@@ -241,4 +241,98 @@ This document outlines the phased development plan for implementing the CEREBRUM
 
 ## Conclusion
 
-The CEREBRUM framework implementation roadmap provides a structured approach to developing this complex system across multiple phases. By prioritizing core components and gradually expanding capabilities, the framework can evolve into a robust ecosystem for case-based cognitive modeling while managing technical and project risks. 
+The CEREBRUM framework implementation roadmap provides a structured approach to developing this complex system across multiple phases. By prioritizing core components and gradually expanding capabilities, the framework can evolve into a robust ecosystem for case-based cognitive modeling while managing technical and project risks.
+
+## Contribution Opportunities by Roadmap Phase
+
+This section outlines specific contribution opportunities aligned with each phase of the CEREBRUM implementation roadmap. Contributors can use this to identify where their skills and interests might best support the project's development.
+
+### Phase 1 Contribution Opportunities
+
+#### Research Contributions
+- Develop and refine the mathematical formulations for case transformations
+- Create validation methodologies for free energy calculations
+- Research optimal serialization formats for probabilistic models
+- Define interface standards between components
+
+#### Technical Contributions
+- Implement core Python components (Model Registry, Case Manager)
+- Develop unit tests for mathematical validation
+- Create basic serialization/deserialization utilities
+- Build proof-of-concept models demonstrating basic functionality
+
+#### Documentation & Educational Contributions
+- Draft API documentation for core components
+- Create architectural diagrams and visualizations
+- Write implementation guides for fundamental concepts
+- Develop introductory tutorials for first-time users
+
+### Phase 2 Contribution Opportunities
+
+#### Research Contributions
+- Design complex transformation patterns between cases
+- Research optimization strategies for transformation operations
+- Develop validation methodologies for cross-language compatibility
+- Explore novel case structures for specific domains
+
+#### Technical Contributions
+- Implement language-specific versions (JavaScript, Rust, etc.)
+- Create cross-language test suites and benchmarks
+- Develop visualization tools for case transformations
+- Build example applications demonstrating full case support
+
+#### Documentation & Educational Contributions
+- Create language-specific implementation guides
+- Develop tutorials for building multi-case applications
+- Document integration patterns for existing systems
+- Create comparison guides with other frameworks
+
+### Phase 3 Contribution Opportunities
+
+#### Research Contributions
+- Research optimization algorithms for transformation pathways
+- Develop hierarchical message passing methodologies
+- Design workflow patterns for common use cases
+- Create security models based on case transformations
+
+#### Technical Contributions
+- Implement performance optimizations for critical components
+- Build workflow definition and execution engines
+- Develop monitoring and debugging tools
+- Create security and access control mechanisms
+
+#### Documentation & Educational Contributions
+- Develop advanced tutorials for performance optimization
+- Create workflow design patterns documentation
+- Write security implementation guides
+- Develop case studies of complex implementations
+
+### Phase 4 Contribution Opportunities
+
+#### Research Contributions
+- Research governance models for open framework development
+- Design plugin architectures for extensibility
+- Develop educational curricula for different expertise levels
+- Research enterprise integration patterns
+
+#### Technical Contributions
+- Build community support tools and infrastructure
+- Develop domain-specific extension libraries
+- Create enterprise deployment frameworks
+- Implement certification testing systems
+
+#### Documentation & Educational Contributions
+- Create comprehensive learning paths for different roles
+- Develop university course materials
+- Write enterprise integration guides
+- Build interactive learning applications
+
+### Ongoing Contribution Opportunities
+
+- Bug reporting and fixing across all components
+- User experience testing and feedback
+- Translation of documentation to other languages
+- Community support and mentoring
+- Writing blog posts, articles, and papers about CEREBRUM
+
+For detailed information on how to contribute in these areas, please see our [CONTRIBUTING.md](https://github.com/ActiveInferenceInstitute/CEREBRUM/blob/main/CONTRIBUTING.md) document. 

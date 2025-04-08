@@ -53,7 +53,21 @@ To get started with CEREBRUM:
 
 ## Contributing
 
-CEREBRUM is an open-source project and welcomes contributions. Please see the root-level README and CONTRIBUTING documents for guidelines on how to contribute.
+CEREBRUM is an open-source project and welcomes contributions from researchers, developers, and enthusiasts at all levels of experience. We offer diverse contribution opportunities:
+
+### Contribution Categories
+- **Research**: Theoretical development, empirical testing, mathematical refinements
+- **Technical**: Core development, language implementations, testing, optimization
+- **Documentation**: Educational content, API documentation, tutorials, use cases
+- **Examples**: Model demonstrations, domain applications, interactive visualizations
+- **Community**: Organizing events, mentoring, content creation, support
+
+### Where to Start
+- Browse our [GitHub Issues](https://github.com/ActiveInferenceInstitute/CEREBRUM/issues) for tagged opportunities
+- Explore the [Implementation Roadmap](implementation_roadmap.md) for phase-specific contributions
+- Check our comprehensive [CONTRIBUTING.md](https://github.com/ActiveInferenceInstitute/CEREBRUM/blob/main/CONTRIBUTING.md) document for detailed guidelines
+
+For specific contribution ideas aligned with the current development phase, see the [Contribution Opportunities by Roadmap Phase](implementation_roadmap.md#contribution-opportunities-by-roadmap-phase) section.
 
 ## License
 

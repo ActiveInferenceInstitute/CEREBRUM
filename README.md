@@ -61,4 +61,16 @@ If you use CEREBRUM in your research, please cite:
 CC BY-NC-ND 4.0
 
 ## Contributing
-Yes, please! 
+We welcome contributions from researchers, developers, and enthusiasts across multiple domains:
+
+### Ways to Contribute
+- **🔬 Research**: Theoretical development, empirical testing, literature reviews
+- **💻 Technical**: Core development, language implementations, integrations, testing
+- **📚 Documentation**: Educational content, API docs, use cases, tutorials
+- **🧩 Examples**: Model examples, domain applications, interactive demonstrations
+- **🌍 Community**: Organizing events, content creation, mentoring, user support
+
+### Contribution Scale
+From micro-contributions (1-3 hours) to large projects (40+ hours), we value contributions of all sizes.
+
+For detailed contribution guidelines, process information, and more specific ideas, please see our [CONTRIBUTING.md](CONTRIBUTING.md) document. 

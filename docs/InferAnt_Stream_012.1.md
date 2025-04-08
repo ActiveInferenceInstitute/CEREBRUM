@@ -39,6 +39,13 @@ gemini-2.5-pro-exp-03-25
 ### 🔍 Repository Tour
 - 📁 GitHub structure walkthrough
 - 🔧 How to contribute
+  - **Research Contributions**: Mathematical extensions, empirical validation, literature reviews
+  - **Technical Contributions**: Core development, language implementations, integrations, testing
+  - **Documentation**: Tutorials, API documentation, use cases, educational materials
+  - **Examples & Applications**: Model demonstrations, domain implementations, visualizations
+  - **Community Building**: Workshops, content creation, mentoring, forum participation
+  - **Contribution Scale**: From micro (1-3h) to large (40h+) contributions - all valuable!
+  - See our [CONTRIBUTING.md](https://github.com/ActiveInferenceInstitute/CEREBRUM/blob/main/CONTRIBUTING.md) for detailed guidelines
 - 📚 Documentation overview
 
 ### 🧪 Q&A and Live Experiments
@@ -119,25 +126,4 @@ Gubgubithepro
 ​​Oh, I may have misinterpreted this, my fault, but what is the line of reasoning with interpreting these languages (I'm going off of it being called a cerebrum and assuming its for reasoning)
 
 
-Gubgubithepro
-​​Also like how does the active inference model handle these nuances in languages and exploiting them?
-
-### Active Inference and Language Nuances
-
-CEREBRUM's active inference model handles language nuances by treating them as precision parameters in its generative model. This allows the system to:
-
-1. Map morphological features from diverse languages to case parameters
-2. Represent aspect, tense, and evidentiality distinctions
-3. Dynamically select cases based on precision-weighted evidence
-4. Transfer linguistic features across language boundaries
-
-For a comprehensive explanation, see our new [Language Nuance Handling](language_nuance_handling.md) document which details:
-- Mathematical formulation of linguistic nuance handling
-- Case-based representation of language-specific features
-- Cross-linguistic knowledge transfer mechanisms
-- Examples across agglutinative, fusional, analytic, and polysynthetic languages
-
-The framework exploits these nuances to achieve more precise inference and communication by modulating certainty based on language-specific markers.
-
-Chat...
 

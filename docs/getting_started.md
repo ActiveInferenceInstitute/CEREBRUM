@@ -256,6 +256,53 @@ A typical development workflow with CEREBRUM includes:
 4. **Transform cases as needed**: Change your model's functional role
 5. **Connect models together**: Use the message bus for model communication
 
+## Contributing to CEREBRUM
+
+If you're interested in contributing to CEREBRUM, we welcome contributions across a wide spectrum of activities:
+
+### Research Contributions
+- **Theoretical Development**
+  - Extending the mathematical framework
+  - Proposing novel case structures
+  - Developing new inference algorithms
+  
+- **Empirical Testing**
+  - Designing experiments
+  - Benchmarking performance
+  - Creating validation datasets
+
+### Technical Contributions
+- **Core Framework Development**
+  - Implementing new model components
+  - Optimizing existing implementations
+  - Improving the transformation engine
+  
+- **Language Implementations**
+  - Creating or improving implementations in various languages
+  - Building integrations with other frameworks
+  - Developing specialized variants
+
+### Documentation & Examples
+- **Educational Content**
+  - Creating tutorials and guides
+  - Developing learning resources
+  - Documenting use cases
+  
+- **Model Examples**
+  - Creating demonstrative models
+  - Implementing domain-specific applications
+  - Building interactive demonstrations
+
+### Getting Started as a Contributor
+
+1. Choose an area that matches your interests and skills
+2. Check the GitHub issues for "good first issue" tags
+3. Read the [CONTRIBUTING.md](https://github.com/ActiveInferenceInstitute/CEREBRUM/blob/main/CONTRIBUTING.md) document for detailed guidelines
+4. Join our community channels to connect with other contributors
+5. Start with small contributions to familiarize yourself with the codebase
+
+For more detailed information about contribution opportunities, please see our comprehensive [contribution guide](https://github.com/ActiveInferenceInstitute/CEREBRUM/blob/main/CONTRIBUTING.md).
+
 ## Next Steps
 
 After building your first model, explore these advanced topics:
