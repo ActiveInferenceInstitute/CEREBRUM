@@ -225,7 +225,35 @@ modified2 = feature_system.apply_modifier_with_agreement(model_fem_dat, accuracy
 3.  **Definiteness/Specificity Marking**: Incorporate explicit marking for definiteness or specificity in model references and transformations.
 4.  **Gender Analogy for Model Typing**: Use the concept of grammatical gender as an analogy for classifying models into different operational types with distinct interaction patterns.
 
-## 8. Conclusion
+## 8. Deeper Integration with CEREBRUM Concepts
+
+German grammar provides clear illustrations and valuable mechanisms relevant to CEREBRUM:
+
+**a. Declinability via Determiners/Adjectives:**
+Unlike languages marking case directly on nouns (Latin, Russian), German primarily marks case on associated determiners (articles) and adjectives. This is a form of **declinability**, where the functional role ([NOM], [ACC], [DAT], [GEN]) of the noun is indicated by changes in its surrounding modifiers. In CEREBRUM, this suggests that case transformations might not always modify the core model object itself, but rather the properties of the *interface* or *link* connecting it to other models, analogous to changing the article (`der` -> `den` -> `dem` -> `des`).
+
+**b. Morphosyntactic Alignment:**
+German strictly follows a **Nominative-Accusative alignment** (Figure 9, `CEREBRUM.md`), clearly distinguishing the subject ([NOM]) from the direct object ([ACC]), with a distinct role for the indirect object ([DAT]). This provides a straightforward base mapping for CEREBRUM's core cases.
+
+**c. Prepositional Governance and Typed Morphisms:**
+German prepositions strictly govern the case of their object (Section 4). This is a strong analogy for **typed morphisms** in the CEREBRUM category (Figures 7, 8, `CEREBRUM.md`).
+- **Morphism Specification:** A preposition like `mit` (with) acts like a specific morphism type requiring its object to be in the [DAT] state (which functionally corresponds to [INS]). `von` (from) requires [DAT] (functionally [ABL]), `durch` (through) requires [ACC].
+- **Two-Way Prepositions:** Prepositions like `in` governing [DAT] for location and [ACC] for direction highlight how the *same* relational concept can correspond to different case assignments (and thus different morphisms/transformations) based on context (static vs. dynamic). This aligns with context-dependent processing in CEREBRUM.
+
+**d. Feature Agreement and Constraint Satisfaction:**
+German adjective declension (strong/weak/mixed based on preceding determiner, agreeing in gender/number/case) is a prime example of **constraint satisfaction** and feature agreement (Section 5).
+- **CEREBRUM Parallel:** When models interact or are modified in CEREBRUM, compatibility checks are needed. For example, a transformation applying a specific algorithm ([INS]) might require the target data model ([ACC]) to possess certain features (e.g., correct data type, sufficient precision). The German system provides a linguistic model for enforcing such complex, multi-feature agreement rules during transformations.
+- **Active Inference:** Successfully applying the correct adjective ending requires the speaker (or CEREBRUM system) to correctly infer/predict the noun's gender, number, case, and the determiner context. Failure leads to grammatical errors (prediction errors), aligning with FEP minimization principles.
+
+**e. Grammatical Gender and Model Typing:**
+While biological gender is irrelevant, German's three grammatical genders (masculine, feminine, neuter) influence agreement patterns. This can serve as an analogy for **typing** CEREBRUM models. Models could be assigned abstract 'types' (analogous to gender) that constrain which transformations or interactions they can participate in, enforced through agreement mechanisms.
+
+**f. Speculative Cases (`cerebrum_beyond_cases.md`):**
+German relies heavily on `Preposition + Case` combinations to express functions like Instrumental ([INS] via `mit`+DAT), Ablative ([ABL] via `von`/`aus`+DAT), and Locative ([LOC] via two-way prepositions + DAT/ACC). Similar to Arabic, this suggests a potential evolutionary path in CEREBRUM where frequently occurring `Modifier + Case` combinations could eventually be reified or abstracted into new, distinct emergent cases if doing so simplifies the overall ecosystem model (FEP minimization).
+
+German's clear case system, strict prepositional governance, and complex agreement rules offer robust models for implementing typed relationships, feature compatibility checks, and context-dependent interactions within the CEREBRUM framework.
+
+## 9. Conclusion (Renumbered from 8)
 
 German offers a clear example of a four-case nominative-accusative system that aligns well with the core CEREBRUM cases (NOM, ACC, DAT, GEN). Its system of prepositional case government provides an excellent model for creating typed relationships between CEREBRUM models, where the type of relationship dictates the required state (case) of the connected model.
 
@@ -233,7 +261,7 @@ Furthermore, the complex agreement system seen in German adjective declension in
 
 By incorporating insights from German grammar, CEREBRUM can enhance its mechanisms for defining specific relationship types and managing feature consistency across interacting components.
 
-## 9. References
+## 10. References (Renumbered from 9)
 
 1.  Durrell, Martin. Hammer's German Grammar and Usage. Routledge, 2017.
 2.  Dodd, Bill, et al. Modern German Grammar: A Practical Guide. Routledge, 2015.

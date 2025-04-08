@@ -252,11 +252,50 @@ result = proc_model.run(data_model[Case.ACC])
 print(f"Run result: {result}")
 ```
 
-## 7. Conclusion
+## 7. Deeper Integration with CEREBRUM Concepts
 
-While Python doesn't have explicit grammatical cases, its rich set of paradigms (OOP, functional) and common patterns provide strong analogies for the relationships represented by CEREBRUM cases. Object interactions, function calls, attribute access, context managers, and iteration patterns all map conceptually to different CEREBRUM cases.
+The mappings above illustrate surface-level analogies. Integrating Python more deeply with the CEREBRUM framework involves leveraging its dynamic nature and rich ecosystem in line with CEREBRUM's principles:
 
-An explicit CEREBRUM implementation in Python could use wrapper classes or decorators to manage case states and mediate interactions, translating Pythonic operations into case-based semantics. This allows leveraging Python's expressiveness while maintaining the structured relational framework of CEREBRUM.
+**a. Declinability and Dynamic Typing:**
+Python's dynamic typing ("duck typing") naturally aligns with CEREBRUM's concept of **declinability**. An object's suitability for a role (case) is determined by its methods and attributes (its behavior) rather than a strict, static type declaration. The `CaseBearingModel` wrapper provides one way to make this explicit, but Python objects can often implicitly shift roles ([NOM] agent becoming an [ACC] patient when passed as an argument) without formal wrappers. This inherent flexibility mirrors the morphological adaptability central to CEREBRUM.
+
+**b. Active Inference, FEP, and Precision:**
+While Python itself doesn't enforce Active Inference, its ecosystem is well-suited for implementation:
+- **Optimization:** Method calls that update object state (`self.status = ...`) can be viewed as steps minimizing a local objective function, analogous to minimizing prediction error or Free Energy Principle (FEP).
+- **Libraries:** Libraries like `NumPy`, `SciPy`, `PyTorch`, `TensorFlow`, and `JAX` provide the necessary tools for building Bayesian generative models that underpin Active Inference, including complex probability distributions and automatic differentiation for variational updates.
+- **Precision Weighting:** CEREBRUM's precision concept (Table 2, `CEREBRUM.md`) could be implemented as parameters within Python model classes or managed by the `CaseBearingModel` wrapper, modulating the influence of different data sources or internal states based on the model's current case ([NOM] prioritizing likelihood, [ACC] prioritizing parameter updates, etc.).
+
+**c. Category Theory and Morphisms:**
+Python's object interactions can be viewed through a category-theoretic lens as suggested in `CEREBRUM.md` (Figures 7, 8):
+- **Objects:** Python objects/instances.
+- **Morphisms:** Method calls (`obj.method(arg)`) represent morphisms. They can transform the object itself (if `self` is modified, `obj` transitions from [NOM] to [ACC]-like state during execution) or act on arguments (`arg` as [ACC]/[DAT]). Function application (`func(arg)`) is also a morphism.
+- **Composition:** Attribute access (`obj.component`) or passing results between functions (`func2(func1(x))`) represents morphism composition.
+- **Functors:** Higher-order functions (like `map`) or classes designed to transform other objects systematically can be seen as functors mapping between categories (e.g., transforming a list of data objects into a list of processed results).
+
+**d. Morphosyntactic Alignment:**
+Python's prevalent Subject-Verb-Object syntax (`subject.verb(object)`) naturally maps to **Nominative-Accusative** alignment ([NOM] acting on [ACC]). Assignment (`target = source.process()`) reinforces this. Functional patterns (`result = process(data, using=tool)`) can sometimes evoke **Ergative-Absolutive** perspectives, where the focus is on the action/tool ([INS], Ergative-like) applied to data ([ACC], Absolutive-like). The flexibility allows modeling different interaction patterns described in `CEREBRUM.md` (Figures 9, 10).
+
+**e. Reflection and Dynamic Adaptation:**
+Python's introspection capabilities (e.g., `getattr`, `hasattr`, `isinstance`, the `inspect` module) are crucial for building sophisticated CEREBRUM implementations. A `CaseBearingModel` could use reflection to dynamically:
+- Discover available methods suitable for a target case.
+- Modify access controls or behavior based on the current case.
+- Implement the case transformation logic (`transform_to_case`) adaptively.
+
+**f. Connections to Speculative Cases (`cerebrum_beyond_cases.md`):**
+Python constructs offer potential mappings to the speculative cases:
+- **[LOC]/[INS]:** Context managers (`with manager:`) strongly map to providing a controlled environment or tool.
+- **[AUG]/[INS]:** Decorators (`@decorator`) can augment ([AUG]) or instrument ([INS]) function behavior.
+- **[GEN]/[ABL]:** Generators (`yield`) are natural sources ([GEN] for values, [ABL] for the stream).
+- **[CHO]:** Python's `asyncio` library for concurrent programming could potentially model **Choral** case interactions, synchronizing multiple model operations.
+- **[MUT]:** Metaclasses, while advanced, allow modification of class creation itself, potentially mapping to the **Mutative** case for structural adaptation.
+- **[SYM]:** Shared memory structures or specific patterns of object composition could represent highly coupled **Symbiotic** relationships.
+- **[NEG]:** Exception handling or specific control flow structures could implement **Negative** constraints.
+
+By leveraging these features, Python provides a powerful and flexible environment for implementing and experimenting with the CEREBRUM framework, from its core case system to its more speculative extensions.
+
+## 8. Conclusion (Renumbered from 7)
+
+Python's multi-paradigm nature, dynamic typing, and extensive libraries make it a suitable language for exploring and implementing CEREBRUM concepts. While lacking explicit morphological cases like some natural languages, its syntactic structures, OOP principles, functional features, and common design patterns provide analogous ways to express the relational roles defined by CEREBRUM cases. Explicit wrappers or frameworks can further formalize these relationships for building complex, case-aware cognitive model ecosystems in Python. The language's flexibility supports both direct mapping of existing cases and exploration of speculative case emergence.
 
 ## 8. References
 

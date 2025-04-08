@@ -240,7 +240,7 @@ class HarmonicConstraintSystem:
         return harmonized_params
 ```
 
-## 6. Example Sentences with Case Mappings
+## 6. Deeper Integration with CEREBRUM Concepts
 
 ### Hungarian Examples with CEREBRUM Parallels
 

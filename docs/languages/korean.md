@@ -239,7 +239,43 @@ print(message_to_student)
 4.  **Particle Stacking Model**: Allow for sequences of functional markers (similar to stacked particles like -eseo-neun) to represent complex relationships.
 5.  **Zero Pronoun Handling**: Develop robust context-based resolution for omitted arguments, mirroring Korean's frequent pronoun dropping.
 
-## 8. Conclusion
+## 8. Deeper Integration with CEREBRUM Concepts
+
+Korean grammar, sharing features with Japanese but with unique aspects, provides further valuable perspectives for CEREBRUM:
+
+**a. Declinability via External Markers (Particles):**
+Like Japanese, Korean uses external **particles** (josa: `-i/-ga`, `-eul/-reul`, `-ege`, `-eseo`, etc.) attached to invariant nouns/stems to mark grammatical roles. This reinforces the alternative model of **declinability** where functional roles are assigned via associated markers rather than internal model state changes. CEREBRUM can implement cases either through internal state transformation (inflection/agglutination model) or via external relational markers (particle model), or potentially a hybrid.
+
+**b. Information Structure (Topic `-eun/-neun` vs. Subject `-i/-ga`):**
+The explicit, grammatically distinct marking of **topic** (`-eun/-neun`) versus **subject** (`-i/-ga`) is even more central in Korean than in Japanese. This provides a strong model for CEREBRUM's information flow and context management:
+- **Active Inference:** The topic (`-eun/-neun`) robustly sets the context or prior expectation. Processing a topic-marked model means activating its context with high precision. The subject (`-i/-ga`), often marking new or specific information, drives the primary action or update within that context. A key prediction for the system is identifying which participant holds which role.
+- **Discourse Management:** The `-eun/-neun` marker clearly signals what the current processing scope or statement is about, essential for maintaining coherence in complex model interactions.
+
+**c. Category Theory and Particles as Morphisms:**
+Similar to Japanese, Korean particles signal the **type of morphism** connecting models.
+- **Objects:** CEREBRUM models.
+- **Morphisms:** Relationships signaled by particles. `-ege` signals a morphism to a recipient ([DAT]), `-eseo` signals a morphism from a location ([ABL]) or within a location ([LOC]), `-(eu)ro` signals an instrumental morphism ([INS]). The particle defines the functional nature of the link established by the verb/action.
+
+**d. Morphosyntactic Alignment:**
+Korean follows **Nominative-Accusative alignment** (`-i/-ga` subject vs. `-eul/-reul` object), fitting CEREBRUM's baseline (Figure 9, `CEREBRUM.md`). The topic marker adds a layer of pragmatic structuring.
+
+**e. Locative Distinction (`-e` vs. `-eseo`):**
+Korean clearly distinguishes static location/time/direction (`-e`) from the location where an action occurs (`-eseo`). This provides a direct linguistic basis for refining CEREBRUM's [LOC] case, potentially splitting it into `[LOC-STATIC]` and `[LOC-ACTION]` or adding a parameter to distinguish these functions.
+
+**f. Honorifics and Social Context:**
+The grammatical encoding of politeness and honorifics (e.g., `-ege` vs. `-kke` for Dative) is highly developed. This suggests CEREBRUM could incorporate **social context** or **formality level** as a parameter influencing case transformations or interaction protocols. An interaction with a high-priority or sensitive model might trigger the use of "honorific" case forms or communication protocols, managed by a system like the `HonorificManager` (Section 5).
+
+**g. Speculative Cases (`cerebrum_beyond_cases.md`):**
+Korean particles also suggest potential emergent CEREBRUM functions:
+- **`-buteo` (from, starting point):** A specific type of **Ablative [ABL-START]**.
+- **`-kkaji` (until, up to, even):** Maps to **Terminative [TERM]** or **Inclusive** markers.
+- **`-man` (only):** An **Exclusive** or **Limitative** function/marker.
+- **`-do` (also, too):** An **Additive [ADD]** or **Inclusive** marker.
+- **`-wa/-gwa` (and, with):** **Comitative [COM]** or **Conjunctive**.
+
+Korean offers a compelling particle-based system emphasizing the topic/subject distinction and incorporating social context through honorifics. It reinforces the idea of external relational marking and provides specific linguistic distinctions (e.g., locative types) that can inform the design of more nuanced CEREBRUM cases or parameters.
+
+## 9. Conclusion (Renumbered from 8)
 
 Korean's particle system, similar to Japanese, offers CEREBRUM valuable insights into marking grammatical functions without inflection. Its most salient contribution is the clear grammatical distinction between subject (-i/-ga) and topic (-eun/-neun), providing a linguistic model for separating core agency (NOM) from discourse context/focus (potentially LOC or a dedicated Topic state).
 
@@ -247,7 +283,7 @@ Furthermore, the pervasive honorific system in Korean grammar suggests integrati
 
 By incorporating these Korean-inspired features, CEREBRUM can enhance its ability to manage discourse context, differentiate actor focus, and adapt interaction styles based on social or operational parameters.
 
-## 9. References
+## 10. References (Renumbered from 9)
 
 1.  Sohn, Ho-Min. The Korean Language. Cambridge University Press, 1999.
 2.  Lee, Iksop, and S. Robert Ramsey. The Korean Language. State University of New York Press, 2000.

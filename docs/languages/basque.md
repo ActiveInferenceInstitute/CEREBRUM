@@ -250,52 +250,50 @@ data_acc = data_model.transform_to_case(Case.ACC)
 
 result = event_handler.trigger_event(
     "PROCESS_DATA", 
-    {"Absolutive": data_acc, "Ergative": processor_nom}
+    participants={
+        "Absolutive": data_acc, # Model in Absolutive/ACC role
+        "Ergative": processor_nom # Model in Ergative/NOM role
+    }
 )
 ```
 
-## 7. Example Sentences with Case Mappings
+## 7. Deeper Integration with CEREBRUM Concepts
 
-### Basque Examples with CEREBRUM Parallels
+Basque grammar, particularly its ergativity and rich case system, offers profound insights for CEREBRUM:
 
-| Basque Sentence | Translation | Case Usage | CEREBRUM Parallel |
-|-----------------|-------------|------------|-------------------|
-| **Modeloa** exekutatzen da. | "The model runs." | Modeloa = Absolutive | model[NOM, {"transitivity": "intransitive"}] running |
-| Sistemak **modeloa** eguneratzen du. | "The system updates the model." | Sistemak = Ergative, Modeloa = Absolutive | system[NOM] updates model[ACC] |
-| Erabiltzaileak **modeloaz** kalkulatzen du. | "The user calculates with the model." | Modeloaz = Instrumental | user[NOM] calculates with model[INS] |
-| Sistemak datuak **modeloari** bidaltzen dizkio. | "The system sends data to the model." | Modeloari = Dative | system[NOM] sends data to model[DAT] |
-| Datuak **modelotik** datoz. | "Data comes from the model." | Modelotik = Ablative | Data originates from model[ABL] |
-| **Modeloaren** emaitzak zehatzak dira. | "The model's results are accurate." | Modeloaren = Genitive | model[GEN].results are accurate |
-| Informazioa **modeloan** dago. | "Information is in the model." | Modeloan = Inessive | Information located in model[LOC] |
+**a. Morphosyntactic Alignment and CEREBRUM (Figures 9, 10, `CEREBRUM.md`):**
+Basque is the archetypal example of **Ergative-Absolutive alignment**. This directly challenges the default Nominative-Accusative bias often implicit in computational models (and English-based descriptions).
+- **CEREBRUM Modeling:** CEREBRUM must be flexible enough to represent *both* alignment systems. The Basque example demonstrates the need for case assignments ([NOM], [ACC]) to be sensitive to the transitivity of the interaction (Section 5). CEREBRUM's [NOM] can represent either the Ergative (transitive agent) or the Absolutive (intransitive agent), while [ACC] typically aligns with the Absolutive (transitive patient). This necessitates a more nuanced internal representation or explicit parameters (e.g., `model[Case.NOM, {"alignment_role": "ergative"}]`) within the CEREBRUM framework to capture these different alignment patterns accurately.
 
-## 8. Extension Opportunities Inspired by Basque
+**b. Declinability and Agglutination:**
+Basque's agglutinative nature, where multiple suffixes (case, number, definiteness) stack onto a stem, is a powerful analogy for **declinability**. A single CEREBRUM model (the stem) can be systematically modified by applying transformations (the suffixes) to adapt its function and relational properties. The `ErgativityAwareModel` (Section 5) and `MultiArgumentEventHandler` (Section 6) hint at how such layered properties (case, role, number, definiteness) could be managed computationally.
 
-Basque's unique structure suggests several extensions for CEREBRUM:
+**c. Active Inference and Transitivity:**
+- **Predicting Alignment:** From an Active Inference perspective, a CEREBRUM ecosystem operating with Basque-like alignment would need its generative model to predict the transitivity of an upcoming interaction to assign the correct case roles (Ergative vs. Absolutive for the agent). The system minimizes free energy by correctly parsing and predicting these relational structures.
+- **Precision and Argument Marking:** The complex polypersonal agreement on Basque auxiliary verbs (agreeing with Ergative, Absolutive, and Dative arguments simultaneously) suggests a high degree of **precision** associated with these core participant roles. In CEREBRUM, this could translate to allocating higher computational resources or confidence to interactions involving models in these core case roles, as marked by the event handler.
 
-1.  **Transitivity-Sensitive Roles**: Implement model roles that explicitly depend on the transitivity (number of core participants) of the transformation process.
-2.  **Absolutive Case Specialization**: Define a core CEREBRUM case representing the primary entity undergoing state change, aligning with the Basque Absolutive.
-3.  **Multi-Argument Agreement Framework**: Develop event handlers or transformation managers that explicitly manage agreement/compatibility between multiple participating models (Absolutive, Ergative, Dative), inspired by Basque auxiliary verbs.
-4.  **Ergative Alignment View**: Provide an alternative view or API for CEREBRUM interactions based on ergative-absolutive principles, useful for modeling certain types of systems.
+**d. Category Theory and Complex Morphisms:**
+- **Local Cases as Morphisms:** Basque's rich inventory of local cases (Inessive, Allative, Ablative, etc.) can be modeled as specific **morphisms** within the CEREBRUM category (Figures 7, 8, `CEREBRUM.md`). These morphisms transform a model's state by situating it spatially or directionally relative to another model or context ([LOC], [ABL]-like transformations).
+- **Agglutination as Composition:** The stacking of suffixes can be viewed as the **composition of morphisms**. Applying a plural suffix, then a case suffix, then a postposition is analogous to applying a sequence of transformations to a CEREBRUM model: `Model -> Model[Plural] -> Model[Plural, Case] -> Model[Plural, Case, Relation]`.
 
-## 9. Technical Advantages of the Basque-Inspired Approach
+**e. Speculative Cases and Granularity (`cerebrum_beyond_cases.md`):**
+- **Rich Case Systems:** Basque's numerous cases (grammatical, local, instrumental, etc.) demonstrate a high degree of **granularity** in specifying relationships. This contrasts with languages like Arabic or English. It suggests that a complex CEREBRUM ecosystem might naturally **evolve** a richer set of specialized cases (beyond the core 8) if doing so provides a more efficient or precise way to model recurring interaction patterns (FEP minimization). The Basque system provides concrete examples of what such evolved cases (e.g., specific spatial relations, Benefactive, Causal) might look like.
+- **Synthetic Cases:** Could a CEREBRUM system dynamically **synthesize** a new case marker (like Basque's agglutinative suffixes) to represent a newly stabilized interaction pattern, potentially combining existing case features (e.g., a Locative-Instrumental case for "using something at a location")?
 
-Considering ergativity offers potential technical advantages:
+Basque grammar, with its ergativity and agglutination, pushes the CEREBRUM framework to handle diverse alignment strategies and consider how complex, multi-suffix case markings can represent layered functional roles and transformations, offering a rich source of inspiration for modeling advanced model interactions and potential case system evolution.
 
-1.  **Focus on State Change**: The Absolutive case naturally highlights the entity whose state is most centrally affected by a process.
-2.  **Clear Transitivity Marking**: Explicitly modeling based on transitivity clarifies the nature of interactions (e.g., one-participant vs. two-participant processes).
-3.  **Robust Multi-Participant Handling**: The auxiliary verb system inspires robust mechanisms for coordinating interactions involving multiple distinct roles.
+## 8. Conclusion (Renumbered from 7)
 
-## 10. Conclusion
+Basque offers critical insights for CEREBRUM, primarily through its ergative-absolutive alignment and rich agglutinative case system. Key takeaways include:
 
-Basque's ergative-absolutive system provides a fascinating contrast to the nominative-accusative systems underlying many computational frameworks, including CEREBRUM's baseline inspiration. While a direct mapping requires care, Basque offers valuable conceptual tools:
+1.  **Alignment Flexibility**: CEREBRUM must accommodate different morphosyntactic alignments (Nominative-Accusative vs. Ergative-Absolutive) by making case assignments sensitive to transitivity.
+2.  **Granular Relationships**: The extensive set of Basque cases (especially local ones) provides a model for representing fine-grained relational roles (location, direction, instrument, beneficiary) beyond the core CEREBRUM set.
+3.  **Multi-Argument Agreement**: Basque auxiliary verbs highlight the need for event handling mechanisms in CEREBRUM that can manage interactions involving multiple, distinctly-roled participants.
+4.  **Agglutination as Declinability**: The suffix-stacking nature of Basque provides a linguistic parallel for how CEREBRUM models can be systematically modified through sequential transformations (adding case, number, definiteness features).
 
--   It encourages thinking about model roles (agent, patient) in relation to process transitivity.
--   The Absolutive case highlights the core entity undergoing change or defining a state.
--   The multi-argument agreement in auxiliary verbs provides a model for coordinating complex interactions.
+Studying Basque encourages a CEREBRUM design that is adaptable to different grammatical strategies for encoding relationships and agent/patient roles.
 
-By incorporating insights from ergativity, CEREBRUM can gain more nuanced ways to model transformations, especially those where the distinction between transitive (agent-acting-on-patient) and intransitive (agent-acting) processes is critical. This alternative perspective can enrich CEREBRUM's ability to represent diverse computational and cognitive processes.
-
-## 11. References
+## 9. References (Renumbered from 8)
 
 1.  King, Alan R. The Basque Language: A Practical Introduction. University of Nevada Press, 1994.
 2.  Hualde, José Ignacio, and Jon Ortiz de Urbina, eds. A Grammar of Basque. Mouton de Gruyter, 2003.

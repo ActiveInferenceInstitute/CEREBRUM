@@ -242,40 +242,44 @@ translator_model = TranslationModel("multilingual_engine")
 result = translator_model[Case.ADV, {"manner": "literal"}].translate(text)
 ```
 
-## 8. Example Sentences with Case Mappings
+## 8. Deeper Integration with CEREBRUM Concepts
 
-### Georgian Examples with CEREBRUM Parallels
+Georgian grammar, especially its split ergativity and case usage, provides sophisticated models for CEREBRUM:
 
-| Georgian Sentence | Translation | Case Usage | CEREBRUM Parallel (Context) |
-|-------------------|-------------|------------|-----------------------------|
-| **Modeli** mushaobs. | "The model works." | Modeli = Nominative | model[NOM] (Intransitive) |
-| Sistema **models** akhalēbs. | "The system updates the model." | Sistema = Nominative, Models = Dative | system[NOM] updates model[ACC] (Series I / Ongoing) |
-| Sistemam **modeli** gaakhalē. | "The system updated the model." | Sistemam = Ergative, Modeli = Nominative | system[NOM, role=erg] updated model[ACC, role=abs] (Series II / Completed) |
-| Momkhmarebeli **modelit** angarishobs. | "The user calculates with the model." | Modelit = Instrumental | user[NOM] calculates with model[INS] |
-| Sistema **models** ugzavnis monacemebs. | "The system sends data to the model." | Models = Dative | system[NOM] sends data to model[DAT] |
-| Monacemebi **modelisgan** modis. | "Data comes from the model." | Modelisgan = Genitive + -gan (Postp.) | Data originates from model[ABL] (via modifier) |
-| **Modelis** shedegebi zustia. | "The model's results are accurate." | Modelis = Genitive | model[GEN].results are accurate |
-| Informatsia **modelshi** aris. | "Information is in the model." | Modelshi = Dative + -shi (Postp.) | Information located in model[LOC] (via modifier) |
-| **Modelad** gadak'etses. | "They turned it into a model." | Modelad = Adverbial | data.transform_to_state("model", mode=Case.ADV) |
+**a. Split Ergativity, Morphosyntactic Alignment, and Active Inference:**
+Georgian's **split ergativity** is a prime example of context-dependent **morphosyntactic alignment** (Figures 9, 10, `CEREBRUM.md`). The choice between Nominative-Accusative (Series I) and Ergative-Absolutive (Series II) alignment depends entirely on the verb's tense-aspect-mood (screeve), representing the process state (ongoing vs. completed).
+- **CEREBRUM Modeling:** This necessitates a CEREBRUM implementation where case assignment ([NOM], [ACC]) is dynamically determined by the predicted or actual state of the process/interaction. The `GeorgianSplitErgativityManager` (Section 5) provides a blueprint. A CEREBRUM model must predict the process state to correctly assign/interpret case roles, aligning with **Active Inference** principles – minimizing prediction error about the interaction dynamics.
+- **Precision:** The shift in alignment could also signal a shift in **precision** weighting. For instance, the agent ([NOM]) might be assigned higher precision in the completed state (Series II, Ergative) where its causal role is finalized, compared to the ongoing state (Series I, Nominative).
 
-## 9. Extension Opportunities Inspired by Georgian
+**b. Declinability, Agglutination, and Postpositions:**
+- **Case Marking:** The 7 distinct case endings demonstrate **declinability**, altering the noun's function (Section 2).
+- **Postpositions as Modifiers:** Georgian's heavy use of postpositions governing specific cases (e.g., Genitive + `-dan` for Ablative function) mirrors the idea of compositional transformations. A base case transformation ([GEN]) is further modified by a postpositional morphism (`-dan`) to yield a more specific functional role ([ABL]). This fits the category-theoretic view of composing morphisms (Section 6).
 
-Georgian's complex system suggests several extensions for CEREBRUM:
+**c. Polypersonal Agreement and Precision:**
+Georgian verbs often agree with multiple arguments (subject, direct object, indirect object) simultaneously through prefixes and suffixes. This **polypersonalism** highlights the grammatical importance of tracking multiple core participants. In CEREBRUM, this translates to needing robust mechanisms (like the event handler in `basque.md`, Section 6) to manage interactions involving multiple case-bearing models ([NOM], [ACC], [DAT]) simultaneously, potentially assigning high **precision** to the state tracking of these core roles involved in the agreement.
 
-1.  **Process-State Dependent Roles**: Implement role assignments (agent/patient cases) that dynamically change based on the execution state (ongoing vs. completed) of a process, mirroring Georgian split ergativity.
-2.  **Relational Modifier System**: Develop a framework of modifiers that refine base case functions, inspired by Georgian postpositions governing specific cases.
-3.  **Adverbial Case for Transformations**: Utilize an Adverbial-like case marker to explicitly signify state transformations or setting operational manner.
-4.  **Screeve-Based Contexts**: Model computational contexts based on temporal/aspectual categories similar to Georgian screeves, influencing case behavior.
+**d. Category Theory and Morphisms:**
+- **Cases as Morphisms:** Each Georgian case suffix (-i, -ma, -s, -is, -it, -ad, -o) represents a distinct **morphism** transforming a base model stem (object) into a specific functional state within the CEREBRUM category (Figures 7, 8, `CEREBRUM.md`).
+- **Postpositions + Case:** The combination `Case + Postposition` acts as a **composite morphism**, refining the functional role (e.g., `DativeMorphism` followed by `LocativeShiMorphism`).
 
-## 10. Conclusion
+**e. Adverbial Case and Speculative Cases (`cerebrum_beyond_cases.md`):**
+- **Adverbial (-ad):** The use of the Adverbial case for transformation ("becoming X") strongly parallels the concept of a **Translative [TRANS]** case (like in Finnish). Its use for manner ("in X way") suggests a specialized **Instrumental [INS-MANNER]** function. This demonstrates how a single morphological case can encompass functions that might emerge as distinct cases in a CEREBRUM ecosystem.
+- **Context-Dependent Cases:** Split ergativity itself is a fascinating example. The *same* conceptual role (transitive agent) is realized by *different* cases ([NOM] vs. [ERG]) depending on context (process state). This suggests CEREBRUM might not just evolve new static cases, but potentially **context-sensitive case assignments** where the mapping from function to case dynamically adapts based on higher-level state variables, reflecting a sophisticated form of FEP minimization across the ecosystem.
 
-Georgian offers CEREBRUM a fascinating model of how grammatical roles can be dynamically assigned based on the temporal or aspectual context of an action (split ergativity). This provides a sophisticated mechanism for representing processes where the relationship between participants changes depending on whether the process is ongoing or completed.
+Georgian's dynamic alignment system, use of postpositions, and polypersonalism offer advanced patterns for context-aware role assignment, compositional transformations, and multi-participant tracking within CEREBRUM.
 
-Furthermore, Georgian's extensive use of postpositions modifying case-marked nouns inspires a system of relational modifiers in CEREBRUM, allowing for more nuanced specification of spatial, temporal, and causal relationships beyond the core case functions.
+## 9. Conclusion (Renumbered from 8)
 
-By incorporating insights from Georgian, CEREBRUM can develop more dynamic and context-sensitive ways to model transformations and relationships, particularly reflecting the interplay between process state and participant roles.
+Georgian provides unique and valuable insights for the CEREBRUM framework, primarily through:
 
-## 11. References
+1.  **Split Ergativity**: Offers a compelling model for context-dependent morphosyntactic alignment in CEREBRUM, where case assignment depends on process state (e.g., ongoing vs. completed).
+2.  **Postpositional System**: Demonstrates how base case functions can be systematically refined by modifiers (postpositions), suggesting a compositional approach to CEREBRUM transformations.
+3.  **Adverbial Case**: Provides parallels for state transformation ([TRANS]) and manner ([INS-MANNER]) functions.
+4.  **Polypersonalism (Implied)**: Highlights the importance of simultaneously tracking multiple core participant roles ([NOM], [ACC], [DAT]).
+
+Incorporating these features allows CEREBRUM to model more dynamic and context-sensitive interactions, where the grammatical roles and transformations adapt based on the state of the ongoing processes, mirroring the sophistication found in languages like Georgian.
+
+## 10. References (Renumbered from 9)
 
 1.  Aronson, Howard I. Georgian: A Reading Grammar. Slavica Publishers, 1990.
 2.  Hewitt, B. G. Georgian: A Structural Reference Grammar. John Benjamins Publishing, 1995.
