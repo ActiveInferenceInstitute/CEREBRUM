@@ -1,7 +1,5 @@
 # Appendix 1: Mathematical Formalization
 
-\appendix
-
 ## Mathematical Appendix
 
 This appendix contains all mathematical formalizations referenced throughout the paper, organized by equation number.

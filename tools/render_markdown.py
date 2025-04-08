@@ -24,6 +24,8 @@ import sys
 import logging
 import re
 import shutil
+import tempfile
+import traceback
 
 # Configure logging for clear output
 logging.basicConfig(
@@ -68,7 +70,7 @@ def render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_pat
     """
     Renders a main Markdown file and multiple appendix Markdown files to PDF using pandoc,
     handling relative resource paths.
-
+    
     Args:
         markdown_abs_path (str): Absolute path to the input main Markdown file.
         appendix_files (list): List of absolute paths to the input appendix Markdown files.
@@ -76,7 +78,7 @@ def render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_pat
         resource_abs_path (str): Absolute path to the directory relative to which
                                  resource paths inside the markdown file should be
                                  resolved (e.g., for images like 'output/figure.png').
-
+    
     Returns:
         bool: True if rendering was successful, False otherwise.
     """
@@ -95,60 +97,28 @@ def render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_pat
 
     # First, remove any duplicate figure references without captions
     remove_duplicate_figures(markdown_abs_path)
+    logging.info("Processing Markdown files and preparing for PDF generation...")
 
     # Using xelatex is often more robust for complex documents, unicode, and fonts
     pdf_engine = "xelatex" 
+    logging.info(f"Using PDF engine: {pdf_engine}")
     
-    # LaTeX packages needed for math symbols and environments
-    header_includes = [
-        "\\usepackage{amsmath}", # For general math enhancements
-        "\\usepackage{amssymb}",  # For symbols like \mathbb
-        "\\usepackage{mathtools}", # Enhanced math tools for better equation rendering
-        "\\usepackage{bm}",      # For bold math symbols
-        "\\usepackage{caption}",  # For better caption control
-        "\\usepackage{booktabs}", # For better table formatting
-        "\\usepackage{tabularx}", # For tables with wrapping text
-        # Command to make table font smaller (changed from footnotesize to tiny)
-        "\\let\\oldtabular\\tabular",
-        "\\let\\endoldtabular\\endtabular",
-        "\\renewenvironment{tabular}{\\tiny\\oldtabular}{\\endoldtabular}",
-        # Improve front matter styling
-        "\\usepackage{titling}",  # For title page customization
-        "\\usepackage{titlesec}", # For section title formatting
-        "\\pretitle{\\begin{center}\\LARGE\\bfseries}",
-        "\\posttitle{\\end{center}\\vspace{0.5em}}",
-        "\\preauthor{\\begin{center}\\large}",
-        "\\postauthor{\\end{center}}",
-        "\\predate{\\begin{center}\\large}",
-        "\\postdate{\\end{center}\\vspace{2em}}",
-        # Add a rule after the title
-        "\\renewcommand{\\maketitlehookd}{\\vspace{1em}\\begin{center}\\footnotesize -.-. . .-. . -... .-. ..- -- ---... / -.-. .- ... . -....- . -. .- -... .-.. . -.. / .-. . .- ... --- -. .. -. --. / . -. --. .. -. . / .-- .. - .... / -... .- -.-- . ... .. .- -. / .-. . .--. .-. . ... . -. - .- - .. --- -. ... / ..-. --- .-. / ..- -. .. ..-. .. . -.. / -- --- -.. . .-.. .. -. --. \\end{center}\\vspace{1em}}",
-        # Add DOI information
-        "\\usepackage{hyperref}",
-        # Move DOI display to appear before the title hook (before divider)
-        "\\AtBeginDocument{\\let\\oldmaketitle\\maketitle\\renewcommand{\\maketitle}{\\oldmaketitle\\begin{center}\\large DOI: \\href{https://doi.org/10.5281/zenodo.15170908}{10.5281/zenodo.15170908}\\end{center}\\maketitlehookd}}"
-    ]
-
-    # Construct the pandoc command using absolute paths
-    command = [
+    # Create a simpler two-step process
+    # 1. First, convert main markdown to PDF
+    # 2. Then create appendix PDF and combine them
+    
+    # Step 1: Convert main markdown to PDF
+    main_command = [
         "pandoc",
         markdown_abs_path,
-    ]
-    
-    # Add all appendix files to the command
-    for appendix_path in appendix_files:
-        command.append(appendix_path)
-    
-    # Add other pandoc options
-    command.extend([
-        "--resource-path", resource_abs_path,  # Crucial for resolving relative image paths
-        "-o", output_pdf_abs_path, # Output PDF file
-        f"--pdf-engine={pdf_engine}", # Use specified PDF engine
-        "--standalone",             # Create a standalone document
-        "--toc",                    # Generate Table of Contents
-        "--toc-depth=3",           # Control TOC depth
-        "--number-sections",        # Number sections (e.g., 1., 1.1, 1.1.1)
-        "--top-level-division=chapter", # Treat top-level sections as chapters, better for appendix handling
+        "--resource-path", resource_abs_path,
+        "-o", f"{output_pdf_abs_path}.main.pdf",
+        f"--pdf-engine={pdf_engine}",
+        "--standalone",
+        "--toc",
+        "--toc-depth=3",
+        "--number-sections",
+        "--top-level-division=chapter",
         
         # Title page variables
         "-V", "title=Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling (CEREBRUM)",
@@ -175,56 +145,194 @@ def render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_pat
         "-V", "linkcolor=black",
         "-V", "urlcolor=black",
         "-V", "links-as-notes=true",
+    ]
+    
+    # Add LaTeX packages directly
+    latex_packages = [
+        "\\usepackage{amsmath}",
+        "\\usepackage{amssymb}",
+        "\\usepackage{mathtools}",
+        "\\usepackage{bm}",
+        "\\usepackage{caption}",
+        "\\usepackage{booktabs}",
+        "\\usepackage{tabularx}",
+        "\\let\\oldtabular\\tabular",
+        "\\let\\endoldtabular\\endtabular",
+        "\\renewenvironment{tabular}{\\tiny\\oldtabular}{\\endoldtabular}",
+        "\\usepackage{titling}",
+        "\\usepackage{titlesec}",
+        "\\pretitle{\\begin{center}\\LARGE\\bfseries}",
+        "\\posttitle{\\end{center}\\vspace{0.5em}}",
+        "\\preauthor{\\begin{center}\\large}",
+        "\\postauthor{\\end{center}}",
+        "\\predate{\\begin{center}\\large}",
+        "\\postdate{\\end{center}\\vspace{2em}}",
+        "\\renewcommand{\\maketitlehookd}{\\vspace{1em}\\begin{center}\\footnotesize -.-. . .-. . -... .-. ..- -- ---... / -.-. .- ... . -....- . -. .- -... .-.. . -.. / .-. . .- ... --- -. .. -. --. / . -. --. .. -. . / .-- .. - .... / -... .- -.-- . ... .. .- -. / .-. . .--. .-. . ... . -. - .- - .. --- -. ... / ..-. --- .-. / ..- -. .. ..-. .. . -.. / -- --- -.. . .-.. .. -. --. \\end{center}\\vspace{1em}}",
+        "\\usepackage{hyperref}",
+        "\\AtBeginDocument{\\let\\oldmaketitle\\maketitle\\renewcommand{\\maketitle}{\\oldmaketitle\\begin{center}\\large DOI: \\href{https://doi.org/10.5281/zenodo.15170908}{10.5281/zenodo.15170908}\\end{center}\\maketitlehookd}}",
+        "\\usepackage{appendix}",
+        "\\renewcommand{\\appendixname}{Appendix}",
+    ]
+    
+    # Add each package as a separate header-includes
+    for pkg in latex_packages:
+        main_command.extend(["-V", f"header-includes={pkg}"])
+    
+    # Step 2: Prepare command for appendices
+    if appendix_files:
+        appendix_command = [
+            "pandoc",
+        ]
         
-        # Add LaTeX configuration for appendices
-        "-V", "header-includes=\\usepackage{appendix}",
-        "-V", "header-includes=\\renewcommand{\\appendixname}{Appendix}",
+        for appendix_file in appendix_files:
+            appendix_command.append(appendix_file)
+            
+        appendix_command.extend([
+            "--resource-path", resource_abs_path,
+            "-o", f"{output_pdf_abs_path}.appendix.tex",
+            "--standalone",
+            "--number-sections",
+            "--top-level-division=chapter",
+            "-V", "header-includes=\\usepackage{appendix}"
+        ])
         
-        # Improved math rendering
-        "--mathjax",
-    ])
-
-    # Add each header include as a separate -V flag
-    for include in header_includes:
-        command.extend(["-V", f"header-includes={include}"])
-
-    logging.info(f"Attempting to render PDF...")
-    logging.info(f"Pandoc command: {' '.join(command)}")
-
+        # Add necessary LaTeX packages for appendices
+        for pkg in latex_packages:
+            appendix_command.extend(["-V", f"header-includes={pkg}"])
+            
+        # Add a special header to mark these as appendices
+        appendix_command.extend([
+            "-B", "\\appendix\n"
+        ])
+    
+    logging.info("Starting PDF generation process...")
+    logging.info(f"Main content command: {' '.join(main_command)}")
+    if appendix_files:
+        logging.info(f"Appendix command: {' '.join(appendix_command)}")
+    
     try:
-        # Execute the pandoc command
-        # We run it from the project root for consistency, although absolute paths make CWD less critical
-        project_root = os.path.dirname(resource_abs_path) # Assuming resource path is <root>/CEREBRUM
+        # Execute main markdown to PDF conversion
+        project_root = os.path.dirname(resource_abs_path)
+        logging.info("Generating main document PDF...")
         result = subprocess.run(
-            command,
-            check=True,             # Raise CalledProcessError if pandoc fails
-            capture_output=True,    # Capture stdout and stderr
-            text=True,              # Decode stdout/stderr as text
-            cwd=project_root        # Set working directory (optional with abs paths, but good practice)
+            main_command,
+            check=True,
+            capture_output=True,
+            text=True,
+            cwd=project_root
         )
-        logging.info(f"Successfully rendered PDF: {output_pdf_abs_path}")
-        # Log stdout/stderr only if debug level is enabled or if there's notable output
-        if result.stdout:
-             logging.debug("Pandoc stdout:\n" + result.stdout)
-        if result.stderr:
-             logging.debug("Pandoc stderr:\n" + result.stderr) # Often contains LaTeX warnings
+        logging.info(f"Generated main document PDF: {output_pdf_abs_path}.main.pdf")
+        
+        # If we have appendices, generate those too
+        if appendix_files:
+            logging.info("Generating appendix content...")
+            try:
+                appendix_result = subprocess.run(
+                    appendix_command,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                    cwd=project_root
+                )
+                logging.info(f"Generated appendix content: {output_pdf_abs_path}.appendix.tex")
+                
+                # Now combine the PDFs
+                logging.info("Combining main document and appendices...")
+                
+                # Create a LaTeX document to combine them
+                combine_tex = f"""
+\\documentclass{{article}}
+\\usepackage{{pdfpages}}
+\\begin{{document}}
+\\includepdf[pages=-]{{"{os.path.basename(output_pdf_abs_path)}.main.pdf"}}
+\\appendix
+\\include{{"{os.path.basename(output_pdf_abs_path)}.appendix"}}
+\\end{{document}}
+"""
+                
+                with open(os.path.join(project_root, f"{output_pdf_abs_path}.combine.tex"), 'w') as f:
+                    f.write(combine_tex)
+                
+                # Compile the combined document
+                logging.info("Compiling final PDF...")
+                final_command = [
+                    pdf_engine,
+                    f"{os.path.basename(output_pdf_abs_path)}.combine.tex"
+                ]
+                
+                final_result = subprocess.run(
+                    final_command,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                    cwd=os.path.dirname(output_pdf_abs_path)
+                )
+                
+                # Run twice to ensure TOC is updated correctly
+                final_result = subprocess.run(
+                    final_command,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                    cwd=os.path.dirname(output_pdf_abs_path)
+                )
+                
+                # Move the combined PDF to the final output location
+                shutil.move(
+                    os.path.join(os.path.dirname(output_pdf_abs_path), f"{os.path.basename(output_pdf_abs_path)}.combine.pdf"),
+                    output_pdf_abs_path
+                )
+                
+                logging.info(f"Successfully generated combined PDF: {output_pdf_abs_path}")
+            except Exception as e:
+                logging.error(f"Error processing appendices: {e}")
+                # If appendix processing fails, just use the main PDF
+                shutil.move(
+                    f"{output_pdf_abs_path}.main.pdf",
+                    output_pdf_abs_path
+                )
+                logging.info(f"Using main document as final PDF due to appendix processing error: {output_pdf_abs_path}")
+        else:
+            # If no appendices, just use the main PDF
+            shutil.move(
+                f"{output_pdf_abs_path}.main.pdf",
+                output_pdf_abs_path
+            )
+            logging.info(f"No appendices to process, using main document as final PDF: {output_pdf_abs_path}")
+        
+        # Clean up temporary files
+        temp_files = [
+            f"{output_pdf_abs_path}.main.pdf",
+            f"{output_pdf_abs_path}.appendix.tex",
+            f"{output_pdf_abs_path}.combine.tex",
+            f"{output_pdf_abs_path}.combine.aux",
+            f"{output_pdf_abs_path}.combine.log"
+        ]
+        
+        for temp_file in temp_files:
+            if os.path.exists(temp_file):
+                try:
+                    os.unlink(temp_file)
+                except Exception as e:
+                    logging.warning(f"Could not delete temporary file {temp_file}: {e}")
+        
+        logging.info("PDF generation completed successfully!")
         return True
         
-    except FileNotFoundError:
-        logging.error(f"Error: 'pandoc' command not found.")
-        logging.error("Please ensure pandoc is installed and in your system's PATH.")
-        logging.error("You also need a LaTeX distribution (like TeX Live or MiKTeX) with the 'xelatex' engine.")
+    except FileNotFoundError as e:
+        logging.error(f"Error: Command not found: {e}")
+        logging.error("Please ensure pandoc and LaTeX are installed and in your system's PATH.")
         return False
     except subprocess.CalledProcessError as e:
-        logging.error(f"Pandoc failed with return code {e.returncode}.")
+        logging.error(f"Command failed with return code {e.returncode}.")
         logging.error(f"Command executed: {' '.join(e.cmd)}")
-        logging.error("Pandoc stderr:\n" + e.stderr)
-        if e.stdout: # Log stdout too, might contain useful info
-            logging.error("Pandoc stdout:\n" + e.stdout)
-        logging.error("Check the pandoc output above for LaTeX errors. Missing packages or font issues are common.")
+        logging.error("Error output:\n" + e.stderr)
+        if e.stdout:
+            logging.error("Standard output:\n" + e.stdout)
         return False
     except Exception as e:
         logging.error(f"An unexpected error occurred during rendering: {e}")
+        traceback.print_exc()
         return False
 
 def run_mermaid_script(script_path, project_root_dir):
@@ -355,6 +463,45 @@ def update_cerebrum_md(cerebrum_path, figure_paths):
     print(f"Updated {cerebrum_path} with image references")
     return True
 
+def prepare_appendix_files(appendix_files):
+    """
+    Prepare appendix files by ensuring they have proper headings.
+    Our new approach doesn't require \appendix commands in the Markdown files,
+    but we still need to make sure the headings are properly formatted.
+    """
+    if not appendix_files:
+        logging.info("No appendix files to prepare")
+        return
+
+    logging.info(f"Preparing {len(appendix_files)} appendix files...")
+    for appendix_file in appendix_files:
+        with open(appendix_file, 'r') as f:
+            content = f.read()
+        
+        # Make sure each appendix starts with a proper heading
+        first_heading_match = re.search(r'^# (.+?)$', content, re.MULTILINE)
+        if first_heading_match:
+            heading_text = first_heading_match.group(1)
+            if not "appendix" in heading_text.lower():
+                # Add "Appendix" to the heading if it's not already there
+                new_heading = f"# {heading_text} (Appendix)"
+                modified_content = content.replace(first_heading_match.group(0), new_heading)
+                
+                with open(appendix_file, 'w') as f:
+                    f.write(modified_content)
+                logging.info(f"Updated heading in {appendix_file}: '{heading_text}' → '{heading_text} (Appendix)'")
+            else:
+                logging.info(f"Heading in {appendix_file} already contains 'Appendix': '{heading_text}'")
+        else:
+            logging.warning(f"Could not find a top-level heading in {appendix_file}")
+        
+        # Remove any existing \appendix commands as they're now handled elsewhere
+        if '\\appendix' in content:
+            modified_content = content.replace('\\appendix', '')
+            with open(appendix_file, 'w') as f:
+                f.write(modified_content)
+            logging.info(f"Removed '\\appendix' command from {appendix_file}")
+
 if __name__ == "__main__":
     project_root = get_project_root()
     
@@ -389,6 +536,9 @@ if __name__ == "__main__":
     
     # Create a list of appendix files
     appendix_files = [appendix1_abs_path, appendix2_abs_path]
+    
+    # Prepare appendix files
+    prepare_appendix_files(appendix_files)
 
     logging.info(f"Project Root: {project_root}")
     logging.info(f"Markdown Source: {markdown_abs_path}")
