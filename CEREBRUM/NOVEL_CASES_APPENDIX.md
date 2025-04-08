@@ -1,4 +1,4 @@
-# Appendix 2: Novel Linguistic Cases
+# Appendix B 2: Novel Linguistic Cases
 
 ## Discovering and Creating New Linguistic Cases Through CEREBRUM
 

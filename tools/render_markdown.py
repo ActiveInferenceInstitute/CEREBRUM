@@ -438,7 +438,18 @@ def prepare_appendix_files(appendix_files):
     # Use letter designations for appendices (A, B, C, ...)
     appendix_letters = [chr(65 + i) for i in range(len(appendix_files))]
     
+    # Define mapping of expected appendix numbering
+    # This ensures consistent numbering across the appendices
+    expected_numbering = {
+        "MATH_APPENDIX.md": "1",
+        "NOVEL_CASES_APPENDIX.md": "2",
+        "PRACTICAL_APPENDIX.md": "3"
+    }
+    
     for i, (appendix_file, letter) in enumerate(zip(appendix_files, appendix_letters)):
+        filename = os.path.basename(appendix_file)
+        number = expected_numbering.get(filename, str(i+1))
+        
         with open(appendix_file, 'r') as f:
             content = f.read()
         
@@ -447,41 +458,39 @@ def prepare_appendix_files(appendix_files):
         if first_heading_match:
             heading_text = first_heading_match.group(1)
             
-            # Check if heading already contains appendix designation
-            if re.search(r'appendix\s+[a-z]', heading_text.lower()):
-                # Leave existing appendix designation
-                logging.info(f"Heading in {os.path.basename(appendix_file)} already has appendix designation: '{heading_text}'")
-            elif "appendix" in heading_text.lower():
-                # Add letter to existing appendix text
-                new_heading = re.sub(r'(appendix)', f"\\1 {letter}", heading_text, flags=re.IGNORECASE)
-                modified_content = content.replace(first_heading_match.group(0), f"# {new_heading}")
-                
-                with open(appendix_file, 'w') as f:
-                    f.write(modified_content)
-                logging.info(f"Updated heading in {os.path.basename(appendix_file)}: '{heading_text}' → '{new_heading}'")
+            # Check if heading already contains properly formatted appendix designation
+            appendix_pattern = rf'Appendix {letter} {number}:'
+            if re.search(appendix_pattern, heading_text):
+                logging.info(f"Heading in {filename} already has correct appendix designation: '{heading_text}'")
             else:
-                # Add "Appendix X:" to the heading
-                new_heading = f"Appendix {letter}: {heading_text}"
+                # Extract existing title without any appendix designation
+                title_text = re.sub(r'^Appendix [A-Z] \d+:\s*', '', heading_text)
+                title_text = re.sub(r'^Appendix [A-Z]:\s*', '', title_text)
+                title_text = re.sub(r'^Appendix \d+:\s*', '', title_text)
+                title_text = re.sub(r'^Appendix:\s*', '', title_text)
+                
+                # Create new heading with proper appendix designation
+                new_heading = f"Appendix {letter} {number}: {title_text}"
                 modified_content = content.replace(first_heading_match.group(0), f"# {new_heading}")
                 
                 with open(appendix_file, 'w') as f:
                     f.write(modified_content)
-                logging.info(f"Updated heading in {os.path.basename(appendix_file)}: '{heading_text}' → '{new_heading}'")
+                logging.info(f"Updated heading in {filename}: '{heading_text}' → '{new_heading}'")
         else:
             # If no heading found, add one
-            new_heading = f"# Appendix {letter}"
+            new_heading = f"# Appendix {letter} {number}"
             modified_content = f"{new_heading}\n\n{content}"
             
             with open(appendix_file, 'w') as f:
                 f.write(modified_content)
-            logging.warning(f"Added missing heading to {os.path.basename(appendix_file)}: '{new_heading}'")
+            logging.warning(f"Added missing heading to {filename}: '{new_heading}'")
         
         # Remove any existing \appendix commands as they're now handled elsewhere
         if '\\appendix' in content:
             modified_content = content.replace('\\appendix', '')
             with open(appendix_file, 'w') as f:
                 f.write(modified_content)
-            logging.info(f"Removed '\\appendix' command from {os.path.basename(appendix_file)}")
+            logging.info(f"Removed '\\appendix' command from {filename}")
 
 def parse_arguments():
     """Parse command line arguments for the script."""
@@ -543,8 +552,24 @@ if __name__ == "__main__":
     output_pdf_abs_path = os.path.join(project_root, output_pdf_relative_path)
     resource_abs_path = os.path.join(project_root, resource_relative_path)
     
-    # Find and order appendix files
+    # Find appendix files
     all_appendix_files = find_appendix_files(cerebrum_dir, args.appendix_pattern)
+    
+    # Define explicit ordering of appendices (if not provided via command line)
+    if not args.appendix_order:
+        # IMPORTANT: This is the canonical order of appendices.
+        # The numbering and lettering should match:
+        # - Appendix A 1: MATH_APPENDIX.md (Mathematical Formalization)
+        # - Appendix B 2: NOVEL_CASES_APPENDIX.md (Novel Linguistic Cases)
+        # - Appendix C 3: PRACTICAL_APPENDIX.md (Practical Applications)
+        args.appendix_order = [
+            "MATH_APPENDIX.md",         # Appendix A 1: First appendix
+            "NOVEL_CASES_APPENDIX.md",  # Appendix B 2: Second appendix
+            "PRACTICAL_APPENDIX.md"     # Appendix C 3: Third appendix
+        ]
+        logging.info(f"Using canonical appendix order: {', '.join(args.appendix_order)}")
+    
+    # Order the appendix files
     ordered_appendix_files = determine_appendix_order(all_appendix_files, args.appendix_order)
     
     # Prepare appendix files

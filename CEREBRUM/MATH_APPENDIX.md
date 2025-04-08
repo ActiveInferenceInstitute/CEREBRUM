@@ -1,4 +1,4 @@
-# Appendix 1: Mathematical Formalization
+# Appendix A 1: Mathematical Formalization
 
 ## Mathematical Appendix
 
