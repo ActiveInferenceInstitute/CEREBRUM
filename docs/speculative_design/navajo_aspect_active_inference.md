@@ -210,4 +210,163 @@ Several challenges arise in this speculative mapping:
 
 The parallels between Navajo's aspectual system and Active Inference's approach to policy evaluation suggest fertile ground for cross-disciplinary exploration. By viewing Expected Free Energy through the lens of linguistic systems specialized for representing viewpoints on actions, we gain new perspectives on how to conceptualize, formalize, and explain the inferential processes underlying planning and policy selection.
 
-This framework invites us to consider how the rich diversity of human languages, each encoding unique perspectives on action, causality, and time, might inform more sophisticated and culturally-nuanced approaches to computational agency. Just as Navajo speakers can fluidly shift between different aspectual viewpoints to capture the multifaceted nature of actions, future active inference systems might benefit from similar flexibility in perspective-taking—evaluating policies not through a single monolithic criterion, but through an aspectually-rich engagement with the multiple ways actions can be conceived, experienced, and valued. 
+This framework invites us to consider how the rich diversity of human languages, each encoding unique perspectives on action, causality, and time, might inform more sophisticated and culturally-nuanced approaches to computational agency. Just as Navajo speakers can fluidly shift between different aspectual viewpoints to capture the multifaceted nature of actions, future active inference systems might benefit from similar flexibility in perspective-taking—evaluating policies not through a single monolithic criterion, but through an aspectually-rich engagement with the multiple ways actions can be conceived, experienced, and valued.
+
+## 9. Tri-System Integration: Navajo, Finnish, and Hungarian Linguistic Frameworks for Active Inference
+
+This section explores the integration of three linguistic frameworks—Navajo aspectual systems, Finnish conceptual structures, and Hungarian case relations—into a comprehensive model for Active Inference and CEREBRUM implementation.
+
+### 9.1 Comparative Analysis of Linguistic Frameworks for Cognitive Modeling
+
+| Active Inference Component | Navajo Aspect Framework | Finnish Concept Framework | Hungarian Case Framework | Combined Implementation Potential |
+|---------------------------|-------------------------|---------------------------|--------------------------|-----------------------------------|
+| **Perspective Taking** | Core strength: Multiple viewpoints on action | `Paikka` (place-specific viewpoints) | Boundary-relative positions | Comprehensive multi-level perspective system |
+| **Temporal Dynamics** | Momentaneous vs. Continuative aspects | `Vuodenkierto` (cycle of year) | N/A (minimal temporal encoding) | Multi-scale temporal processing framework |
+| **Boundary Dynamics** | Classifier stems (agency boundaries) | `Reuna`/`Raja` (edge concepts) | Surface cases (core strength) | Complete interface theory with multiple dimensions |
+| **Information Flow** | Seriative aspect (sequential flow) | `Verkosto` (network relationships) | Directional cases (onto/from) | Rich directional information flow architecture |
+| **System Resilience** | Iterative aspect (persistence) | `Sisu` (core strength: resilience) | N/A (structure-focused) | Robust persistence mechanics with structural stability |
+| **Collective Agency** | D-Classifier (reciprocal actions) | `Talkoot` (communal work) | N/A (individual-focused) | Multi-agent coordination frameworks |
+
+### 9.2 CEREBRUM Implementation Strategy
+
+The Navajo aspectual system offers specific implementation pathways for CEREBRUM cognitive architectures:
+
+* **Multi-Perspective Policy Evaluation**
+  * Implement policy selection using aspect-inspired viewpoint multiplicity
+  * Create classifier-based categories for different agency perspectives
+  * Design momentaneous/continuative dual evaluation pathways
+
+* **Temporal Resolution Frameworks**
+  * Build imperfective/perfective distinction into process monitoring
+  * Implement iterative aspects for cyclical policy evaluation
+  * Create seriative structures for sequential plan representation
+
+* **Agency Flow Architecture**
+  * Design classifier-inspired agency attribution mechanisms
+  * Implement optative modes for counterfactual simulation
+  * Create linguistic templates for agency-aware policy evaluation
+
+* **Navajo-Finnish-Hungarian Hybrid Systems**
+  * Combine Navajo temporal perspectives with Hungarian boundary mechanics
+  * Integrate Finnish place-awareness with Navajo agency perspectives
+  * Layer Hungarian interface dynamics onto Navajo temporal structures
+
+### 9.3 Active Inference Technical Implementation Matrix
+
+| Active Inference Process | Navajo Implementation | Finnish Implementation | Hungarian Implementation | Hybrid Approach |
+|--------------------------|----------------------|------------------------|--------------------------|-----------------|
+| **Policy Selection** | Multi-aspect evaluation | `Sisu`-weighted persistence | Case-based boundary analysis | Aspect-driven policy with case-based execution |
+| **State Estimation** | Classifier-based perspectives | `Paikka`-contextual inference | Superessive state representation | Multi-perspective state models with boundary awareness |
+| **Prediction** | Optative/Future constructions | `Verkosto` propagation | Sublative flow modeling | Predictive flows across contextual boundaries |
+| **Action Execution** | Momentaneous aspect triggers | `Käsityö` execution precision | Delative projection | Precisely controlled outward projection with temporal specificity |
+| **Learning** | Iterative/Repetitive aspects | `Luonto`-inspired adaptation | Case-refinement over time | Cyclical learning with boundary-awareness |
+| **Multi-Agent Coordination** | D-Classifier reciprocity | `Talkoot` communal patterns | N/A (individually focused) | Reciprocal action with communal work patterns |
+
+## 10. Practical Applications in CEREBRUM Cognitive Architectures
+
+### 10.1 Linguistic Intelligence Implementation
+
+• **Aspect-Based Language Understanding:**
+  - Parse language using Navajo aspect-inspired semantic structures
+  - Recognize temporal viewpoints in natural language
+  - Implement classifier-like agency attribution in semantic processing
+
+• **Viewpoint-Aware Language Generation:**
+  - Generate text with appropriate aspect-based temporal framing
+  - Modulate expression of agency using classifier-inspired mechanics
+  - Create grammatically coherent representations of multiple perspectives
+
+• **Aspect-Based Cognitive Operations:**
+  - Model inference processes using imperfective/perfective distinctions
+  - Implement decision-making using momentaneous/continuative contrasts
+  - Structure learning operations using iterative/seriative aspects
+
+### 10.2 Code Pattern: Navajo Aspect Implementation
+
+```python
+# Conceptual example of Navajo aspect implementation in Active Inference
+class AspectualPolicyEvaluator:
+    def __init__(self):
+        self.policies = {}
+        self.current_context = {}
+        
+    def evaluate_policy_momentaneous(self, policy_id):
+        """Evaluate policy as a point-like action (momentaneous aspect)"""
+        # Single-step evaluation focusing on immediate transitions
+        policy = self.policies[policy_id]
+        current_state = self.current_context.get('state')
+        next_state = policy.transition_model.predict_single_step(current_state)
+        return self.value_function(next_state)
+    
+    def evaluate_policy_continuative(self, policy_id, time_horizon=10):
+        """Evaluate policy as an extended process (continuative aspect)"""
+        # Trajectory-based evaluation over time
+        policy = self.policies[policy_id]
+        current_state = self.current_context.get('state')
+        states = policy.transition_model.predict_trajectory(current_state, time_horizon)
+        return sum(self.value_function(s) * self.discount_factor**t 
+                  for t, s in enumerate(states))
+    
+    def evaluate_policy_imperfective(self, policy_id):
+        """Evaluate policy as ongoing process (imperfective aspect)"""
+        # Focuses on process dynamics, information gain
+        return self.compute_epistemic_value(policy_id)
+    
+    def evaluate_policy_perfective(self, policy_id):
+        """Evaluate policy as completed whole (perfective aspect)"""
+        # Focuses on final outcomes, pragmatic value
+        return self.compute_pragmatic_value(policy_id)
+    
+    def evaluate_policies_classifier_based(self, perspective="Ł"):
+        """Evaluate all policies from specific classifier perspective"""
+        if perspective == "Ø":  # Simple/stative perspective
+            return {p_id: self.evaluate_basic_state(p_id) for p_id in self.policies}
+        elif perspective == "Ł":  # Causative/transitive perspective
+            return {p_id: self.evaluate_causal_impact(p_id) for p_id in self.policies}
+        elif perspective == "D":  # Reflexive/reciprocal perspective
+            return {p_id: self.evaluate_self_impact(p_id) for p_id in self.policies}
+        elif perspective == "L":  # Handling/manipulation perspective
+            return {p_id: self.evaluate_manipulation_quality(p_id) for p_id in self.policies}
+```
+
+### 10.3 Tri-System Integration for Cognitive Architectures
+
+• **Complementary Cognitive Functions:**
+  - Navajo Framework: Perspective-taking, temporal framing, agency attribution
+  - Finnish Framework: Place-awareness, contextual sensitivity, ecological grounding
+  - Hungarian Framework: Boundary dynamics, information flow directionality, interface design
+
+• **Implementation in CEREBRUM:**
+  - Core architecture: Hungarian case-based interface mechanics
+  - Contextual awareness: Finnish concept-based place and ecological sensitivity
+  - Policy evaluation: Navajo aspect-based perspective and temporal framing
+
+• **Technical Integration Points:**
+  - State partitioning: Combined Hungarian boundary and Navajo classifier approaches
+  - Message passing: Finnish network concepts with Hungarian directional cases
+  - Temporal dynamics: Navajo aspects with Finnish cyclical understanding
+  - Interface management: Hungarian surface cases with Navajo classifier perspectives
+
+### 10.4 Application to Linguistic Intelligence in CEREBRUM
+
+The integrated tri-system framework offers powerful capabilities for linguistic intelligence:
+
+| Linguistic Function | Navajo Contribution | Finnish Contribution | Hungarian Contribution | Combined Capability |
+|---------------------|---------------------|----------------------|------------------------|---------------------|
+| **Semantic Parsing** | Aspect-based action framing | Place/context sensitivity | Boundary and relationship structure | Comprehensive contextual meaning extraction |
+| **Pragmatic Understanding** | Multiple action perspectives | Social/ecological context | Directional relationships | Rich situational comprehension |
+| **Discourse Modeling** | Temporal coherence frameworks | Network-based relationships | Interface between contexts | Sophisticated discourse tracking |
+| **Conceptual Representation** | Action viewpoint encoding | Ecological conceptual grounding | Boundary-explicit relationships | Multi-dimensional concept modeling |
+| **Language Generation** | Appropriate aspectual framing | Contextually appropriate expression | Well-structured semantic flow | Naturalistic, context-sensitive output |
+
+• **Key Integration Advantages:**
+  - Handles multiple temporal perspectives (Navajo) within place-specific contexts (Finnish)
+  - Maintains clear boundaries between conceptual domains (Hungarian)
+  - Represents both process dynamics (Navajo) and relational structures (Finnish/Hungarian)
+  - Models both individual viewpoints (Navajo/Hungarian) and collective dynamics (Finnish)
+
+• **Implementation Priorities for CEREBRUM:**
+  - Develop aspect-oriented policy evaluation modules
+  - Implement case-based boundary interfaces 
+  - Create place-aware contextual sensitivity frameworks
+  - Design classifier-inspired agency attribution systems 
