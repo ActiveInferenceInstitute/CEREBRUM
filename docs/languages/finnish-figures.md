@@ -288,32 +288,26 @@ stateDiagram-v2
 ## The Dance of CEREBRUM Cases
 
 ```mermaid
-gitGraph
-   commit
-   branch nominative
-   checkout nominative
-   commit
-   commit
-   checkout main
-   merge nominative
-   branch accusative
-   checkout accusative
-   commit
-   commit
-   checkout main
-   merge accusative
-   branch dative
-   checkout dative
-   commit
-   commit
-   checkout main
-   merge dative
-   branch genitive
-   checkout genitive
-   commit
-   commit
-   checkout main
-   merge genitive
+flowchart LR
+    M((Main))
+    N[Nominative<br>Case]
+    A[Accusative<br>Case]
+    D[Dative<br>Case] 
+    G[Genitive<br>Case]
+    
+    M --> N
+    N --> M
+    M --> A
+    A --> M
+    M --> D
+    D --> M
+    M --> G
+    G --> M
+    
+    N --> |transforms| A
+    A --> |sends to| D
+    D --> |produces| G
+    G --> |supports| N
 ```
 
 ## Sisu in Active Inference Implementation
@@ -677,6 +671,23 @@ graph TD
     end
 ```
 
+## The Simple Beauty of Finnish Design Principles
+
+```mermaid
+graph TD
+    F[Functionality]
+    S[Simplicity]
+    H[Harmony]
+    D[Durability]
+    M[Materials]
+    
+    F --- S
+    S --- H
+    H --- D
+    D --- M
+    M --- F
+```
+
 ## CEREBRUM Morphological Grammar
 
 ```mermaid
@@ -702,26 +713,28 @@ graph LR
     G1 -->|delivers to| D1
 ```
 
+## CEREBRUM Morphological Grammar
+
+```mermaid
+graph LR
+    N1[Active Agent<br>NOM]
+    A1[Object of Process<br>ACC]
+    G1[Source Generator<br>GEN]
+    D1[Recipient<br>DAT]
+    
+    N1 -->|transforms| A1
+    A1 -->|produces| G1
+    G1 -->|delivers to| D1
+```
+
 ## Bridging Linguistic and Computational Boundaries
 
 ```mermaid
 flowchart LR
-    subgraph Finnish Linguistic Genius
-        L1[Case System]
-        L2[Agglutination]
-        L3[Vowel Harmony]
-    end
-    
-    subgraph Computational Framework
-        C1[Model Structure]
-        C2[Function Chaining]
-        C3[Process Harmony]
-    end
-    
-    L1 --> C1
-    L2 --> C2
-    L3 --> C3
-``` 
+    L1[Case System] --> C1[Model Structure]
+    L2[Agglutination] --> C2[Function Chaining]
+    L3[Vowel Harmony] --> C3[Process Harmony]
+```
 
 ## Core Finnish Concepts Hierarchy
 
@@ -771,6 +784,56 @@ mindmap
       (Foraging)
       (Cyclical processes)
       (Seasonal knowledge)
+```
+
+## Core Finnish Concepts Hierarchy
+
+```mermaid
+graph TD
+    root((Finnish Concepts))
+    
+    L[Luonto/Nature]
+    P[Paikka/Place]
+    T[Talkoot/Community]
+    S[Sisu/Resilience]
+    K[Käsityö/Craft]
+    R[Reuna/Edge]
+    V[Verkosto/Network]
+    KV[Keräily/Cycles]
+    
+    root --> L
+    root --> P
+    root --> T
+    root --> S
+    root --> K
+    root --> R
+    root --> V
+    root --> KV
+    
+    L --> L1[Forest]
+    L --> L2[Ecosystems]
+    L --> L3[Biodiversity]
+    
+    P --> P1[Locative Cases]
+    P --> P2[Spatial Awareness]
+    
+    T --> T1[Communal Work]
+    T --> T2[Cooperation]
+    
+    S --> S1[Perseverance]
+    S --> S2[Anti-fragility]
+    
+    K --> K1[Handicraft]
+    K --> K2[Design]
+    
+    R --> R1[Boundaries]
+    R --> R2[Transitions]
+    
+    V --> V1[Connections]
+    V --> V2[Relationships]
+    
+    KV --> KV1[Seasonal Knowledge]
+    KV --> KV2[Cyclical Processes]
 ```
 
 ## Finnish Concepts to Application Domains Flow
@@ -846,95 +909,95 @@ erDiagram
         string precision_weighting
     }
     
-    LUONTO-NATURE ||--o{ NOMINATIVE-CASE : grounds
-    LUONTO-NATURE {
-        string essence "Character/Essence"
-        string cycles "Ecological cycles"
-        string biodiversity "Monimuotoisuus"
+    LUONTO ||--o{ NOMINATIVE : grounds
+    LUONTO {
+        string essence
+        string cycles
+        string biodiversity
     }
     
-    NOMINATIVE-CASE {
-        string function "Model as active agent"
-        string parameters "Fully accessible"
-        string precision "Highest on likelihood"
+    NOMINATIVE {
+        string function
+        string parameters
+        string precision
     }
     
-    PAIKKA-PLACE ||--o{ LOCATIVE-CASE : structures
-    PAIKKA-PLACE {
-        string location_types "Six locative cases"
-        string context "Spatial relationships"
-        string awareness "Paikkatietoisuus"
+    PAIKKA ||--o{ LOCATIVE : structures
+    PAIKKA {
+        string location_types
+        string context
+        string awareness
     }
     
-    LOCATIVE-CASE {
-        string function "Model as context"
-        string parameters "Environmental emphasis"
-        string precision "Highest on contexts"
+    LOCATIVE {
+        string function
+        string parameters
+        string precision
     }
     
-    TALKOOT-COMMUNITY ||--o{ DATIVE-CASE : facilitates
-    TALKOOT-COMMUNITY {
-        string communal_work "Voluntary collaboration"
-        string cooperation "Shared goals"
-        string helping "Naapuriapu"
+    TALKOOT ||--o{ DATIVE : facilitates
+    TALKOOT {
+        string communal_work
+        string cooperation
+        string helping
     }
     
-    DATIVE-CASE {
-        string function "Model as recipient"
-        string parameters "Input-focused"
-        string precision "Highest on inputs"
+    DATIVE {
+        string function
+        string parameters
+        string precision
     }
     
-    SISU-RESILIENCE ||--o{ ABLATIVE-CASE : strengthens
-    SISU-RESILIENCE {
-        string perseverance "Determination"
-        string anti_fragility "Robustness"
-        string endurance "Long-term stability"
+    SISU ||--o{ ABLATIVE : strengthens
+    SISU {
+        string perseverance
+        string anti_fragility
+        string endurance
     }
     
-    ABLATIVE-CASE {
-        string function "Model as origin/cause"
-        string parameters "Origin states emphasized"
-        string precision "Highest on historical data"
+    ABLATIVE {
+        string function
+        string parameters
+        string precision
     }
     
-    KASITYO-CRAFT ||--o{ INSTRUMENTAL-CASE : implements
-    KASITYO-CRAFT {
-        string craft "Handicraft techniques"
-        string design "Muotoilu principles"
-        string durability "Long-lasting quality"
+    KASITYO ||--o{ INSTRUMENTAL : implements
+    KASITYO {
+        string craft
+        string design
+        string durability
     }
     
-    INSTRUMENTAL-CASE {
-        string function "Model as method/tool"
-        string parameters "Method-oriented"
-        string precision "Highest on operations"
+    INSTRUMENTAL {
+        string function
+        string parameters
+        string precision
     }
     
-    VERKOSTO-NETWORK ||--o{ GENITIVE-CASE : generates
-    VERKOSTO-NETWORK {
-        string connections "Relationship web"
-        string structure "Network topology"
-        string quality "Connection integrity"
+    VERKOSTO ||--o{ GENITIVE : generates
+    VERKOSTO {
+        string connections
+        string structure
+        string quality
     }
     
-    GENITIVE-CASE {
-        string function "Model as source/possessor"
-        string parameters "Output-focused"
-        string precision "Highest on outputs"
+    GENITIVE {
+        string function
+        string parameters
+        string precision
     }
     
-    REUNA-EDGE ||--o{ ACCUSATIVE-CASE : transforms
-    REUNA-EDGE {
-        string boundary "Raja concept"
-        string transition "Välitila space"
-        string interface "Interconnection point"
+    REUNA ||--o{ ACCUSATIVE : transforms
+    REUNA {
+        string boundary
+        string transition
+        string interface
     }
     
-    ACCUSATIVE-CASE {
-        string function "Model as object of process"
-        string parameters "Restricted access"
-        string precision "Highest on parameters"
+    ACCUSATIVE {
+        string function
+        string parameters
+        string precision
     }
 ```
 
@@ -944,12 +1007,12 @@ erDiagram
 sequenceDiagram
     participant User
     participant System
-    participant Inessive as Inessive (-ssa/-ssä)
-    participant Elative as Elative (-sta/-stä)
-    participant Illative as Illative (-an/-en/...)
-    participant Adessive as Adessive (-lla/-llä)
-    participant Ablative as Ablative (-lta/-ltä)
-    participant Allative as Allative (-lle)
+    participant Inessive
+    participant Elative
+    participant Illative
+    participant Adessive
+    participant Ablative
+    participant Allative
     
     User->>System: Initiate location query
     System->>Inessive: Check if entity is IN location
@@ -971,7 +1034,7 @@ sequenceDiagram
 
 ```mermaid
 pie
-    title "Finnish Concept Integration in CEREBRUM"
+    title Finnish Concept Integration in CEREBRUM
     "Luonto (Nature)" : 20
     "Paikka (Place)" : 25
     "Talkoot (Community)" : 15
@@ -986,44 +1049,55 @@ pie
 ```mermaid
 gantt
     title Talkoot-inspired Collaborative Workflow
-    dateFormat  YYYY-MM-DD
+    dateFormat YYYY-MM-DD
+    
     section Planning
     Community Goal Setting       :a1, 2025-01-01, 30d
-    Resource Assessment          :after a1, 20d
+    Resource Assessment          :a2, after a1, 20d
+    
     section Preparation
     Environment Setup            :b1, after a1, 20d
-    Tool Distribution            :after b1, 10d
+    Tool Distribution            :b2, after b1, 10d
+    
     section Execution
     Collaborative Development    :c1, after b1, 40d
     Quality Checking             :c2, after c1, 15d
+    
     section Completion
     Integration                  :d1, after c2, 20d
-    Communal Celebration         :after d1, 5d
+    Communal Celebration         :d2, after d1, 5d
 ```
 
 ## Active Inference in Finnish-Inspired CEREBRUM
 
 ```mermaid
 flowchart TD
-    subgraph "Finnish Concepts"
-        L[Luonto]
-        P[Paikka]
-        T[Talkoot]
-        S[Sisu]
-        K[Käsityö]
-        R[Reuna/Raja]
-        V[Verkosto]
-    end
+    %% Finnish Concepts
+    L[Luonto]
+    P[Paikka]
+    T[Talkoot]
+    S[Sisu]
+    K[Käsityö]
+    R[Reuna/Raja]
+    V[Verkosto]
     
-    subgraph "CEREBRUM Active Inference"
-        GM[Generative Model]
-        FE[Free Energy Principle]
-        MB[Markov Blanket]
-        PP[Predictive Processing]
-        PS[Precision Scaling]
-        AC[Active Control]
-    end
+    %% CEREBRUM Active Inference
+    GM[Generative Model]
+    FE[Free Energy Principle]
+    MB[Markov Blanket]
+    PP[Predictive Processing]
+    PS[Precision Scaling]
+    AC[Active Control]
     
+    %% Implementation
+    M1[Ecological Priors]
+    M2[Place-Specific Boundaries]
+    M3[Network Message Passing]
+    M4[Context-Sensitive Precision]
+    M5[Resilient Optimization]
+    M6[Craft-Based Control]
+    
+    %% Connections
     L --> GM
     L --> PP
     P --> MB
@@ -1034,14 +1108,12 @@ flowchart TD
     R --> MB
     V --> PP
     
-    subgraph "Implementation"
-        GM --> M1[Ecological Priors]
-        MB --> M2[Place-Specific Boundaries]
-        PP --> M3[Network Message Passing]
-        PS --> M4[Context-Sensitive Precision]
-        FE --> M5[Resilient Optimization]
-        AC --> M6[Craft-Based Control]
-    end
+    GM --> M1
+    MB --> M2
+    PP --> M3
+    PS --> M4
+    FE --> M5
+    AC --> M6
 ```
 
 ## Finnish Case Transformations in CEREBRUM
@@ -2146,4 +2218,13 @@ erDiagram
         string causal_attribution "Causal explanation"
         string historical_parameters "Origin-focused parameters"
     }
+```
+
+## Bridging Linguistic and Computational Boundaries
+
+```mermaid
+flowchart LR
+    L1[Case System] --> C1[Model Structure]
+    L2[Agglutination] --> C2[Function Chaining]
+    L3[Vowel Harmony] --> C3[Process Harmony]
 ```
