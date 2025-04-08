@@ -26,6 +26,8 @@ import re
 import shutil
 import tempfile
 import traceback
+import glob
+import argparse
 
 # Configure logging for clear output
 logging.basicConfig(
@@ -355,18 +357,88 @@ def update_cerebrum_md(cerebrum_path, figure_paths):
     print(f"Updated {cerebrum_path} with image references")
     return True
 
+def find_appendix_files(cerebrum_dir, appendix_pattern="*_APPENDIX.md"):
+    """
+    Find all appendix files in the specified directory matching the given pattern.
+    
+    Args:
+        cerebrum_dir (str): Directory where appendix files are located.
+        appendix_pattern (str): Glob pattern to match appendix files.
+        
+    Returns:
+        list: List of absolute paths to appendix files, sorted alphabetically.
+    """
+    appendix_pattern_full = os.path.join(cerebrum_dir, appendix_pattern)
+    appendix_files = glob.glob(appendix_pattern_full)
+    
+    # Sort files alphabetically to maintain consistent ordering
+    appendix_files.sort()
+    
+    if not appendix_files:
+        logging.warning(f"No appendix files found matching pattern: {appendix_pattern_full}")
+    else:
+        logging.info(f"Found {len(appendix_files)} appendix files: {', '.join(os.path.basename(f) for f in appendix_files)}")
+    
+    return appendix_files
+
+def determine_appendix_order(appendix_files, explicit_order=None):
+    """
+    Determine the order of appendix files based on optional explicit ordering,
+    with fallback to alphabetical order.
+    
+    Args:
+        appendix_files (list): List of appendix file paths.
+        explicit_order (list, optional): List of filenames in desired order.
+        
+    Returns:
+        list: Ordered list of appendix file paths.
+    """
+    if not appendix_files:
+        return []
+        
+    if explicit_order:
+        # Map filenames to their full paths
+        filename_to_path = {os.path.basename(f): f for f in appendix_files}
+        
+        # Build ordered list from explicit order, skipping any not found
+        ordered_files = []
+        for filename in explicit_order:
+            if filename in filename_to_path:
+                ordered_files.append(filename_to_path[filename])
+                logging.info(f"Using explicitly ordered appendix: {filename}")
+            else:
+                logging.warning(f"Explicitly ordered appendix file not found: {filename}")
+        
+        # Add any remaining files not in explicit order
+        for f in appendix_files:
+            if os.path.basename(f) not in explicit_order:
+                ordered_files.append(f)
+                logging.info(f"Adding additional appendix not in explicit order: {os.path.basename(f)}")
+        
+        return ordered_files
+    else:
+        # Default to alphabetical ordering
+        logging.info("Using alphabetical ordering for appendix files")
+        return sorted(appendix_files)
+
 def prepare_appendix_files(appendix_files):
     """
     Prepare appendix files by ensuring they have proper headings.
-    Our new approach doesn't require \appendix commands in the Markdown files,
-    but we still need to make sure the headings are properly formatted.
+    Adds appendix designation to headings if needed and ensures appendices are properly numbered.
+    
+    Args:
+        appendix_files (list): List of absolute paths to appendix files.
     """
     if not appendix_files:
         logging.info("No appendix files to prepare")
         return
 
     logging.info(f"Preparing {len(appendix_files)} appendix files...")
-    for appendix_file in appendix_files:
+    
+    # Use letter designations for appendices (A, B, C, ...)
+    appendix_letters = [chr(65 + i) for i in range(len(appendix_files))]
+    
+    for i, (appendix_file, letter) in enumerate(zip(appendix_files, appendix_letters)):
         with open(appendix_file, 'r') as f:
             content = f.read()
         
@@ -374,72 +446,119 @@ def prepare_appendix_files(appendix_files):
         first_heading_match = re.search(r'^# (.+?)$', content, re.MULTILINE)
         if first_heading_match:
             heading_text = first_heading_match.group(1)
-            if not "appendix" in heading_text.lower():
-                # Add "Appendix" to the heading if it's not already there
-                new_heading = f"# {heading_text} (Appendix)"
-                modified_content = content.replace(first_heading_match.group(0), new_heading)
+            
+            # Check if heading already contains appendix designation
+            if re.search(r'appendix\s+[a-z]', heading_text.lower()):
+                # Leave existing appendix designation
+                logging.info(f"Heading in {os.path.basename(appendix_file)} already has appendix designation: '{heading_text}'")
+            elif "appendix" in heading_text.lower():
+                # Add letter to existing appendix text
+                new_heading = re.sub(r'(appendix)', f"\\1 {letter}", heading_text, flags=re.IGNORECASE)
+                modified_content = content.replace(first_heading_match.group(0), f"# {new_heading}")
                 
                 with open(appendix_file, 'w') as f:
                     f.write(modified_content)
-                logging.info(f"Updated heading in {appendix_file}: '{heading_text}' → '{heading_text} (Appendix)'")
+                logging.info(f"Updated heading in {os.path.basename(appendix_file)}: '{heading_text}' → '{new_heading}'")
             else:
-                logging.info(f"Heading in {appendix_file} already contains 'Appendix': '{heading_text}'")
+                # Add "Appendix X:" to the heading
+                new_heading = f"Appendix {letter}: {heading_text}"
+                modified_content = content.replace(first_heading_match.group(0), f"# {new_heading}")
+                
+                with open(appendix_file, 'w') as f:
+                    f.write(modified_content)
+                logging.info(f"Updated heading in {os.path.basename(appendix_file)}: '{heading_text}' → '{new_heading}'")
         else:
-            logging.warning(f"Could not find a top-level heading in {appendix_file}")
+            # If no heading found, add one
+            new_heading = f"# Appendix {letter}"
+            modified_content = f"{new_heading}\n\n{content}"
+            
+            with open(appendix_file, 'w') as f:
+                f.write(modified_content)
+            logging.warning(f"Added missing heading to {os.path.basename(appendix_file)}: '{new_heading}'")
         
         # Remove any existing \appendix commands as they're now handled elsewhere
         if '\\appendix' in content:
             modified_content = content.replace('\\appendix', '')
             with open(appendix_file, 'w') as f:
                 f.write(modified_content)
-            logging.info(f"Removed '\\appendix' command from {appendix_file}")
+            logging.info(f"Removed '\\appendix' command from {os.path.basename(appendix_file)}")
+
+def parse_arguments():
+    """Parse command line arguments for the script."""
+    parser = argparse.ArgumentParser(description="Generate PDF from CEREBRUM Markdown files")
+    parser.add_argument("--cerebrum-dir", default="CEREBRUM", 
+                      help="Directory containing CEREBRUM.md and appendix files (default: CEREBRUM)")
+    parser.add_argument("--main-file", default="CEREBRUM.md",
+                      help="Main Markdown file to process (default: CEREBRUM.md)")
+    parser.add_argument("--output-file", default="CEREBRUM.pdf",
+                      help="Output PDF filename (default: CEREBRUM.pdf)")
+    parser.add_argument("--appendix-pattern", default="*_APPENDIX.md",
+                      help="Glob pattern to identify appendix files (default: *_APPENDIX.md)")
+    parser.add_argument("--appendix-order", nargs="*",
+                      help="Explicit order of appendix files (by filename)")
+    parser.add_argument("--skip-mermaid", action="store_true",
+                      help="Skip running the Mermaid rendering script")
+    parser.add_argument("--debug", action="store_true",
+                      help="Enable debug logging")
+    
+    return parser.parse_args()
 
 if __name__ == "__main__":
-    project_root = get_project_root()
+    # Parse command line arguments
+    args = parse_arguments()
     
-    # --- Run Mermaid Script First ---
-    mermaid_script_name = "render_mermaids.py"
-    mermaid_script_path = os.path.join(project_root, "tools", mermaid_script_name)
+    # Set debug logging if requested
+    if args.debug:
+        logging.getLogger().setLevel(logging.DEBUG)
+        logging.debug("Debug logging enabled")
+    
+    project_root = get_project_root()
+    cerebrum_dir = os.path.join(project_root, args.cerebrum_dir)
+    
+    # --- Run Mermaid Script First (unless skipped) ---
+    if not args.skip_mermaid:
+        mermaid_script_name = "render_mermaids.py"
+        mermaid_script_path = os.path.join(project_root, "tools", mermaid_script_name)
 
-    if not os.path.exists(mermaid_script_path):
-        logging.error(f"Mermaid script not found at: {mermaid_script_path}")
-        sys.exit(1)
+        if not os.path.exists(mermaid_script_path):
+            logging.error(f"Mermaid script not found at: {mermaid_script_path}")
+            sys.exit(1)
 
-    if not run_mermaid_script(mermaid_script_path, project_root):
-        logging.error("Aborting PDF generation due to Mermaid script failure.")
-        sys.exit(1)
+        if not run_mermaid_script(mermaid_script_path, project_root):
+            logging.error("Aborting PDF generation due to Mermaid script failure.")
+            sys.exit(1)
+    else:
+        logging.info("Skipping Mermaid rendering as requested")
     # --------------------------------
 
     # --- Proceed with PDF Generation ---
     # Define paths relative to the determined project root
-    markdown_relative_path = os.path.join("CEREBRUM", "CEREBRUM.md")
-    appendix1_relative_path = os.path.join("CEREBRUM", "MATH_APPENDIX.md")
-    appendix2_relative_path = os.path.join("CEREBRUM", "NOVEL_CASES_APPENDIX.md")
-    output_pdf_relative_path = os.path.join("CEREBRUM", "CEREBRUM.pdf")
+    markdown_relative_path = os.path.join(args.cerebrum_dir, args.main_file)
+    output_pdf_relative_path = os.path.join(args.cerebrum_dir, args.output_file)
     # The resource path is the directory containing the 'output' folder referenced in the markdown
-    resource_relative_path = "CEREBRUM"
+    resource_relative_path = args.cerebrum_dir
 
     # Construct absolute paths based on the project root
     markdown_abs_path = os.path.join(project_root, markdown_relative_path)
-    appendix1_abs_path = os.path.join(project_root, appendix1_relative_path)
-    appendix2_abs_path = os.path.join(project_root, appendix2_relative_path)
     output_pdf_abs_path = os.path.join(project_root, output_pdf_relative_path)
     resource_abs_path = os.path.join(project_root, resource_relative_path)
     
-    # Create a list of appendix files
-    appendix_files = [appendix1_abs_path, appendix2_abs_path]
+    # Find and order appendix files
+    all_appendix_files = find_appendix_files(cerebrum_dir, args.appendix_pattern)
+    ordered_appendix_files = determine_appendix_order(all_appendix_files, args.appendix_order)
     
     # Prepare appendix files
-    prepare_appendix_files(appendix_files)
+    prepare_appendix_files(ordered_appendix_files)
 
     logging.info(f"Project Root: {project_root}")
     logging.info(f"Markdown Source: {markdown_abs_path}")
-    logging.info(f"Appendix 1 (Math): {appendix1_abs_path}")
-    logging.info(f"Appendix 2 (Novel Cases): {appendix2_abs_path}")
     logging.info(f"PDF Output: {output_pdf_abs_path}")
     logging.info(f"Resource Path: {resource_abs_path}")
+    logging.info(f"Appendix Files ({len(ordered_appendix_files)}):")
+    for i, f in enumerate(ordered_appendix_files):
+        logging.info(f"  {i+1}. {os.path.basename(f)}")
 
-    if render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_path, resource_abs_path):
+    if render_markdown_to_pdf(markdown_abs_path, ordered_appendix_files, output_pdf_abs_path, resource_abs_path):
         logging.info("PDF generation completed successfully.")
         sys.exit(0) # Indicate success
     else:

@@ -30,6 +30,18 @@ This directory contains case mapping analyses for the following languages:
 - [German](german.md) - Germanic language with 4 cases
 - [Hindi](hindi.md) - Indo-Aryan language with direct and oblique cases plus postpositions
 - [Swahili](swahili.md) - Bantu language with noun class system replacing traditional case marking
+- [Tamil](tamil.md) - Dravidian language with 8 cases and agglutinative morphology
+- [Inuktitut](inuktitut.md) - Eskimo-Aleut language with complex polysynthetic case system
+- [Mandarin](mandarin.md) - Analytic language showing how case functions are expressed without morphological marking
+- [Quechua](quechua.md) - Andean language with evidential markers that could inspire extensions to CEREBRUM
+- [Polish](polish.md) - Slavic language with 7 cases and complex phonological changes
+- [Ancient Greek](ancient_greek.md) - Indo-European language with 5 cases and historical linguistic significance
+- [Estonian](estonian.md) - Finnic language with 14 cases including specialized spatial cases
+- [Hebrew](hebrew.md) - Semitic language with construct state instead of traditional case marking
+- [Icelandic](icelandic.md) - Germanic language with preserved 4-case system
+- [Tagalog](tagalog.md) - Austronesian language with focus system rather than case marking
+- [Wolof](wolof.md) - Niger-Congo language with a unique verbal focus system
+- [Maori](maori.md) - Polynesian language with particle-based grammatical relations
 
 ## Structure of Each Language Document
 
@@ -50,27 +62,6 @@ These language mappings can be used in several ways:
 2. **Explaining to Linguists** - Use familiar concepts to introduce CEREBRUM to linguistics professionals
 3. **Extended Case Design** - Draw inspiration for custom cases in CEREBRUM implementations
 4. **Cross-Cultural Adaptation** - Adapt CEREBRUM concepts to different linguistic traditions
-
-## Languages To-Do List
-
-The following languages are prioritized for future development to expand CEREBRUM's linguistic foundations:
-
-1. **Tamil** - Dravidian language with 8 cases and agglutinative morphology
-2. **Inuktitut** - Eskimo-Aleut language with complex polysynthetic case system
-3. **Mandarin Chinese** - Analytic language showing how case functions are expressed without morphological marking
-4. **Quechua** - Andean language with evidential markers that could inspire extensions to CEREBRUM
-5. **Polish** - Slavic language with 7 cases and complex phonological changes
-6. **Ancient Greek** - Indo-European language with 5 cases and historical linguistic significance
-7. **Estonian** - Finnic language with 14 cases including specialized spatial cases
-8. **Hebrew** - Semitic language with construct state instead of traditional case marking
-9. **Icelandic** - Germanic language with preserved 4-case system
-10. **Tagalog** - Austronesian language with focus system rather than case marking
-
-When developing documentation for new languages, consider:
-- Languages with typologically distinct case systems
-- Languages representing different language families
-- Languages demonstrating alternative approaches to expressing case relationships
-- Languages with unique grammatical features that could inspire CEREBRUM extensions
 
 ## Contribution Guidelines
 
