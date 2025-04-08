@@ -13,6 +13,7 @@ CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unifie
 - **Version:** 1.0
 - **Date:** April 7, 2025
 - **DOI:** [10.5281/zenodo.15170908](https://doi.org/10.5281/zenodo.15170908)
+- **Zenodo Record:** [https://zenodo.org/records/15170908](https://zenodo.org/records/15170908)
 - **Institution:** Active Inference Institute
 
 ## Overview
@@ -59,6 +60,9 @@ If you use CEREBRUM in your research, please cite:
 
 ## License
 CC BY-NC-ND 4.0
+
+## Acknowledgements
+This work builds upon the efforts and insights of many participants within the Active Inference Institute. Special thanks are extended to Dave Douglass for his contributions related to computational linguistics, archiving, Active Inference principles, upper ontologies, and translations, which have significantly informed aspects of this project.
 
 ## Contributing
 We welcome contributions from researchers, developers, and enthusiasts across multiple domains:
