@@ -1,8 +1,6 @@
-# Appendix A 1: Mathematical Formalization
+# Mathematical Formalization
 
-## Mathematical Appendix
-
-This appendix contains all mathematical formalizations referenced throughout the paper, organized by equation number.
+This supplement contains all mathematical formalizations referenced throughout the paper, organized by equation number.
 
 ### Variational Free Energy and Case Transformations
 

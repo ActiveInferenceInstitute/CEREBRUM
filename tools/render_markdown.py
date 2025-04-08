@@ -108,12 +108,12 @@ def render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_pat
     # Create a simple straightforward approach with a single pandoc command
     main_command = ["pandoc", markdown_abs_path]
     
-    # Create a temporary file with just the \appendix command
+    # Create a temporary file with just the \\appendix command - RESTORED
     appendix_marker_file = os.path.join(os.path.dirname(output_pdf_abs_path), "appendix_marker.tex")
     with open(appendix_marker_file, 'w') as f:
         f.write("\n\\clearpage\n\\appendix\n")
     
-    # Add the appendix marker after the main content
+    # Add the appendix marker after the main content - RESTORED
     main_command.append("--include-after-body=" + appendix_marker_file)
     
     # Add all appendix files
@@ -172,17 +172,18 @@ def render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_pat
         "\\renewenvironment{tabular}{\\tiny\\oldtabular}{\\endoldtabular}",
         "\\usepackage{titling}",
         "\\usepackage{titlesec}",
-        "\\pretitle{\\begin{center}\\LARGE\\bfseries}",
-        "\\posttitle{\\end{center}\\vspace{0.5em}}",
-        "\\preauthor{\\begin{center}\\large}",
-        "\\postauthor{\\end{center}}",
-        "\\predate{\\begin{center}\\large}",
-        "\\postdate{\\end{center}\\vspace{2em}}",
-        "\\renewcommand{\\maketitlehookd}{\\vspace{1em}\\begin{center}\\footnotesize -.-. . .-. . -... .-. ..- -- ---... / -.-. .- ... . -....- . -. .- -... .-.. . -.. / .-. . .- ... --- -. .. -. --. / . -. --. .. -. . / .-- .. - .... / -... .- -.-- . ... .. .- -. / .-. . .--. .-. . ... . -. - .- - .. --- -. ... / ..-. --- .-. / ..- -. .. ..-. .. . -.. / -- --- -.. . .-.. .. -. --. \\end{center}\\vspace{1em}}",
+        "\\pretitle{\\\\begin{center}\\\\LARGE\\\\bfseries}",
+        "\\posttitle{\\\\end{center}\\\\vspace{0.5em}}",
+        "\\preauthor{\\\\begin{center}\\\\large}",
+        "\\postauthor{\\\\end{center}}",
+        "\\predate{\\\\begin{center}\\\\large}",
+        "\\postdate{\\\\end{center}\\\\vspace{2em}}",
+        "\\newcommand{\\\\maketitlehookd}{}",
+        "\\renewcommand{\\\\maketitlehookd}{\\\\vspace{1em}\\\\begin{center}\\\\footnotesize -.-. . .-. . -... .-. ..- -- ---... / -.-. .- ... . -....- . -. .- -... .-.. . -.. / .-. . .- ... --- -. .. -. --. / . -. --. .. -. . / .-- .. - .... / -... .- -.-- . ... .. .- -. / .-. . .--. .-. . ... . -. - .- - .. --- -. ... / ..-. --- .-. / ..- -. .. ..-. .. . -.. / -- --- -.. . .-.. .. -. --. \\\\end{center}\\\\vspace{1em}}",
         "\\usepackage{hyperref}",
-        "\\AtBeginDocument{\\let\\oldmaketitle\\maketitle\\renewcommand{\\maketitle}{\\oldmaketitle\\begin{center}\\large DOI: \\href{https://doi.org/10.5281/zenodo.15170908}{10.5281/zenodo.15170908}\\end{center}\\maketitlehookd}}",
-        "\\usepackage{appendix}",
-        "\\renewcommand{\\appendixname}{Appendix}",
+        "\\AtBeginDocument{\\\\let\\\\oldmaketitle\\\\maketitle\\\\renewcommand{\\\\maketitle}{\\\\oldmaketitle\\\\begin{center}\\\\large DOI: \\\\href{https://doi.org/10.5281/zenodo.15170908}{10.5281/zenodo.15170908}\\\\end{center}\\\\maketitlehookd}}",
+        "\\usepackage{appendix}", # RESTORED
+        "\\renewcommand{\\\\appendixname}{Appendix}", # RESTORED (Ensures "Appendix" is used)
     ]
     
     # Add each package as a separate header-includes
@@ -205,7 +206,7 @@ def render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_pat
         )
         logging.info(f"Successfully generated PDF: {output_pdf_abs_path}")
         
-        # Clean up temporary files
+        # Clean up temporary files - RESTORED appendix_marker_file cleanup
         try:
             os.unlink(appendix_marker_file)
         except Exception as e:
@@ -480,38 +481,38 @@ def prepare_appendix_files(appendix_files):
         first_heading_match = re.search(r'^# (.+?)$', content, re.MULTILINE)
         if first_heading_match:
             heading_text = first_heading_match.group(1)
+            original_heading_line = first_heading_match.group(0)
 
-            # Check if heading already contains properly formatted supplement designation (Number only)
-            appendix_pattern = rf'Supplement {number}:' # Pattern now only uses number
-            if re.search(appendix_pattern, heading_text) and not re.search(r'Supplement [A-Z] \d+:', heading_text):
-                logging.info(f"Heading in {filename} already has correct supplement designation: '{heading_text}'")
-            else:
-                # Extract existing title without any supplement/appendix designation (Letter+Number or Number only)
-                title_text = re.sub(r'^Supplement [A-Z] \d+:\s*', '', heading_text)
-                title_text = re.sub(r'^Supplement \d+:\s*', '', title_text) # Remove number-only prefix too
-                title_text = re.sub(r'^Supplement [A-Z]:\s*', '', title_text)
-                title_text = re.sub(r'^Supplement:\s*', '', title_text)
-                # Also remove old "Appendix" prefixes if present
-                title_text = re.sub(r'^Appendix [A-Z] \d+:\s*', '', title_text)
-                title_text = re.sub(r'^Appendix [A-Z]:\s*', '', title_text)
-                title_text = re.sub(r'^Appendix \d+:\s*', '', title_text)
-                title_text = re.sub(r'^Appendix:\s*', '', title_text)
+            # Extract existing title without any supplement/appendix designation
+            title_text = re.sub(r'^Supplement [A-Z] \d+:\s*', '', heading_text)
+            title_text = re.sub(r'^Supplement \d+:\s*', '', title_text)
+            title_text = re.sub(r'^Supplement [A-Z]:\s*', '', title_text)
+            title_text = re.sub(r'^Supplement:\s*', '', title_text)
+            title_text = re.sub(r'^Appendix [A-Z] \d+:\s*', '', title_text)
+            title_text = re.sub(r'^Appendix [A-Z]:\s*', '', title_text)
+            title_text = re.sub(r'^Appendix \d+:\s*', '', title_text)
+            title_text = re.sub(r'^Appendix:\s*', '', title_text)
+            title_text = title_text.strip()
 
-                # Create new heading with proper supplement designation (Number only)
-                new_heading = f"Supplement {number}: {title_text}"
-                modified_content = content.replace(first_heading_match.group(0), f"# {new_heading}")
+            # Ensure the heading is just the title, prefixed with #
+            new_heading_line = f"# {title_text}"
 
+            # Only modify if the heading line needs changing
+            if original_heading_line != new_heading_line:
+                modified_content = content.replace(original_heading_line, new_heading_line)
                 with open(appendix_file, 'w') as f:
                     f.write(modified_content)
-                logging.info(f"Updated heading in {filename}: '{heading_text}' → '{new_heading}'")
-        else:
-            # If no heading found, add one
-            new_heading = f"# Supplement {number}"
-            modified_content = f"{new_heading}\\n\\n{content}"
+                logging.info("Normalized heading in %s to: %s", filename, new_heading_line)
+            else:
+                 logging.info("Heading in %s already correctly formatted: %s", filename, new_heading_line)
 
-            with open(appendix_file, 'w') as f:
-                f.write(modified_content)
-            logging.warning(f"Added missing heading to {filename}: '{new_heading}'")
+        else:
+            # If no heading found, this is an issue - log a warning.
+            # Adding a generic heading might break structure.
+            logging.warning(f"No level 1 heading (#) found in appendix file: {filename}. Cannot ensure correct formatting.")
+            
+        # Note: Removed logic that previously *added* prefixes like "Appendix X:"
+        # The LaTeX \appendix command will handle the numbering and naming.
 
         # Remove any existing \\appendix commands etc. (code remains the same)
 

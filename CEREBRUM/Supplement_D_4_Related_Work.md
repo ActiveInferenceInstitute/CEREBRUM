@@ -1,10 +1,10 @@
-# Appendix D 4: Related Work - Detailed Analysis
+# Related Work
 
-This appendix provides a comprehensive analysis of the research traditions upon which CEREBRUM builds, situating the framework within the broader theoretical landscape and highlighting its novel contributions.
+This supplement provides a comprehensive analysis of the research traditions upon which CEREBRUM builds, situating the framework within the broader theoretical landscape and highlighting its novel contributions.
 
-## D.1 Cognitive Architectures
+## 4.1 Cognitive Architectures
 
-### D.1.1 Traditional Cognitive Architectures
+### 4.1.1 Traditional Cognitive Architectures
 
 Traditional cognitive architectures have served as comprehensive frameworks for modeling cognitive processes, providing structured approaches to implementing computational models of cognition:
 
@@ -28,7 +28,7 @@ Traditional cognitive architectures have served as comprehensive frameworks for 
 
 CEREBRUM differs from these traditional architectures by explicitly modeling the morphological transformations of computational entities as they move through different processing contexts. Rather than relying on fixed architectural components with predetermined functions, CEREBRUM enables flexible role assignments within model ecosystems through its case-based framework. This approach allows models to maintain their core identity while adapting their functional roles based on contextual requirements.
 
-### D.1.2 Active Inference Cognitive Architectures
+### 4.1.2 Active Inference Cognitive Architectures
 
 Recent developments in active inference have led to specialized cognitive architectures that emphasize predictive processing and free energy minimization:
 
@@ -52,11 +52,11 @@ Recent developments in active inference have led to specialized cognitive archit
 
 CEREBRUM extends these active inference approaches by applying free energy principles not just to individual model operations but to the transformations between different functional roles. By formalizing case transformations within a precision-weighted message passing framework, CEREBRUM provides a systematic approach to managing model interactions guided by active inference principles.
 
-## D.2 Category-Theoretic Approaches to Cognition
+## 4.2 Category-Theoretic Approaches to Cognition
 
 Category theory has emerged as a powerful mathematical framework for formalizing cognitive processes, offering tools for representing compositional and transformational aspects of cognition:
 
-### D.2.1 Categorical Compositional Cognition
+### 4.2.1 Categorical Compositional Cognition
 
 **Categorical Compositional Distributed Semantics** [(Coecke et al., 2010)](#references):
 - Uses monoidal categories to formalize compositional meaning in natural language
@@ -78,11 +78,11 @@ Category theory has emerged as a powerful mathematical framework for formalizing
 
 CEREBRUM builds upon these category-theoretic approaches by specifically applying categorical structures to case relationships and transformations. By formalizing case functors, natural transformations, and commutative diagrams for model interactions, CEREBRUM provides a rigorous mathematical foundation for representing and reasoning about model ecosystems.
 
-## D.3 Linguistic Approaches to Computation
+## 4.3 Linguistic Approaches to Computation
 
 The application of linguistic frameworks to computational systems has a rich history, with several approaches that inform CEREBRUM's linguistic foundations:
 
-### D.3.1 Case Grammar and Computational Linguistics
+### 4.3.1 Case Grammar and Computational Linguistics
 
 **Case Grammar in Linguistics** [(Fillmore, 1968)](#references):
 - Developed the theory of deep case roles in linguistic structures
@@ -104,7 +104,7 @@ The application of linguistic frameworks to computational systems has a rich his
 
 CEREBRUM repurposes linguistic case theory beyond natural language processing, using it as a structural framework for model relationships. This novel application enables the formalization of model interactions using the rich semantics of case relationships, creating a bridge between linguistic theory and computational model management.
 
-### D.3.2 Morphological Computing
+### 4.3.2 Morphological Computing
 
 **Computing with Words** [(Zadeh, 1996)](#references):
 - Develops computational systems that operate on linguistic terms
@@ -120,11 +120,11 @@ CEREBRUM repurposes linguistic case theory beyond natural language processing, u
 
 CEREBRUM extends these approaches by applying declensional semantics to model management, treating models as entities that can assume different morphological forms based on their functional roles. This perspective enables more flexible and expressive representations of model relationships within computational ecosystems.
 
-## D.4 Intelligence Production and Case Management
+## 4.4 Intelligence Production and Case Management
 
 Traditional approaches to intelligence production and case management provide important context for CEREBRUM's practical applications:
 
-### D.4.1 Intelligence Analysis Frameworks
+### 4.4.1 Intelligence Analysis Frameworks
 
 **Intelligence Cycle** [(Clark, 2019)](#references):
 - Describes the process of intelligence production from collection to dissemination
@@ -146,7 +146,7 @@ Traditional approaches to intelligence production and case management provide im
 
 CEREBRUM enhances these intelligence production frameworks by providing formal mathematical foundations for representing model relationships within intelligence workflows. By applying case semantics to model roles, CEREBRUM enables more structured and principled approaches to managing analytical processes.
 
-### D.4.2 Case Management Systems
+### 4.4.2 Case Management Systems
 
 **Legal Case Management** [(Reiling, 2010)](#references):
 - Implements structured workflows for legal case processing
@@ -168,11 +168,11 @@ CEREBRUM enhances these intelligence production frameworks by providing formal m
 
 CEREBRUM extends these case management approaches by providing a principled framework for managing model interactions within intelligence production workflows. The case-based representation of model roles enables more systematic coordination of analytical processes while maintaining formal mathematical foundations.
 
-## D.5 Emerging Approaches in Cognitive Modeling
+## 4.5 Emerging Approaches in Cognitive Modeling
 
 Recent developments in cognitive modeling have explored innovative approaches that align with aspects of CEREBRUM:
 
-### D.5.1 Agentic Intelligence Architectures
+### 4.5.1 Agentic Intelligence Architectures
 
 **Multi-Agent Cognitive Architectures** [(Shafti et al., 2020)](#references):
 - Distributes cognitive processes across specialized agents
@@ -188,7 +188,7 @@ Recent developments in cognitive modeling have explored innovative approaches th
 
 CEREBRUM enhances these approaches by providing formal mechanisms for role transitions and coordination within agent ecosystems. The case-based framework enables more principled representations of functional roles and transformations within multi-agent systems.
 
-### D.5.2 Compositional Cognitive Systems
+### 4.5.2 Compositional Cognitive Systems
 
 **Neural-Symbolic Integration** [(Garcez et al., 2019)](#references):
 - Combines neural networks and symbolic reasoning
@@ -204,7 +204,7 @@ CEREBRUM enhances these approaches by providing formal mechanisms for role trans
 
 CEREBRUM extends these compositional approaches by applying categorical composition to model relationships, enabling more systematic representations of how models can be combined while preserving their case properties. The monoidal structure of the case model category provides formal foundations for compositional operations within model ecosystems.
 
-## D.6 Unique Contributions of CEREBRUM
+## 4.6 Unique Contributions of CEREBRUM
 
 Based on this comprehensive analysis of related work, CEREBRUM makes several unique contributions:
 
@@ -220,7 +220,7 @@ Based on this comprehensive analysis of related work, CEREBRUM makes several uni
 
 These contributions position CEREBRUM as a novel synthesis of linguistic theory, category mathematics, active inference, and intelligence production, creating a unified framework for understanding and managing complex model ecosystems.
 
-## D.7 Future Integration Opportunities
+## 4.7 Future Integration Opportunities
 
 The analysis of related work suggests several opportunities for future integration with other research traditions:
 
@@ -236,7 +236,7 @@ The analysis of related work suggests several opportunities for future integrati
 
 These integration opportunities highlight the potential for CEREBRUM to continue evolving through cross-disciplinary collaboration and theoretical extension.
 
-## <a name="references"></a>D.8 References
+## <a name="references"></a>4.8 References
 
 Anderson, J. R., Bothell, D., Byrne, M. D., Douglass, S., Lebiere, C., & Qin, Y. (2004). An integrated theory of the mind. *Psychological Review*, 111(4), 1036-1060.
 
