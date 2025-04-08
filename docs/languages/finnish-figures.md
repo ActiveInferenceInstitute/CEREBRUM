@@ -8,38 +8,31 @@ This document presents a series of Mermaid diagrams illustrating the connections
 ```mermaid
 mindmap
   root((Finnish<br>Concepts))
-    (Luonto & Metsä):::nature
+    (Luonto & Metsä)
       (Nature)
       (Forest)
       (Ecological systems)
       (Biodiversity)
-    (Paikka):::place
+    (Paikka)
       (Place)
       (Locative Cases)
       (Spatial Awareness)
-    (Talkoot):::community
+    (Talkoot)
       (Communal work)
       (Cooperation)
       (Neighborly help)
-    (Sisu):::resilience
+    (Sisu)
       (Determination)
       (Resilience)
       (Anti-fragility)
-    (Käsityö):::craft
+    (Käsityö)
       (Craft)
       (Design)
       (Durability)
-    (Verkosto):::network
+    (Verkosto)
       (Network)
       (Connections)
       (Relationships)
-
-classDef nature fill:#7CB9E8,stroke:#0078D7,color:white
-classDef place fill:#8F9779,stroke:#4F5746,color:white
-classDef community fill:#D0A2F7,stroke:#9969C7,color:white 
-classDef resilience fill:#F78FA7,stroke:#EB5286,color:white
-classDef craft fill:#FFBF00,stroke:#B27200,color:white
-classDef network fill:#5FD068,stroke:#2D9344,color:white
 ```
 
 ## The Essence of Luonto (Nature)
@@ -198,22 +191,41 @@ flowchart TB
 ## Finnish Concepts to Application Domains
 
 ```mermaid
-sankey-beta
-    Luonto,Spatial Web,2
-    Luonto,Food Forests,3
-    Paikka,Spatial Web,4
-    Paikka,Web3,2
-    Paikka,Interface Design,3
-    Talkoot,Web3,3
-    Talkoot,Network Weaving,4
-    Sisu,Web3,2
-    Sisu,Participatory Tech,3
-    Käsityö,Participatory Tech,4
-    Reuna,Interface Design,3
-    Reuna,Food Forests,2
-    Verkosto,Network Weaving,5
-    Verkosto,Web3,2
-    Keräily,Food Forests,4
+flowchart LR
+    %% Finnish concepts
+    L[Luonto]
+    P[Paikka]
+    T[Talkoot]
+    S[Sisu]
+    K[Käsityö]
+    R[Reuna]
+    V[Verkosto]
+    KE[Keräily]
+    
+    %% Application domains
+    SW[Spatial Web]
+    FF[Food Forests]
+    W3[Web3]
+    ID[Interface Design]
+    NW[Network Weaving]
+    PT[Participatory Tech]
+    
+    %% Connections
+    L --> SW
+    L --> FF
+    P --> SW
+    P --> W3
+    P --> ID
+    T --> W3
+    T --> NW
+    S --> W3
+    S --> PT
+    K --> PT
+    R --> ID
+    R --> FF
+    V --> NW
+    V --> W3
+    KE --> FF
 ```
 
 ## Finnish-CEREBRUM Case Resonance
@@ -285,23 +297,30 @@ stateDiagram-v2
 
 ```mermaid
 gitGraph
+    commit id: "Initial Setup"
+    branch main
+    checkout main
     commit id: "Initial Model"
     branch nominative
+    checkout nominative
     commit id: "Active Prediction"
     commit id: "Control Signal"
     checkout main
     merge nominative
     branch accusative
+    checkout accusative
     commit id: "Receive Updates"
     commit id: "Parameter Adjustment"
     checkout main
     merge accusative
     branch dative
+    checkout dative
     commit id: "Data Reception"
     commit id: "Input Processing"
     checkout main
     merge dative
     branch genitive
+    checkout genitive
     commit id: "Output Generation"
     commit id: "Product Delivery"
     checkout main
@@ -368,27 +387,22 @@ graph LR
 ```mermaid
 mindmap
     root((Ecological<br>Models))
-        (Biodiversity):::bio
+        (Biodiversity)
             (Model Variety)
             (Multiple Approaches)
             (Diverse Algorithms)
-        (Cycles):::cycle
+        (Cycles)
             (Iterative Processing)
             (Feedback Loops)
             (Seasonal Variations)
-        (Adaptation):::adapt
+        (Adaptation)
             (Dynamic Parameters)
             (Environmental Response)
             (Evolution Over Time)
-        (Balance):::balance
+        (Balance)
             (Resource Allocation)
             (Competing Priorities)
             (Sustainable Operation)
-
-    classDef bio fill:#7CB9E8,stroke:#0078D7,color:white
-    classDef cycle fill:#53A3DA,stroke:#0078D7,color:white
-    classDef adapt fill:#3D8DD1,stroke:#0078D7,color:white
-    classDef balance fill:#1666BA,stroke:#0078D7,color:white
 ```
 
 ## Finnish-Inspired Interface Ecology
@@ -1412,35 +1426,30 @@ graph TB
 ```mermaid
 mindmap
     root((Luontosuhde<br>Nature Relationship))
-        (Jokamiehenoikeus):::forest
+        (Jokamiehenoikeus)
             (Freedom to Roam)
             (Universal Access)
             (Responsible Use)
-        (Luonnonsuojelu):::forest
+        (Luonnonsuojelu)
             (Conservation)
             (Biodiversity Preservation)
             (Ecological Awareness)
-        (Metsäsuhde):::forest
+        (Metsäsuhde)
             (Forest Relationship)
             (Cultural Heritage)
             (Resource Management)
-        (Vesistöt):::water
+        (Vesistöt)
             (Lakes/Järvet)
             (Rivers/Joet)
             (Coastal Areas/Rannikkoalueet)
-        (Suot):::peat
+        (Suot)
             (Peatlands)
             (Carbon Sinks)
             (Ecosystem Services)
-        (Vuodenajat):::cycle
+        (Vuodenajat)
             (Seasonal Cycles)
             (Adaptation Patterns)
             (Temporal Knowledge)
-
-    classDef forest fill:#4F7942,stroke:#2E4725,color:white
-    classDef water fill:#1A75FF,stroke:#0047B3,color:white
-    classDef peat fill:#8B4513,stroke:#5E2F0D,color:white
-    classDef cycle fill:#FFB347,stroke:#CC7A00,color:black
 ```
 
 ## CEREBRUM Linguistic Cases and Finnish Ecological Knowledge
@@ -1827,31 +1836,26 @@ stateDiagram-v2
 ```mermaid
 mindmap
     root((Ekosysteemipalvelut<br>Ecosystem Services))
-        (Tuotantopalvelut):::supply
+        (Tuotantopalvelut)
             (Ruoka/Food)
             (Puutavara/Timber)
             (Puhdas vesi/Clean water)
             (Geenivarasto/Genetic resources)
-        (Säätelypalvelut):::regulation
+        (Säätelypalvelut)
             (Ilmaston säätely/Climate regulation)
             (Tulvien hallinta/Flood control)
             (Veden puhdistus/Water purification)
             (Pölytys/Pollination)
-        (Kulttuuripalvelut):::cultural
+        (Kulttuuripalvelut)
             (Virkistys/Recreation)
             (Esteettiset elämykset/Aesthetic experiences)
             (Henkiset arvot/Spiritual values)
             (Koulutus/Education)
-        (Tukipalvelut):::support
+        (Tukipalvelut)
             (Ravinteiden kierto/Nutrient cycling)
             (Maaperän muodostus/Soil formation)
             (Yhteyttäminen/Photosynthesis)
             (Elinympäristöt/Habitats)
-
-    classDef supply fill:#8BC34A,stroke:#558B2F,color:white
-    classDef regulation fill:#42A5F5,stroke:#1976D2,color:white
-    classDef cultural fill:#AB47BC,stroke:#7B1FA2,color:white
-    classDef support fill:#FF7043,stroke:#E64A19,color:white
 ```
 
 ## Finnish Ekolingvistinen CEREBRUM: Ecological Linguistics & Case Modeling
