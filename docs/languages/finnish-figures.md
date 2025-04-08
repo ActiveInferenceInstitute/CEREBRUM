@@ -1353,8 +1353,8 @@ graph TD
     subgraph "Luonto Nature Principles"
         L1[Biodiversity/Monimuotoisuus]
         L2[Ecological Cycles/Vuodenkierto]
-        L3[Systems Thinking]
-        L4[Natural Balance]
+        L3[Systems Thinking/Systeemiajattelu]
+        L4[Natural Balance/Luonnontasapaino]
     end
     
     subgraph "CEREBRUM Ecological Implementation"
@@ -1375,4 +1375,852 @@ graph TD
         E3 --> C3[Cross-Case Relationships]
         E4 --> C4[Case-Balance Mechanisms]
     end
+```
+
+## Ecological Transitions: Finnish Ecotones and CEREBRUM Boundaries
+
+```mermaid
+graph TB
+    subgraph "Finnish Ecotone Concepts"
+        E1[Vaihettumisvyöhyke<br>Transition Zone]:::ecotone
+        E2[Reunavyöhyke<br>Edge Zone]:::ecotone
+        E3[Metsänreuna<br>Forest Edge]:::ecotone
+        E4[Rantavyöhyke<br>Shoreline Zone]:::ecotone
+        E5[Kosteikko<br>Wetland]:::ecotone
+    end
+
+    subgraph "CEREBRUM Boundary Systems"
+        B1[Markov Blanket]:::boundary
+        B2[Case Interfaces]:::boundary
+        B3[Morphism Boundaries]:::boundary
+        B4[Precision Barriers]:::boundary
+        B5[Information Gradients]:::boundary
+    end
+
+    E1 --> B1
+    E2 --> B2
+    E3 --> B3
+    E4 --> B4
+    E5 --> B5
+
+    classDef ecotone fill:#8FAD88,stroke:#4F6746,color:white
+    classDef boundary fill:#9590A8,stroke:#5F5676,color:white
+```
+
+## Suomalainen Luontosuhde: Finnish Nature Relationship and Active Inference
+
+```mermaid
+mindmap
+    root((Luontosuhde<br>Nature Relationship))
+        (Jokamiehenoikeus):::forest
+            (Freedom to Roam)
+            (Universal Access)
+            (Responsible Use)
+        (Luonnonsuojelu):::forest
+            (Conservation)
+            (Biodiversity Preservation)
+            (Ecological Awareness)
+        (Metsäsuhde):::forest
+            (Forest Relationship)
+            (Cultural Heritage)
+            (Resource Management)
+        (Vesistöt):::water
+            (Lakes/Järvet)
+            (Rivers/Joet)
+            (Coastal Areas/Rannikkoalueet)
+        (Suot):::peat
+            (Peatlands)
+            (Carbon Sinks)
+            (Ecosystem Services)
+        (Vuodenajat):::cycle
+            (Seasonal Cycles)
+            (Adaptation Patterns)
+            (Temporal Knowledge)
+
+    classDef forest fill:#4F7942,stroke:#2E4725,color:white
+    classDef water fill:#1A75FF,stroke:#0047B3,color:white
+    classDef peat fill:#8B4513,stroke:#5E2F0D,color:white
+    classDef cycle fill:#FFB347,stroke:#CC7A00,color:black
+```
+
+## CEREBRUM Linguistic Cases and Finnish Ecological Knowledge
+
+```mermaid
+flowchart TD
+    subgraph "Finnish Ecological Knowledge Types"
+        F1[Perinnetieto<br>Traditional Knowledge]:::finn
+        F2[Paikallinen Tieto<br>Local Knowledge]:::finn
+        F3[Kokemusperäinen Tieto<br>Experiential Knowledge]:::finn
+        F4[Kansanekologia<br>Folk Ecology]:::finn
+        F5[Luonnontieto<br>Nature Knowledge]:::finn
+    end
+
+    subgraph "CEREBRUM Case Structure"
+        C1[Nominative Case]:::cerebrum
+        C2[Accusative Case]:::cerebrum
+        C3[Genitive Case]:::cerebrum
+        C4[Dative Case]:::cerebrum
+        C5[Instrumental Case]:::cerebrum
+        C6[Locative Case]:::cerebrum
+        C7[Ablative Case]:::cerebrum
+        C8[Vocative Case]:::cerebrum
+    end
+
+    F1 --> C1
+    F2 --> C6
+    F3 --> C5
+    F4 --> C3
+    F5 --> C7
+
+    classDef finn fill:#0073CF,stroke:#004A86,color:white
+    classDef cerebrum fill:#D42A2E,stroke:#8C1D1F,color:white
+```
+
+## Metsäekosysteemi: Finnish Forest Ecosystem as Model Architecture
+
+```mermaid
+graph TD
+    subgraph "Finnish Forest Layers"
+        L1[Latvuskerros<br>Canopy Layer]:::forest1
+        L2[Alikasvos<br>Understory]:::forest2
+        L3[Pensaskerros<br>Shrub Layer]:::forest3
+        L4[Kenttäkerros<br>Field Layer]:::forest4
+        L5[Pohjakerros<br>Ground Layer]:::forest5
+        L6[Maaperä<br>Soil]:::forest6
+    end
+
+    subgraph "CEREBRUM Architecture"
+        M1[Interface Models]:::model1
+        M2[Integration Models]:::model2
+        M3[Processing Models]:::model3
+        M4[Data Models]:::model4
+        M5[Utility Models]:::model5
+        M6[Infrastructure]:::model6
+    end
+
+    L1 --- M1
+    L2 --- M2
+    L3 --- M3
+    L4 --- M4
+    L5 --- M5
+    L6 --- M6
+
+    classDef forest1 fill:#004D00,stroke:#002800,color:white
+    classDef forest2 fill:#006600,stroke:#003300,color:white
+    classDef forest3 fill:#008000,stroke:#004000,color:white
+    classDef forest4 fill:#38761D,stroke:#274E13,color:white
+    classDef forest5 fill:#6AA84F,stroke:#38761D,color:white
+    classDef forest6 fill:#8B4513,stroke:#5E2F0D,color:white
+
+    classDef model1 fill:#4361EE,stroke:#2B3EAD,color:white
+    classDef model2 fill:#4895EF,stroke:#2F6EB7,color:white
+    classDef model3 fill:#4CC9F0,stroke:#33A1C5,color:white
+    classDef model4 fill:#56CFE1,stroke:#3CA3B1,color:white
+    classDef model5 fill:#72EFDD,stroke:#4DCDB8,color:white
+    classDef model6 fill:#80FFDB,stroke:#57D9B7,color:white
+```
+
+## Finnish Ecosystem Types and CEREBRUM Model Categories
+
+```mermaid
+pie
+    title "Finnish Ecosystem Diversity and Model Types"
+    "Metsät (Forests)" : 35
+    "Suot (Peatlands)" : 20
+    "Järvet (Lakes)" : 15
+    "Tunturit (Fells)" : 10
+    "Saaristo (Archipelago)" : 10
+    "Maatalousmaisema (Agricultural Landscape)" : 10
+```
+
+## Suomalainen Ekotoni: Finnish Ecotones and Boundary Phenomena
+
+```mermaid
+quadrantChart
+    title Finnish Ecotones and CEREBRUM Boundary Systems
+    x-axis Low Complexity --> High Complexity
+    y-axis Low Biodiversity --> High Biodiversity
+    quadrant-1 Simple Rich Transitions
+    quadrant-2 Complex Biodiverse Systems
+    quadrant-3 Simple Homogeneous Areas
+    quadrant-4 Complex Limited Diversity
+    "Metsänreuna (Forest Edge)": [0.7, 0.8]
+    "Rantavyöhyke (Shoreline)": [0.8, 0.9]
+    "Suo-metsä Vaihettumisvyöhyke (Peatland-Forest Transition)": [0.75, 0.85]
+    "Tunturikoivikko (Mountain Birch Zone)": [0.6, 0.7]
+    "CEREBRUM Markov Blanket": [0.85, 0.65]
+    "CEREBRUM Case Transformations": [0.9, 0.75]
+```
+
+## Aktiivinen Päättely: Finnish Active Inference Implementation
+
+```mermaid
+sequenceDiagram
+    participant E as Ennuste (Prediction)
+    participant H as Havainto (Observation)
+    participant V as Virhe (Error)
+    participant T as Tarkkuus (Precision)
+    participant P as Päivitys (Update)
+    
+    Note over E,P: Suomalainen Aktiivinen Päättely (Finnish Active Inference)
+    E->>H: Generoi ennuste (Generate prediction)
+    H->>V: Vertaa havaintoon (Compare to observation)
+    V->>T: Painota tarkkuudella (Weight by precision)
+    T->>P: Päivitä parametrit (Update parameters)
+    P->>E: Päivitä malli (Update model)
+```
+
+## Kiertotalous: Finnish Circular Economy as Model Workflow
+
+```mermaid
+graph LR
+    subgraph "Kiertotalous (Circular Economy)"
+        K1[Suunnittelu<br>Design]:::circular
+        K2[Tuotanto<br>Production]:::circular
+        K3[Käyttö<br>Usage]:::circular
+        K4[Uudelleenkäyttö<br>Reuse]:::circular
+        K5[Kierrätys<br>Recycling]:::circular
+        K6[Uudistaminen<br>Regeneration]:::circular
+    end
+
+    K1 --> K2 --> K3 --> K4 --> K5 --> K6 --> K1
+
+    subgraph "CEREBRUM Model Lifecycle"
+        C1[Design]:::cerebrum
+        C2[Implementation]:::cerebrum
+        C3[Deployment]:::cerebrum
+        C4[Redeployment]:::cerebrum
+        C5[Transformation]:::cerebrum
+        C6[Evolution]:::cerebrum
+    end
+
+    C1 --> C2 --> C3 --> C4 --> C5 --> C6 --> C1
+
+    K1 -.-> C1
+    K2 -.-> C2
+    K3 -.-> C3
+    K4 -.-> C4
+    K5 -.-> C5
+    K6 -.-> C6
+
+    classDef circular fill:#7CB342,stroke:#558B2F,color:white
+    classDef cerebrum fill:#5C6BC0,stroke:#3949AB,color:white
+```
+
+## Finnish Ecological Succession and Model Evolution
+
+```mermaid
+timeline
+    title Sukkessio (Ecological Succession) as Model Evolution
+    section Pioneeriyhteisö (Pioneer Community)
+        Initialization : Model scaffolding
+        Basic structures : Simple parameters
+        Foundation layers : Core functions
+    section Väliyhteisö (Intermediate Community)
+        Complexity growth : Expanded capabilities
+        Interaction patterns : Inter-model relations
+        Resource optimization : Efficiency improvements
+    section Kliimaksiyhteisö (Climax Community)
+        Stability : Optimized performance
+        Self-regulation : Autonomous adaptation
+        Homeostasis : Balance maintenance
+```
+
+## Seasonal Free Energy Minimization
+
+```mermaid
+xychart-beta
+    title "Vuodenaikojen Vapaaenergian Minimointi (Seasonal Free Energy Minimization)"
+    x-axis "Kevät (Spring) --> Kesä (Summer) --> Syksy (Autumn) --> Talvi (Winter)" 0 --> 12
+    y-axis "Free Energy (Vapaaenergia)" 0 --> 100
+    line [80, 40, 60, 90]
+    line [70, 30, 50, 85]
+```
+
+## Finnish Ecotone-Based Adaptive Active Inference
+
+```mermaid
+graph TB
+    subgraph "Finnish Ecotone Types"
+        E1[Metsä-suo<br>Forest-Peatland]:::ecotone1
+        E2[Metsä-pelto<br>Forest-Field]:::ecotone2
+        E3[Järvi-maa<br>Lake-Land]:::ecotone3
+        E4[Rannikko<br>Coastal Zone]:::ecotone4
+        E5[Tunturi-metsä<br>Alpine-Forest]:::ecotone5
+    end
+
+    subgraph "Ecotone Properties"
+        P1[Lajirunsaus<br>Species Richness]:::property
+        P2[Ekologinen Häiriö<br>Ecological Disturbance]:::property
+        P3[Rajat ja Vaihdot<br>Boundaries & Exchanges]:::property
+        P4[Sopeutumismallit<br>Adaptation Patterns]:::property
+    end
+
+    subgraph "CEREBRUM Case Transitions"
+        C1[Nominative-Accusative<br>Agent-Object]:::case
+        C2[Accusative-Genitive<br>Object-Source]:::case
+        C3[Genitive-Dative<br>Source-Recipient]:::case
+        C4[Dative-Instrumental<br>Recipient-Tool]:::case
+        C5[Instrumental-Locative<br>Tool-Context]:::case
+    end
+
+    E1 --> P1 & P3
+    E2 --> P2 & P4
+    E3 --> P1 & P4
+    E4 --> P2 & P3
+    E5 --> P3 & P4
+
+    P1 --> C1
+    P2 --> C2
+    P3 --> C3 & C5
+    P4 --> C4
+
+    classDef ecotone1 fill:#8B4513,stroke:#5E2F0D,color:white
+    classDef ecotone2 fill:#556B2F,stroke:#3A4D21,color:white
+    classDef ecotone3 fill:#1E90FF,stroke:#0068D6,color:white
+    classDef ecotone4 fill:#48D1CC,stroke:#38A19D,color:white
+    classDef ecotone5 fill:#9932CC,stroke:#6A1B9A,color:white
+    classDef property fill:#FF7F50,stroke:#E63F00,color:white
+    classDef case fill:#6A5ACD,stroke:#483D8B,color:white
+```
+
+## Markov Blanket and Finnish Ecotone Parallel
+
+```mermaid
+erDiagram
+    MARKOV-BLANKET ||--|| ECOTONE : models
+    
+    MARKOV-BLANKET {
+        string external "Environmental states"
+        string boundary "Interface conditions"
+        string internal "System states"
+    }
+    
+    ECOTONE {
+        string ekosysteemi1 "First ecosystem"
+        string vaihettumisvyohyke "Transition zone"
+        string ekosysteemi2 "Second ecosystem"
+    }
+    
+    EXTERNAL-STATES ||--|| ECOSYSTEM1 : corresponds-to
+    EXTERNAL-STATES {
+        string environmental_conditions "External factors"
+        string outside_influences "Neighboring effects"
+    }
+    
+    ECOSYSTEM1 {
+        string metsatyyppi "Forest type"
+        string suotyyppi "Wetland type"
+        string vesistotyyppi "Water system type"
+    }
+    
+    BOUNDARY-STATES ||--|| TRANSITION-ZONE : corresponds-to
+    BOUNDARY-STATES {
+        string sensors "Information reception"
+        string actions "Information transmission"
+        string interface "Information exchange"
+    }
+    
+    TRANSITION-ZONE {
+        string lajistomuutos "Species change"
+        string fysikaaliset_gradientit "Physical gradients"
+        string vaihtovyohyke "Exchange zone"
+    }
+    
+    INTERNAL-STATES ||--|| ECOSYSTEM2 : corresponds-to
+    INTERNAL-STATES {
+        string beliefs "Internal model"
+        string inferences "Derived conclusions"
+        string expectations "Predicted states"
+    }
+    
+    ECOSYSTEM2 {
+        string mikroilmasto "Microclimate"
+        string lajisto "Species composition"
+        string sopeutumismalli "Adaptation model"
+    }
+```
+
+## Case Transformations in Finnish Ecological Knowledge Systems
+
+```mermaid
+stateDiagram-v2
+    [*] --> NominativeKnowledge
+    
+    state NominativeKnowledge {
+        [*] --> Kansanekologia
+        Kansanekologia --> Perinnetieto
+        Perinnetieto --> [*]
+        
+        note right of Kansanekologia
+            Active knowledge systems
+            driving understanding
+            "Folk ecology as agent"
+        end note
+    }
+    
+    state AccusativeKnowledge {
+        [*] --> Luonnonsuojelu
+        Luonnonsuojelu --> Ekologinenennallistaminen
+        Ekologinenennallistaminen --> [*]
+        
+        note right of Luonnonsuojelu
+            Knowledge systems receiving action
+            "Conservation as target"
+        end note
+    }
+    
+    state GenitiveKnowledge {
+        [*] --> Luonnonvaratietous
+        Luonnonvaratietous --> Kestävälläkäyttö
+        Kestävälläkäyttö --> [*]
+        
+        note right of Luonnonvaratietous
+            Knowledge systems as source
+            "Resource knowledge as generator"
+        end note
+    }
+    
+    state DativeKnowledge {
+        [*] --> Tiedonvälitys
+        Tiedonvälitys --> Koulutus
+        Koulutus --> [*]
+        
+        note right of Tiedonvälitys
+            Knowledge systems receiving information
+            "Knowledge transfer as recipient"
+        end note
+    }
+    
+    state InstrumentalKnowledge {
+        [*] --> Metsänhoito
+        Metsänhoito --> Maatalousosaaminen
+        Maatalousosaaminen --> [*]
+        
+        note right of Metsänhoito
+            Knowledge systems as tools
+            "Forest management as method"
+        end note
+    }
+    
+    state LocativeKnowledge {
+        [*] --> Paikallisetelinkeinot
+        Paikallisetelinkeinot --> Alueellisetkulttuurit
+        Alueellisetkulttuurit --> [*]
+        
+        note right of Paikallisetelinkeinot
+            Knowledge systems as contexts
+            "Local livelihoods as environment"
+        end note
+    }
+    
+    NominativeKnowledge --> AccusativeKnowledge: Becomes object
+    AccusativeKnowledge --> GenitiveKnowledge: Becomes source
+    GenitiveKnowledge --> DativeKnowledge: Becomes recipient
+    DativeKnowledge --> InstrumentalKnowledge: Becomes tool
+    InstrumentalKnowledge --> LocativeKnowledge: Becomes context
+    LocativeKnowledge --> NominativeKnowledge: Becomes active agent
+```
+
+## Finnish Ecosystem Services and CEREBRUM Functional Cases
+
+```mermaid
+mindmap
+    root((Ekosysteemipalvelut<br>Ecosystem Services))
+        (Tuotantopalvelut):::supply
+            (Ruoka/Food)
+            (Puutavara/Timber)
+            (Puhdas vesi/Clean water)
+            (Geenivarasto/Genetic resources)
+        (Säätelypalvelut):::regulation
+            (Ilmaston säätely/Climate regulation)
+            (Tulvien hallinta/Flood control)
+            (Veden puhdistus/Water purification)
+            (Pölytys/Pollination)
+        (Kulttuuripalvelut):::cultural
+            (Virkistys/Recreation)
+            (Esteettiset elämykset/Aesthetic experiences)
+            (Henkiset arvot/Spiritual values)
+            (Koulutus/Education)
+        (Tukipalvelut):::support
+            (Ravinteiden kierto/Nutrient cycling)
+            (Maaperän muodostus/Soil formation)
+            (Yhteyttäminen/Photosynthesis)
+            (Elinympäristöt/Habitats)
+
+    classDef supply fill:#8BC34A,stroke:#558B2F,color:white
+    classDef regulation fill:#42A5F5,stroke:#1976D2,color:white
+    classDef cultural fill:#AB47BC,stroke:#7B1FA2,color:white
+    classDef support fill:#FF7043,stroke:#E64A19,color:white
+```
+
+## Finnish Ekolingvistinen CEREBRUM: Ecological Linguistics & Case Modeling
+
+```mermaid
+flowchart TB
+    subgraph "Ekologiset Konseptit (Ecological Concepts)"
+        E1[Biodiversiteetti<br>Biodiversity]:::eco
+        E2[Kestävyys<br>Sustainability]:::eco
+        E3[Kiertotalous<br>Circular Economy]:::eco
+        E4[Resilienssi<br>Resilience]:::eco
+        E5[Ekotoni<br>Ecotone]:::eco
+    end
+
+    subgraph "Kielelliset Sijamuodot (Linguistic Cases)"
+        L1[Nominatiivi<br>Nominative]:::lang
+        L2[Genetiivi<br>Genitive]:::lang
+        L3[Partitiivi<br>Partitive]:::lang
+        L4[Inessiivi<br>Inessive]:::lang
+        L5[Elatiivi<br>Elative]:::lang
+        L6[Illatiivi<br>Illative]:::lang
+        L7[Adessiivi<br>Adessive]:::lang
+        L8[Ablatiivi<br>Ablative]:::lang
+        L9[Allatiivi<br>Allative]:::lang
+    end
+
+    subgraph "CEREBRUM Mallien Sijamuodot (CEREBRUM Model Cases)"
+        C1[Malli toimijana<br>Model as agent]:::cereb
+        C2[Malli kohteena<br>Model as target]:::cereb
+        C3[Malli lähteenä<br>Model as source]:::cereb
+        C4[Malli vastaanottajana<br>Model as recipient]:::cereb
+        C5[Malli työkaluna<br>Model as tool]:::cereb
+        C6[Malli kontekstina<br>Model as context]:::cereb
+        C7[Malli alkuperänä<br>Model as origin]:::cereb
+    end
+
+    E1 --> L1 & L3
+    E2 --> L2 & L9
+    E3 --> L4 & L5 & L6
+    E4 --> L7 & L8
+    E5 --> L4 & L7
+
+    L1 --> C1
+    L2 --> C3
+    L3 --> C2
+    L4 & L7 --> C6
+    L5 & L8 --> C7
+    L6 & L9 --> C4
+    L7 --> C5
+
+    classDef eco fill:#4CAF50,stroke:#388E3C,color:white
+    classDef lang fill:#FFC107,stroke:#FFA000,color:black
+    classDef cereb fill:#9C27B0,stroke:#7B1FA2,color:white
+```
+
+## Finnish Suomuurain Model: Cloudberry Life Cycle as Active Inference
+
+```mermaid
+graph TD
+    classDef seed fill:#8B4513,stroke:#5E2F0D,color:white
+    classDef growth fill:#6B8E23,stroke:#556B2F,color:white
+    classDef flower fill:#FFFFE0,stroke:#FFFF00,color:black
+    classDef fruit fill:#FF7F50,stroke:#FF6347,color:white
+    classDef dispersal fill:#9370DB,stroke:#6A5ACD,color:white
+    classDef inference fill:#4682B4,stroke:#1E5599,color:white
+    
+    subgraph "Suomuuraimen Elinkaari (Cloudberry Life Cycle)"
+        S1[Siemen<br>Seed]:::seed
+        S2[Kasvu suoympäristössä<br>Growth in bog]:::growth
+        S3[Kukinta<br>Flowering]:::flower
+        S4[Marjat<br>Berries]:::fruit
+        S5[Leviäminen<br>Dispersal]:::dispersal
+    end
+    
+    subgraph "Aktiivinen Päättely (Active Inference)"
+        AI1[Mallintaminen<br>Modeling]:::inference
+        AI2[Havainnointi<br>Perception]:::inference
+        AI3[Ennustaminen<br>Prediction]:::inference
+        AI4[Toiminta<br>Action]:::inference
+        AI5[Sopeutuminen<br>Adaptation]:::inference
+    end
+    
+    S1 --> S2 --> S3 --> S4 --> S5 --> S1
+    AI1 --> AI2 --> AI3 --> AI4 --> AI5 --> AI1
+    
+    S1 -.-> AI1
+    S2 -.-> AI2
+    S3 -.-> AI3
+    S4 -.-> AI4
+    S5 -.-> AI5
+```
+
+## Deep Ecotone Analysis: Transitional Free Energy Minimization
+
+```mermaid
+quadrantChart
+    title Ecotones as Free Energy Minimization Systems
+    x-axis Low Information Exchange --> High Information Exchange
+    y-axis Low Adaptive Capacity --> High Adaptive Capacity
+    quadrant-1 Static Rich Information
+    quadrant-2 Dynamic Complex Adaptation
+    quadrant-3 Simple Stable Systems
+    quadrant-4 Complex Fixed Systems
+    "Metsä-pelto rajapinta (Forest-Field Interface)": [0.6, 0.5]
+    "Suon ja kangasmetsän vaihettumisvyöhyke (Bog-Forest Transition)": [0.7, 0.7]
+    "Järven rantavyöhyke (Lake Shoreline)": [0.8, 0.9]
+    "Tunturikoivikko (Mountain Birch Belt)": [0.5, 0.8]
+    "Markov blanket in Active Inference": [0.9, 0.6]
+    "CEREBRUM Case Transformation": [0.7, 0.8]
+```
+
+## Forest-Bog Ecotone and Case Structure Parallels
+
+```mermaid
+graph TB
+    subgraph "Suo-Metsä Ekotoni (Bog-Forest Ecotone)"
+        direction LR
+        E1[Räme<br>Pine Bog]:::bog
+        E2[Korpirämeet<br>Spruce-Pine Swamp]:::trans
+        E3[Korpi<br>Spruce Mire]:::trans
+        E4[Kangasmetsä<br>Heath Forest]:::forest
+    end
+    
+    subgraph "CEREBRUM Sijarakenne (Case Structure)"
+        direction LR
+        C1[Ablatiivinen Malli<br>Ablative Model]:::ablative
+        C2[Lokatiivinen Malli<br>Locative Model]:::locative
+        C3[Instrumentaalinen Malli<br>Instrumental Model]:::instrumental
+        C4[Nominatiivinen Malli<br>Nominative Model]:::nominative
+    end
+    
+    E1 --- E2 --- E3 --- E4
+    C1 --- C2 --- C3 --- C4
+    
+    E1 -.-> C1
+    E2 -.-> C2
+    E3 -.-> C3
+    E4 -.-> C4
+    
+    classDef bog fill:#6B4226,stroke:#472B19,color:white
+    classDef trans fill:#8E7545,stroke:#5E4D2E,color:white
+    classDef forest fill:#228B22,stroke:#145214,color:white
+    
+    classDef ablative fill:#FF6B6B,stroke:#CC5555,color:white
+    classDef locative fill:#4ECDC4,stroke:#3BA39B,color:white
+    classDef instrumental fill:#FFD166,stroke:#C9A652,color:black
+    classDef nominative fill:#06D6A0,stroke:#04A57B,color:white
+```
+
+## Finnish Seasonal Adaptation as Active Inference Cycle
+
+```mermaid
+journey
+    title Finnish Seasonal Adaptation and Free Energy Minimization
+    section Kevät (Spring)
+      Prediction Updates: 5: System, Environment
+      Resource Allocation: 4: System, Energy
+      Growth Parameters: 3: System, Model
+    section Kesä (Summer)
+      Maximum Activity: 5: System, Production
+      Information Gathering: 5: System, Learning
+      Model Refinement: 4: System, Adaptation
+    section Syksy (Autumn)
+      Resource Conservation: 5: System, Planning
+      Parameter Adjustment: 4: System, Optimization
+      Preparation Strategies: 5: System, Forecasting
+    section Talvi (Winter)
+      Minimal Processing: 2: System, Conservation
+      Core Function Maintenance: 3: System, Stability
+      Long-term Planning: 4: System, Evolution
 ``` 
+
+## Comprehensive Finnish-CEREBRUM Integration Matrix
+
+```mermaid
+graph TB
+    %% Main concepts
+    subgraph "Finnish Ecological Concepts"
+        direction TB
+        FC1[Metsäekologia<br>Forest Ecology]:::finn1
+        FC2[Suoekosysteemi<br>Wetland Ecosystem]:::finn2
+        FC3[Ekotoni<br>Ecotone]:::finn3
+        FC4[Vuodenkierto<br>Annual Cycle]:::finn4
+        FC5[Lajidiversiteetti<br>Species Diversity]:::finn5
+        FC6[Suksessio<br>Succession]:::finn6
+    end
+    
+    subgraph "CEREBRUM Framework"
+        direction TB
+        CF1[Mallien Sijamuodot<br>Model Cases]:::cerebrum1
+        CF2[Aktiivinen Päättely<br>Active Inference]:::cerebrum2
+        CF3[Kategoriarakenne<br>Category Structure]:::cerebrum3
+        CF4[Vapaaenergian Minimointi<br>Free Energy Minimization]:::cerebrum4
+        CF5[Mallimuunnokset<br>Model Transformations]:::cerebrum5
+        CF6[Markovin Peitteet<br>Markov Blankets]:::cerebrum6
+    end
+    
+    %% Detailed connections
+    subgraph "Detailed Integration Points"
+        direction TB
+        %% Forest Ecology and Model Cases
+        FI1[Metsän kerroksellisuus<br>Forest Stratification]:::detail
+        FI2[Sijarakenne<br>Case Structure]:::detail
+        FC1 --> FI1
+        CF1 --> FI2
+        FI1 --- FI2
+        
+        %% Wetland Ecosystem and Active Inference
+        FI3[Suon vedenkierto<br>Wetland Hydrology]:::detail
+        FI4[Ennustevirheen minimointi<br>Prediction Error Minimization]:::detail
+        FC2 --> FI3
+        CF2 --> FI4
+        FI3 --- FI4
+        
+        %% Ecotone and Category Structure
+        FI5[Vaihettumisvyöhykkeen rakenne<br>Transition Zone Structure]:::detail
+        FI6[Morfismien rajat<br>Morphism Boundaries]:::detail
+        FC3 --> FI5
+        CF3 --> FI6
+        FI5 --- FI6
+        
+        %% Annual Cycle and Free Energy Minimization
+        FI7[Vuodenaikojen energiatalous<br>Seasonal Energy Economy]:::detail
+        FI8[Parametrien vuosisäätö<br>Parameter Annual Adjustment]:::detail
+        FC4 --> FI7
+        CF4 --> FI8
+        FI7 --- FI8
+        
+        %% Species Diversity and Model Transformations
+        FI9[Lajien roolit ekosysteemissä<br>Species Roles in Ecosystem]:::detail
+        FI10[Mallien toiminnalliset muutokset<br>Functional Model Changes]:::detail
+        FC5 --> FI9
+        CF5 --> FI10
+        FI9 --- FI10
+        
+        %% Succession and Markov Blankets
+        FI11[Ekosysteemin kehityskulku<br>Ecosystem Development Path]:::detail
+        FI12[Sisäiset ja ulkoiset mallitilat<br>Internal and External Model States]:::detail
+        FC6 --> FI11
+        CF6 --> FI12
+        FI11 --- FI12
+    end
+    
+    subgraph "Implementation Examples"
+        IE1[Metsätyypin luokittelu nominatiivisessa sijassa<br>Forest Type Classification in Nominative Case]:::impl
+        IE2[Suovesien virtausmalli instrumentaalisessa sijassa<br>Wetland Water Flow Model in Instrumental Case]:::impl
+        IE3[Ekotonianalyysi lokatiivisessa sijassa<br>Ecotone Analysis in Locative Case]:::impl
+        IE4[Vuodenkiertomalli akkusatiivisessa sijassa<br>Annual Cycle Model in Accusative Case]:::impl
+        IE5[Lajidiversiteettimalli genetiivisessä sijassa<br>Species Diversity Model in Genitive Case]:::impl
+        IE6[Sukessioanalyysi ablatiivisessa sijassa<br>Succession Analysis in Ablative Case]:::impl
+    end
+    
+    %% Connections to implementation
+    FI1 & FI2 --> IE1
+    FI3 & FI4 --> IE2
+    FI5 & FI6 --> IE3
+    FI7 & FI8 --> IE4
+    FI9 & FI10 --> IE5
+    FI11 & FI12 --> IE6
+    
+    %% Style definitions
+    classDef finn1 fill:#004D00,stroke:#002800,color:white
+    classDef finn2 fill:#8B4513,stroke:#5E2F0D,color:white
+    classDef finn3 fill:#8FAD88,stroke:#4F6746,color:white
+    classDef finn4 fill:#FFB347,stroke:#CC7A00,color:black
+    classDef finn5 fill:#4682B4,stroke:#1E5599,color:white
+    classDef finn6 fill:#9370DB,stroke:#6A5ACD,color:white
+    
+    classDef cerebrum1 fill:#D42A2E,stroke:#8C1D1F,color:white
+    classDef cerebrum2 fill:#E9967A,stroke:#BE7A62,color:black
+    classDef cerebrum3 fill:#9C27B0,stroke:#7B1FA2,color:white
+    classDef cerebrum4 fill:#FF6B6B,stroke:#CC5555,color:white
+    classDef cerebrum5 fill:#6A5ACD,stroke:#483D8B,color:white
+    classDef cerebrum6 fill:#4ECDC4,stroke:#3BA39B,color:white
+    
+    classDef detail fill:#A3CEF1,stroke:#6A8EB2,color:black
+    classDef impl fill:#F9E79F,stroke:#C4B454,color:black
+```
+
+## Finnish Ecological Classification and CEREBRUM Case Integration
+
+```mermaid
+erDiagram
+    METSATYYPIT ||--o{ NOMINATIVE-CASE : use-as
+    METSATYYPIT {
+        string lehto "Grove"
+        string lehtomainen_kangas "Herb-rich heath forest"
+        string tuore_kangas "Fresh heath forest" 
+        string kuivahko_kangas "Sub-dry heath forest"
+        string kuiva_kangas "Dry heath forest"
+        string karukkokankaat "Barren heath forest"
+    }
+    
+    NOMINATIVE-CASE {
+        string active_prediction "Forward inference"
+        string control_signals "Action selection"
+        string parameter_activity "Full parameter access"
+    }
+    
+    SUOTYYPIT ||--o{ INSTRUMENTAL-CASE : use-as
+    SUOTYYPIT {
+        string korpi "Spruce mire"
+        string rame "Pine bog"
+        string neva "Open bog"
+        string letto "Rich fen"
+        string yhdistelmatyypit "Combination types"
+    }
+    
+    INSTRUMENTAL-CASE {
+        string method_implementation "Algorithmic procedures"
+        string tool_operation "Process execution"
+        string operational_parameters "Method-oriented parameters"
+    }
+    
+    VESISTOTYYPIT ||--o{ DATIVE-CASE : use-as
+    VESISTOTYYPIT {
+        string jarvet "Lakes"
+        string joet "Rivers"
+        string purot "Streams"
+        string lammet "Ponds"
+        string lahdevedet "Spring waters"
+    }
+    
+    DATIVE-CASE {
+        string data_reception "Input processing"
+        string information_intake "Data flow handling"
+        string input_parameters "Input-focused parameters"
+    }
+    
+    EKOTONITYYPIT ||--o{ LOCATIVE-CASE : use-as
+    EKOTONITYYPIT {
+        string metsa_suo "Forest-wetland"
+        string metsa_pelto "Forest-field"
+        string jarvi_maa "Lake-land"
+        string tunturi_metsa "Alpine-forest"
+    }
+    
+    LOCATIVE-CASE {
+        string context_provision "Environmental parameters"
+        string situational_constraints "Contextual boundaries"
+        string environmental_modeling "Context-oriented processes"
+    }
+    
+    LAJIRYHMAT ||--o{ GENITIVE-CASE : use-as
+    LAJIRYHMAT {
+        string puut "Trees"
+        string pensaat "Shrubs"
+        string ruohot "Herbs"
+        string sammalet "Mosses"
+        string jakala "Lichen"
+    }
+    
+    GENITIVE-CASE {
+        string output_generation "Product creation"
+        string source_functionality "Information source"
+        string generative_parameters "Output-focused parameters"
+    }
+    
+    KASVILLISUUSVYOHYKKEET ||--o{ ABLATIVE-CASE : use-as
+    KASVILLISUUSVYOHYKKEET {
+        string hemiboreaalinen "Hemiboreal"
+        string etelaboreaaliinen "Southern boreal"
+        string keskiboreaalinen "Middle boreal"
+        string pohjoisboreaaliinen "Northern boreal"
+    }
+    
+    ABLATIVE-CASE {
+        string origin_representation "Historical source"
+        string causal_attribution "Causal explanation"
+        string historical_parameters "Origin-focused parameters"
+    }
+```
