@@ -562,10 +562,16 @@ if __name__ == "__main__":
         # - Appendix A 1: MATH_APPENDIX.md (Mathematical Formalization)
         # - Appendix B 2: NOVEL_CASES_APPENDIX.md (Novel Linguistic Cases)
         # - Appendix C 3: PRACTICAL_APPENDIX.md (Practical Applications)
+        # - Appendix D 4: RELATED_WORK_APPENDIX.md (Related Work - Detailed Analysis)
+        # - Appendix E 5: CATEGORY_THEORY_APPENDIX.md (Category-Theoretic Formalization)
+        # - Appendix F 6: FUTURE_DIRECTIONS_APPENDIX.md (Future Directions for CEREBRUM Research)
         args.appendix_order = [
-            "MATH_APPENDIX.md",         # Appendix A 1: First appendix
-            "NOVEL_CASES_APPENDIX.md",  # Appendix B 2: Second appendix
-            "PRACTICAL_APPENDIX.md"     # Appendix C 3: Third appendix
+            "MATH_APPENDIX.md",             # Appendix A 1: First appendix
+            "NOVEL_CASES_APPENDIX.md",      # Appendix B 2: Second appendix
+            "PRACTICAL_APPENDIX.md",        # Appendix C 3: Third appendix
+            "RELATED_WORK_APPENDIX.md",     # Appendix D 4: Fourth appendix
+            "CATEGORY_THEORY_APPENDIX.md",  # Appendix E 5: Fifth appendix
+            "FUTURE_DIRECTIONS_APPENDIX.md" # Appendix F 6: Sixth appendix
         ]
         logging.info(f"Using canonical appendix order: {', '.join(args.appendix_order)}")
     

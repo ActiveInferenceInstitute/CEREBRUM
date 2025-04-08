@@ -144,7 +144,7 @@ graph TD
 
 ```mermaid
 pie
-    title "Elements of Talkoot (Community Work)"
+    title "Talkoot Elements"
     "Shared Purpose" : 30
     "Voluntary Participation" : 25
     "Collective Benefit" : 20
@@ -251,80 +251,70 @@ graph TB
     K --- F[Functionality]
     K --- A[Aesthetics]
     
-    subgraph "Knowledge Embodiment"
+    subgraph Knowledge Embodiment
         S --- S1[Tacit Knowledge]
         S --- S2[Practice Wisdom]
         S --- S3[Cultural Techniques]
     end
     
-    subgraph "Materials Intelligence"
+    subgraph Materials Intelligence
         M --- M1[Material Properties]
         M --- M2[Sustainability]
         M --- M3[Sourcing Ethics]
     end
     
-    subgraph "Design Thinking"
+    subgraph Design Thinking
         D --- D1[User Needs]
         D --- D2[Context Awareness]
         D --- D3[Creative Solutions]
     end
-    
-    style K fill:#FFBF00,stroke:#B27200,color:white,stroke-width:3px
-    style M fill:#FFCB33,stroke:#B27200,color:white
-    style S fill:#FFCB33,stroke:#B27200,color:white
-    style D fill:#FFCB33,stroke:#B27200,color:white
-    style F fill:#FFCB33,stroke:#B27200,color:white
-    style A fill:#FFCB33,stroke:#B27200,color:white
 ```
 
 ## Finnish Case Transformation Cycle
 
 ```mermaid
 stateDiagram-v2
-    [*] --> NominativeCase
+    [*] --> Nominative
     
-    NominativeCase --> AccusativeCase: Becomes object
-    AccusativeCase --> DativeCase: Becomes recipient
-    DativeCase --> GenitiveCase: Becomes source
-    GenitiveCase --> InstrumentalCase: Becomes tool
-    InstrumentalCase --> LocativeCase: Becomes context
-    LocativeCase --> AblativeCase: Becomes origin
-    AblativeCase --> VocativeCase: Becomes addressable
-    VocativeCase --> NominativeCase: Becomes agent
+    Nominative --> Accusative: Becomes object
+    Accusative --> Dative: Becomes recipient
+    Dative --> Genitive: Becomes source
+    Genitive --> Instrumental: Becomes tool
+    Instrumental --> Locative: Becomes context
+    Locative --> Ablative: Becomes origin
+    Ablative --> Vocative: Becomes addressable
+    Vocative --> Nominative: Becomes agent
 ```
 
 ## The Dance of CEREBRUM Cases
 
 ```mermaid
 gitGraph
-    commit id: "Initial Setup"
-    branch main
-    checkout main
-    commit id: "Initial Model"
-    branch nominative
-    checkout nominative
-    commit id: "Active Prediction"
-    commit id: "Control Signal"
-    checkout main
-    merge nominative
-    branch accusative
-    checkout accusative
-    commit id: "Receive Updates"
-    commit id: "Parameter Adjustment"
-    checkout main
-    merge accusative
-    branch dative
-    checkout dative
-    commit id: "Data Reception"
-    commit id: "Input Processing"
-    checkout main
-    merge dative
-    branch genitive
-    checkout genitive
-    commit id: "Output Generation"
-    commit id: "Product Delivery"
-    checkout main
-    merge genitive
+   commit
+   branch nominative
+   checkout nominative
+   commit
+   commit
+   checkout main
+   merge nominative
+   branch accusative
+   checkout accusative
+   commit
+   commit
+   checkout main
+   merge accusative
+   branch dative
+   checkout dative
+   commit
+   commit
+   checkout main
+   merge dative
+   branch genitive
+   checkout genitive
+   commit
+   commit
+   checkout main
+   merge genitive
 ```
 
 ## Sisu in Active Inference Implementation
@@ -410,33 +400,33 @@ mindmap
 ```mermaid
 pie
     title "Balanced Interface Design Elements"
-    "Paikka (Place-awareness)" : 25
-    "Reuna (Edge/Boundary Clarity)" : 20
-    "Käsityö (Crafted Quality)" : 20
-    "Luonto (Natural Patterns)" : 15
-    "Sisu (Resilient Operation)" : 10
-    "Talkoot (Collaborative Elements)" : 10
+    "Paikka Place-awareness" : 25
+    "Reuna Edge Boundary Clarity" : 20
+    "Kasityo Crafted Quality" : 20
+    "Luonto Natural Patterns" : 15
+    "Sisu Resilient Operation" : 10
+    "Talkoot Collaborative Elements" : 10
 ```
 
 ## The Rhythm of Vuodenkierto (Cycle of the Year)
 
 ```mermaid
 timeline
-    title Finnish Seasonal Cycle as System Model
+    title Finnish Seasonal Cycle Model
     section Spring
         Awakening : New processes initiate
-        Melting : System boundaries become fluid
+        Melting : Boundaries become fluid
         Growth : Rapid resource intake
     section Summer
-        Abundance : Maximum energy availability
-        Activity : Peak processing capacity
+        Abundance : Max energy available
+        Activity : Peak processing
         Gathering : Resource accumulation
     section Autumn
         Harvest : Output collection
         Preparation : System restructuring
         Storage : Resource conservation
     section Winter
-        Dormancy : Reduced activity state
+        Dormancy : Reduced activity
         Conservation : Minimal resource usage
         Planning : Internal reorganization
 ```
