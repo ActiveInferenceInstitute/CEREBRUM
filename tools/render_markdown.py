@@ -103,16 +103,25 @@ def render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_pat
     pdf_engine = "xelatex" 
     logging.info(f"Using PDF engine: {pdf_engine}")
     
-    # Create a simpler two-step process
-    # 1. First, convert main markdown to PDF
-    # 2. Then create appendix PDF and combine them
+    # Create a simple straightforward approach with a single pandoc command
+    main_command = ["pandoc", markdown_abs_path]
     
-    # Step 1: Convert main markdown to PDF
-    main_command = [
-        "pandoc",
-        markdown_abs_path,
+    # Create a temporary file with just the \appendix command
+    appendix_marker_file = os.path.join(os.path.dirname(output_pdf_abs_path), "appendix_marker.tex")
+    with open(appendix_marker_file, 'w') as f:
+        f.write("\n\\clearpage\n\\appendix\n")
+    
+    # Add the appendix marker after the main content
+    main_command.append("--include-after-body=" + appendix_marker_file)
+    
+    # Add all appendix files
+    for appendix_file in appendix_files:
+        main_command.append(appendix_file)
+    
+    # Add output options
+    main_command.extend([
         "--resource-path", resource_abs_path,
-        "-o", f"{output_pdf_abs_path}.main.pdf",
+        "-o", output_pdf_abs_path,
         f"--pdf-engine={pdf_engine}",
         "--standalone",
         "--toc",
@@ -145,7 +154,7 @@ def render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_pat
         "-V", "linkcolor=black",
         "-V", "urlcolor=black",
         "-V", "links-as-notes=true",
-    ]
+    ])
     
     # Add LaTeX packages directly
     latex_packages = [
@@ -178,42 +187,13 @@ def render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_pat
     for pkg in latex_packages:
         main_command.extend(["-V", f"header-includes={pkg}"])
     
-    # Step 2: Prepare command for appendices
-    if appendix_files:
-        appendix_command = [
-            "pandoc",
-        ]
-        
-        for appendix_file in appendix_files:
-            appendix_command.append(appendix_file)
-            
-        appendix_command.extend([
-            "--resource-path", resource_abs_path,
-            "-o", f"{output_pdf_abs_path}.appendix.tex",
-            "--standalone",
-            "--number-sections",
-            "--top-level-division=chapter",
-            "-V", "header-includes=\\usepackage{appendix}"
-        ])
-        
-        # Add necessary LaTeX packages for appendices
-        for pkg in latex_packages:
-            appendix_command.extend(["-V", f"header-includes={pkg}"])
-            
-        # Add a special header to mark these as appendices
-        appendix_command.extend([
-            "-B", "\\appendix\n"
-        ])
-    
-    logging.info("Starting PDF generation process...")
-    logging.info(f"Main content command: {' '.join(main_command)}")
-    if appendix_files:
-        logging.info(f"Appendix command: {' '.join(appendix_command)}")
+    logging.info("Starting PDF generation with single pandoc command...")
+    logging.info(f"Pandoc command: {' '.join(main_command)}")
     
     try:
-        # Execute main markdown to PDF conversion
+        # Execute the pandoc command
         project_root = os.path.dirname(resource_abs_path)
-        logging.info("Generating main document PDF...")
+        logging.info("Generating PDF...")
         result = subprocess.run(
             main_command,
             check=True,
@@ -221,102 +201,14 @@ def render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_pat
             text=True,
             cwd=project_root
         )
-        logging.info(f"Generated main document PDF: {output_pdf_abs_path}.main.pdf")
-        
-        # If we have appendices, generate those too
-        if appendix_files:
-            logging.info("Generating appendix content...")
-            try:
-                appendix_result = subprocess.run(
-                    appendix_command,
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                    cwd=project_root
-                )
-                logging.info(f"Generated appendix content: {output_pdf_abs_path}.appendix.tex")
-                
-                # Now combine the PDFs
-                logging.info("Combining main document and appendices...")
-                
-                # Create a LaTeX document to combine them
-                combine_tex = f"""
-\\documentclass{{article}}
-\\usepackage{{pdfpages}}
-\\begin{{document}}
-\\includepdf[pages=-]{{"{os.path.basename(output_pdf_abs_path)}.main.pdf"}}
-\\appendix
-\\include{{"{os.path.basename(output_pdf_abs_path)}.appendix"}}
-\\end{{document}}
-"""
-                
-                with open(os.path.join(project_root, f"{output_pdf_abs_path}.combine.tex"), 'w') as f:
-                    f.write(combine_tex)
-                
-                # Compile the combined document
-                logging.info("Compiling final PDF...")
-                final_command = [
-                    pdf_engine,
-                    f"{os.path.basename(output_pdf_abs_path)}.combine.tex"
-                ]
-                
-                final_result = subprocess.run(
-                    final_command,
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                    cwd=os.path.dirname(output_pdf_abs_path)
-                )
-                
-                # Run twice to ensure TOC is updated correctly
-                final_result = subprocess.run(
-                    final_command,
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                    cwd=os.path.dirname(output_pdf_abs_path)
-                )
-                
-                # Move the combined PDF to the final output location
-                shutil.move(
-                    os.path.join(os.path.dirname(output_pdf_abs_path), f"{os.path.basename(output_pdf_abs_path)}.combine.pdf"),
-                    output_pdf_abs_path
-                )
-                
-                logging.info(f"Successfully generated combined PDF: {output_pdf_abs_path}")
-            except Exception as e:
-                logging.error(f"Error processing appendices: {e}")
-                # If appendix processing fails, just use the main PDF
-                shutil.move(
-                    f"{output_pdf_abs_path}.main.pdf",
-                    output_pdf_abs_path
-                )
-                logging.info(f"Using main document as final PDF due to appendix processing error: {output_pdf_abs_path}")
-        else:
-            # If no appendices, just use the main PDF
-            shutil.move(
-                f"{output_pdf_abs_path}.main.pdf",
-                output_pdf_abs_path
-            )
-            logging.info(f"No appendices to process, using main document as final PDF: {output_pdf_abs_path}")
+        logging.info(f"Successfully generated PDF: {output_pdf_abs_path}")
         
         # Clean up temporary files
-        temp_files = [
-            f"{output_pdf_abs_path}.main.pdf",
-            f"{output_pdf_abs_path}.appendix.tex",
-            f"{output_pdf_abs_path}.combine.tex",
-            f"{output_pdf_abs_path}.combine.aux",
-            f"{output_pdf_abs_path}.combine.log"
-        ]
+        try:
+            os.unlink(appendix_marker_file)
+        except Exception as e:
+            logging.warning(f"Could not delete temporary file {appendix_marker_file}: {e}")
         
-        for temp_file in temp_files:
-            if os.path.exists(temp_file):
-                try:
-                    os.unlink(temp_file)
-                except Exception as e:
-                    logging.warning(f"Could not delete temporary file {temp_file}: {e}")
-        
-        logging.info("PDF generation completed successfully!")
         return True
         
     except FileNotFoundError as e:
