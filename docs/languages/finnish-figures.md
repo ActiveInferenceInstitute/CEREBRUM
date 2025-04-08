@@ -668,7 +668,7 @@ graph TB
 
 ```mermaid
 graph TD
-    subgraph Finnish Design Ethos
+    subgraph Finnish_Design_Ethos
         F[Functionality]
         S[Simplicity]
         H[Harmony]
@@ -681,19 +681,19 @@ graph TD
 
 ```mermaid
 graph LR
-    subgraph Model NOM
-        N1[Active<br>Agent]
+    subgraph Model_NOM
+        N1[Active Agent]
     end
     
-    subgraph Model ACC
-        A1[Object of<br>Process]
+    subgraph Model_ACC
+        A1[Object of Process]
     end
     
-    subgraph Model GEN
-        G1[Source/<br>Generator]
+    subgraph Model_GEN
+        G1[Source Generator]
     end
     
-    subgraph Model DAT
+    subgraph Model_DAT
         D1[Recipient]
     end
     
@@ -706,24 +706,21 @@ graph LR
 
 ```mermaid
 flowchart LR
-    subgraph "Finnish Linguistic Genius"
-        L1[Case System]:::ling
-        L2[Agglutination]:::ling
-        L3[Vowel Harmony]:::ling
+    subgraph Finnish Linguistic Genius
+        L1[Case System]
+        L2[Agglutination]
+        L3[Vowel Harmony]
     end
     
-    subgraph "Computational Framework"
-        C1[Model Structure]:::comp
-        C2[Function Chaining]:::comp
-        C3[Process Harmony]:::comp
+    subgraph Computational Framework
+        C1[Model Structure]
+        C2[Function Chaining]
+        C3[Process Harmony]
     end
     
     L1 --> C1
     L2 --> C2
     L3 --> C3
-    
-    classDef ling fill:#C8B6FF,stroke:#9178ED,color:black
-    classDef comp fill:#FFD6A5,stroke:#FFA940,color:black
 ``` 
 
 ## Core Finnish Concepts Hierarchy
@@ -731,37 +728,37 @@ flowchart LR
 ```mermaid
 mindmap
   root((Finnish Concepts))
-    (Luonto & Metsä)
+    (Luonto and Metsa)
       (Nature)
       (Forest)
       (Ecological systems)
-      (Biodiversity/Monimuotoisuus)
-      (Cycles/Vuodenkierto)
-    (Paikka & Locative Cases)
+      (Biodiversity Monimuotoisuus)
+      (Cycles Vuodenkierto)
+    (Paikka and Locative Cases)
       (Place)
-      (Inessive -ssa/-ssä)
-      (Elative -sta/-stä)
-      (Illative -an/-en/...)
-      (Adessive -lla/-llä)
-      (Ablative -lta/-ltä)
+      (Inessive -ssa -ssä)
+      (Elative -sta -stä)
+      (Illative -an -en etc)
+      (Adessive -lla -llä)
+      (Ablative -lta -ltä)
       (Allative -lle)
-    (Talkoot & Yhteisö)
+    (Talkoot and Yhteiso)
       (Communal work)
       (Community)
       (Cooperation)
-      (Naapuriapu/Neighborly help)
-      (Osuuskunta/Cooperative)
+      (Naapuriapu Neighborly help)
+      (Osuuskunta Cooperative)
     (Sisu)
       (Resilience)
       (Perseverance)
       (Anti-fragility)
       (Robustness)
-    (Käsityö & Muotoilu)
+    (Kasityo and Muotoilu)
       (Handicraft)
       (Design)
       (Functional aesthetics)
       (Durability)
-    (Reuna, Raja, Välitila)
+    (Reuna Raja Valitila)
       (Edge)
       (Boundary)
       (In-between space)
@@ -770,7 +767,7 @@ mindmap
       (Network)
       (Connections)
       (Web of relationships)
-    (Keräily & Vuodenkierto)
+    (Keraily and Vuodenkierto)
       (Foraging)
       (Cyclical processes)
       (Seasonal knowledge)
