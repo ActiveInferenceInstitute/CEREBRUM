@@ -12,7 +12,7 @@ Version 1.0 (2025-04-07) ~ CC BY-NC-ND 4.0
 
 ## Abstract
 
-This paper introduces Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling (CEREBRUM). CEREBRUM is a synthetic intelligence framework that integrates linguistic case systems with cognitive scientific principles to describe, design, and deploy generative models in an expressive fashion. By treating models as case-bearing entities that can play multiple contextual roles (e.g. like declinable nouns), CEREBRUM establishes a formal linguistic-type calculus for cognitive model use, relationships, and transformations. The CEREBRUM framework uses structures from category theory and modeling techniques related to the Free Energy Principle, in describing and utilizing model across. CEREBRUM addresses the growing complexity in computational and cognitive modeling systems (e.g. generative, decentralized, agentic intelligences), by providing structured representations of model ecosystems that align with lexical ergonomics, scientific principles, and operational processes.
+This paper introduces Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling (CEREBRUM). CEREBRUM is a synthetic intelligence framework that integrates linguistic case systems with cognitive scientific principles to describe, design, and deploy generative models in an expressive fashion. By treating models as case-bearing entities that can play multiple contextual roles (e.g. like declinable nouns), CEREBRUM establishes a formal linguistic-type calculus for cognitive model use, relationships, and transformations. The CEREBRUM framework uses structures from category theory and modeling techniques related to the Free Energy Principle, in describing and utilizing models across contexts. CEREBRUM addresses the growing complexity in computational and cognitive modeling systems (e.g. generative, decentralized, agentic intelligences), by providing structured representations of model ecosystems that align with lexical ergonomics, scientific principles, and operational processes.
 
 ## Overview
 
@@ -138,9 +138,9 @@ When an active inference generative model undergoes case transformation, it expe
 
 ### Active Inference Model Declension Example
 
-Consider a perception-oriented generative model M with parameters θ, internal states s, and observational distribution p(o|s,θ). When declined across cases, this single model transforms as follows:
+Consider a perception-oriented generative model M with parameters theta, internal states s, and observational distribution p(o|s,theta). When declined across cases, this single model transforms as follows:
 
-- **M[NOM]**: Actively generates predictions by sampling from p(o|s,θ), with all parameters fully accessible
+- **M[NOM]**: Actively generates predictions by sampling from p(o|s,theta), with all parameters fully accessible
 - **M[ACC]**: Becomes the target of updates, with parameter gradients calculated from prediction errors
 - **M[DAT]**: Configured to receive data flows, with specific input interfaces activated
 - **M[GEN]**: Optimized to generate outputs, with output interfaces prioritized

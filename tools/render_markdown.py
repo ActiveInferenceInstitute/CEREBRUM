@@ -148,6 +148,7 @@ def render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_pat
         "--toc",                    # Generate Table of Contents
         "--toc-depth=3",           # Control TOC depth
         "--number-sections",        # Number sections (e.g., 1., 1.1, 1.1.1)
+        "--top-level-division=chapter", # Treat top-level sections as chapters, better for appendix handling
         
         # Title page variables
         "-V", "title=Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling (CEREBRUM)",
@@ -174,6 +175,10 @@ def render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_pat
         "-V", "linkcolor=black",
         "-V", "urlcolor=black",
         "-V", "links-as-notes=true",
+        
+        # Add LaTeX configuration for appendices
+        "-V", "header-includes=\\usepackage{appendix}",
+        "-V", "header-includes=\\renewcommand{\\appendixname}{Appendix}",
         
         # Improved math rendering
         "--mathjax",
