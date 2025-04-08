@@ -1362,4 +1362,317 @@ graph TB
     classDef ai1 fill:#9C27B0,stroke:#7B1FA2,color:white
     classDef ai2 fill:#BA68C8,stroke:#9951A0,color:white
     classDef ai3 fill:#E1BEE7,stroke:#B498BC,color:black
+```
+
+## Spiritual Dimensions and Ontological Cases
+
+```mermaid
+graph TB
+    subgraph "Sámi Spiritual Worldview"
+        S1[Sieidi<br>Sacred Sites]:::spirit1
+        S2[Noaidi<br>Shamanic Practice]:::spirit2
+        S3[Bassibáikkit<br>Sacred Places]:::spirit3
+        S4[Eahparaš<br>Ancestral Spirits]:::spirit4
+        S5[Sáivu<br>Sacred Underworld]:::spirit5
+    end
+
+    subgraph "Ontological Dimensions"
+        O1[Physical World]:::onto1
+        O2[Liminal Space]:::onto2
+        O3[Spirit World]:::onto3
+    end
+
+    S1 & S3 --> O1 & O2
+    S2 --> O1 & O2 & O3
+    S4 & S5 --> O2 & O3
+
+    subgraph "CEREBRUM Case Structure"
+        C1[Locative<br>Context Embedding]:::case1
+        C2[Vocative<br>Direct Addressing]:::case2
+        C3[Translative<br>State Transformation]:::case3
+        C4[Essive<br>Temporary State]:::case4
+        C5[Abessive<br>State Without]:::case5
+    end
+
+    O1 --> C1
+    O2 --> C3 & C4
+    O3 --> C2 & C5
+
+    subgraph "Implementation"
+        I1[Context Models]:::impl1
+        I2[Interface Models]:::impl2
+        I3[Transformation Models]:::impl3
+        I4[Temporary State Models]:::impl4
+        I5[Negative State Models]:::impl5
+    end
+
+    C1 --> I1
+    C2 --> I2
+    C3 --> I3
+    C4 --> I4
+    C5 --> I5
+
+    classDef spirit1 fill:#8EA476,stroke:#5C754F,color:white
+    classDef spirit2 fill:#9A77B8,stroke:#774D96,color:white
+    classDef spirit3 fill:#C19A6B,stroke:#8D6C4B,color:white
+    classDef spirit4 fill:#AE7FB6,stroke:#8B5894,color:white
+    classDef spirit5 fill:#609CE1,stroke:#3E7BBD,color:white
+
+    classDef onto1 fill:#A9D3F9,stroke:#65AFEC,color:black
+    classDef onto2 fill:#FFCF96,stroke:#FFAD5B,color:black
+    classDef onto3 fill:#F5CFA4,stroke:#D6AB7C,color:black
+
+    classDef case1 fill:#4682B4,stroke:#1E5599,color:white
+    classDef case2 fill:#F78FA7,stroke:#EB5286,color:white
+    classDef case3 fill:#6A5ACD,stroke:#483D8B,color:white
+    classDef case4 fill:#E9967A,stroke:#BE7A62,color:black
+    classDef case5 fill:#9C27B0,stroke:#7B1FA2,color:white
+
+    classDef impl1 fill:#6A8CC0,stroke:#435F8F,color:white
+    classDef impl2 fill:#FF9AA2,stroke:#CC7A82,color:white
+    classDef impl3 fill:#9590A8,stroke:#5F5676,color:white
+    classDef impl4 fill:#FFB347,stroke:#CC7A00,color:black
+    classDef impl5 fill:#BA68C8,stroke:#9951A0,color:white
+```
+
+## Noaidi Drum (Goavddis) Symbols as Knowledge System
+
+```mermaid
+erDiagram
+    DRUM-SYMBOLS ||--|| KNOWLEDGE-SYSTEM : represents
+    
+    DRUM-SYMBOLS {
+        string cosmological "World layers"
+        string beings "Spirits and entities"
+        string places "Sacred locations"
+        string animals "Symbolic fauna"
+        string activities "Human practices"
+    }
+    
+    KNOWLEDGE-SYSTEM {
+        string ontological "Reality structure"
+        string relational "Entity connections"
+        string navigational "Spiritual pathways"
+        string temporal "Cyclical patterns"
+        string practical "Application methods"
+    }
+    
+    COSMOLOGICAL-SYMBOLS ||--o{ ONTOLOGICAL-KNOWLEDGE : encode
+    COSMOLOGICAL-SYMBOLS {
+        string upper_world "Celestial realm"
+        string middle_world "Human realm"
+        string lower_world "Underworld realm"
+        string world_pillar "Connecting axis"
+        string sun_symbol "Life energy"
+    }
+    
+    ONTOLOGICAL-KNOWLEDGE {
+        string reality_structure "Domain organization"
+        string causal_relationships "Inter-realm effects"
+        string existence_principles "Entity nature"
+    }
+    
+    BEING-SYMBOLS ||--o{ RELATIONAL-KNOWLEDGE : encode
+    BEING-SYMBOLS {
+        string deities "Divine entities"
+        string ancestors "Familial spirits"
+        string helpers "Guiding entities"
+        string adversaries "Challenging entities"
+        string animals "Spirit forms"
+    }
+    
+    RELATIONAL-KNOWLEDGE {
+        string entity_connections "Being interactions"
+        string power_dynamics "Influence patterns"
+        string communication_methods "Interaction protocols"
+    }
+    
+    PLACE-SYMBOLS ||--o{ NAVIGATIONAL-KNOWLEDGE : encode
+    PLACE-SYMBOLS {
+        string sacred_mountains "Power locations"
+        string lakes "Liminal waters"
+        string passages "Realm transitions"
+        string sieiddit "Offering sites"
+        string graves "Ancestor locations"
+    }
+    
+    NAVIGATIONAL-KNOWLEDGE {
+        string spiritual_pathways "Transition routes"
+        string access_methods "Entry techniques"
+        string safety_protocols "Protection measures"
+    }
+    
+    ACTIVITY-SYMBOLS ||--o{ PRACTICAL-KNOWLEDGE : encode
+    ACTIVITY-SYMBOLS {
+        string drumming "Ritual practice"
+        string offerings "Exchange methods"
+        string healing "Restoration techniques"
+        string divination "Knowledge seeking"
+        string transformation "State changes"
+    }
+    
+    PRACTICAL-KNOWLEDGE {
+        string application_methods "Implementation techniques"
+        string ritual_procedures "Ceremonial processes"
+        string effect_generation "Outcome production"
+    }
+```
+
+## Sámi Cosmology and CEREBRUM Dimensional Mapping
+
+```mermaid
+mindmap
+    root((Sámi<br>Cosmology))
+        (Vertical Dimensions):::vertical
+            (Albmemáilbmi/Sky World)
+            (Gaskamáilbmi/Middle World)
+            (Jábmiidmáilbmi/Underworld)
+        (Liminal Spaces):::liminal
+            (Bassibáikkit/Sacred Places)
+            (Áiligas/Holy Mountains)
+            (Sieidi/Sacred Stones)
+            (Sáiva/Sacred Lakes)
+        (Spirit Entities):::spirits
+            (Sáivu olbmot/Underworld People)
+            (Háldi/Guardian Spirits)
+            (Ulda/Hidden People)
+            (Stállu/Giant Beings)
+        (CEREBRUM Integration):::cerebrum
+            (Dimensional Model Hierarchy)
+            (Boundary-Crossing Transformations)
+            (Entity Case Relationships)
+            (Navigational Model Structure)
+
+    classDef vertical fill:#8EA476,stroke:#5C754F,color:white
+    classDef liminal fill:#AE7FB6,stroke:#8B5894,color:white
+    classDef spirits fill:#F5CFA4,stroke:#D6AB7C,color:black
+    classDef cerebrum fill:#609CE1,stroke:#3E7BBD,color:white
+```
+
+## Sámi World Tree (Meilmmimuorra) as Model Organization
+
+```mermaid
+graph TB
+    subgraph "World Tree Structure"
+        WT[Meilmmimuorra<br>World Tree]:::tree0
+        
+        subgraph "Tree Components"
+            TC1[Crown<br>Upper World]:::tree1
+            TC2[Trunk<br>Middle World]:::tree2
+            TC3[Roots<br>Lower World]:::tree3
+        end
+    end
+    
+    subgraph "CEREBRUM Organization"
+        CO[Model Ecosystem]:::org0
+        
+        subgraph "System Layers"
+            CL1[High-Level Models<br>Abstract Concepts]:::org1
+            CL2[Mid-Level Models<br>Functional Components]:::org2
+            CL3[Foundation Models<br>Base Functions]:::org3
+        end
+    end
+    
+    WT --- CO
+    TC1 --- CL1
+    TC2 --- CL2
+    TC3 --- CL3
+    
+    subgraph "Case Functions"
+        CF1[Vocative & Nominative<br>Communication & Agency]:::case1
+        CF2[Accusative & Instrumental<br>Implementation & Tool Use]:::case2
+        CF3[Locative & Ablative<br>Context & Origin]:::case3
+    end
+    
+    CL1 --- CF1
+    CL2 --- CF2
+    CL3 --- CF3
+
+    classDef tree0 fill:#8EA476,stroke:#5C754F,color:white
+    classDef tree1 fill:#A5B58A,stroke:#5C754F,color:white
+    classDef tree2 fill:#C19A6B,stroke:#8D6C4B,color:white
+    classDef tree3 fill:#8D6C4B,stroke:#634B34,color:white
+    
+    classDef org0 fill:#609CE1,stroke:#3E7BBD,color:white
+    classDef org1 fill:#7BAFEA,stroke:#3E7BBD,color:white
+    classDef org2 fill:#92B5E0,stroke:#5A88C0,color:white
+    classDef org3 fill:#435F8F,stroke:#2E4065,color:white
+    
+    classDef case1 fill:#F78FA7,stroke:#EB5286,color:white
+    classDef case2 fill:#4ECDC4,stroke:#3BA39B,color:white
+    classDef case3 fill:#9A77B8,stroke:#774D96,color:white
+```
+
+## Circular Time Concept and Temporal Case Structure
+
+```mermaid
+pie showData
+    title "Sámi Temporal-Spatial Integration"
+    "Cyclical Time" : 35
+    "Place-Based Knowledge" : 25
+    "Generational Continuity" : 20
+    "Seasonal Activities" : 15
+    "Ritual Timing" : 5
+```
+
+## Comprehensive Sámi Ontological-CEREBRUM Framework
+
+```mermaid
+flowchart TD
+    subgraph "Sámi Ontological Framework"
+        direction TB
+        OF1[Physical Reality<br>Duovdagat/Landscapes]:::onto1
+        OF2[Social Reality<br>Siida/Community]:::onto2
+        OF3[Spiritual Reality<br>Bassi/Sacred]:::onto3
+        OF4[Knowledge Systems<br>Árbediehtu]:::onto4
+        OF5[Temporal Reality<br>Jahkodagat/Seasons]:::onto5
+    end
+    
+    subgraph "CEREBRUM Framework"
+        direction TB
+        CF1[Model Ecosystem]:::cerebrum1
+        CF2[Message Passing]:::cerebrum2
+        CF3[Case Structure]:::cerebrum3
+        CF4[Free Energy]:::cerebrum4
+        CF5[Active Inference]:::cerebrum5
+    end
+    
+    OF1 --> CF1
+    OF2 --> CF2
+    OF3 --> CF3
+    OF4 --> CF4
+    OF5 --> CF5
+    
+    subgraph "Integration Products"
+        direction TB
+        IP1[Environmental Models]:::product1
+        IP2[Social Coordination]:::product2
+        IP3[Categorical Semantics]:::product3
+        IP4[Predictive Culture]:::product4
+        IP5[Adaptive Response]:::product5
+    end
+    
+    CF1 --> IP1
+    CF2 --> IP2
+    CF3 --> IP3
+    CF4 --> IP4
+    CF5 --> IP5
+    
+    classDef onto1 fill:#8EA476,stroke:#5C754F,color:white
+    classDef onto2 fill:#AE7FB6,stroke:#8B5894,color:white
+    classDef onto3 fill:#F5CFA4,stroke:#D6AB7C,color:black
+    classDef onto4 fill:#609CE1,stroke:#3E7BBD,color:white
+    classDef onto5 fill:#EAAA45,stroke:#BB872C,color:white
+    
+    classDef cerebrum1 fill:#D42A2E,stroke:#8C1D1F,color:white
+    classDef cerebrum2 fill:#E9967A,stroke:#BE7A62,color:black
+    classDef cerebrum3 fill:#9C27B0,stroke:#7B1FA2,color:white
+    classDef cerebrum4 fill:#FF6B6B,stroke:#CC5555,color:white
+    classDef cerebrum5 fill:#6A5ACD,stroke:#483D8B,color:white
+    
+    classDef product1 fill:#A5B58A,stroke:#5C754F,color:white
+    classDef product2 fill:#BD97C4,stroke:#8B5894,color:white
+    classDef product3 fill:#FFCF96,stroke:#FFAD5B,color:black
+    classDef product4 fill:#7BAFEA,stroke:#3E7BBD,color:white
+    classDef product5 fill:#F0C68A,stroke:#BB872C,color:black
 ``` 

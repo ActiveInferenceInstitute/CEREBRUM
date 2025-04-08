@@ -357,7 +357,7 @@ def update_cerebrum_md(cerebrum_path, figure_paths):
     print(f"Updated {cerebrum_path} with image references")
     return True
 
-def find_appendix_files(cerebrum_dir, appendix_pattern="*_APPENDIX.md"):
+def find_appendix_files(cerebrum_dir, appendix_pattern="Supplement_*.md"):
     """
     Find all appendix files in the specified directory matching the given pattern.
     
@@ -438,59 +438,80 @@ def prepare_appendix_files(appendix_files):
     # Use letter designations for appendices (A, B, C, ...)
     appendix_letters = [chr(65 + i) for i in range(len(appendix_files))]
     
-    # Define mapping of expected appendix numbering
+    # Define mapping of expected appendix numbering based on new filenames
     # This ensures consistent numbering across the appendices
     expected_numbering = {
-        "MATH_APPENDIX.md": "1",
-        "NOVEL_CASES_APPENDIX.md": "2",
-        "PRACTICAL_APPENDIX.md": "3"
+        "Supplement_A_1_Mathematical_Formalization.md": "1",
+        "Supplement_B_2_Novel_Linguistic_Cases.md": "2",
+        "Supplement_C_3_Practical_Applications.md": "3",
+        "Supplement_D_4_Related_Work.md": "4",
+        "Supplement_E_5_Category_Theory.md": "5",
+        "Supplement_F_6_Future_Directions.md": "6"
     }
     
     for i, (appendix_file, letter) in enumerate(zip(appendix_files, appendix_letters)):
         filename = os.path.basename(appendix_file)
-        number = expected_numbering.get(filename, str(i+1))
-        
+        # Ensure number consistency using the dictionary, fallback to index+1 if file not found
+        number = expected_numbering.get(filename, str(i + 1))
+        if filename not in expected_numbering:
+             logging.warning(f"Filename {filename} not found in expected numbering map. Using index-based number {number}.")
+
         with open(appendix_file, 'r') as f:
             content = f.read()
-        
+
         # Make sure each appendix starts with a proper heading
         first_heading_match = re.search(r'^# (.+?)$', content, re.MULTILINE)
         if first_heading_match:
             heading_text = first_heading_match.group(1)
-            
+
             # Check if heading already contains properly formatted appendix designation
-            appendix_pattern = rf'Appendix {letter} {number}:'
+            # Updated pattern to match "Supplement"
+            appendix_pattern = rf'Supplement {letter} {number}:'
             if re.search(appendix_pattern, heading_text):
-                logging.info(f"Heading in {filename} already has correct appendix designation: '{heading_text}'")
+                logging.info(f"Heading in {filename} already has correct supplement designation: '{heading_text}'")
             else:
-                # Extract existing title without any appendix designation
-                title_text = re.sub(r'^Appendix [A-Z] \d+:\s*', '', heading_text)
+                # Extract existing title without any appendix/supplement designation
+                title_text = re.sub(r'^Supplement [A-Z] \d+:\s*', '', heading_text)
+                title_text = re.sub(r'^Supplement [A-Z]:\s*', '', title_text)
+                title_text = re.sub(r'^Supplement \d+:\s*', '', title_text)
+                title_text = re.sub(r'^Supplement:\s*', '', title_text)
+                # Also remove old "Appendix" prefixes if present
+                title_text = re.sub(r'^Appendix [A-Z] \d+:\s*', '', title_text)
                 title_text = re.sub(r'^Appendix [A-Z]:\s*', '', title_text)
                 title_text = re.sub(r'^Appendix \d+:\s*', '', title_text)
                 title_text = re.sub(r'^Appendix:\s*', '', title_text)
-                
-                # Create new heading with proper appendix designation
-                new_heading = f"Appendix {letter} {number}: {title_text}"
+
+                # Create new heading with proper supplement designation
+                new_heading = f"Supplement {letter} {number}: {title_text}"
                 modified_content = content.replace(first_heading_match.group(0), f"# {new_heading}")
-                
+
                 with open(appendix_file, 'w') as f:
                     f.write(modified_content)
                 logging.info(f"Updated heading in {filename}: '{heading_text}' → '{new_heading}'")
         else:
             # If no heading found, add one
-            new_heading = f"# Appendix {letter} {number}"
-            modified_content = f"{new_heading}\n\n{content}"
-            
+            new_heading = f"# Supplement {letter} {number}"
+            modified_content = f"{new_heading}\\n\\n{content}"
+
             with open(appendix_file, 'w') as f:
                 f.write(modified_content)
             logging.warning(f"Added missing heading to {filename}: '{new_heading}'")
-        
-        # Remove any existing \appendix commands as they're now handled elsewhere
-        if '\\appendix' in content:
-            modified_content = content.replace('\\appendix', '')
-            with open(appendix_file, 'w') as f:
-                f.write(modified_content)
-            logging.info(f"Removed '\\appendix' command from {filename}")
+
+        # Remove any existing \\appendix commands as they're now handled elsewhere
+        # Also remove old \appendixname redefinitions if they exist
+        modified_content_lines = []
+        content_changed = False
+        for line in content.splitlines():
+            if '\\appendix' in line or '\\renewcommand{\\appendixname}' in line:
+                 content_changed = True
+                 logging.info(f"Removed deprecated LaTeX command from {filename}: {line.strip()}")
+                 continue
+            modified_content_lines.append(line)
+
+        if content_changed:
+             modified_content = "\\n".join(modified_content_lines)
+             with open(appendix_file, 'w') as f:
+                 f.write(modified_content)
 
 def parse_arguments():
     """Parse command line arguments for the script."""
@@ -501,8 +522,8 @@ def parse_arguments():
                       help="Main Markdown file to process (default: CEREBRUM.md)")
     parser.add_argument("--output-file", default="CEREBRUM.pdf",
                       help="Output PDF filename (default: CEREBRUM.pdf)")
-    parser.add_argument("--appendix-pattern", default="*_APPENDIX.md",
-                      help="Glob pattern to identify appendix files (default: *_APPENDIX.md)")
+    parser.add_argument("--appendix-pattern", default="Supplement_*.md",
+                      help="Glob pattern to identify appendix files (default: Supplement_*.md)")
     parser.add_argument("--appendix-order", nargs="*",
                       help="Explicit order of appendix files (by filename)")
     parser.add_argument("--skip-mermaid", action="store_true",
@@ -559,19 +580,19 @@ if __name__ == "__main__":
     if not args.appendix_order:
         # IMPORTANT: This is the canonical order of appendices.
         # The numbering and lettering should match:
-        # - Appendix A 1: MATH_APPENDIX.md (Mathematical Formalization)
-        # - Appendix B 2: NOVEL_CASES_APPENDIX.md (Novel Linguistic Cases)
-        # - Appendix C 3: PRACTICAL_APPENDIX.md (Practical Applications)
-        # - Appendix D 4: RELATED_WORK_APPENDIX.md (Related Work - Detailed Analysis)
-        # - Appendix E 5: CATEGORY_THEORY_APPENDIX.md (Category-Theoretic Formalization)
-        # - Appendix F 6: FUTURE_DIRECTIONS_APPENDIX.md (Future Directions for CEREBRUM Research)
+        # - Supplement A 1: Supplement_A_1_Mathematical_Formalization.md
+        # - Supplement B 2: Supplement_B_2_Novel_Linguistic_Cases.md
+        # - Supplement C 3: Supplement_C_3_Practical_Applications.md
+        # - Supplement D 4: Supplement_D_4_Related_Work.md
+        # - Supplement E 5: Supplement_E_5_Category_Theory.md
+        # - Supplement F 6: Supplement_F_6_Future_Directions.md
         args.appendix_order = [
-            "MATH_APPENDIX.md",             # Appendix A 1: First appendix
-            "NOVEL_CASES_APPENDIX.md",      # Appendix B 2: Second appendix
-            "PRACTICAL_APPENDIX.md",        # Appendix C 3: Third appendix
-            "RELATED_WORK_APPENDIX.md",     # Appendix D 4: Fourth appendix
-            "CATEGORY_THEORY_APPENDIX.md",  # Appendix E 5: Fifth appendix
-            "FUTURE_DIRECTIONS_APPENDIX.md" # Appendix F 6: Sixth appendix
+            "Supplement_A_1_Mathematical_Formalization.md", # Supplement A 1
+            "Supplement_B_2_Novel_Linguistic_Cases.md",     # Supplement B 2
+            "Supplement_C_3_Practical_Applications.md",     # Supplement C 3
+            "Supplement_D_4_Related_Work.md",             # Supplement D 4
+            "Supplement_E_5_Category_Theory.md",          # Supplement E 5
+            "Supplement_F_6_Future_Directions.md"         # Supplement F 6
         ]
         logging.info(f"Using canonical appendix order: {', '.join(args.appendix_order)}")
     
