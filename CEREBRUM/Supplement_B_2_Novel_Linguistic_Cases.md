@@ -1,4 +1,4 @@
-# Appendix B 2: Novel Linguistic Cases
+# Novel Linguistic Cases
 
 ## Discovering and Creating New Linguistic Cases Through CEREBRUM
 
@@ -17,9 +17,9 @@ Traditional linguistic case systems evolved to serve human communication needs i
 
 One speculative example of a novel case that might emerge within CEREBRUM is what we might term the "conjunctive" case [CNJ]. This case would represent a model's role in synthesizing multiple predictive streams into coherent joint predictions that couldn't be achieved through simple composition of existing cases.
 
-The mathematical formalism for a model in conjunctive case would extend the standard free energy equation as shown in Equation 15 (see Mathematical Appendix), representing the assembly of connected models participating in the joint prediction. The key innovation is that the likelihood term explicitly depends on multiple models' predictions rather than a single model's output, enabling integration of diverse predictive streams.
+The mathematical formalism for a model in conjunctive case would extend the standard free energy equation as shown in Equation 15 (see Supplement 1), representing the assembly of connected models participating in the joint prediction. The key innovation is that the likelihood term explicitly depends on multiple models' predictions rather than a single model's output, enabling integration of diverse predictive streams.
 
-In the message-passing formulation, the conjunctive case would introduce unique update rules as described in Equation 16 (see Mathematical Appendix), with weighting factors for individual model predictions, as well as a multiplicative integration of predictions that captures interdependencies beyond simple weighted averaging. This formulation enables rich joint inference across model collectives.
+In the message-passing formulation, the conjunctive case would introduce unique update rules as described in Equation 16 (see Supplement 1), with weighting factors for individual model predictions, as well as a multiplicative integration of predictions that captures interdependencies beyond simple weighted averaging. This formulation enables rich joint inference across model collectives.
 
 ### Speculative Novel Case: The "Recursive" Case
 
@@ -27,7 +27,7 @@ Another potential novel case is the "recursive" case [REC], which would enable a
 
 In the recursive case, a model assumes both agent and object roles simultaneously, creating feedback loops that enable complex self-modification behaviors. This case would be particularly relevant for metalearning systems and artificial neural networks that modify their own architectures.
 
-The recursive case would introduce unique precision dynamics as formalized in Equation 17 (see Mathematical Appendix). The key innovation is that the model appears on both sides of the transformation, creating a form of self-reference that traditional case systems don't accommodate. This enables models to introspect and modify their own parameters through self-directed transformations.
+The recursive case would introduce unique precision dynamics as formalized in Equation 17 (see Supplement 1). The key innovation is that the model appears on both sides of the transformation, creating a form of self-reference that traditional case systems don't accommodate. This enables models to introspect and modify their own parameters through self-directed transformations.
 
 ### Speculative Novel Case: The "Metaphorical" Case
 
@@ -35,7 +35,7 @@ A third potential novel case is the "metaphorical" case [MET], which would enabl
 
 In the metaphorical case, a model acts as a transformation bridge between disparate domains, establishing systematic mappings between conceptual structures. This case would be particularly valuable for transfer learning systems and creative problem-solving algorithms that need to apply learned patterns in novel contexts.
 
-The metaphorical case would introduce unique cross-domain mapping functions as formalized in Equation 18 (see Mathematical Appendix). The key innovation is the structured alignment of latent representations across domains, enabling principled knowledge transfer that preserves relational invariants while adapting to target domain constraints.
+The metaphorical case would introduce unique cross-domain mapping functions as formalized in Equation 18 (see Supplement 1). The key innovation is the structured alignment of latent representations across domains, enabling principled knowledge transfer that preserves relational invariants while adapting to target domain constraints.
 
 #### Connections to Human Cognition and Communication
 
