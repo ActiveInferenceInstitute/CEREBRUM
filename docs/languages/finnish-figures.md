@@ -275,7 +275,6 @@ graph TB
 ```mermaid
 stateDiagram-v2
     [*] --> Nominative
-    
     Nominative --> Accusative: Becomes object
     Accusative --> Dative: Becomes recipient
     Dative --> Genitive: Becomes source
@@ -435,18 +434,18 @@ timeline
 
 ```mermaid
 flowchart LR
-    subgraph "Talkoot Principles"
-        T1[Shared<br>Goals]:::talkoot
-        T2[Voluntary<br>Participation]:::talkoot
-        T3[Reciprocal<br>Benefits]:::talkoot
-        T4[Community<br>Building]:::talkoot
+    subgraph Talkoot Principles
+        T1[Shared<br>Goals]
+        T2[Voluntary<br>Participation]
+        T3[Reciprocal<br>Benefits]
+        T4[Community<br>Building]
     end
     
-    subgraph "Multi-Agent System"
-        A1[Agent 1]:::agent
-        A2[Agent 2]:::agent
-        A3[Agent 3]:::agent
-        A4[Agent 4]:::agent
+    subgraph Multi-Agent System
+        A1[Agent 1]
+        A2[Agent 2]
+        A3[Agent 3]
+        A4[Agent 4]
     end
     
     T1 --> A1 & A2 & A3 & A4
@@ -460,40 +459,32 @@ flowchart LR
     A4 <--> A1
     A1 <--> A3
     A2 <--> A4
-    
-    classDef talkoot fill:#D0A2F7,stroke:#9969C7,color:white
-    classDef agent fill:#F9C74F,stroke:#BC6C25,color:white
 ```
 
 ## Finnish Linguistic Case System in CEREBRUM
 
 ```mermaid
 graph TB
-    classDef nominal fill:#A7C7E7,stroke:#0078D7,color:white
-    classDef verbal fill:#F9C774,stroke:#BD8422,color:white
-    classDef spatial fill:#8F9779,stroke:#4F5746,color:white
-    classDef functional fill:#F78FA7,stroke:#EB5286,color:white
-    
-    subgraph "Linguistic Cases"
-        L1[Nominative]:::nominal
-        L2[Accusative]:::nominal
-        L3[Genitive]:::nominal
-        L4[Dative]:::nominal
-        L5[Instrumental]:::nominal
-        L6[Locative]:::spatial
-        L7[Ablative]:::spatial
-        L8[Vocative]:::functional
+    subgraph Linguistic Cases
+        L1[Nominative]
+        L2[Accusative]
+        L3[Genitive]
+        L4[Dative]
+        L5[Instrumental]
+        L6[Locative]
+        L7[Ablative]
+        L8[Vocative]
     end
     
-    subgraph "CEREBRUM Cases"
-        C1[Model as active agent]:::nominal
-        C2[Model as object]:::nominal
-        C3[Model as source]:::nominal
-        C4[Model as recipient]:::nominal
-        C5[Model as method]:::nominal
-        C6[Model as context]:::spatial
-        C7[Model as origin]:::spatial
-        C8[Model as addressable entity]:::functional
+    subgraph CEREBRUM Cases
+        C1[Model as active agent]
+        C2[Model as object]
+        C3[Model as source]
+        C4[Model as recipient]
+        C5[Model as method]
+        C6[Model as context]
+        C7[Model as origin]
+        C8[Model as addressable entity]
     end
     
     L1 --- C1
@@ -529,26 +520,20 @@ quadrantChart
 
 ```mermaid
 graph TD
-    classDef canopy fill:#4F7942,stroke:#2E4725,color:white
-    classDef shrub fill:#6B8E23,stroke:#4F6919,color:white
-    classDef herb fill:#9DC183,stroke:#6A8253,color:white
-    classDef root fill:#8B4513,stroke:#5E2F0D,color:white
-    classDef soil fill:#9B7653,stroke:#664E37,color:white
-    
-    subgraph "Forest Garden Layers"
-        C[Canopy Layer]:::canopy
-        S[Shrub Layer]:::shrub
-        H[Herbaceous Layer]:::herb
-        R[Root Layer]:::root
-        M[Soil Microbiome]:::soil
+    subgraph Forest Garden Layers
+        C[Canopy Layer]
+        S[Shrub Layer]
+        H[Herbaceous Layer]
+        R[Root Layer]
+        M[Soil Microbiome]
     end
     
-    subgraph "System Architecture Layers"
-        UI[User Interface]:::canopy
-        ML[Middle Logic]:::shrub
-        DS[Data Services]:::herb
-        DB[Database]:::root
-        IS[Infrastructure]:::soil
+    subgraph System Architecture Layers
+        UI[User Interface]
+        ML[Middle Logic]
+        DS[Data Services]
+        DB[Database]
+        IS[Infrastructure]
     end
     
     C --- UI
@@ -624,21 +609,20 @@ gantt
 
 ## Emotional Dimensions of Finnish Concepts
 
-```mermaid
-xychart-beta
-    title "Emotional Dimensions of Finnish Concepts"
-    x-axis "Communal -- Individual" -5 --> 5
-    y-axis "Practical -- Philosophical" -5 --> 5
-    bar [0, 1, -2.5, 3.5, -3, 2, -4]
-    line [2, 4, -1, 3, -2, 0, -3.5]
-    point [1, 3, -2, 4, -2.5, 1, -4.5]
-    title "Luonto, Paikka, Talkoot, Sisu, Käsityö, Verkosto, Reuna"
-```
+*   **Luonto:** Communal=0, Practical=2
+*   **Paikka:** Communal=1, Practical=4
+*   **Talkoot:** Communal=-2.5, Practical=-1
+*   **Sisu:** Communal=3.5, Practical=3
+*   **Käsityö:** Communal=-3, Practical=-2
+*   **Verkosto:** Communal=2, Practical=0
+*   **Reuna:** Communal=-4, Practical=-3.5
+
+(Note: xychart-beta is not reliably supported in GitHub Markdown)
 
 ## Finnish-CEREBRUM Integration: Precision & Context
 
 ```mermaid
-pie showData
+pie
     title "Value Integration Areas"
     "Contextual Intelligence" : 30
     "Precision Mechanics" : 25
@@ -651,24 +635,24 @@ pie showData
 
 ```mermaid
 graph TB
-    subgraph "Forest Ecosystem"
-        T1[Tall Trees]:::tree
-        T2[Mid-Canopy]:::tree
-        T3[Understory]:::tree
-        S[Shrubs]:::shrub
-        H[Herbs]:::herb
-        M[Mushrooms]:::fungi
-        SO[Soil]:::soil
+    subgraph Forest Ecosystem
+        T1[Tall Trees]
+        T2[Mid-Canopy]
+        T3[Understory]
+        S[Shrubs]
+        H[Herbs]
+        M[Mushrooms]
+        SO[Soil]
     end
     
-    subgraph "Model Ecosystem"
-        M1[Core Models]:::model1
-        M2[Support Models]:::model2
-        M3[Interface Models]:::model3
-        M4[Processing Models]:::model4
-        M5[Data Models]:::model5
-        M6[Integration Models]:::model6
-        M7[Infrastructure]:::model7
+    subgraph Model Ecosystem
+        M1[Core Models]
+        M2[Support Models]
+        M3[Interface Models]
+        M4[Processing Models]
+        M5[Data Models]
+        M6[Integration Models]
+        M7[Infrastructure]
     end
     
     T1 --- M1
@@ -678,95 +662,65 @@ graph TB
     H --- M5
     M --- M6
     SO --- M7
-    
-    classDef tree fill:#4F7942,stroke:#2E4725,color:white
-    classDef shrub fill:#6B8E23,stroke:#4F6919,color:white
-    classDef herb fill:#9DC183,stroke:#6A8253,color:white
-    classDef fungi fill:#DEB887,stroke:#8B7355,color:white
-    classDef soil fill:#8B4513,stroke:#5E2F0D,color:white
-    
-    classDef model1 fill:#4361EE,stroke:#2B3EAD,color:white
-    classDef model2 fill:#4895EF,stroke:#2F6EB7,color:white
-    classDef model3 fill:#4CC9F0,stroke:#33A1C5,color:white
-    classDef model4 fill:#56CFE1,stroke:#3CA3B1,color:white
-    classDef model5 fill:#72EFDD,stroke:#4DCDB8,color:white
-    classDef model6 fill:#80FFDB,stroke:#57D9B7,color:white
-    classDef model7 fill:#64DFDF,stroke:#4AB5B5,color:white
 ```
 
 ## The Simple Beauty of Finnish Design Principles
 
 ```mermaid
 graph TD
-    subgraph "Finnish Design Ethos"
-        F[Functionality]:::design
-        S[Simplicity]:::design
-        H[Harmony]:::design
-        D[Durability]:::design
-        M[Materials]:::design
+    subgraph Finnish_Design_Ethos
+        F[Functionality]
+        S[Simplicity]
+        H[Harmony]
+        D[Durability]
+        M[Materials]
     end
-    
-    style F fill:#FFFFFF,stroke:#000000,color:black,stroke-width:2px
-    style S fill:#FFFFFF,stroke:#000000,color:black,stroke-width:2px
-    style H fill:#FFFFFF,stroke:#000000,color:black,stroke-width:2px
-    style D fill:#FFFFFF,stroke:#000000,color:black,stroke-width:2px
-    style M fill:#FFFFFF,stroke:#000000,color:black,stroke-width:2px
-    
-    classDef design stroke-dasharray: 5 5
 ```
 
 ## CEREBRUM Morphological Grammar
 
 ```mermaid
 graph LR
-    subgraph "Model [NOM]"
-        N1[Active<br>Agent]
+    subgraph Model_NOM
+        N1[Active Agent]
     end
     
-    subgraph "Model [ACC]"
-        A1[Object of<br>Process]
+    subgraph Model_ACC
+        A1[Object of Process]
     end
     
-    subgraph "Model [GEN]"
-        G1[Source/<br>Generator]
+    subgraph Model_GEN
+        G1[Source Generator]
     end
     
-    subgraph "Model [DAT]"
+    subgraph Model_DAT
         D1[Recipient]
     end
     
     N1 -->|transforms| A1
     A1 -->|produces| G1
     G1 -->|delivers to| D1
-    
-    style N1 fill:#E9C46A,stroke:#B7831A,color:black
-    style A1 fill:#F4A261,stroke:#D47A39,color:black
-    style G1 fill:#E76F51,stroke:#BC3F23,color:white
-    style D1 fill:#2A9D8F,stroke:#176D63,color:white
 ```
 
 ## Bridging Linguistic and Computational Boundaries
 
 ```mermaid
 flowchart LR
-    subgraph "Finnish Linguistic Genius"
-        L1[Case System]:::ling
-        L2[Agglutination]:::ling
-        L3[Vowel Harmony]:::ling
+    subgraph Finnish Linguistic Genius
+        L1[Case System]
+        L2[Agglutination]
+        L3[Vowel Harmony]
     end
     
-    subgraph "Computational Framework"
-        C1[Model Structure]:::comp
-        C2[Function Chaining]:::comp
-        C3[Process Harmony]:::comp
+    subgraph Computational Framework
+        C1[Model Structure]
+        C2[Function Chaining]
+        C3[Process Harmony]
     end
     
     L1 --> C1
     L2 --> C2
     L3 --> C3
-    
-    classDef ling fill:#C8B6FF,stroke:#9178ED,color:black
-    classDef comp fill:#FFD6A5,stroke:#FFA940,color:black
 ``` 
 
 ## Core Finnish Concepts Hierarchy
@@ -774,37 +728,37 @@ flowchart LR
 ```mermaid
 mindmap
   root((Finnish Concepts))
-    (Luonto & Metsä)
+    (Luonto and Metsa)
       (Nature)
       (Forest)
       (Ecological systems)
-      (Biodiversity/Monimuotoisuus)
-      (Cycles/Vuodenkierto)
-    (Paikka & Locative Cases)
+      (Biodiversity Monimuotoisuus)
+      (Cycles Vuodenkierto)
+    (Paikka and Locative Cases)
       (Place)
-      (Inessive -ssa/-ssä)
-      (Elative -sta/-stä)
-      (Illative -an/-en/...)
-      (Adessive -lla/-llä)
-      (Ablative -lta/-ltä)
+      (Inessive -ssa -ssä)
+      (Elative -sta -stä)
+      (Illative -an -en etc)
+      (Adessive -lla -llä)
+      (Ablative -lta -ltä)
       (Allative -lle)
-    (Talkoot & Yhteisö)
+    (Talkoot and Yhteiso)
       (Communal work)
       (Community)
       (Cooperation)
-      (Naapuriapu/Neighborly help)
-      (Osuuskunta/Cooperative)
+      (Naapuriapu Neighborly help)
+      (Osuuskunta Cooperative)
     (Sisu)
       (Resilience)
       (Perseverance)
       (Anti-fragility)
       (Robustness)
-    (Käsityö & Muotoilu)
+    (Kasityo and Muotoilu)
       (Handicraft)
       (Design)
       (Functional aesthetics)
       (Durability)
-    (Reuna, Raja, Välitila)
+    (Reuna Raja Valitila)
       (Edge)
       (Boundary)
       (In-between space)
@@ -813,7 +767,7 @@ mindmap
       (Network)
       (Connections)
       (Web of relationships)
-    (Keräily & Vuodenkierto)
+    (Keraily and Vuodenkierto)
       (Foraging)
       (Cyclical processes)
       (Seasonal knowledge)

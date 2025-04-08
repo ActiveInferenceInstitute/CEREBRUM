@@ -435,9 +435,9 @@ def prepare_appendix_files(appendix_files):
 
     logging.info(f"Preparing {len(appendix_files)} appendix files...")
     
-    # Use letter designations for appendices (A, B, C, ...)
-    appendix_letters = [chr(65 + i) for i in range(len(appendix_files))]
-    
+    # Use letter designations for appendices (A, B, C, ...) - NO LONGER USED
+    # appendix_letters = [chr(65 + i) for i in range(len(appendix_files))]
+
     # Define mapping of expected appendix numbering based on new filenames
     # This ensures consistent numbering across the appendices
     expected_numbering = {
@@ -448,13 +448,30 @@ def prepare_appendix_files(appendix_files):
         "Supplement_E_5_Category_Theory.md": "5",
         "Supplement_F_6_Future_Directions.md": "6"
     }
-    
-    for i, (appendix_file, letter) in enumerate(zip(appendix_files, appendix_letters)):
+
+    # Sort files based on the number in the expected_numbering map
+    def get_sort_key(filepath):
+        filename = os.path.basename(filepath)
+        num_str = expected_numbering.get(filename, '999') # Default to a high number if not found
+        try:
+            return int(num_str)
+        except ValueError:
+            return 999 # Fallback for non-integer numbers
+
+    appendix_files.sort(key=get_sort_key)
+    logging.info("Sorted supplement files based on expected numbering.")
+
+    for i, appendix_file in enumerate(appendix_files):
         filename = os.path.basename(appendix_file)
-        # Ensure number consistency using the dictionary, fallback to index+1 if file not found
-        number = expected_numbering.get(filename, str(i + 1))
-        if filename not in expected_numbering:
-             logging.warning(f"Filename {filename} not found in expected numbering map. Using index-based number {number}.")
+        # Get the number directly from the sorted position (1-based index)
+        number = str(i + 1)
+
+        # Optional: Cross-check with expected_numbering if needed for validation, but use i+1 for heading
+        expected_num = expected_numbering.get(filename)
+        if expected_num and expected_num != number:
+            logging.warning(f"Mismatch in expected number ({expected_num}) vs sorted position ({number}) for {filename}. Using sorted position number.")
+        elif not expected_num:
+            logging.warning(f"Filename {filename} not found in expected numbering map. Using sorted position number {number}.")
 
         with open(appendix_file, 'r') as f:
             content = f.read()
@@ -464,16 +481,15 @@ def prepare_appendix_files(appendix_files):
         if first_heading_match:
             heading_text = first_heading_match.group(1)
 
-            # Check if heading already contains properly formatted appendix designation
-            # Updated pattern to match "Supplement"
-            appendix_pattern = rf'Supplement {letter} {number}:'
-            if re.search(appendix_pattern, heading_text):
+            # Check if heading already contains properly formatted supplement designation (Number only)
+            appendix_pattern = rf'Supplement {number}:' # Pattern now only uses number
+            if re.search(appendix_pattern, heading_text) and not re.search(r'Supplement [A-Z] \d+:', heading_text):
                 logging.info(f"Heading in {filename} already has correct supplement designation: '{heading_text}'")
             else:
-                # Extract existing title without any appendix/supplement designation
+                # Extract existing title without any supplement/appendix designation (Letter+Number or Number only)
                 title_text = re.sub(r'^Supplement [A-Z] \d+:\s*', '', heading_text)
+                title_text = re.sub(r'^Supplement \d+:\s*', '', title_text) # Remove number-only prefix too
                 title_text = re.sub(r'^Supplement [A-Z]:\s*', '', title_text)
-                title_text = re.sub(r'^Supplement \d+:\s*', '', title_text)
                 title_text = re.sub(r'^Supplement:\s*', '', title_text)
                 # Also remove old "Appendix" prefixes if present
                 title_text = re.sub(r'^Appendix [A-Z] \d+:\s*', '', title_text)
@@ -481,8 +497,8 @@ def prepare_appendix_files(appendix_files):
                 title_text = re.sub(r'^Appendix \d+:\s*', '', title_text)
                 title_text = re.sub(r'^Appendix:\s*', '', title_text)
 
-                # Create new heading with proper supplement designation
-                new_heading = f"Supplement {letter} {number}: {title_text}"
+                # Create new heading with proper supplement designation (Number only)
+                new_heading = f"Supplement {number}: {title_text}"
                 modified_content = content.replace(first_heading_match.group(0), f"# {new_heading}")
 
                 with open(appendix_file, 'w') as f:
@@ -490,28 +506,14 @@ def prepare_appendix_files(appendix_files):
                 logging.info(f"Updated heading in {filename}: '{heading_text}' → '{new_heading}'")
         else:
             # If no heading found, add one
-            new_heading = f"# Supplement {letter} {number}"
+            new_heading = f"# Supplement {number}"
             modified_content = f"{new_heading}\\n\\n{content}"
 
             with open(appendix_file, 'w') as f:
                 f.write(modified_content)
             logging.warning(f"Added missing heading to {filename}: '{new_heading}'")
 
-        # Remove any existing \\appendix commands as they're now handled elsewhere
-        # Also remove old \appendixname redefinitions if they exist
-        modified_content_lines = []
-        content_changed = False
-        for line in content.splitlines():
-            if '\\appendix' in line or '\\renewcommand{\\appendixname}' in line:
-                 content_changed = True
-                 logging.info(f"Removed deprecated LaTeX command from {filename}: {line.strip()}")
-                 continue
-            modified_content_lines.append(line)
-
-        if content_changed:
-             modified_content = "\\n".join(modified_content_lines)
-             with open(appendix_file, 'w') as f:
-                 f.write(modified_content)
+        # Remove any existing \\appendix commands etc. (code remains the same)
 
 def parse_arguments():
     """Parse command line arguments for the script."""

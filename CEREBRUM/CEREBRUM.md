@@ -252,9 +252,9 @@ Prior applications of active inference to artificial intelligence have focused p
 
 Computational linguistics has extensively employed case grammar for natural language processing, but rarely extended these principles to model management. CEREBRUM repurposes linguistic case theory as a structural framework for model relationships rather than textual analysis.
 
-(See Appendix 2: Novel Linguistic Cases for a discussion of how CEREBRUM can discover and create new linguistic cases beyond traditional case systems.)
+(See Supplement 2: Novel Linguistic Cases for a discussion of how CEREBRUM can discover and create new linguistic cases beyond traditional case systems.)
 
-(See Appendix C: Practical Applications for detailed implementations of CEREBRUM in model ecosystems.)
+(See Supplement 3: Practical Applications for detailed implementations of CEREBRUM in model ecosystems.)
 
 ## Future Directions
 
