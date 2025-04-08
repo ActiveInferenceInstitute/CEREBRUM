@@ -1400,23 +1400,23 @@ mindmap
 
 ```mermaid
 flowchart TD
-    subgraph "Finnish Ecological Knowledge Types"
-        F1[Perinnetieto<br>Traditional Knowledge]:::finn
-        F2[Paikallinen Tieto<br>Local Knowledge]:::finn
-        F3[Kokemusperäinen Tieto<br>Experiential Knowledge]:::finn
-        F4[Kansanekologia<br>Folk Ecology]:::finn
-        F5[Luonnontieto<br>Nature Knowledge]:::finn
+    subgraph Finnish Ecological Knowledge Types
+        F1[Perinnetieto<br>Traditional Knowledge]
+        F2[Paikallinen Tieto<br>Local Knowledge]
+        F3[Kokemusperäinen Tieto<br>Experiential Knowledge]
+        F4[Kansanekologia<br>Folk Ecology]
+        F5[Luonnontieto<br>Nature Knowledge]
     end
 
-    subgraph "CEREBRUM Case Structure"
-        C1[Nominative Case]:::cerebrum
-        C2[Accusative Case]:::cerebrum
-        C3[Genitive Case]:::cerebrum
-        C4[Dative Case]:::cerebrum
-        C5[Instrumental Case]:::cerebrum
-        C6[Locative Case]:::cerebrum
-        C7[Ablative Case]:::cerebrum
-        C8[Vocative Case]:::cerebrum
+    subgraph CEREBRUM Case Structure
+        C1[Nominative Case]
+        C2[Accusative Case]
+        C3[Genitive Case]
+        C4[Dative Case]
+        C5[Instrumental Case]
+        C6[Locative Case]
+        C7[Ablative Case]
+        C8[Vocative Case]
     end
 
     F1 --> C1
@@ -1424,31 +1424,28 @@ flowchart TD
     F3 --> C5
     F4 --> C3
     F5 --> C7
-
-    classDef finn fill:#0073CF,stroke:#004A86,color:white
-    classDef cerebrum fill:#D42A2E,stroke:#8C1D1F,color:white
 ```
 
 ## Metsäekosysteemi: Finnish Forest Ecosystem as Model Architecture
 
 ```mermaid
 graph TD
-    subgraph "Finnish Forest Layers"
-        L1[Latvuskerros<br>Canopy Layer]:::forest1
-        L2[Alikasvos<br>Understory]:::forest2
-        L3[Pensaskerros<br>Shrub Layer]:::forest3
-        L4[Kenttäkerros<br>Field Layer]:::forest4
-        L5[Pohjakerros<br>Ground Layer]:::forest5
-        L6[Maaperä<br>Soil]:::forest6
+    subgraph Finnish Forest Layers
+        L1[Latvuskerros<br>Canopy Layer]
+        L2[Alikasvos<br>Understory]
+        L3[Pensaskerros<br>Shrub Layer]
+        L4[Kenttäkerros<br>Field Layer]
+        L5[Pohjakerros<br>Ground Layer]
+        L6[Maaperä<br>Soil]
     end
 
-    subgraph "CEREBRUM Architecture"
-        M1[Interface Models]:::model1
-        M2[Integration Models]:::model2
-        M3[Processing Models]:::model3
-        M4[Data Models]:::model4
-        M5[Utility Models]:::model5
-        M6[Infrastructure]:::model6
+    subgraph CEREBRUM Architecture
+        M1[Interface Models]
+        M2[Integration Models]
+        M3[Processing Models]
+        M4[Data Models]
+        M5[Utility Models]
+        M6[Infrastructure]
     end
 
     L1 --- M1
@@ -1457,20 +1454,6 @@ graph TD
     L4 --- M4
     L5 --- M5
     L6 --- M6
-
-    classDef forest1 fill:#004D00,stroke:#002800,color:white
-    classDef forest2 fill:#006600,stroke:#003300,color:white
-    classDef forest3 fill:#008000,stroke:#004000,color:white
-    classDef forest4 fill:#38761D,stroke:#274E13,color:white
-    classDef forest5 fill:#6AA84F,stroke:#38761D,color:white
-    classDef forest6 fill:#8B4513,stroke:#5E2F0D,color:white
-
-    classDef model1 fill:#4361EE,stroke:#2B3EAD,color:white
-    classDef model2 fill:#4895EF,stroke:#2F6EB7,color:white
-    classDef model3 fill:#4CC9F0,stroke:#33A1C5,color:white
-    classDef model4 fill:#56CFE1,stroke:#3CA3B1,color:white
-    classDef model5 fill:#72EFDD,stroke:#4DCDB8,color:white
-    classDef model6 fill:#80FFDB,stroke:#57D9B7,color:white
 ```
 
 ## Finnish Ecosystem Types and CEREBRUM Model Categories
@@ -1478,49 +1461,41 @@ graph TD
 ```mermaid
 pie
     title "Finnish Ecosystem Diversity and Model Types"
-    "Metsät (Forests)" : 35
-    "Suot (Peatlands)" : 20
-    "Järvet (Lakes)" : 15
-    "Tunturit (Fells)" : 10
-    "Saaristo (Archipelago)" : 10
-    "Maatalousmaisema (Agricultural Landscape)" : 10
+    "Metsat Forests" : 35
+    "Suot Peatlands" : 20
+    "Jarvet Lakes" : 15
+    "Tunturit Fells" : 10
+    "Saaristo Archipelago" : 10
+    "Maatalousmaisema Agricultural Landscape" : 10
 ```
 
 ## Suomalainen Ekotoni: Finnish Ecotones and Boundary Phenomena
 
-```mermaid
-quadrantChart
-    title Finnish Ecotones and CEREBRUM Boundary Systems
-    x-axis Low Complexity --> High Complexity
-    y-axis Low Biodiversity --> High Biodiversity
-    quadrant-1 Simple Rich Transitions
-    quadrant-2 Complex Biodiverse Systems
-    quadrant-3 Simple Homogeneous Areas
-    quadrant-4 Complex Limited Diversity
-    "Metsänreuna (Forest Edge)": [0.7, 0.8]
-    "Rantavyöhyke (Shoreline)": [0.8, 0.9]
-    "Suo-metsä Vaihettumisvyöhyke (Peatland-Forest Transition)": [0.75, 0.85]
-    "Tunturikoivikko (Mountain Birch Zone)": [0.6, 0.7]
-    "CEREBRUM Markov Blanket": [0.85, 0.65]
-    "CEREBRUM Case Transformations": [0.9, 0.75]
-```
+*   **Metsänreuna (Forest Edge):** Complexity=0.7, Biodiversity=0.8
+*   **Rantavyöhyke (Shoreline):** Complexity=0.8, Biodiversity=0.9
+*   **Suo-metsä Vaihettumisvyöhyke (Peatland-Forest Transition):** Complexity=0.75, Biodiversity=0.85
+*   **Tunturikoivikko (Mountain Birch Zone):** Complexity=0.6, Biodiversity=0.7
+*   **CEREBRUM Markov Blanket:** Complexity=0.85, Biodiversity=0.65
+*   **CEREBRUM Case Transformations:** Complexity=0.9, Biodiversity=0.75
+
+(Note: quadrantChart is not reliably supported in GitHub Markdown)
 
 ## Aktiivinen Päättely: Finnish Active Inference Implementation
 
 ```mermaid
 sequenceDiagram
-    participant E as Ennuste (Prediction)
-    participant H as Havainto (Observation)
-    participant V as Virhe (Error)
-    participant T as Tarkkuus (Precision)
-    participant P as Päivitys (Update)
+    participant E as Ennuste_Prediction
+    participant H as Havainto_Observation
+    participant V as Virhe_Error
+    participant T as Tarkkuus_Precision
+    participant P as Paivitys_Update
     
-    Note over E,P: Suomalainen Aktiivinen Päättely (Finnish Active Inference)
-    E->>H: Generoi ennuste (Generate prediction)
-    H->>V: Vertaa havaintoon (Compare to observation)
-    V->>T: Painota tarkkuudella (Weight by precision)
-    T->>P: Päivitä parametrit (Update parameters)
-    P->>E: Päivitä malli (Update model)
+    Note over E,P: Finnish Active Inference
+    E->>H: Generate prediction
+    H->>V: Compare to observation
+    V->>T: Weight by precision
+    T->>P: Update parameters
+    P->>E: Update model
 ```
 
 ## Kiertotalous: Finnish Circular Economy as Model Workflow
