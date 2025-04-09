@@ -8,7 +8,11 @@ ORCID: 0000-0001-6232-9096
 
 Email: daniel@activeinference.institute
 
-Version 1.0 (2025-04-07) ~ CC BY-NC-ND 4.0
+Version 1.0 (2025-04-07)
+
+CC BY-NC-ND 4.0
+
+DOI: 10.5281/zenodo.15170907
 
 ## Abstract
 
@@ -28,7 +32,7 @@ Cognitive systems modeling approaches cognition as a complex adaptive system, wh
 
 ### Active Inference
 
-Active Inference is a first-principles account of perception, learning, and decision-making based on the Free Energy Principle. In this framework, cognitive systems minimize variational free energy — bounded surprise, reflecting the difference between an organism's internal model and its environment — through perception (updating internal models) and action (changing action and ultimately sensory inputs). The Active Inference framework formalizes uncertainty in terms of entropy and precision weighting, enabling dynamic adaptive processes. While many model architectures are possible, hierarchical message passing is a common implementation that implements predictions as top-down flows and prediction errors as bottom-up flows, creating a bidirectional inference system that iteratively minimizes surprise across model levels. Active Inference treats all cognitive operations as Bayesian model update, providing a unifying mathematical formalism for predictive cognition.
+Active Inference is a first-principles account of perception, learning, and decision-making based on the Free Energy Principle. In this framework, cognitive systems minimize variational free energy  bounded surprise, reflecting the difference between an organism's internal model and its environment  through perception (updating internal models) and action (changing action and ultimately sensory inputs). The Active Inference framework formalizes uncertainty in terms of entropy and precision weighting, enabling dynamic adaptive processes. While many model architectures are possible, hierarchical message passing is a common implementation that implements predictions as top-down flows and prediction errors as bottom-up flows, creating a bidirectional inference system that iteratively minimizes surprise across model levels. Active Inference treats all cognitive operations as Bayesian model update, providing a unifying mathematical formalism for predictive cognition.
 
 ### Linguistic Case Systems
 

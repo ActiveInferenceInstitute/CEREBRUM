@@ -36,12 +36,12 @@ python3 tools/render_markdown.py
 ```
 
 This script will:
-1. Execute the `render_mermaids.py` script to generate diagrams from Mermaid syntax
-2. Process the main Markdown file (`CEREBRUM/CEREBRUM.md`) 
-3. Include appendix files (`MATH_APPENDIX.md` and `NOVEL_CASES_APPENDIX.md`)
-4. Generate the final PDF file at `CEREBRUM/CEREBRUM.pdf`
+1. Execute the `render_mermaids.py` script to generate diagrams from Mermaid syntax (unless skipped via arguments).
+2. Process the main Markdown file (`CEREBRUM/CEREBRUM.md`).
+3. Find, order, and include appendix files (matching `CEREBRUM/Supplement_*.md` by default).
+4. Generate the final PDF file at `CEREBRUM/CEREBRUM.pdf`.
 
-The PDF includes proper formatting, a table of contents, section numbering, and embedded figures (included as Mermaid Markdown diagrams in the source files).
+The PDF includes proper formatting, a table of contents, section numbering, and embedded figures.
 
 ## Citation
 If you use CEREBRUM in your research, please cite:

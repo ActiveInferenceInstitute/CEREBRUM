@@ -60,12 +60,12 @@ Consists of a family of morphisms $\{\eta_M: F_{\text{CASE}_1}(M) \rightarrow F_
 For any model $M$ and two cases $\text{CASE}_1$ and $\text{CASE}_2$, the following diagram commutes:
 
 ```
-F_CASE(M) -----_M-----> F_CASE(M)
+F_CASE₁(M) -----η_M-----> F_CASE₂(M)
     |                       |
- F_CASE(f)              F_CASE(f)
+ F_CASE₁(f)              F_CASE₂(f)
     |                       |
     v                       v
-F_CASE(N) -----_N-----> F_CASE(N)
+F_CASE₁(N) -----η_N-----> F_CASE₂(N)
 ```
 
 This demonstrates that case transformations preserve the underlying structural relationships between models.
@@ -75,13 +75,13 @@ This demonstrates that case transformations preserve the underlying structural r
 The composition of case transformations follows category-theoretic laws. For three cases $\text{CASE}_1$, $\text{CASE}_2$, and $\text{CASE}_3$, with natural transformations $\eta: F_{\text{CASE}_1} \Rightarrow F_{\text{CASE}_2}$ and $\mu: F_{\text{CASE}_2} \Rightarrow F_{\text{CASE}_3}$, the following diagram commutes:
 
 ```
-            _M  _M
-F_CASE(M) -----------> F_CASE(M)
+            μ_M ∘ η_M
+F_CASE₁(M) -----------> F_CASE₃(M)
     |                       |
     |                       |
     v                       v
-  _M           _F_CASE(M)
-F_CASE(M) -----------> F_CASE(M)
+  η_M           μ_F_CASE₂(M)
+F_CASE₂(M) -----------> F_CASE₃(M)
 ```
 
 This ensures that sequential case transformations are well-defined and consistent.
@@ -90,7 +90,7 @@ This ensures that sequential case transformations are well-defined and consisten
 
 ### 5.5.1 Monoidal Category of Case Models
 
-The category $\mathbf{CaseModel}$ can be equipped with a monoidal structure $(, I)$ where:
+The category $\mathbf{CaseModel}$ can be equipped with a monoidal structure $(⊗, I)$ where:
 
 - $\otimes$ represents the composition of case-bearing models
 - $I$ is the identity model that acts as the unit for composition

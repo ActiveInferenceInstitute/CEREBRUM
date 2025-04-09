@@ -224,7 +224,7 @@ These contributions position CEREBRUM as a novel synthesis of linguistic theory,
 
 The analysis of related work suggests several opportunities for future integration with other research traditions:
 
-1. **Integration with Process Calculi**: CEREBRUM could benefit from integration with process calculi like -calculus or session types for formalizing communication between models in different cases.
+1. **Integration with Process Calculi**: CEREBRUM could benefit from integration with process calculi like π-calculus or session types for formalizing communication between models in different cases.
 
 2. **Connection to Programming Language Theory**: The case transformations in CEREBRUM have parallels with type systems and effect systems in programming languages, suggesting potential cross-fertilization.
 
@@ -264,7 +264,7 @@ Laird, J. E. (2012). *The Soar cognitive architecture*. MIT Press.
 
 Lake, B. M., & Baroni, M. (2018). Generalization without systematicity: On the compositional skills of sequence-to-sequence recurrent networks. *International Conference on Machine Learning*, 2873-2882.
 
-Lanillos, P., Meo, C., Pezzato, C., Meera, A. A., Baioumy, M., Ohata, W., Tschopp, F., Nager, Y., Patrizi, A., Vlimki, T., Puljic, B., Cominelli, L., Vouloutsi, V., Oliver, G., & Verschure, P. (2021). Active inference in robotics and artificial agents: Survey and challenges. *arXiv preprint arXiv:2112.01871*.
+Lanillos, P., Meo, C., Pezzato, C., Meera, A. A., Baioumy, M., Ohata, W., Tschopp, F., Nager, Y., Patrizi, A., Välimäki, T., Puljic, B., Cominelli, L., Vouloutsi, V., Oliver, G., & Verschure, P. (2021). Active inference in robotics and artificial agents: Survey and challenges. *arXiv preprint arXiv:2112.01871*.
 
 Liu, H., & Lieberman, H. (2005). Metafor: Visualizing stories as code. *International Conference on Intelligent User Interfaces*, 305-307.
 

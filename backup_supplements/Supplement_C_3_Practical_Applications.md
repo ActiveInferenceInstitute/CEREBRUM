@@ -44,10 +44,10 @@ def optimize_pipeline(models):
 
 | Pattern | Case Sequence | Use Case | Key Benefit |
 |---------|--------------|----------|-------------|
-| Linear | NOMDATGEN | Sequential processing | Simple, efficient data flow |
-| Branching | NOM(DAT,DAT)GEN | Parallel processing | Increased throughput |
-| Aggregating | (NOM,NOM)ACCGEN | Multi-source fusion | Information integration |
-| Feedback | NOMDATGENLOCNOM | Iterative refinement | Self-correction |
+| Linear | NOM→DAT→GEN | Sequential processing | Simple, efficient data flow |
+| Branching | NOM→(DAT,DAT)→GEN | Parallel processing | Increased throughput |
+| Aggregating | (NOM,NOM)→ACC→GEN | Multi-source fusion | Information integration |
+| Feedback | NOM→DAT→GEN→LOC→NOM | Iterative refinement | Self-correction |
 
 ## Resource Allocation Strategies
 
@@ -111,11 +111,11 @@ def allocate_resources(models, task_type, total_compute):
 
 | Context Change | Case Transition | Implementation Approach | Expected Outcome |
 |----------------|----------------|-------------------------|------------------|
-| Data volume spike | NOMACC | Increase buffer capacity, batch processing | Sustained throughput |
-| Accuracy requirement | ACCNOM | Precision increase, additional validation | Higher quality results |
-| Latency constraints | INSNOM | Pipeline shortening, parallelization | Faster response time |
-| Novel data | ACCABL | Representation adaptation, uncertainty handling | Better generalization |
-| Resource limitation | AllACC selective | Selective processing, prioritization | Resource conservation |
+| Data volume spike | NOM→ACC | Increase buffer capacity, batch processing | Sustained throughput |
+| Accuracy requirement | ACC→NOM | Precision increase, additional validation | Higher quality results |
+| Latency constraints | INS→NOM | Pipeline shortening, parallelization | Faster response time |
+| Novel data | ACC→ABL | Representation adaptation, uncertainty handling | Better generalization |
+| Resource limitation | All→ACC selective | Selective processing, prioritization | Resource conservation |
 
 ### Implementation Recipe: Adaptive Configuration
 
@@ -216,23 +216,23 @@ def build_knowledge_graph(entities, relationships):
 
 ```
 1. Model's PRIMARY ROLE:
-    GENERATES content  NOM
-    RECEIVES data  ACC
-    TRANSFERS information  DAT
-    PRODUCES output  GEN
-    PROVIDES methods/context  INS/LOC
+   ├── GENERATES content → NOM
+   ├── RECEIVES data → ACC
+   ├── TRANSFERS information → DAT
+   ├── PRODUCES output → GEN
+   └── PROVIDES methods/context → INS/LOC
 
 2. POSITION in pipeline:
-    FIRST component  NOM
-    MIDDLE component  DAT
-    JUNCTION component  DAT+ACC
-    FINAL component  GEN
+   ├── FIRST component → NOM
+   ├── MIDDLE component → DAT
+   ├── JUNCTION component → DAT+ACC
+   └── FINAL component → GEN
    
 3. SPECIAL FUNCTION:
-    ERROR handling  INS+LOC
-    MEMORY systems  ABL+GEN
-    INTERACTIVE systems  VOC+NOM
-    LEARNING components  ACC+NOM
+   ├── ERROR handling → INS+LOC
+   ├── MEMORY systems → ABL+GEN
+   ├── INTERACTIVE systems → VOC+NOM
+   └── LEARNING components → ACC+NOM
 ```
 
 ## Implementation Best Practices

@@ -98,67 +98,29 @@ def render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_pat
         return False
 
     # First, remove any duplicate figure references without captions
-    remove_duplicate_figures(markdown_abs_path)
+    # remove_duplicate_figures(markdown_abs_path)
     logging.info("Processing Markdown files and preparing for PDF generation...")
 
     # Using xelatex is often more robust for complex documents, unicode, and fonts
-    pdf_engine = "xelatex" 
+    pdf_engine = "xelatex"
     logging.info(f"Using PDF engine: {pdf_engine}")
     
     # Create a simple straightforward approach with a single pandoc command
     main_command = ["pandoc", markdown_abs_path]
     
-    # Create a temporary file with just the \\appendix command - RESTORED
+    # --- Appendix Setup using \appendix and report class ---
+    # Insert \appendix command and override chapter numbering to arabic after main body
     appendix_marker_file = os.path.join(os.path.dirname(output_pdf_abs_path), "appendix_marker.tex")
     with open(appendix_marker_file, 'w') as f:
-        f.write("\n\\clearpage\n\\appendix\n")
-    
-    # Add the appendix marker after the main content - RESTORED
-    main_command.append("--include-after-body=" + appendix_marker_file)
-    
-    # Add all appendix files
+        f.write("\n\clearpage\n\appendix\n")
+    main_command.insert(2, "--include-after-body=" + appendix_marker_file) # Insert after main markdown file
+    # --- End Appendix Setup ---
+
+    # Add all appendix files (will be treated as chapters by report class due to headings)
     for appendix_file in appendix_files:
         main_command.append(appendix_file)
-    
-    # Add output options
-    main_command.extend([
-        "--resource-path", resource_abs_path,
-        "-o", output_pdf_abs_path,
-        f"--pdf-engine={pdf_engine}",
-        "--standalone",
-        "--toc",
-        "--toc-depth=3",
-        "--number-sections",
-        "--top-level-division=chapter",
-        
-        # Title page variables
-        "-V", "title=Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling (CEREBRUM)",
-        "-V", "author=Daniel Ari Friedman",
-        "-V", "date=Version 1.0 (2025-04-07)",
-        "-V", "institute=Active Inference Institute",
-        "-V", "abstract-title=Abstract",
-        "-V", "doi=10.5281/zenodo.15170908",
-        
-        # Add metadata for PDF info
-        "--metadata=author-meta:Daniel Ari Friedman",
-        "--metadata=title-meta:CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling",
-        "--metadata=doi:10.5281/zenodo.15170908",
-        
-        # Move TOC after title page
-        "-V", "toc-title=Contents",
-        
-        # Page layout and formatting
-        "-V", "documentclass=article",
-        "-V", "papersize=letter",
-        "-V", "geometry=margin=1in",
-        "-V", "fontsize=11pt",
-        "-V", "linestretch=1.15",
-        "-V", "linkcolor=black",
-        "-V", "urlcolor=black",
-        "-V", "links-as-notes=true",
-    ])
-    
-    # Add LaTeX packages directly
+
+    # Define LaTeX packages and preamble settings
     latex_packages = [
         "\\usepackage{amsmath}",
         "\\usepackage{amssymb}",
@@ -170,29 +132,93 @@ def render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_pat
         "\\let\\oldtabular\\tabular",
         "\\let\\endoldtabular\\endtabular",
         "\\renewenvironment{tabular}{\\tiny\\oldtabular}{\\endoldtabular}",
-        "\\usepackage{titling}",
         "\\usepackage{titlesec}",
-        "\\pretitle{\\\\begin{center}\\\\LARGE\\\\bfseries}",
-        "\\posttitle{\\\\end{center}\\\\vspace{0.5em}}",
-        "\\preauthor{\\\\begin{center}\\\\large}",
-        "\\postauthor{\\\\end{center}}",
-        "\\predate{\\\\begin{center}\\\\large}",
-        "\\postdate{\\\\end{center}\\\\vspace{2em}}",
-        "\\newcommand{\\\\maketitlehookd}{}",
-        "\\renewcommand{\\\\maketitlehookd}{\\\\vspace{1em}\\\\begin{center}\\\\footnotesize -.-. . .-. . -... .-. ..- -- ---... / -.-. .- ... . -....- . -. .- -... .-.. . -.. / .-. . .- ... --- -. .. -. --. / . -. --. .. -. . / .-- .. - .... / -... .- -.-- . ... .. .- -. / .-. . .--. .-. . ... . -. - .- - .. --- -. ... / ..-. --- .-. / ..- -. .. ..-. .. . -.. / -- --- -.. . .-.. .. -. --. \\\\end{center}\\\\vspace{1em}}",
         "\\usepackage{hyperref}",
-        "\\AtBeginDocument{\\\\let\\\\oldmaketitle\\\\maketitle\\\\renewcommand{\\\\maketitle}{\\\\oldmaketitle\\\\begin{center}\\\\large DOI: \\\\href{https://doi.org/10.5281/zenodo.15170908}{10.5281/zenodo.15170908}\\\\end{center}\\\\maketitlehookd}}",
-        "\\usepackage{appendix}", # RESTORED
-        "\\renewcommand{\\\\appendixname}{Appendix}", # RESTORED (Ensures "Appendix" is used)
+        # Explicitly include appendix package for potentially better handling - REMOVED
+        # "\\usepackage{appendix}", 
+        # Ensure chapter numbering is arabic - REMOVED
+        # "\\AtBeginDocument{\\renewcommand{\\thechapter}{\\arabic{chapter}}}",
+        # Rename Appendix Title
+        "\\renewcommand{\\appendixname}{Supplement}",
+        # Completely redefine \maketitle for custom title page layout
+        # "\\makeatletter", # Allow use of @ commands
+        # "\\renewcommand{\\maketitle}{",
+        # "  \\begin{center}",
+        # "    {\\LARGE \\bfseries \\@title \\par}", # Title
+        # "    \\vspace{1.5em}",
+        # "    {\\large \\@author \\par}", # Author
+        # "    \\vspace{0.5em}",
+        # "    {\\large Active Inference Institute \\par}", # Institute
+        # "    \\vspace{0.5em}",
+        # "    {\\large Email: daniel@activeinference.institute \\par}", # Email
+        # "    \\vspace{1.5em}",
+        # "    {\\large \\@date \\par}", # Date (Version)
+        # "    \\vspace{0.5em}",
+        # "    {\\large CC BY-NC-ND 4.0 \\par}", # License
+        # "    \\vspace{1.5em}",
+        # "    {\\large DOI: \\href{https://doi.org/$doi$}{$doi$} \\par}", # DOI
+        # "    \\vspace{1.5em}",
+        # "    {\\large\\texttt{-.-. . .-. . -... .-. ..- -- ---... / -.-. .- ... . -....- . -. .- -... .-.. . -.. / .-. . .- ... --- -. .. -. --. / . -. --. .. -. . / .-- .. - .... / -... .- -.-- . ... .. .- -. / .-. . .--. .-. . ... . -. - .- - .. --- -. ... / ..-. --- .-. / ..- -. .. ..-. .. . -.. / -- --- -.. . .-.. .. -. --.} \\par}", # Morse
+        # "  \\end{center}",
+        # "  \\par",
+        # "  \\vspace{2em}", # Space before abstract/TOC
+        # "}",
+        # "\\makeatother", # Disallow use of @ commands
+        # REMOVED appendix name/numbering overrides - rely on Markdown headings
+        # "\\renewcommand{\\appendixname}{Supplement}",
+        # "\\renewcommand{\\thechapter}{\\arabic{chapter}}",
+        # Removed explicit appendix package - relying on report class
     ]
-    
-    # Add each package as a separate header-includes
+
+    # Add output options and PREPEND preamble settings correctly
+    pandoc_options = [
+        # Resource path should be the project root, not the CEREBRUM subdir
+        # "--resource-path", resource_abs_path,
+        # Set resource path to both project root and CEREBRUM dir
+        "--resource-path", ".", 
+        "--resource-path", args.cerebrum_dir, # Allows finding CEREBRUM/output/...
+        "-o", output_pdf_abs_path,
+        f"--pdf-engine={pdf_engine}",
+        "--standalone",
+        "--toc",
+        "--toc-depth=3",
+        "--number-sections",
+        "--top-level-division=chapter",
+        # Title page variables
+        "-V", "title=Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling (CEREBRUM)",
+        # Revert Author and Date to simple forms
+        "-V", "author=Daniel Ari Friedman",
+        "-V", "date=Version 1.0 (2025-04-07)",
+        "-V", "abstract-title=Abstract",
+        "-V", "doi=10.5281/zenodo.15170907",
+        # Add metadata for PDF info
+        "--metadata=author-meta:Daniel Ari Friedman",
+        "--metadata=title-meta:CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling",
+        "--metadata=doi:10.5281/zenodo.15170907",
+        # Move TOC after title page
+        "-V", "toc-title=Contents",
+        # Page layout and formatting
+        "-V", "documentclass=report", # CHANGED to report
+        "-V", "papersize=letter",
+        "-V", "geometry=margin=1in",
+        "-V", "fontsize=11pt",
+        "-V", "linestretch=1.15",
+        "-V", "linkcolor=black",
+        "-V", "urlcolor=black",
+        # "-V", "links-as-notes=true", # REMOVED to prevent DOI footnote
+    ]
+
+    # Add each LaTeX package/command using -V header-includes=
     for pkg in latex_packages:
-        main_command.extend(["-V", f"header-includes={pkg}"])
-    
+        pandoc_options.extend(["-V", f"header-includes={pkg}"])
+
+    # Combine pandoc command with options
+    main_command.extend(pandoc_options)
+
     logging.info("Starting PDF generation with single pandoc command...")
-    logging.info(f"Pandoc command: {' '.join(main_command)}")
-    
+    # Ensure the command string for logging is rebuilt correctly if needed
+    # logging.info(f"Pandoc command: {' '.join(main_command)}") # Might be too long/complex now
+
     try:
         # Execute the pandoc command
         project_root = os.path.dirname(resource_abs_path)
@@ -206,10 +232,11 @@ def render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_pat
         )
         logging.info(f"Successfully generated PDF: {output_pdf_abs_path}")
         
-        # Clean up temporary files - RESTORED appendix_marker_file cleanup
+        # Clean up appendix marker file
         try:
             os.unlink(appendix_marker_file)
-        except Exception as e:
+            logging.debug(f"Cleaned up temporary file: {appendix_marker_file}")
+        except OSError as e:
             logging.warning(f"Could not delete temporary file {appendix_marker_file}: {e}")
         
         return True
@@ -477,39 +504,44 @@ def prepare_appendix_files(appendix_files):
         with open(appendix_file, 'r') as f:
             content = f.read()
 
-        # Make sure each appendix starts with a proper heading
+        # Make sure each appendix starts with a proper heading: # Supplement X: Title
         first_heading_match = re.search(r'^# (.+?)$', content, re.MULTILINE)
         if first_heading_match:
             heading_text = first_heading_match.group(1)
             original_heading_line = first_heading_match.group(0)
 
-            # Extract existing title without any supplement/appendix designation
-            title_text = re.sub(r'^Supplement [A-Z] \d+:\s*', '', heading_text)
-            title_text = re.sub(r'^Supplement \d+:\s*', '', title_text)
-            title_text = re.sub(r'^Supplement [A-Z]:\s*', '', title_text)
-            title_text = re.sub(r'^Supplement:\s*', '', title_text)
-            title_text = re.sub(r'^Appendix [A-Z] \d+:\s*', '', title_text)
-            title_text = re.sub(r'^Appendix [A-Z]:\s*', '', title_text)
-            title_text = re.sub(r'^Appendix \d+:\s*', '', title_text)
-            title_text = re.sub(r'^Appendix:\s*', '', title_text)
-            title_text = title_text.strip()
+            # Extract existing title, stripping any previous prefixes
+            # (e.g., "Supplement A 1:", "Supplement 1:", "Appendix A:", etc.)
+            title_text = re.sub(r'^(Supplement|Appendix)\s*([A-Z]\s*)?(\d+\s*)?[:.]?\s*', '', heading_text).strip()
 
-            # Ensure the heading is just the title, prefixed with #
+            # Construct the desired heading - JUST THE TITLE
             new_heading_line = f"# {title_text}"
 
             # Only modify if the heading line needs changing
             if original_heading_line != new_heading_line:
-                modified_content = content.replace(original_heading_line, new_heading_line)
+                # Backup before modifying (optional but recommended)
+                # shutil.copy2(appendix_file, appendix_file + ".bak")
+                
+                modified_content = content.replace(original_heading_line, new_heading_line, 1) # Replace only the first occurrence
                 with open(appendix_file, 'w') as f:
                     f.write(modified_content)
-                logging.info("Normalized heading in %s to: %s", filename, new_heading_line)
+                logging.info("Updated heading in %s to: %s", filename, new_heading_line)
             else:
                  logging.info("Heading in %s already correctly formatted: %s", filename, new_heading_line)
 
         else:
-            # If no heading found, this is an issue - log a warning.
-            # Adding a generic heading might break structure.
-            logging.warning(f"No level 1 heading (#) found in appendix file: {filename}. Cannot ensure correct formatting.")
+            # If no heading found, create one using the filename as a placeholder title
+            logging.warning(f"No level 1 heading (#) found in appendix file: {filename}. Adding a placeholder heading.")
+            # Extract a placeholder title from filename (e.g., "Supplement_A_1_Mathematical_Formalization" -> "Mathematical Formalization")
+            base_title = os.path.splitext(filename)[0]
+            base_title = re.sub(r'^Supplement_[A-Z]_\d+_', '', base_title).replace('_', ' ')
+            # new_heading_line = f"# Supplement {number}: {base_title}"
+            new_heading_line = f"# {base_title}"
+            # Prepend the heading to the content
+            modified_content = new_heading_line + "\n\n" + content
+            with open(appendix_file, 'w') as f:
+                f.write(modified_content)
+            logging.info("Added placeholder heading to %s: %s", filename, new_heading_line)
             
         # Note: Removed logic that previously *added* prefixes like "Appendix X:"
         # The LaTeX \appendix command will handle the numbering and naming.
@@ -534,13 +566,29 @@ def parse_arguments():
     parser.add_argument("--debug", action="store_true",
                       help="Enable debug logging")
     
-    return parser.parse_args()
+    # Return None if no arguments are provided besides the script name
+    if len(sys.argv) <= 1:
+        # Create a default Namespace object if no args are provided
+        # This mimics the structure returned by parse_args()
+        # Allowing the rest of the script to use args.attribute notation
+        defaults = argparse.Namespace(
+            cerebrum_dir="CEREBRUM",
+            main_file="CEREBRUM.md",
+            output_file="CEREBRUM.pdf",
+            appendix_pattern="Supplement_*.md",
+            appendix_order=None, # Will trigger canonical order later
+            skip_mermaid=False,
+            debug=False
+        )
+        return defaults
+    else:
+        return parser.parse_args()
 
 if __name__ == "__main__":
-    # Parse command line arguments
+    # Parse command line arguments or get defaults
     args = parse_arguments()
     
-    # Set debug logging if requested
+    # Set debug logging if requested (either via flag or if default changes)
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
         logging.debug("Debug logging enabled")

@@ -22,7 +22,7 @@ where MB(M) denotes the Markov blanket of model M.
 
 $$\beta(c,m) = \frac{\exp(-F(c,m))}{\sum_{i}\exp(-F(c_i,m))}  \tag{3}$$
 
-where (c,m) is the precision weight for case c and model m.
+where β(c,m) is the precision weight for case c and model m.
 
 **Equation 4: Case-Specific Gradient Descent on Free Energy**
 
@@ -82,7 +82,7 @@ where $\kappa_c$ represents case-specific learning rates or precision weights, $
 
 $$\beta(c,m) = \frac{\exp(-\gamma \cdot F(c,m))}{\sum_i \exp(-\gamma \cdot F(c_i,m))}  \tag{13}$$
 
-where  is the inverse temperature parameter controlling allocation sharpness.
+where γ is the inverse temperature parameter controlling allocation sharpness.
 
 **Equation 14: Resource-Weighted Free Energy**
 

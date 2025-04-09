@@ -24,7 +24,7 @@ The development of robust programming libraries for CEREBRUM faces several techn
      # Core model properties
      P: ParametricStructure
      S: StateSpace<T>
-     : Parameters
+     Θ: Parameters
      I: InputInterfaces
      O: OutputInterfaces
      C: Case
