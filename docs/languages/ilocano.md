@@ -8,38 +8,47 @@ In Ilocano, the focused argument (equivalent to the subject in English) is marke
 
 ```mermaid
 graph TD
-    A[Ilocano Grammatical System]
-    A --> B[Verbal Voice System]
+    A[Ilocano Grammatical System] --> B[Verbal Voice System]
     A --> C[Nominal Case Marking]
     
-    B --> B1[Actor Focus ag-/mang-]
-    B --> B2[Patient Focus -en]
-    B --> B3[Locative Focus -an]
-    B --> B4[Instrumental/Benefactive Focus i-]
+    B --> B1[Actor Focus<br>ag-/mang-]
+    B --> B2[Patient Focus<br>-en]
+    B --> B3[Locative Focus<br>-an]
+    B --> B4[Instrumental/Benefactive<br>Focus i-]
     
-    C --> C1[Focus Markers ti/dagiti/ni/da]
-    C --> C2[Oblique Markers iti/kadagiti/kenni/kada]
-    C --> C3[Non-focused Agent ti/dagiti/ni/da]
+    C --> C1[Focus Markers<br>ti/dagiti/ni/da]
+    C --> C2[Oblique Markers<br>iti/kadagiti/kenni/kada]
+    C --> C3[Non-focused Agent<br>ti/dagiti/ni/da]
     
-    B1 --- D1[Focused Agent/Actor]
-    B2 --- D2[Focused Patient/Object]
-    B3 --- D3[Focused Location]
-    B4 --- D4[Focused Instrument/Beneficiary]
+    B1 -.- D1[Focused Agent/Actor]
+    B2 -.- D2[Focused Patient/Object]
+    B3 -.- D3[Focused Location]
+    B4 -.- D4[Focused Instrument/Beneficiary]
     
-    C1 --- D1
-    C1 --- D2
-    C1 --- D3
-    C1 --- D4
-    C2 --- D5[Non-focused Non-agent]
-    C3 --- D6[Non-focused Agent]
+    C1 -.- D1
+    C1 -.- D2
+    C1 -.- D3
+    C1 -.- D4
+    C2 -.- D5[Non-focused<br>Non-agent]
+    C3 -.- D6[Non-focused Agent]
     
-    D1 --- E[CEREBRUM [NOM\]]
-    D2 --- F[CEREBRUM [ACC\]]
-    D3 --- G[CEREBRUM [LOC\]]
-    D4 --- H1[CEREBRUM [INS\]]
-    D4 --- H2[CEREBRUM [DAT\]]
-    D6 --- I[CEREBRUM [GEN\]]
-    D5 --- J[Other CEREBRUM Cases]
+    D1 --> E[CEREBRUM NOM]
+    D2 --> F[CEREBRUM ACC]
+    D3 --> G[CEREBRUM LOC]
+    D4 --> H1[CEREBRUM INS]
+    D4 --> H2[CEREBRUM DAT]
+    D6 --> I[CEREBRUM GEN]
+    D5 --> J[Other CEREBRUM Cases]
+    
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style B fill:#ddf,stroke:#333
+    style C fill:#fdd,stroke:#333
+    style E fill:#f96,stroke:#333
+    style F fill:#69f,stroke:#333
+    style G fill:#9cf,stroke:#333
+    style H1 fill:#fc9,stroke:#333
+    style H2 fill:#c9f,stroke:#333
+    style I fill:#9c6,stroke:#333
 ```
 
 ## Functional Equivalents to Cases in Ilocano
@@ -83,54 +92,62 @@ Ilocano's focus system and markers can be mapped to CEREBRUM's eight standard ca
 
 ```mermaid
 flowchart LR
-    subgraph "Ilocano Voice System"
-        AF[Actor Focus<br>ag-/mang-]
-        PF[Patient Focus<br>-en]
-        LF[Locative Focus<br>-an]
-        IF[Instrumental/Benefactive<br>Focus i-]
+    subgraph VS["Ilocano Voice System"]
+        direction TB
+        AF["Actor Focus<br>ag-/mang-"]
+        PF["Patient Focus<br>-en"]
+        LF["Locative Focus<br>-an"]
+        IF["Instrumental/Benefactive<br>Focus i-"]
     end
     
-    subgraph "Ilocano Nominal Marking"
-        FocM[Focus Markers<br>ti/dagiti/ni/da]
-        OblM[Oblique Markers<br>iti/kadagiti/kenni/kada]
-        NFAg[Non-focused Agent<br>ti/dagiti/ni/da]
+    subgraph NM["Ilocano Nominal Marking"]
+        direction TB
+        FocM["Focus Markers<br>ti/dagiti/ni/da"]
+        OblM["Oblique Markers<br>iti/kadagiti/kenni/kada"]
+        NFAg["Non-focused Agent<br>ti/dagiti/ni/da"]
     end
     
-    subgraph "CEREBRUM Cases"
-        NOM[NOM - Nominative]
-        ACC[ACC - Accusative]
-        GEN[GEN - Genitive]
-        DAT[DAT - Dative]
-        INS[INS - Instrumental]
-        LOC[LOC - Locative]
-        ABL[ABL - Ablative]
-        VOC[VOC - Vocative]
+    subgraph CC["CEREBRUM Cases"]
+        direction TB
+        NOM["NOM - Nominative"]
+        ACC["ACC - Accusative"]
+        GEN["GEN - Genitive"]
+        DAT["DAT - Dative"]
+        INS["INS - Instrumental"]
+        LOC["LOC - Locative"]
+        ABL["ABL - Ablative"]
+        VOC["VOC - Vocative"]
     end
     
-    AF --> NOM
-    PF --> ACC
-    LF --> LOC
-    IF --> INS
-    IF --> DAT
+    AF ==> NOM
+    PF ==> ACC
+    LF ==> LOC
+    IF ==> INS
+    IF ==> DAT
     
-    FocM --> NOM
-    FocM --> ACC
-    FocM --> LOC
-    FocM --> INS
-    FocM --> DAT
+    FocM === NOM
+    FocM === ACC
+    FocM === LOC
+    FocM === INS
+    FocM === DAT
     
-    NFAg --> GEN
-    OblM --> ABL
+    NFAg ==> GEN
+    OblM ==> ABL
     OblM -.-> DAT
     OblM -.-> INS
     OblM -.-> LOC
     
+    style VS fill:#ddf,stroke:#333,stroke-width:1px
+    style NM fill:#fdd,stroke:#333,stroke-width:1px
+    style CC fill:#dfd,stroke:#333,stroke-width:1px
     style NOM fill:#f96,stroke:#333
     style ACC fill:#69f,stroke:#333
     style GEN fill:#9c6,stroke:#333
     style DAT fill:#c9f,stroke:#333
     style INS fill:#fc9,stroke:#333
     style LOC fill:#9cf,stroke:#333
+    style ABL fill:#fcf,stroke:#333
+    style VOC fill:#ccc,stroke:#333
 ```
 
 ## Unique Features
@@ -198,22 +215,25 @@ Ilocano's grammatical system offers several unique features relevant to CEREBRUM
 
 ```mermaid
 graph TD
-    A[Same Semantic Relationship]
-    A --> B[Actor Focus View]
-    A --> C[Patient Focus View]
-    A --> D[Locative Focus View]
-    A --> E[Benefactive/Instrumental Focus View]
+    A["Same Semantic Relationship"] --> B["Actor Focus View"]
+    A --> C["Patient Focus View"]
+    A --> D["Locative Focus View"]
+    A --> E["Benefactive/Instrumental<br>Focus View"]
     
-    B -- "ag-/mang- affixes" --> F[Agent is Prominent<br>Other arguments oblique]
-    C -- "-en affix" --> G[Patient is Prominent<br>Agent is non-focused]
-    D -- "-an affix" --> H[Location is Prominent<br>Agent is non-focused]
-    E -- "i- affix" --> I[Instrument/Beneficiary is Prominent<br>Agent is non-focused]
+    B -- "ag-/mang- affixes" --> F["Agent is Prominent<br>Other arguments oblique"]
+    C -- "-en affix" --> G["Patient is Prominent<br>Agent is non-focused"]
+    D -- "-an affix" --> H["Location is Prominent<br>Agent is non-focused"]
+    E -- "i- affix" --> I["Instrument/Beneficiary<br>is Prominent<br>Agent is non-focused"]
     
     style A fill:#f9f,stroke:#333,stroke-width:2px
     style B fill:#fcc,stroke:#333
     style C fill:#cfc,stroke:#333
     style D fill:#ccf,stroke:#333
     style E fill:#ffc,stroke:#333
+    style F fill:#faa,stroke:#333,stroke-width:1px
+    style G fill:#afa,stroke:#333,stroke-width:1px
+    style H fill:#aaf,stroke:#333,stroke-width:1px
+    style I fill:#ffa,stroke:#333,stroke-width:1px
 ```
 
 ## Extension Opportunities
@@ -242,34 +262,44 @@ Ilocano's focus system suggests several extension opportunities for CEREBRUM:
 
 ```mermaid
 sequenceDiagram
-    participant Operation as Operation
-    participant Agent as Agent Model
-    participant Patient as Patient Model
-    participant Location as Location Model
-    participant Beneficiary as Beneficiary Model
-    participant Instrument as Instrument Model
+    participant Op as Operation
+    participant Ag as Agent Model
+    participant Pat as Patient Model
+    participant Loc as Location Model
+    participant Ben as Beneficiary Model
+    participant Ins as Instrument Model
     
-    Note over Operation,Instrument: Perspective Transformations
+    Note over Op,Ins: Perspective Transformations
     
-    Agent->>Operation: Actor Focus (ag-/mang-)<br>Agent becomes [NOM]
-    Operation-->>Patient: Affects (oblique marking)
-    Operation-->>Location: Occurs at (oblique marking)
+    rect rgba(255, 220, 220, 0.3)
+    Ag->>Op: Actor Focus (ag-/mang-)<br>Agent becomes [NOM]
+    Op-->>Pat: Affects (oblique marking)
+    Op-->>Loc: Occurs at (oblique marking)
+    end
     
-    Operation->>Patient: Patient Focus (-en)<br>Patient becomes [ACC]
-    Agent-->>Operation: Performs (non-focused agent/[GEN])
-    Operation-->>Location: Occurs at (oblique marking)
+    rect rgba(220, 255, 220, 0.3)
+    Op->>Pat: Patient Focus (-en)<br>Patient becomes [ACC]
+    Ag-->>Op: Performs (non-focused agent/[GEN])
+    Op-->>Loc: Occurs at (oblique marking)
+    end
     
-    Operation->>Location: Locative Focus (-an)<br>Location becomes [LOC]
-    Agent-->>Operation: Performs (non-focused agent/[GEN])
-    Operation-->>Patient: Affects (oblique marking)
+    rect rgba(220, 220, 255, 0.3)
+    Op->>Loc: Locative Focus (-an)<br>Location becomes [LOC]
+    Ag-->>Op: Performs (non-focused agent/[GEN])
+    Op-->>Pat: Affects (oblique marking)
+    end
     
-    Operation->>Beneficiary: Benefactive Focus (i-)<br>Beneficiary becomes [DAT]
-    Agent-->>Operation: Performs (non-focused agent/[GEN])
-    Operation-->>Patient: Affects (oblique marking)
+    rect rgba(255, 255, 220, 0.3)
+    Op->>Ben: Benefactive Focus (i-)<br>Beneficiary becomes [DAT]
+    Ag-->>Op: Performs (non-focused agent/[GEN])
+    Op-->>Pat: Affects (oblique marking)
+    end
     
-    Operation->>Instrument: Instrumental Focus (i-)<br>Instrument becomes [INS]
-    Agent-->>Operation: Performs (non-focused agent/[GEN])
-    Operation-->>Patient: Affects (oblique marking)
+    rect rgba(255, 220, 255, 0.3)
+    Op->>Ins: Instrumental Focus (i-)<br>Instrument becomes [INS]
+    Ag-->>Op: Performs (non-focused agent/[GEN])
+    Op-->>Pat: Affects (oblique marking)
+    end
 ```
 
 ## Example Sentences
@@ -342,7 +372,8 @@ Below are example sentences in Ilocano with their CEREBRUM parallels:
 
 ```mermaid
 graph TB
-    subgraph "Ilocano Reading Event"
+    subgraph Event["Ilocano Reading Event"]
+        direction LR
         Reading[Reading Event]
         Child[Child]
         Book[Book]
@@ -351,7 +382,8 @@ graph TB
         Maria[Maria]
     end
     
-    subgraph "Different Focus Perspectives"
+    subgraph Focus["Different Focus Perspectives"]
+        direction TB
         AF[Actor Focus<br>agbasa]
         PF[Patient Focus<br>basaen]
         LF[Locative Focus<br>basaan]
@@ -359,38 +391,48 @@ graph TB
         IF[Instrumental Focus<br>ipangbasa]
     end
     
-    subgraph "CEREBRUM Cases"
-        NOM[Child_Model[NOM:AF]]
-        ACC[Book_Model[ACC:PF]]
-        LOC[School_Model[LOC:LF]]
-        DAT[Maria_Model[DAT:BF]]
-        INS[Glasses_Model[INS:IF]]
-        GEN[Child_Model[GEN]]
+    subgraph CEREBRUM["CEREBRUM Cases"]
+        direction TB
+        NOM[Child_Model<br>[NOM:AF]]
+        ACC[Book_Model<br>[ACC:PF]]
+        LOC[School_Model<br>[LOC:LF]]
+        DAT[Maria_Model<br>[DAT:BF]]
+        INS[Glasses_Model<br>[INS:IF]]
+        GEN[Child_Model<br>[GEN]]
     end
     
-    Child --- AF
-    AF --- NOM
+    Child ==> AF
+    AF ==> NOM
     
-    Book --- PF
-    PF --- ACC
+    Book ==> PF
+    PF ==> ACC
     
-    School --- LF
-    LF --- LOC
+    School ==> LF
+    LF ==> LOC
     
-    Maria --- BF
-    BF --- DAT
+    Maria ==> BF
+    BF ==> DAT
     
-    Glasses --- IF
-    IF --- INS
+    Glasses ==> IF
+    IF ==> INS
     
-    Child --- GEN
+    Child -.-> GEN
     
+    style Event fill:#f5f5ff,stroke:#333,stroke-width:1px
+    style Focus fill:#fff5f5,stroke:#333,stroke-width:1px
+    style CEREBRUM fill:#f5fff5,stroke:#333,stroke-width:1px
     style Reading fill:#f9f,stroke:#333,stroke-width:2px
     style AF fill:#fcc,stroke:#333
     style PF fill:#cfc,stroke:#333
     style LF fill:#ccf,stroke:#333
     style BF fill:#ffc,stroke:#333
     style IF fill:#fcf,stroke:#333
+    style NOM fill:#f96,stroke:#333
+    style ACC fill:#69f,stroke:#333 
+    style LOC fill:#9cf,stroke:#333
+    style DAT fill:#c9f,stroke:#333
+    style INS fill:#fc9,stroke:#333
+    style GEN fill:#9c6,stroke:#333
 ```
 
 ## Implications for CEREBRUM Design
@@ -411,7 +453,8 @@ Ilocano's focus system offers valuable insights for CEREBRUM implementations:
 
 ```mermaid
 graph LR
-    subgraph "Basic Semantic Event"
+    subgraph SEvent["Basic Semantic Event"]
+        direction TB
         Event[Reading Event]
         Agent[Agent: Child]
         Patient[Patient: Book] 
@@ -420,7 +463,8 @@ graph LR
         Beneficiary[Beneficiary: Maria]
     end
     
-    subgraph "Transformation by Focus Shift"
+    subgraph Transform["Transformation by Focus Shift"]
+        direction TB
         AF[AF: Agent Prominence<br>Child = NOM]
         PF[PF: Patient Prominence<br>Book = ACC]
         LF[LF: Location Prominence<br>School = LOC]
@@ -428,7 +472,8 @@ graph LR
         BF[BF: Beneficiary Prominence<br>Maria = DAT]
     end
     
-    subgraph "Computational Implications"
+    subgraph CompImp["Computational Implications"]
+        direction TB
         AFcomp[Agent receives<br>processing priority]
         PFcomp[Patient receives<br>processing priority]
         LFcomp[Location receives<br>processing priority]
@@ -444,7 +489,20 @@ graph LR
     IF --> IFcomp
     BF --> BFcomp
     
+    style SEvent fill:#f5f5ff,stroke:#333,stroke-width:1px
+    style Transform fill:#fff5f5,stroke:#333,stroke-width:1px
+    style CompImp fill:#f5fff5,stroke:#333,stroke-width:1px
     style Event fill:#f9f,stroke:#333,stroke-width:4px
+    style AF fill:#fcc,stroke:#333
+    style PF fill:#cfc,stroke:#333
+    style LF fill:#ccf,stroke:#333
+    style IF fill:#fcf,stroke:#333
+    style BF fill:#ffc,stroke:#333
+    style AFcomp fill:#faa,stroke:#333
+    style PFcomp fill:#afa,stroke:#333 
+    style LFcomp fill:#aaf,stroke:#333
+    style IFcomp fill:#faf,stroke:#333
+    style BFcomp fill:#ffa,stroke:#333
 ```
 
 These Ilocano-inspired approaches would be particularly valuable for CEREBRUM implementations requiring flexible perspective assignment and entity-sensitive relationship marking across model ecosystems. 
