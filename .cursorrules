@@ -1,0 +1,65 @@
+# CEREBRUM Project Rules
+
+## Code Quality
+- Always use meaningful, descriptive variable and function names
+- Follow PEP 8 style guidelines for Python code
+- Add comprehensive docstrings to all functions and classes
+- Maintain consistent indentation and formatting
+- Include proper error handling with descriptive error messages
+- Log operations at appropriate verbosity levels
+
+## Content Creation
+- Never use placeholder text or methods in production code or documentation
+- Always use real, descriptive content in all text, captions, and labels
+- Ensure figure captions are complete and descriptive
+- Maintain consistent terminology throughout the codebase and documentation
+- Format figure references consistently as "Figure X: Caption"
+- Ensure proper cross-referencing between documents and supplements
+
+## Documentation
+- Document all major components with clear explanations
+- Keep documentation up-to-date with code changes
+- Include examples where appropriate
+- Ensure README files are comprehensive
+- Maintain standardized heading levels (# for titles, ## for sections)
+- Document tool usage with command-line options and examples
+
+## Project Structure
+- Organize code by functionality and domain
+- Use clear directory structures
+- Separate configuration from implementation
+- Follow consistent file naming conventions
+- Maintain canonical ordering of supplement files
+- Store output artifacts in designated directories (e.g., "output/")
+
+## Rendering and Output
+- Validate all outputs for accuracy and completeness
+- Ensure PDFs and other generated documents maintain consistent formatting
+- Include proper citations and references
+- Verify that all images and figures render correctly with complete captions
+- Insert appropriate page breaks between major sections
+- Implement proper table of contents and document structure
+- Process diagrams (e.g., Mermaid) before document generation
+
+## Version Control
+- Write clear, descriptive commit messages
+- Group related changes in single commits
+- Keep pull requests focused on single features or fixes
+- Review code before merging
+- Track generated artifacts separately from source documents
+- Document version history in release notes
+
+## Testing
+- Write tests for all new functionality
+- Maintain test coverage for critical components
+- Automate testing where possible
+- Test edge cases and error conditions
+- Validate document rendering with different input configurations
+- Verify generated output matches expected format and content
+
+## Tool Integration
+- Integrate with standard document generation tools (e.g., pandoc, LaTeX)
+- Support command-line arguments for customizing document generation
+- Provide verbose logging options for troubleshooting
+- Implement cleanup procedures for temporary files
+- Handle external dependencies gracefully with clear error messages 

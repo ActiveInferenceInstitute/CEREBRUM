@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Render Mermaid diagrams from markdown files to PNG and insert them into CEREBRUM.md.
+Render Mermaid diagrams from markdown files to PNG and insert them into CEREBRUM_main_text.md.
 Non-interactive, fully automated approach.
 """
 
@@ -16,7 +16,7 @@ from pathlib import Path
 # Constants
 CEREBRUM_DIR = Path("CEREBRUM")
 OUTPUT_DIR = Path("CEREBRUM/output")
-CEREBRUM_MD = CEREBRUM_DIR / "CEREBRUM.md"
+CEREBRUM_MD = CEREBRUM_DIR / "CEREBRUM_main_text.md"
 FIGURE_PATTERN = re.compile(r"Figure_(\d+)\.md")
 
 def extract_mermaid_code(file_path):
@@ -137,19 +137,14 @@ def render_mermaid_with_mmdc(mermaid_code, output_path):
             os.unlink(config_path)
 
 def update_cerebrum_md(cerebrum_path, figure_paths):
-    """Update CEREBRUM.md to include the rendered PNG images."""
+    """Update CEREBRUM_main_text.md to include references to the rendered PNG images."""
     with open(cerebrum_path, 'r') as f:
         content = f.read()
-    
-    # Create a backup of the original file
-    backup_path = cerebrum_path.with_suffix('.md.bak')
-    shutil.copy2(cerebrum_path, backup_path)
-    print(f"Created backup of CEREBRUM.md at {backup_path}")
     
     # Track which figures have already been processed to avoid duplicates
     processed_figures = set()
     
-    # For each figure, find reference and add image
+    # For each figure, find reference and add image reference (not the actual image)
     for figure_num, image_path in figure_paths.items():
         # Skip if we've already processed this figure
         if figure_num in processed_figures:
@@ -181,8 +176,12 @@ def update_cerebrum_md(cerebrum_path, figure_paths):
                     processed_figures.add(figure_num)
                     break
                 
-                # Insert image reference after the figure title
-                img_ref = f"\n\n![Figure {figure_num}]({rel_image_path})\n\n"
+                # Extract caption if available
+                caption_match = re.search(f"Figure {figure_num}:? (.*?)$", match.group(0).strip())
+                caption = caption_match.group(1).strip() if caption_match else f"Figure {figure_num}"
+                
+                # Insert image reference (not the image itself) after the figure title
+                img_ref = f"\n\n![Figure {figure_num}: {caption}]({rel_image_path})\n\n"
                 insert_pos = match.end()
                 content = content[:insert_pos] + img_ref + content[insert_pos:]
                 print(f"Added image reference for Figure {figure_num}")
@@ -191,7 +190,7 @@ def update_cerebrum_md(cerebrum_path, figure_paths):
                 break
         
         if not match_found:
-            print(f"Warning: Could not find reference for Figure {figure_num} in CEREBRUM.md")
+            print(f"Warning: Could not find reference for Figure {figure_num} in {cerebrum_path.name}")
     
     # Write the updated content back to the file
     with open(cerebrum_path, 'w') as f:
@@ -436,13 +435,30 @@ def fix_mermaid_syntax(mermaid_code):
     
     return output
 
+def check_cerebrum_file_exists():
+    """
+    Check if CEREBRUM_main_text.md exists, if not, use CEREBRUM.md and create a copy.
+    """
+    original_file = CEREBRUM_DIR / "CEREBRUM.md"
+    
+    if not CEREBRUM_MD.exists() and original_file.exists():
+        print(f"Creating {CEREBRUM_MD} from {original_file}")
+        shutil.copy2(original_file, CEREBRUM_MD)
+    
+    return CEREBRUM_MD.exists()
+
 def main():
-    """Main function to render all mermaid diagrams and update CEREBRUM.md."""
+    """Main function to render all mermaid diagrams and update CEREBRUM_main_text.md."""
     print("Starting mermaid diagram rendering process")
     
     # Check dependencies
     if not check_node_dependencies():
         print("Error: Required dependencies not available.")
+        return 1
+    
+    # Ensure CEREBRUM_main_text.md exists
+    if not check_cerebrum_file_exists():
+        print(f"Error: Neither CEREBRUM.md nor CEREBRUM_main_text.md found in {CEREBRUM_DIR}")
         return 1
     
     # Create output directory if it doesn't exist
@@ -470,7 +486,7 @@ def main():
         render_mermaid_with_mmdc(mermaid_code, output_path)
         figure_paths[figure_num] = output_path
     
-    # Update CEREBRUM.md with image references
+    # Update CEREBRUM_main_text.md with image references
     update_cerebrum_md(CEREBRUM_MD, figure_paths)
     
     print("\nRendering summary:")

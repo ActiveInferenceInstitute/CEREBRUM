@@ -2,7 +2,7 @@
 
 This supplement contains all mathematical formalizations referenced throughout the paper, organized by equation number.
 
-### Variational Free Energy and Case Transformations
+## Variational Free Energy and Case Transformations
 
 **Equation 1: Variational Free Energy for Case Transformation**
 
@@ -48,7 +48,7 @@ $$
 F = D_{KL}[q(s|c,m) || p(s|m)] - \mathbb{E}_{q(s|c,m)}[\log p(o|s,c,m)]  \tag{7}
 $$
 
-### Message Passing Rules for Different Cases
+## Message Passing Rules for Different Cases
 
 These equations illustrate how case assignments modulate standard hierarchical message passing (e.g., in predictive coding) where beliefs/predictions ($\mu$) and prediction errors ($\varepsilon$) flow between adjacent levels (denoted by superscripts 0 and 1). The case-specific weights ($\kappa_c$) determine the influence of each message type based on the model's current functional role.
 
@@ -76,7 +76,7 @@ $$\text{Vocative [VOC]}: activation = \sigma(\kappa_{VOC} \cdot sim(id, address)
 
 where $\kappa_c$ represents case-specific learning rates or precision weights, $\eta$ is a noise term, $\mu^0, \mu^1$ represent beliefs/predictions, and $\varepsilon^0, \varepsilon^1$ represent prediction errors at adjacent hierarchical levels.
 
-### Precision Allocation and Resource Optimization
+## Precision Allocation and Resource Optimization
 
 **Equation 13: Precision Weight Allocation with Temperature**
 
@@ -90,7 +90,7 @@ $$F_{\beta}(m) = \sum_c \beta(c,m) \cdot F(c,m) \cdot R(c)  \tag{14}$$
 
 where R(c) represents the computational resources allocated to case c.
 
-### Novel Case Formalizations
+## Novel Case Formalizations
 
 **Equation 15: Conjunctive Case Free Energy**
 
@@ -110,7 +110,7 @@ where w_i are model-specific weighting factors.
 
 $$\beta(REC,m) = \frac{\exp(-\gamma \cdot F(REC,m))}{\sum_i \exp(-\gamma \cdot F(c_i,m)) + \exp(-\gamma \cdot F(REC,m))}  \tag{17}$$
 
-#### Glossary of Variables
+## Glossary of Variables
 
 - $a$: Action (in MDP context, often selecting a case transition)
 - $\alpha$: Learning rate (in Neural Process Models context)

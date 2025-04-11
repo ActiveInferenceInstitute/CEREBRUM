@@ -2,20 +2,18 @@
 # -*- coding: utf-8 -*-
 
 """
-Renders the CEREBRUM/CEREBRUM.md file into a PDF file named 
-CEREBRUM/CEREBRUM.pdf in the same directory.
+CEREBRUM PDF Generator
 
-This script uses pandoc to perform the conversion and assumes that 
-pandoc and a suitable LaTeX distribution (like TeX Live or MiKTeX, 
-preferably with xelatex) are installed and available in the system's PATH.
+This script renders the CEREBRUM document suite into a cohesive PDF file.
+It handles:
+1. Title page
+2. Main CEREBRUM.md content with proper image insertion
+3. Figures section with one figure per page
+4. All supplements in the correct order
 
-The script determines the project root based on its own location 
-(expected to be in '<root>/tools/'). It then constructs the necessary 
-paths relative to this root.
-
-It ensures that images referenced with relative paths like 'output/Figure_1.png' 
-within CEREBRUM.md are correctly embedded in the final PDF by setting the
-appropriate resource path for pandoc.
+Requirements:
+- pandoc
+- A LaTeX distribution with xelatex
 """
 
 import subprocess
@@ -24,12 +22,11 @@ import sys
 import logging
 import re
 import shutil
-import tempfile
-import traceback
 import glob
 import argparse
+from pathlib import Path
 
-# Configure logging for clear output
+# Configure logging
 logging.basicConfig(
     level=logging.INFO, 
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -37,633 +34,704 @@ logging.basicConfig(
 )
 
 def get_project_root():
-    """
-    Determines the project root directory based on the script's location.
-    Assumes the script resides in '<project_root>/tools/'.
-    """
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.dirname(script_dir)
-    logging.debug(f"Determined project root: {project_root}")
-    return project_root
+    """Determine the project root directory (parent of the tools directory)."""
+    script_dir = Path(__file__).parent.absolute()
+    return script_dir.parent
 
-def remove_duplicate_figures(markdown_abs_path):
-    """
-    Remove duplicate figure references without captions from the markdown file.
-    """
-    with open(markdown_abs_path, 'r') as f:
-        content = f.read()
+def run_mermaid_renderer(project_root):
+    """Run the Mermaid diagram rendering script if available."""
+    mermaid_script_path = project_root / "tools" / "render_mermaids.py"
     
-    # Pattern to match figure images without proper captions
-    # This pattern looks for ![Figure X](path) that isn't followed by a proper caption
-    duplicate_pattern = r'!\[Figure (\d+)\]\(output/Figure_\1\.png\)\s*\n\s*\n(?!!\[Figure \1:)'
-    
-    # Replace duplicate figures with empty string
-    cleaned_content = re.sub(duplicate_pattern, '', content)
-    
-    # Write back to file if changes were made
-    if cleaned_content != content:
-        with open(markdown_abs_path, 'w') as f:
-            f.write(cleaned_content)
-        logging.info(f"Removed duplicate figure references from {markdown_abs_path}")
-    
-    return cleaned_content != content
+    if not mermaid_script_path.exists():
+        logging.warning(f"Mermaid rendering script not found at: {mermaid_script_path}")
+        return False
+        
+    logging.info("Rendering Mermaid diagrams...")
+    try:
+        result = subprocess.run(
+            ["python3", str(mermaid_script_path)],
+            check=True,
+            capture_output=True,
+            text=True,
+            cwd=str(project_root)
+        )
+        logging.info("Mermaid diagrams rendered successfully")
+        return True
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Mermaid rendering failed: {e}")
+        logging.error(f"Error output: {e.stderr}")
+        return False
 
-def render_markdown_to_pdf(markdown_abs_path, appendix_files, output_pdf_abs_path, resource_abs_path):
-    """
-    Renders a main Markdown file and multiple appendix Markdown files to PDF using pandoc,
-    handling relative resource paths.
+def ensure_figures_directory(cerebrum_dir):
+    """Ensure the figures directory exists and contains all figure images."""
+    figures_dir = cerebrum_dir / "figures"
+    figures_dir.mkdir(exist_ok=True)
+    
+    # Check for figures in output directory and move them to figures directory
+    output_dir = cerebrum_dir / "output"
+    if output_dir.exists():
+        figure_files = list(output_dir.glob("Figure_*.png"))
+        for fig_file in figure_files:
+            target_file = figures_dir / fig_file.name
+            if not target_file.exists() or (target_file.stat().st_mtime < fig_file.stat().st_mtime):
+                shutil.copy2(fig_file, target_file)
+                logging.info(f"Copied figure: {fig_file.name} to figures directory")
+    
+    return figures_dir
+
+def fix_image_references(markdown_file, output_to_figures=True, remove_images=False):
+    """Ensure images are properly referenced in the markdown file.
     
     Args:
-        markdown_abs_path (str): Absolute path to the input main Markdown file.
-        appendix_files (list): List of absolute paths to the input appendix Markdown files.
-        output_pdf_abs_path (str): Absolute path for the output PDF file.
-        resource_abs_path (str): Absolute path to the directory relative to which
-                                 resource paths inside the markdown file should be
-                                 resolved (e.g., for images like 'output/figure.png').
-    
-    Returns:
-        bool: True if rendering was successful, False otherwise.
+        markdown_file: Path to the markdown file to update
+        output_to_figures: Whether to update paths from output/ to figures/
+        remove_images: If True, removes image markdown but keeps figure references
     """
-    if not os.path.exists(markdown_abs_path):
-        logging.error(f"Input Markdown file not found: {markdown_abs_path}")
+    logging.info(f"Fixing image references in {markdown_file}")
+    
+    with open(markdown_file, 'r') as f:
+        content = f.read()
+    
+    # 1. Fix double labeled figures
+    content = re.sub(
+        r'!\[Figure (\d+): Figure \1: ([^\]]+)\]',
+        r'![Figure \1: \2]', 
+        content
+    )
+    
+    # 2. Remove duplicate figure references without captions
+    content = re.sub(
+        r'(!\[Figure (\d+)\]\(output/Figure_\2\.png\))\s*\n\s*\n\1',
+        r'\1',
+        content
+    )
+    
+    if output_to_figures:
+        # 3. Update figure paths from output/ to figures/
+        content = re.sub(
+            r'(!\[Figure (\d+)[^\]]*\])\(output/Figure_(\d+)\.png\)',
+            r'\1(figures/Figure_\3.png)',
+            content
+        )
+    
+    # 4. Ensure figures with captions have proper format
+    figure_pattern = r'Figure (\d+): ([^\n]+)\n'
+    for match in re.finditer(figure_pattern, content):
+        fig_num = match.group(1)
+        caption = match.group(2).strip()
+        
+        # Check for image reference after the caption
+        end_pos = match.end()
+        next_100_chars = content[end_pos:end_pos+100]
+        
+        if not re.search(rf'!\[Figure {fig_num}[^\]]*\]', next_100_chars):
+            # Add image reference if missing
+            img_path = f"figures/Figure_{fig_num}.png" if output_to_figures else f"output/Figure_{fig_num}.png"
+            img_ref = f"\n\n![Figure {fig_num}: {caption}]({img_path})\n\n"
+            content = content[:end_pos] + img_ref + content[end_pos:]
+    
+    # 5. Remove image references if requested (for main text)
+    if remove_images:
+        # Replace image markdown with empty string but keep figure references as text
+        content = re.sub(
+            r'!\[Figure (\d+)(?:: [^\]]+)?\]\((figures|output)/Figure_\d+\.png\)\s*\n*',
+            r'',
+            content
+        )
+        
+        # Also remove standalone images without captions
+        content = re.sub(
+            r'!\[[^\]]*\]\((figures|output)/Figure_\d+\.png\)\s*\n*',
+            r'',
+            content
+        )
+        
+        # Remove any double newlines that might have been created
+        content = re.sub(r'\n{3,}', r'\n\n', content)
+    
+    # Write the updated content
+    with open(markdown_file, 'w') as f:
+        f.write(content)
+    
+    return True
+
+def standardize_heading_levels(file_path):
+    """Ensure each markdown file only uses # for title and ## for sections"""
+    logging.info(f"Standardizing heading levels in {file_path}")
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # First, make sure the file starts with a single # heading (title)
+        heading_match = re.match(r'^#\s+(.+?)(?:\n|\r\n)', content.lstrip())
+        if not heading_match:
+            # If no title found, create one from filename
+            filename = file_path.stem
+            title = filename.replace('_', ' ').replace('Supplement', '').strip()
+            content = f"# {title}\n\n{content}"
+            logging.info(f"Added missing title to {file_path.name}: # {title}")
+        
+        # For supplements, ensure the first heading is a top-level heading (#)
+        if "Supplement_" in file_path.name:
+            # Convert any initial ## heading to # heading if no # heading exists
+            if not re.match(r'^#\s+', content.lstrip()):
+                content = re.sub(r'^##\s+(.+?)(\n|\r\n)', r'# \1\2', content.lstrip(), count=1)
+                logging.info(f"Converted initial ## heading to # in {file_path.name}")
+                
+            # Convert all ### (and deeper) headings to ## 
+            content = re.sub(r'^(#{3,})\s+', r'## ', content, flags=re.MULTILINE)
+        
+        # Write the standardized content
+        with open(file_path, 'w', encoding='utf-8') as f:
+            f.write(content)
+            
+        return True
+    except Exception as e:
+        logging.error(f"Error standardizing headings in {file_path.name}: {e}")
         return False
-    
-    for appendix_path in appendix_files:
-        if not os.path.exists(appendix_path):
-            logging.error(f"Input Appendix file not found: {appendix_path}")
-            return False
-    
-    if not os.path.isdir(os.path.dirname(output_pdf_abs_path)):
-        logging.error(f"Output directory does not exist: {os.path.dirname(output_pdf_abs_path)}")
-        return False
 
-    # First, remove any duplicate figure references without captions
-    # remove_duplicate_figures(markdown_abs_path)
-    logging.info("Processing Markdown files and preparing for PDF generation...")
-
-    # Using xelatex is often more robust for complex documents, unicode, and fonts
-    pdf_engine = "xelatex"
-    logging.info(f"Using PDF engine: {pdf_engine}")
-    
-    # Create a simple straightforward approach with a single pandoc command
-    main_command = ["pandoc", markdown_abs_path]
-    
-    # --- Appendix Setup using \appendix and report class ---
-    # Insert \appendix command and override chapter numbering to arabic after main body
-    appendix_marker_file = os.path.join(os.path.dirname(output_pdf_abs_path), "appendix_marker.tex")
-    with open(appendix_marker_file, 'w') as f:
-        f.write("\n\clearpage\n\appendix\n")
-    main_command.insert(2, "--include-after-body=" + appendix_marker_file) # Insert after main markdown file
-    # --- End Appendix Setup ---
-
-    # Add all appendix files (will be treated as chapters by report class due to headings)
-    for appendix_file in appendix_files:
-        main_command.append(appendix_file)
-
-    # Define LaTeX packages and preamble settings
-    latex_packages = [
-        "\\usepackage{amsmath}",
-        "\\usepackage{amssymb}",
-        "\\usepackage{mathtools}",
-        "\\usepackage{bm}",
-        "\\usepackage{caption}",
-        "\\usepackage{booktabs}",
-        "\\usepackage{tabularx}",
-        "\\let\\oldtabular\\tabular",
-        "\\let\\endoldtabular\\endtabular",
-        "\\renewenvironment{tabular}{\\tiny\\oldtabular}{\\endoldtabular}",
-        "\\usepackage{titlesec}",
-        "\\usepackage{hyperref}",
-        # Explicitly include appendix package for potentially better handling - REMOVED
-        # "\\usepackage{appendix}", 
-        # Ensure chapter numbering is arabic - REMOVED
-        # "\\AtBeginDocument{\\renewcommand{\\thechapter}{\\arabic{chapter}}}",
-        # Rename Appendix Title
-        "\\renewcommand{\\appendixname}{Supplement}",
-        # Completely redefine \maketitle for custom title page layout
-        # "\\makeatletter", # Allow use of @ commands
-        # "\\renewcommand{\\maketitle}{",
-        # "  \\begin{center}",
-        # "    {\\LARGE \\bfseries \\@title \\par}", # Title
-        # "    \\vspace{1.5em}",
-        # "    {\\large \\@author \\par}", # Author
-        # "    \\vspace{0.5em}",
-        # "    {\\large Active Inference Institute \\par}", # Institute
-        # "    \\vspace{0.5em}",
-        # "    {\\large Email: daniel@activeinference.institute \\par}", # Email
-        # "    \\vspace{1.5em}",
-        # "    {\\large \\@date \\par}", # Date (Version)
-        # "    \\vspace{0.5em}",
-        # "    {\\large CC BY-NC-ND 4.0 \\par}", # License
-        # "    \\vspace{1.5em}",
-        # "    {\\large DOI: \\href{https://doi.org/$doi$}{$doi$} \\par}", # DOI
-        # "    \\vspace{1.5em}",
-        # "    {\\large\\texttt{-.-. . .-. . -... .-. ..- -- ---... / -.-. .- ... . -....- . -. .- -... .-.. . -.. / .-. . .- ... --- -. .. -. --. / . -. --. .. -. . / .-- .. - .... / -... .- -.-- . ... .. .- -. / .-. . .--. .-. . ... . -. - .- - .. --- -. ... / ..-. --- .-. / ..- -. .. ..-. .. . -.. / -- --- -.. . .-.. .. -. --.} \\par}", # Morse
-        # "  \\end{center}",
-        # "  \\par",
-        # "  \\vspace{2em}", # Space before abstract/TOC
-        # "}",
-        # "\\makeatother", # Disallow use of @ commands
-        # REMOVED appendix name/numbering overrides - rely on Markdown headings
-        # "\\renewcommand{\\appendixname}{Supplement}",
-        # "\\renewcommand{\\thechapter}{\\arabic{chapter}}",
-        # Removed explicit appendix package - relying on report class
+def prepare_supplement_files(cerebrum_dir):
+    """Find and prepare supplement files with consistent headings."""
+    # Define canonical order and identifiers
+    canonical_supplements = [
+        {"file": "Supplement_1_Mathematical_Formalization.md", "number": 1},
+        {"file": "Supplement_2_Novel_Linguistic_Cases.md", "number": 2},
+        {"file": "Supplement_3_Practical_Applications.md", "number": 3},
+        {"file": "Supplement_4_Related_Work.md", "number": 4},
+        {"file": "Supplement_5_Category_Theory.md", "number": 5},
+        {"file": "Supplement_6_Future_Directions.md", "number": 6},
     ]
 
-    # Add output options and PREPEND preamble settings correctly
-    pandoc_options = [
-        # Resource path should be the project root, not the CEREBRUM subdir
-        # "--resource-path", resource_abs_path,
-        # Set resource path to both project root and CEREBRUM dir
-        "--resource-path", ".", 
-        "--resource-path", args.cerebrum_dir, # Allows finding CEREBRUM/output/...
-        "-o", output_pdf_abs_path,
-        f"--pdf-engine={pdf_engine}",
+    supplement_files = []
+    found_canonical_files = set()
+    for supp in canonical_supplements:
+        file_path = cerebrum_dir / supp["file"]
+        if file_path.exists():
+            supplement_files.append((file_path, supp["number"]))
+            found_canonical_files.add(file_path.name)
+        else:
+            logging.warning(f"Canonical supplement {supp['file']} not found")
+
+    # Discover extra supplements
+    extra_files = list(cerebrum_dir.glob("Supplement_*.md"))
+    next_extra_number = len(canonical_supplements) + 1
+    for file_path in extra_files:
+        if file_path.name not in found_canonical_files:
+            match = re.search(r'Supplement_(\d+)_', file_path.name)
+            num = int(match.group(1)) if match else next_extra_number
+            if not match:
+                next_extra_number += 1
+            supplement_files.append((file_path, num))
+            logging.warning(f"Found non-canonical supplement: {file_path.name}, assigned number {num}")
+
+    # Sort by number
+    supplement_files.sort(key=lambda x: x[1])
+
+    # Extract just the file paths in order
+    processed_paths = []
+    for file_path, number in supplement_files:
+        # Standardize heading levels (# for title, ## for sections)
+        standardize_heading_levels(file_path)
+        # Update image references to use figures directory
+        fix_image_references(file_path)
+        # Add to processed list
+        processed_paths.append(file_path)
+        logging.info(f"Processed supplement: {file_path.name}")
+
+    return processed_paths
+
+def extract_figure_info(main_content_file):
+    """Extract figure numbers and captions from the main content file."""
+    logging.info(f"Extracting figure information from {main_content_file}")
+    figure_info = []
+    
+    # Default complete captions for any figures that might not have proper captions
+    default_captions = {
+        "1": "Foundation Domains of CEREBRUM. The diagram shows the four key domains (Cognitive Systems Modeling, Active Inference, Linguistic Case Systems, and Intelligence Production) and their integration through the CEREBRUM core.",
+        "2": "Case Relationships - Model and Linguistic Parallels. The diagram illustrates parallel case relationships between a generative model and linguistic examples, demonstrating how model cases mirror grammatical roles in natural language.",
+        "3": "Cognitive Model Case Framework. The hierarchical organization of case types in CEREBRUM, showing primary, source, and contextual declensions with their functional relationships to the core generative model.",
+        "4": "Generative Model Integration in Intelligence Case Management. Illustrates how CEREBRUM's generative model core orchestrates intelligence production and case management through case-specific transformations.",
+        "5": "Model Workflows as Case Transformations - Sequence Diagram. Illustrates the temporal sequence of case transformations as models transition through different functional roles in an intelligence workflow.",
+        "6": "Intelligence Production Workflow with Case-Bearing Models. Illustrates the intelligence production cycle, showing the stages where models with different case assignments participate.",
+        "7": "CEREBRUM Category Theory Framework. Demonstrates the category-theoretic formalization of case relationships and transformations between cognitive models.",
+        "8": "Category Theory Framework (Alternative View). Further illustrates the category-theoretic components and properties within CEREBRUM.",
+        "9": "Morphosyntactic Alignments in Model Relationships. Shows how CEREBRUM implements different alignment patterns for model relationships based on linguistic morphosyntactic structures.",
+        "10": "Alignment Patterns in Model Ecosystems. Illustrates the practical implementation of alignment patterns and how they affect model interactions and transformations.",
+        "11": "Implementation in Intelligence Production - State Diagram. Provides a state-based view of the intelligence workflow highlighting model case assignments at each stage.",
+        "12": "Alternative State-Based Visualization of Model Workflows. Provides another perspective on model transitions and transformations in intelligence production contexts.",
+        "13": "Active Inference Integration Framework. Shows how active inference principles are integrated with case transformations through precision-weighted message passing and free energy minimization.",
+        "14": "Message Passing Rules in the CEREBRUM Framework. Details the message passing protocols that enable communication between models with different case assignments.",
+        "15": "Model Case Calculus Framework. Presents the formal mathematical relationships and transformation rules that govern case transitions in the CEREBRUM framework."
+    }
+    
+    try:
+        with open(main_content_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Dictionary to collect captions for figures
+        figure_captions = {}
+        
+        # Look for captions in image markdown syntax
+        # Pattern: ![Figure X: Caption](figures/Figure_X.png)
+        md_caption_pattern = r'!\[Figure (\d+)(?:: ([^\]]+))?\]\((figures|output)/Figure_\1\.png\)'
+        for match in re.finditer(md_caption_pattern, content):
+            fig_num = match.group(1)
+            if match.group(2) and len(match.group(2).strip()) > 5:
+                caption = match.group(2).strip()
+                if not caption.startswith('Figure') and not caption.startswith('output/') and not caption.startswith('figures/'):
+                    figure_captions[fig_num] = caption
+        
+        # Look for captions following image markdown (common pattern)
+        # Pattern: ![Figure X](figures/Figure_X.png)
+        # 
+        # ![Caption text](figures/Figure_X.png)
+        standalone_img_pattern = r'!\[Figure (\d+)\]\((figures|output)/Figure_\1\.png\)\s*\n\s*\n\s*!\[([^\]]+)\]\((figures|output)/Figure_\1\.png\)'
+        for match in re.finditer(standalone_img_pattern, content):
+            fig_num = match.group(1)
+            caption = match.group(3).strip()
+            if caption and len(caption) > 10 and not caption.startswith('Figure') and not caption.startswith('output/') and not caption.startswith('figures/'):
+                figure_captions[fig_num] = caption
+        
+        # Look for descriptive text about figures
+        # Pattern: Figure X illustrates/shows/etc.
+        desc_patterns = [
+            r'Figure (\d+) (?:illustrates|shows|depicts|presents|represents|demonstrates) ([^\.]+)',
+            r'Figure (\d+)[^\.\n]*?(?:illustrates|shows|depicts|presents|represents|demonstrates) ([^\.]+)'
+        ]
+        
+        for pattern in desc_patterns:
+            for match in re.finditer(pattern, content, re.IGNORECASE):
+                fig_num = match.group(1)
+                desc = match.group(2).strip()
+                if desc and len(desc) > 10:
+                    figure_captions[fig_num] = desc
+        
+        # Also look for explicit caption lines directly after figure references
+        # Pattern: Figure X
+        # Some caption text.
+        figure_ref_pattern = r'Figure (\d+)\s*\n\s*([^\.\n]+)'
+        for match in re.finditer(figure_ref_pattern, content):
+            fig_num = match.group(1)
+            line_after = match.group(2).strip()
+            # Only use if it's a substantial caption and not a reference to another figure
+            if line_after and len(line_after) > 15 and not re.search(r'Figure \d+', line_after):
+                figure_captions[fig_num] = line_after
+        
+        # Extract all figure references in numerical order
+        figure_ref_set = set()
+        for match in re.finditer(r'Figure (\d+)', content):
+            figure_ref_set.add(match.group(1))
+        
+        # Look for explicit figure captions in the format "Figure X: Caption"
+        caption_pattern = r'Figure (\d+): ([^\.\n]+)'
+        for match in re.finditer(caption_pattern, content):
+            fig_num = match.group(1)
+            caption = match.group(2).strip()
+            if caption and len(caption) > 10:
+                figure_captions[fig_num] = caption
+        
+        # Create figure info objects for all referenced figures
+        for fig_num in sorted(figure_ref_set, key=int):
+            # Get the best caption available, or use a default
+            if fig_num in figure_captions:
+                caption = figure_captions[fig_num]
+            else:
+                # Look one more time for any descriptive text near figure mentions
+                fig_pos = content.find(f"Figure {fig_num}")
+                if fig_pos > 0:
+                    surrounding = content[max(0, fig_pos-100):min(len(content), fig_pos+500)]
+                    cap_match = re.search(r'Figure \d+[^\.\n]*?\. ([^\.]+)', surrounding)
+                    if cap_match:
+                        potential_caption = cap_match.group(1).strip()
+                        if len(potential_caption) > 15:
+                            caption = potential_caption
+                        else:
+                            # Use our predefined default caption
+                            caption = default_captions.get(fig_num, f"Figure {fig_num}")
+                    else:
+                        # Use our predefined default caption
+                        caption = default_captions.get(fig_num, f"Figure {fig_num}")
+                else:
+                    # Use our predefined default caption
+                    caption = default_captions.get(fig_num, f"Figure {fig_num}")
+            
+            # Clean up any remaining markdown or path references
+            caption = re.sub(r'(output|figures)/Figure_\d+\.png', '', caption)
+            caption = re.sub(r'\]\([^\)]+\)', '', caption)
+            caption = caption.strip()
+            
+            # Ensure caption doesn't start with "Figure X:"
+            caption = re.sub(r'^Figure \d+:', '', caption).strip()
+            
+            # Ensure the caption is substantial - if not, use our default
+            if not caption or len(caption) < 15:
+                caption = default_captions.get(fig_num, f"Figure {fig_num}")
+                
+            # Add to figure info array
+            figure_info.append({
+                "number": int(fig_num),
+                "caption": caption,
+                "path": f"figures/Figure_{fig_num}.png"
+            })
+        
+        # Sort figures by number
+        figure_info.sort(key=lambda x: x["number"])
+        
+        logging.info(f"Found {len(figure_info)} unique figures")
+        return figure_info
+    
+    except Exception as e:
+        logging.error(f"Error extracting figure information: {e}")
+        return []
+
+def create_figures_supplement(cerebrum_dir, figure_info):
+    """Create a supplement file with all figures, one per page."""
+    figures_file = cerebrum_dir / "Supplement_0_Figures.md"
+    
+    try:
+        # Create the figures supplement content
+        content = "# Figures\n\n"
+        content += "This supplement contains all figures referenced in the main text, presented one per page for detailed viewing.\n\n"
+        
+        for fig in figure_info:
+            # Use the integer for display but convert back to string for file path
+            fig_num = fig["number"]
+            caption = fig["caption"]
+            path = fig["path"]
+            
+            # Clean any markdown or path fragments from captions
+            caption = re.sub(r'figures/Figure_\d+\.png', '', caption)
+            caption = re.sub(r'!\[Figure \d+:? ?', '', caption)
+            caption = re.sub(r'\]$', '', caption)
+            caption = caption.strip()
+            
+            # If caption is empty or too short, use a default
+            if not caption or len(caption) < 10:
+                caption = f"Figure {fig_num}"
+            
+            # Use full caption instead of just the figure number
+            content += f"## Figure {fig_num}: {caption}\n\n"
+            content += f"![Figure {fig_num}: {caption}]({path})\n\n"
+            content += "\\pagebreak\n\n"  # Add pagebreak after each figure
+        
+        # Write the figures supplement
+        with open(figures_file, 'w', encoding='utf-8') as f:
+            f.write(content)
+        
+        logging.info(f"Created figures supplement at {figures_file}")
+        return figures_file
+    
+    except Exception as e:
+        logging.error(f"Error creating figures supplement: {e}")
+        return None
+
+def generate_pdf(title_page, main_content, figures_supplement, supplements, output_pdf, cerebrum_dir):
+    """Generate the PDF using pandoc with simplified TOC and structure."""
+    logging.info("Generating PDF...")
+    
+    # Check if title_page exists
+    if not title_page.exists():
+        logging.error(f"Title page not found: {title_page}")
+        return False
+    
+    # Get the base name for output files
+    output_base = output_pdf.with_suffix('')
+    output_tex = output_base.with_suffix('.tex')
+    
+    # Build pandoc command
+    pandoc_cmd = [
+        "pandoc",
+        # Input files in order: Title, Main Content, Figures Supplement, Other Supplements
+        str(title_page),
+        str(main_content),
+    ]
+    
+    # Add figures supplement if available
+    if figures_supplement and figures_supplement.exists():
+        pandoc_cmd.append(str(figures_supplement))
+    
+    # Add all other supplements in proper order
+    for supp in supplements:
+        # Skip the figures supplement as it was already added
+        if supp.name == "Supplement_0_Figures.md":
+            continue
+        pandoc_cmd.append(str(supp))
+    
+    # Add output and formatting options
+    pandoc_cmd.extend([
+        # Output file
+        "-o", str(output_pdf),
+        
+        # PDF engine
+        "--pdf-engine=xelatex",
+        
+        # Simple document structure
         "--standalone",
+        
+        # Add table of contents with depth of 2
         "--toc",
-        "--toc-depth=3",
-        "--number-sections",
-        "--top-level-division=chapter",
-        # Title page variables
-        "-V", "title=Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling (CEREBRUM)",
-        # Revert Author and Date to simple forms
-        "-V", "author=Daniel Ari Friedman",
-        "-V", "date=Version 1.0 (2025-04-07)",
-        "-V", "abstract-title=Abstract",
-        "-V", "doi=10.5281/zenodo.15170907",
-        # Add metadata for PDF info
-        "--metadata=author-meta:Daniel Ari Friedman",
-        "--metadata=title-meta:CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling",
-        "--metadata=doi:10.5281/zenodo.15170907",
-        # Move TOC after title page
-        "-V", "toc-title=Contents",
-        # Page layout and formatting
-        "-V", "documentclass=report", # CHANGED to report
+        "--toc-depth=2",
+        
+        # Resource path for images - include both figures and output directories
+        "--resource-path", f"{cerebrum_dir}:{cerebrum_dir}/figures:{cerebrum_dir}/output",
+        
+        # Formatting
         "-V", "papersize=letter",
         "-V", "geometry=margin=1in",
         "-V", "fontsize=11pt",
         "-V", "linestretch=1.15",
         "-V", "linkcolor=black",
         "-V", "urlcolor=black",
-        # "-V", "links-as-notes=true", # REMOVED to prevent DOI footnote
+        "-V", "documentclass=article",
+        
+        # Insert page breaks before top-level headings (supplements and sections)
+        "-V", "header-includes=\\usepackage{etoolbox}\\pretocmd{\\section}{\\clearpage}{}{}"
+    ])
+    
+    # Run pandoc
+    try:
+        logging.info(f"Running: {' '.join(pandoc_cmd)}")
+        result = subprocess.run(
+            pandoc_cmd,
+            check=True,
+            capture_output=True,
+            text=True,
+            cwd=str(cerebrum_dir)
+        )
+        logging.info(f"PDF generated successfully: {output_pdf}")
+        
+        # Generate .tex file with a second pandoc command
+        tex_cmd = pandoc_cmd.copy()
+        # Replace the output file
+        out_index = tex_cmd.index("-o") + 1
+        tex_cmd[out_index] = str(output_tex)
+        # Add --standalone to ensure complete .tex file
+        if "--standalone" not in tex_cmd:
+            tex_cmd.append("--standalone")
+        
+        logging.info(f"Generating TEX file: {' '.join(tex_cmd)}")
+        result = subprocess.run(
+            tex_cmd,
+            check=True,
+            capture_output=True,
+            text=True,
+            cwd=str(cerebrum_dir)
+        )
+        logging.info(f"TEX file generated successfully: {output_tex}")
+        
+        return True
+    except subprocess.CalledProcessError as e:
+        logging.error(f"PDF/TEX generation failed: {e}")
+        logging.error(f"Error output: {e.stderr}")
+        return False
+
+def cleanup_intermediate_files(cerebrum_dir):
+    """Clean up intermediate files created during PDF generation."""
+    logging.info("Cleaning up intermediate files...")
+    
+    # Patterns of files to remove, excluding .tex files
+    patterns = [
+        "*.aux", "*.log", "*.out", "*.toc", 
+        "*.bak", "*.lof", "*.lot"
     ]
+    
+    total_removed = 0
+    for pattern in patterns:
+        files = list(cerebrum_dir.glob(pattern))
+        for file in files:
+            try:
+                file.unlink()
+                total_removed += 1
+            except Exception as e:
+                logging.warning(f"Could not remove {file}: {e}")
+    
+    # Also look in the output directory
+    output_dir = cerebrum_dir / "output"
+    if output_dir.exists():
+        for pattern in patterns:
+            files = list(output_dir.glob(pattern))
+            for file in files:
+                try:
+                    file.unlink()
+                    total_removed += 1
+                except Exception as e:
+                    logging.warning(f"Could not remove {file}: {e}")
+    
+    logging.info(f"Removed {total_removed} intermediate files")
 
-    # Add each LaTeX package/command using -V header-includes=
-    for pkg in latex_packages:
-        pandoc_options.extend(["-V", f"header-includes={pkg}"])
-
-    # Combine pandoc command with options
-    main_command.extend(pandoc_options)
-
-    logging.info("Starting PDF generation with single pandoc command...")
-    # Ensure the command string for logging is rebuilt correctly if needed
-    # logging.info(f"Pandoc command: {' '.join(main_command)}") # Might be too long/complex now
-
-    try:
-        # Execute the pandoc command
-        project_root = os.path.dirname(resource_abs_path)
-        logging.info("Generating PDF...")
-        result = subprocess.run(
-            main_command,
-            check=True,
-            capture_output=True,
-            text=True,
-            cwd=project_root
-        )
-        logging.info(f"Successfully generated PDF: {output_pdf_abs_path}")
-        
-        # Clean up appendix marker file
-        try:
-            os.unlink(appendix_marker_file)
-            logging.debug(f"Cleaned up temporary file: {appendix_marker_file}")
-        except OSError as e:
-            logging.warning(f"Could not delete temporary file {appendix_marker_file}: {e}")
-        
-        return True
-        
-    except FileNotFoundError as e:
-        logging.error(f"Error: Command not found: {e}")
-        logging.error("Please ensure pandoc and LaTeX are installed and in your system's PATH.")
-        return False
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Command failed with return code {e.returncode}.")
-        logging.error(f"Command executed: {' '.join(e.cmd)}")
-        logging.error("Error output:\n" + e.stderr)
-        if e.stdout:
-            logging.error("Standard output:\n" + e.stdout)
-        return False
-    except Exception as e:
-        logging.error(f"An unexpected error occurred during rendering: {e}")
-        traceback.print_exc()
-        return False
-
-def run_mermaid_script(script_path, project_root_dir):
+def remove_images_from_main_text(main_file):
+    """Completely remove all image references from the main text file while preserving figure mentions.
+    
+    This function ensures that only textual references to figures remain in the main text,
+    with all actual image markdown completely removed.
     """
-    Runs the render_mermaids.py script from the project root directory.
-
-    Args:
-        script_path (str): Absolute path to the render_mermaids.py script.
-        project_root_dir (str): Absolute path to the project root directory.
-
-    Returns:
-        bool: True if the script ran successfully, False otherwise.
-    """
-    logging.info(f"Running Mermaid rendering script: {script_path}")
-    try:
-        result = subprocess.run(
-            ["python3", script_path], # Use absolute path for script
-            check=True,
-            capture_output=True,
-            text=True,
-            cwd=project_root_dir # Set CWD to project root
-        )
-        logging.info("Mermaid rendering script finished successfully.")
-        logging.debug(f"Mermaid script stdout:\n{result.stdout}")
-        if result.stderr:
-            logging.debug(f"Mermaid script stderr:\n{result.stderr}")
-        return True
-    except FileNotFoundError:
-        logging.error("Error: 'python3' command not found. Cannot run Mermaid script.")
-        return False
-    except subprocess.CalledProcessError as e:
-        logging.error(f"Mermaid rendering script failed with return code {e.returncode}.")
-        logging.error(f"Command executed: {' '.join(e.cmd)}")
-        if e.stdout:
-            logging.error(f"Mermaid script stdout:\n{e.stdout}")
-        if e.stderr:
-            logging.error(f"Mermaid script stderr:\n{e.stderr}")
-        return False
-    except Exception as e:
-        logging.error(f"An unexpected error occurred while running Mermaid script: {e}")
-        return False
-
-def update_cerebrum_md(cerebrum_path, figure_paths):
-    """Update CEREBRUM.md to include the rendered PNG images, ensuring no duplicates."""
-    with open(cerebrum_path, 'r') as f:
+    logging.info(f"Removing image references from {main_file}")
+    
+    with open(main_file, 'r') as f:
         content = f.read()
     
-    # Create a backup of the original file
-    backup_path = cerebrum_path.with_suffix('.md.bak')
-    shutil.copy2(cerebrum_path, backup_path)
-    print(f"Created backup of CEREBRUM.md at {backup_path}")
+    # Multiple passes to ensure all references are removed
     
-    # Track which figures have already been processed to avoid duplicates
-    processed_figures = set()
+    # Pass 1: Remove all standard image markdown references
+    content = re.sub(
+        r'!\[.*?\]\([^)]+\)',
+        '',
+        content
+    )
     
-    # First, fix any double labeled figures (Figure X: Figure X:)
-    double_label_pattern = r'!\[Figure (\d+): Figure \1: ([^\]]+)\]'
-    content = re.sub(double_label_pattern, r'![Figure \1: \2]', content)
+    # Pass 2: Remove any remaining image paths and brackets
+    content = re.sub(
+        r'\]\(figures?/[^)]*?\)',
+        '',
+        content
+    )
+    content = re.sub(
+        r'\]\(output/[^)]*?\)',
+        '',
+        content
+    )
     
-    # Pre-process: Check for existing figure references with captions
-    # Find all existing proper figure references with captions
-    caption_pattern = r'!\[Figure (\d+): [^\]]+\]\(output/Figure_\1\.png\)'
-    caption_matches = re.finditer(caption_pattern, content)
-    for match in caption_matches:
-        fig_num = match.group(1)
-        processed_figures.add(fig_num)
-        print(f"Found existing captioned figure reference for Figure {fig_num}")
+    # Pass 3: Remove any leftover fragments like "Figure_X.png"
+    content = re.sub(
+        r'Figure_\d+\.png',
+        '',
+        content
+    )
     
-    # For each figure, find reference and add image only if not already properly captioned
-    for figure_num, image_path in figure_paths.items():
-        # Skip if we've already processed this figure
-        if figure_num in processed_figures:
-            print(f"Figure {figure_num} already has a proper caption, skipping")
-            continue
-            
-        # Create relative path from CEREBRUM.md to the image
-        rel_image_path = os.path.relpath(image_path, cerebrum_path.parent)
-        
-        # Pattern to find figure reference (various formats possible)
-        fig_patterns = [
-            f"Figure {figure_num}[^\\n]*\\n",
-            f"Figure {figure_num}:[^\\n]*\\n",
-            f"Figure {figure_num}\\.[^\\n]*\\n"
-        ]
-        
-        match_found = False
-        for pattern in fig_patterns:
-            matches = list(re.finditer(pattern, content))
-            if matches:
-                # Only process the first match for each figure number
-                match = matches[0]
-                
-                # Extract just the caption text, without the "Figure X: " prefix
-                caption_text = match.group(0).strip()
-                if caption_text.startswith(f"Figure {figure_num}: "):
-                    caption_text = caption_text[len(f"Figure {figure_num}: "):]
-                elif caption_text.startswith(f"Figure {figure_num}."):
-                    caption_text = caption_text[len(f"Figure {figure_num}."):]
-                
-                # Check if image reference already exists to avoid duplicates
-                next_content = content[match.end():match.end()+200]  # Look further ahead
-                if f"![Figure {figure_num}]" in next_content:
-                    print(f"Image reference for Figure {figure_num} already exists, skipping")
-                    match_found = True
-                    processed_figures.add(figure_num)
-                    break
-                
-                # Insert image reference after the figure title
-                img_ref = f"\n\n![Figure {figure_num}]({rel_image_path})\n\n"
-                insert_pos = match.end()
-                content = content[:insert_pos] + img_ref + content[insert_pos:]
-                print(f"Added image reference for Figure {figure_num}")
-                match_found = True
-                processed_figures.add(figure_num)
-                break
-        
-        if not match_found:
-            print(f"Warning: Could not find reference for Figure {figure_num} in CEREBRUM.md")
+    # Pass 4: Remove any lines that just have brackets or fragments
+    content = re.sub(
+        r'^\s*\][^\n]*$',
+        '',
+        content,
+        flags=re.MULTILINE
+    )
     
-    # Final cleanup: Remove any duplicate figure references without proper captions
-    duplicate_pattern = r'!\[Figure (\d+)\]\(output/Figure_\1\.png\)\s*\n\s*\n(?!!\[Figure \1:)'
-    content = re.sub(duplicate_pattern, '', content)
+    # Pass 5: Clean up any fragments of image captions without proper markdown
+    content = re.sub(
+        r'!\[Figure \d+:.*?$',
+        '',
+        content,
+        flags=re.MULTILINE
+    )
     
-    # Write the updated content back to the file
-    with open(cerebrum_path, 'w') as f:
+    # Pass 6: Remove reference to figures directory
+    content = re.sub(
+        r'figures/|output/',
+        '',
+        content
+    )
+    
+    # Pass 7: Clean up lines with just brackets
+    content = re.sub(
+        r'^\s*\]\s*$',
+        '',
+        content,
+        flags=re.MULTILINE
+    )
+    
+    # Final pass: Clean up excessive whitespace and newlines
+    content = re.sub(r'\n{3,}', '\n\n', content)
+    content = re.sub(r'\s+\n', '\n', content)
+    
+    # Make sure figure references are still properly formatted
+    content = re.sub(
+        r'(Figure \d+)[:]?[ ]*\n',
+        r'\1: ',
+        content
+    )
+    
+    with open(main_file, 'w') as f:
         f.write(content)
     
-    print(f"Updated {cerebrum_path} with image references")
+    logging.info(f"Successfully removed image references from {main_file}")
     return True
 
-def find_appendix_files(cerebrum_dir, appendix_pattern="Supplement_*.md"):
-    """
-    Find all appendix files in the specified directory matching the given pattern.
-    
-    Args:
-        cerebrum_dir (str): Directory where appendix files are located.
-        appendix_pattern (str): Glob pattern to match appendix files.
-        
-    Returns:
-        list: List of absolute paths to appendix files, sorted alphabetically.
-    """
-    appendix_pattern_full = os.path.join(cerebrum_dir, appendix_pattern)
-    appendix_files = glob.glob(appendix_pattern_full)
-    
-    # Sort files alphabetically to maintain consistent ordering
-    appendix_files.sort()
-    
-    if not appendix_files:
-        logging.warning(f"No appendix files found matching pattern: {appendix_pattern_full}")
-    else:
-        logging.info(f"Found {len(appendix_files)} appendix files: {', '.join(os.path.basename(f) for f in appendix_files)}")
-    
-    return appendix_files
-
-def determine_appendix_order(appendix_files, explicit_order=None):
-    """
-    Determine the order of appendix files based on optional explicit ordering,
-    with fallback to alphabetical order.
-    
-    Args:
-        appendix_files (list): List of appendix file paths.
-        explicit_order (list, optional): List of filenames in desired order.
-        
-    Returns:
-        list: Ordered list of appendix file paths.
-    """
-    if not appendix_files:
-        return []
-        
-    if explicit_order:
-        # Map filenames to their full paths
-        filename_to_path = {os.path.basename(f): f for f in appendix_files}
-        
-        # Build ordered list from explicit order, skipping any not found
-        ordered_files = []
-        for filename in explicit_order:
-            if filename in filename_to_path:
-                ordered_files.append(filename_to_path[filename])
-                logging.info(f"Using explicitly ordered appendix: {filename}")
-            else:
-                logging.warning(f"Explicitly ordered appendix file not found: {filename}")
-        
-        # Add any remaining files not in explicit order
-        for f in appendix_files:
-            if os.path.basename(f) not in explicit_order:
-                ordered_files.append(f)
-                logging.info(f"Adding additional appendix not in explicit order: {os.path.basename(f)}")
-        
-        return ordered_files
-    else:
-        # Default to alphabetical ordering
-        logging.info("Using alphabetical ordering for appendix files")
-        return sorted(appendix_files)
-
-def prepare_appendix_files(appendix_files):
-    """
-    Prepare appendix files by ensuring they have proper headings.
-    Adds appendix designation to headings if needed and ensures appendices are properly numbered.
-    
-    Args:
-        appendix_files (list): List of absolute paths to appendix files.
-    """
-    if not appendix_files:
-        logging.info("No appendix files to prepare")
-        return
-
-    logging.info(f"Preparing {len(appendix_files)} appendix files...")
-    
-    # Use letter designations for appendices (A, B, C, ...) - NO LONGER USED
-    # appendix_letters = [chr(65 + i) for i in range(len(appendix_files))]
-
-    # Define mapping of expected appendix numbering based on new filenames
-    # This ensures consistent numbering across the appendices
-    expected_numbering = {
-        "Supplement_A_1_Mathematical_Formalization.md": "1",
-        "Supplement_B_2_Novel_Linguistic_Cases.md": "2",
-        "Supplement_C_3_Practical_Applications.md": "3",
-        "Supplement_D_4_Related_Work.md": "4",
-        "Supplement_E_5_Category_Theory.md": "5",
-        "Supplement_F_6_Future_Directions.md": "6"
-    }
-
-    # Sort files based on the number in the expected_numbering map
-    def get_sort_key(filepath):
-        filename = os.path.basename(filepath)
-        num_str = expected_numbering.get(filename, '999') # Default to a high number if not found
-        try:
-            return int(num_str)
-        except ValueError:
-            return 999 # Fallback for non-integer numbers
-
-    appendix_files.sort(key=get_sort_key)
-    logging.info("Sorted supplement files based on expected numbering.")
-
-    for i, appendix_file in enumerate(appendix_files):
-        filename = os.path.basename(appendix_file)
-        # Get the number directly from the sorted position (1-based index)
-        number = str(i + 1)
-
-        # Optional: Cross-check with expected_numbering if needed for validation, but use i+1 for heading
-        expected_num = expected_numbering.get(filename)
-        if expected_num and expected_num != number:
-            logging.warning(f"Mismatch in expected number ({expected_num}) vs sorted position ({number}) for {filename}. Using sorted position number.")
-        elif not expected_num:
-            logging.warning(f"Filename {filename} not found in expected numbering map. Using sorted position number {number}.")
-
-        with open(appendix_file, 'r') as f:
-            content = f.read()
-
-        # Make sure each appendix starts with a proper heading: # Supplement X: Title
-        first_heading_match = re.search(r'^# (.+?)$', content, re.MULTILINE)
-        if first_heading_match:
-            heading_text = first_heading_match.group(1)
-            original_heading_line = first_heading_match.group(0)
-
-            # Extract existing title, stripping any previous prefixes
-            # (e.g., "Supplement A 1:", "Supplement 1:", "Appendix A:", etc.)
-            title_text = re.sub(r'^(Supplement|Appendix)\s*([A-Z]\s*)?(\d+\s*)?[:.]?\s*', '', heading_text).strip()
-
-            # Construct the desired heading - JUST THE TITLE
-            new_heading_line = f"# {title_text}"
-
-            # Only modify if the heading line needs changing
-            if original_heading_line != new_heading_line:
-                # Backup before modifying (optional but recommended)
-                # shutil.copy2(appendix_file, appendix_file + ".bak")
-                
-                modified_content = content.replace(original_heading_line, new_heading_line, 1) # Replace only the first occurrence
-                with open(appendix_file, 'w') as f:
-                    f.write(modified_content)
-                logging.info("Updated heading in %s to: %s", filename, new_heading_line)
-            else:
-                 logging.info("Heading in %s already correctly formatted: %s", filename, new_heading_line)
-
-        else:
-            # If no heading found, create one using the filename as a placeholder title
-            logging.warning(f"No level 1 heading (#) found in appendix file: {filename}. Adding a placeholder heading.")
-            # Extract a placeholder title from filename (e.g., "Supplement_A_1_Mathematical_Formalization" -> "Mathematical Formalization")
-            base_title = os.path.splitext(filename)[0]
-            base_title = re.sub(r'^Supplement_[A-Z]_\d+_', '', base_title).replace('_', ' ')
-            # new_heading_line = f"# Supplement {number}: {base_title}"
-            new_heading_line = f"# {base_title}"
-            # Prepend the heading to the content
-            modified_content = new_heading_line + "\n\n" + content
-            with open(appendix_file, 'w') as f:
-                f.write(modified_content)
-            logging.info("Added placeholder heading to %s: %s", filename, new_heading_line)
-            
-        # Note: Removed logic that previously *added* prefixes like "Appendix X:"
-        # The LaTeX \appendix command will handle the numbering and naming.
-
-        # Remove any existing \\appendix commands etc. (code remains the same)
-
-def parse_arguments():
-    """Parse command line arguments for the script."""
-    parser = argparse.ArgumentParser(description="Generate PDF from CEREBRUM Markdown files")
-    parser.add_argument("--cerebrum-dir", default="CEREBRUM", 
-                      help="Directory containing CEREBRUM.md and appendix files (default: CEREBRUM)")
-    parser.add_argument("--main-file", default="CEREBRUM.md",
-                      help="Main Markdown file to process (default: CEREBRUM.md)")
+def main():
+    # Parse arguments
+    parser = argparse.ArgumentParser(description="Generate CEREBRUM PDF")
+    parser.add_argument("--cerebrum-dir", default="CEREBRUM",
+                      help="Directory containing CEREBRUM files (default: CEREBRUM)")
+    parser.add_argument("--main-file", default="CEREBRUM_main_text.md",
+                      help="Main Markdown file (default: CEREBRUM_main_text.md)")
     parser.add_argument("--output-file", default="CEREBRUM.pdf",
                       help="Output PDF filename (default: CEREBRUM.pdf)")
-    parser.add_argument("--appendix-pattern", default="Supplement_*.md",
-                      help="Glob pattern to identify appendix files (default: Supplement_*.md)")
-    parser.add_argument("--appendix-order", nargs="*",
-                      help="Explicit order of appendix files (by filename)")
     parser.add_argument("--skip-mermaid", action="store_true",
                       help="Skip running the Mermaid rendering script")
-    parser.add_argument("--debug", action="store_true",
-                      help="Enable debug logging")
+    parser.add_argument("--verbose", "-v", action="store_true",
+                      help="Enable verbose logging")
+    parser.add_argument("--keep-temp", action="store_true",
+                      help="Keep temporary files after generation")
+    parser.add_argument("--keep-images", action="store_true",
+                      help="Keep images in main text instead of moving to figures supplement only")
+
+    args = parser.parse_args()
+
+    if args.verbose:
+        logging.getLogger().setLevel(logging.DEBUG)
+
+    # 1. Setup paths
+    project_root = get_project_root()
+    cerebrum_dir = project_root / args.cerebrum_dir
+    main_file = cerebrum_dir / args.main_file
+    title_page = cerebrum_dir / "title_page.md"
+    # Construct the output path within the CEREBRUM/output directory
+    output_dir = cerebrum_dir / "output"
+    output_dir.mkdir(parents=True, exist_ok=True) # Ensure output directory exists
+    output_file = output_dir / args.output_file 
+
+    if not cerebrum_dir.exists():
+        logging.error(f"CEREBRUM directory not found: {cerebrum_dir}")
+        return 1
     
-    # Return None if no arguments are provided besides the script name
-    if len(sys.argv) <= 1:
-        # Create a default Namespace object if no args are provided
-        # This mimics the structure returned by parse_args()
-        # Allowing the rest of the script to use args.attribute notation
-        defaults = argparse.Namespace(
-            cerebrum_dir="CEREBRUM",
-            main_file="CEREBRUM.md",
-            output_file="CEREBRUM.pdf",
-            appendix_pattern="Supplement_*.md",
-            appendix_order=None, # Will trigger canonical order later
-            skip_mermaid=False,
-            debug=False
-        )
-        return defaults
-    else:
-        return parser.parse_args()
+    if not main_file.exists():
+        logging.error(f"Main file not found: {main_file}")
+        # Try to find CEREBRUM.md and rename it
+        original_file = cerebrum_dir / "CEREBRUM.md"
+        if original_file.exists():
+            logging.info(f"Found original file {original_file}, copying to {main_file}")
+            shutil.copy2(original_file, main_file)
+        else:
+            return 1
+    
+    if not title_page.exists():
+        logging.error(f"Title page not found: {title_page}")
+        return 1
+    
+    # 2. Run Mermaid renderer if available and not skipped
+    if not args.skip_mermaid:
+        run_mermaid_renderer(project_root)
+    
+    # 3. Ensure figures directory exists and contains all figure images
+    figures_dir = ensure_figures_directory(cerebrum_dir)
+    
+    # 4. First, update image paths to use figures directory
+    fix_image_references(main_file, output_to_figures=True, remove_images=False)
+    
+    # 5. Extract figure information from main file (before removing images)
+    figure_info = extract_figure_info(main_file)
+    
+    # 6. If not keeping images in main text, remove them completely
+    if not args.keep_images:
+        remove_images_from_main_text(main_file)
+    
+    # 7. Create a figures supplement
+    figures_supplement = create_figures_supplement(cerebrum_dir, figure_info)
+    
+    # 8. Prepare other supplement files (find, sort, ensure consistent headings)
+    supplements = prepare_supplement_files(cerebrum_dir)
+    logging.info(f"Found and prepared {len(supplements)} supplement files in order:")
+    for supp_path in supplements:
+        logging.info(f"  - {supp_path.name}")
+    
+    # 9. Generate the PDF with the figures supplement inserted after main text
+    success = generate_pdf(title_page, main_file, figures_supplement, supplements, output_file, cerebrum_dir)
+    
+    # 10. Clean up intermediate files unless specified to keep them
+    if success and not args.keep_temp:
+        cleanup_intermediate_files(cerebrum_dir)
+    
+    return 0 if success else 1
 
 if __name__ == "__main__":
-    # Parse command line arguments or get defaults
-    args = parse_arguments()
-    
-    # Set debug logging if requested (either via flag or if default changes)
-    if args.debug:
-        logging.getLogger().setLevel(logging.DEBUG)
-        logging.debug("Debug logging enabled")
-    
-    project_root = get_project_root()
-    cerebrum_dir = os.path.join(project_root, args.cerebrum_dir)
-    
-    # --- Run Mermaid Script First (unless skipped) ---
-    if not args.skip_mermaid:
-        mermaid_script_name = "render_mermaids.py"
-        mermaid_script_path = os.path.join(project_root, "tools", mermaid_script_name)
-
-        if not os.path.exists(mermaid_script_path):
-            logging.error(f"Mermaid script not found at: {mermaid_script_path}")
-            sys.exit(1)
-
-        if not run_mermaid_script(mermaid_script_path, project_root):
-            logging.error("Aborting PDF generation due to Mermaid script failure.")
-            sys.exit(1)
-    else:
-        logging.info("Skipping Mermaid rendering as requested")
-    # --------------------------------
-
-    # --- Proceed with PDF Generation ---
-    # Define paths relative to the determined project root
-    markdown_relative_path = os.path.join(args.cerebrum_dir, args.main_file)
-    output_pdf_relative_path = os.path.join(args.cerebrum_dir, args.output_file)
-    # The resource path is the directory containing the 'output' folder referenced in the markdown
-    resource_relative_path = args.cerebrum_dir
-
-    # Construct absolute paths based on the project root
-    markdown_abs_path = os.path.join(project_root, markdown_relative_path)
-    output_pdf_abs_path = os.path.join(project_root, output_pdf_relative_path)
-    resource_abs_path = os.path.join(project_root, resource_relative_path)
-    
-    # Find appendix files
-    all_appendix_files = find_appendix_files(cerebrum_dir, args.appendix_pattern)
-    
-    # Define explicit ordering of appendices (if not provided via command line)
-    if not args.appendix_order:
-        # IMPORTANT: This is the canonical order of appendices.
-        # The numbering and lettering should match:
-        # - Supplement A 1: Supplement_A_1_Mathematical_Formalization.md
-        # - Supplement B 2: Supplement_B_2_Novel_Linguistic_Cases.md
-        # - Supplement C 3: Supplement_C_3_Practical_Applications.md
-        # - Supplement D 4: Supplement_D_4_Related_Work.md
-        # - Supplement E 5: Supplement_E_5_Category_Theory.md
-        # - Supplement F 6: Supplement_F_6_Future_Directions.md
-        args.appendix_order = [
-            "Supplement_A_1_Mathematical_Formalization.md", # Supplement A 1
-            "Supplement_B_2_Novel_Linguistic_Cases.md",     # Supplement B 2
-            "Supplement_C_3_Practical_Applications.md",     # Supplement C 3
-            "Supplement_D_4_Related_Work.md",             # Supplement D 4
-            "Supplement_E_5_Category_Theory.md",          # Supplement E 5
-            "Supplement_F_6_Future_Directions.md"         # Supplement F 6
-        ]
-        logging.info(f"Using canonical appendix order: {', '.join(args.appendix_order)}")
-    
-    # Order the appendix files
-    ordered_appendix_files = determine_appendix_order(all_appendix_files, args.appendix_order)
-    
-    # Prepare appendix files
-    prepare_appendix_files(ordered_appendix_files)
-
-    logging.info(f"Project Root: {project_root}")
-    logging.info(f"Markdown Source: {markdown_abs_path}")
-    logging.info(f"PDF Output: {output_pdf_abs_path}")
-    logging.info(f"Resource Path: {resource_abs_path}")
-    logging.info(f"Appendix Files ({len(ordered_appendix_files)}):")
-    for i, f in enumerate(ordered_appendix_files):
-        logging.info(f"  {i+1}. {os.path.basename(f)}")
-
-    if render_markdown_to_pdf(markdown_abs_path, ordered_appendix_files, output_pdf_abs_path, resource_abs_path):
-        logging.info("PDF generation completed successfully.")
-        sys.exit(0) # Indicate success
-    else:
-        logging.error("PDF generation failed.")
-        sys.exit(1) # Indicate failure 
+    sys.exit(main()) 

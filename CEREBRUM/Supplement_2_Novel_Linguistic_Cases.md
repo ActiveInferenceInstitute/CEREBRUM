@@ -4,7 +4,7 @@
 
 The CEREBRUM framework not only operationalizes traditional linguistic cases but potentially enables the discovery of entirely new case archetypes through its systematic approach to model interactions. As cognitive models interact in increasingly complex ecosystems, emergent functional roles may arise that transcend the classical case system derived from human languages.
 
-### Emergence of Novel Case Functions
+## Emergence of Novel Case Functions
 
 Traditional linguistic case systems evolved to serve human communication needs in physical and social environments. However, computational cognitive ecosystems face novel challenges and opportunities that may drive the emergence of new functional roles. The mathematical formalism of CEREBRUM provides a scaffold for identifying these emergent case functions through:
 
@@ -13,7 +13,7 @@ Traditional linguistic case systems evolved to serve human communication needs i
 3. **Precision allocation clusters**: Statistical clustering of precision weightings revealing new functional categories
 4. **Transition probability densities**: Dense regions in case transition probability spaces suggesting stable new cases
 
-### Speculative Novel Case: The Emergent "Conjunctive" Case
+## Speculative Novel Case: The Emergent "Conjunctive" Case
 
 One speculative example of a novel case that might emerge within CEREBRUM is what we might term the "conjunctive" case [CNJ]. This case would represent a model's role in synthesizing multiple predictive streams into coherent joint predictions that couldn't be achieved through simple composition of existing cases.
 
@@ -21,7 +21,7 @@ The mathematical formalism for a model in conjunctive case would extend the stan
 
 In the message-passing formulation, the conjunctive case would introduce unique update rules as described in Equation 16 (see Supplement 1), with weighting factors for individual model predictions, as well as a multiplicative integration of predictions that captures interdependencies beyond simple weighted averaging. This formulation enables rich joint inference across model collectives.
 
-### Speculative Novel Case: The "Recursive" Case
+## Speculative Novel Case: The "Recursive" Case
 
 Another potential novel case is the "recursive" case [REC], which would enable a model to apply its transformations to itself, creating a form of computational reflection not captured by traditional cases.
 
@@ -29,7 +29,7 @@ In the recursive case, a model assumes both agent and object roles simultaneousl
 
 The recursive case would introduce unique precision dynamics as formalized in Equation 17 (see Supplement 1). The key innovation is that the model appears on both sides of the transformation, creating a form of self-reference that traditional case systems don't accommodate. This enables models to introspect and modify their own parameters through self-directed transformations.
 
-### Speculative Novel Case: The "Metaphorical" Case
+## Speculative Novel Case: The "Metaphorical" Case
 
 A third potential novel case is the "metaphorical" case [MET], which would enable a model to map structures and relationships from one domain to another, creating computational analogies that transfer knowledge across conceptual spaces.
 
@@ -37,11 +37,11 @@ In the metaphorical case, a model acts as a transformation bridge between dispar
 
 The metaphorical case would introduce unique cross-domain mapping functions as formalized in Equation 18 (see Supplement 1). The key innovation is the structured alignment of latent representations across domains, enabling principled knowledge transfer that preserves relational invariants while adapting to target domain constraints.
 
-#### Connections to Human Cognition and Communication
+## Connections to Human Cognition and Communication
 
 The metaphorical case has rich connections to multiple domains of human cognition and communication. In affective neuroscience, it models how emotional experiences are mapped onto conceptual frameworks, explaining how we understand emotions through bodily metaphors (e.g., "heavy heart," "burning anger"). In first and second-person neuroscience, metaphorical mappings enable perspective-taking and empathy through systematic projection of one's own experiential models onto others. Educational contexts leverage metaphorical case operations when complex concepts are taught through familiar analogies, making abstract ideas concrete through structured mappings. The way people converse about generative models often employs metaphorical languagedescribing models as "thinking," "imagining," or "dreaming"which represents a natural metaphorical mapping between human cognitive processes and computational operations. Learning itself fundamentally involves metaphorical operations when knowledge from one domain scaffolds understanding in another. Perhaps most profoundly, the metaphorical case provides a computational framework for understanding how symbols and archetypes function in human cognitionas cross-domain mappings that compress complex experiential patterns into transferable, culturally-shared representations that retain their structural integrity across diverse contexts while adapting to individual interpretive frameworks.
 
-### Implications of Novel Cases for Computational Cognition
+## Implications of Novel Cases for Computational Cognition
 
 The discovery of novel cases through CEREBRUM could have profound implications for computational cognitive science:
 

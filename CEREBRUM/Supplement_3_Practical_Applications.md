@@ -6,7 +6,7 @@ The declension paradigm for cognitive models offers significant practical benefi
 
 Complex cognitive workflows typically involve sequences of models arranged in processing pipelines. By applying case declensions, each component can seamlessly adapt its interfaces.
 
-### Implementation Recipe: Pipeline Adapter Pattern
+## Implementation Recipe: Pipeline Adapter Pattern
 
 ```python
 def transform_model(model, target_case):
@@ -40,14 +40,14 @@ def optimize_pipeline(models):
     return models
 ```
 
-### Pipeline Design Patterns
+## Pipeline Design Patterns
 
 | Pattern | Case Sequence | Use Case | Key Benefit |
 |---------|--------------|----------|-------------|
-| Linear | NOM→DAT→GEN | Sequential processing | Simple, efficient data flow |
-| Branching | NOM→(DAT,DAT)→GEN | Parallel processing | Increased throughput |
-| Aggregating | (NOM,NOM)→ACC→GEN | Multi-source fusion | Information integration |
-| Feedback | NOM→DAT→GEN→LOC→NOM | Iterative refinement | Self-correction |
+| Linear | NOMDATGEN | Sequential processing | Simple, efficient data flow |
+| Branching | NOM(DAT,DAT)GEN | Parallel processing | Increased throughput |
+| Aggregating | (NOM,NOM)ACCGEN | Multi-source fusion | Information integration |
+| Feedback | NOMDATGENLOCNOM | Iterative refinement | Self-correction |
 
 ## Resource Allocation Strategies
 
@@ -60,7 +60,7 @@ def optimize_pipeline(models):
 | Report generation | GEN > NOM > LOC | 50% output, 30% content, 20% context | Optimize clarity |
 | Method development | INS > ACC > NOM | 50% method, 30% testing, 20% generation | Minimize errors |
 
-### Implementation Recipe: Resource Allocator
+## Implementation Recipe: Resource Allocator
 
 ```python
 def allocate_resources(models, task_type, total_compute):
@@ -91,7 +91,7 @@ def allocate_resources(models, task_type, total_compute):
     return models
 ```
 
-### Resource Allocation Heuristics
+## Resource Allocation Heuristics
 
 1. **Dynamic Scaling Rules:**
    - Scale up [NOM] case precision during initial processing
@@ -111,13 +111,13 @@ def allocate_resources(models, task_type, total_compute):
 
 | Context Change | Case Transition | Implementation Approach | Expected Outcome |
 |----------------|----------------|-------------------------|------------------|
-| Data volume spike | NOM→ACC | Increase buffer capacity, batch processing | Sustained throughput |
-| Accuracy requirement | ACC→NOM | Precision increase, additional validation | Higher quality results |
-| Latency constraints | INS→NOM | Pipeline shortening, parallelization | Faster response time |
-| Novel data | ACC→ABL | Representation adaptation, uncertainty handling | Better generalization |
-| Resource limitation | All→ACC selective | Selective processing, prioritization | Resource conservation |
+| Data volume spike | NOMACC | Increase buffer capacity, batch processing | Sustained throughput |
+| Accuracy requirement | ACCNOM | Precision increase, additional validation | Higher quality results |
+| Latency constraints | INSNOM | Pipeline shortening, parallelization | Faster response time |
+| Novel data | ACCABL | Representation adaptation, uncertainty handling | Better generalization |
+| Resource limitation | AllACC selective | Selective processing, prioritization | Resource conservation |
 
-### Implementation Recipe: Adaptive Configuration
+## Implementation Recipe: Adaptive Configuration
 
 ```python
 def reconfigure_ecosystem(models, context):
@@ -159,7 +159,7 @@ def reconfigure_ecosystem(models, context):
 
 ## Knowledge Graph Enhancement
 
-### Implementation Recipe: Case-Based Knowledge Graph
+## Implementation Recipe: Case-Based Knowledge Graph
 
 ```python
 def build_knowledge_graph(entities, relationships):
@@ -212,27 +212,27 @@ def build_knowledge_graph(entities, relationships):
 | Federated learning | ACC, ABL, VOC | Privacy-preserving knowledge exchange | Learning efficiency with privacy |
 | Recommendation | GEN, ACC, DAT | Personalization through case precision | Relevance, diversity, novelty |
 
-### Quick Reference: Case Selection Decision Tree
+## Quick Reference: Case Selection Decision Tree
 
 ```
 1. Model's PRIMARY ROLE:
-   ├── GENERATES content → NOM
-   ├── RECEIVES data → ACC
-   ├── TRANSFERS information → DAT
-   ├── PRODUCES output → GEN
-   └── PROVIDES methods/context → INS/LOC
+    GENERATES content  NOM
+    RECEIVES data  ACC
+    TRANSFERS information  DAT
+    PRODUCES output  GEN
+    PROVIDES methods/context  INS/LOC
 
 2. POSITION in pipeline:
-   ├── FIRST component → NOM
-   ├── MIDDLE component → DAT
-   ├── JUNCTION component → DAT+ACC
-   └── FINAL component → GEN
+    FIRST component  NOM
+    MIDDLE component  DAT
+    JUNCTION component  DAT+ACC
+    FINAL component  GEN
    
 3. SPECIAL FUNCTION:
-   ├── ERROR handling → INS+LOC
-   ├── MEMORY systems → ABL+GEN
-   ├── INTERACTIVE systems → VOC+NOM
-   └── LEARNING components → ACC+NOM
+    ERROR handling  INS+LOC
+    MEMORY systems  ABL+GEN
+    INTERACTIVE systems  VOC+NOM
+    LEARNING components  ACC+NOM
 ```
 
 ## Implementation Best Practices

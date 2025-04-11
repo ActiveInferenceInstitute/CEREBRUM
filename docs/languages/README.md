@@ -42,6 +42,13 @@ This directory contains case mapping analyses for the following languages:
 - [Tagalog](tagalog.md) - Austronesian language with focus system rather than case marking
 - [Wolof](wolof.md) - Niger-Congo language with a unique verbal focus system
 - [Maori](maori.md) - Polynesian language with particle-based grammatical relations
+- [Esperanto](esperanto.md) - Constructed international auxiliary language with a simplified two-case system
+- [Inter-Slavic](interslavic.md) - Constructed zonal auxiliary language with standardized Slavic case system
+- [Ilocano](ilocano.md) - Philippine Austronesian language with focus/voice system and case markers
+- [Puyuma](puyuma.md) - Formosan Austronesian language with four-voice system and case markers
+- [Kavalan](kavalan.md) - Formosan Austronesian language with voice system and person-marking clitics
+- [Amis](amis.md) - Formosan Austronesian language with five-voice system and dedicated benefactive focus
+- [Paiwan](paiwan.md) - Formosan Austronesian language with four-voice system and status-sensitive marking
 
 ## Structure of Each Language Document
 
