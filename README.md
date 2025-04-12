@@ -13,35 +13,36 @@ CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unifie
 - **Version:** 1.0
 - **Date:** April 7, 2025
 - **DOI:** [10.5281/zenodo.15170908](https://doi.org/10.5281/zenodo.15170908)
-- **Zenodo Record:** [https://zenodo.org/records/15170908](https://zenodo.org/records/15170908)
+- **Zenodo Record:** [https://zenodo.org/records/15173983](https://zenodo.org/records/15173983)
 - **Institution:** Active Inference Institute
 
 ## Overview
 CEREBRUM is a unified modeling framework that integrates case-based reasoning with Bayesian representations.
 
 ## PDF Documentation
-The full documentation for CEREBRUM is available as a PDF file (`CEREBRUM/CEREBRUM.pdf`), which is generated from the Markdown source files.
+The full documentation for CEREBRUM is available as a PDF file in the `paper/output/` directory, which is generated from the Markdown source files.
 
 ### Requirements for PDF Generation
 To regenerate the PDF documentation, you need:
 - Python 3
-- pandoc
-- A LaTeX distribution with xelatex (like TeX Live or MiKTeX)
+- Node.js with Mermaid CLI (`@mermaid-js/mermaid-cli` package)
+- Pandoc
+- XeLaTeX (for PDF generation)
 
 ### Generating the PDF
 To regenerate the PDF documentation, run:
 
 ```bash
-python3 tools/render_markdown.py
+python3 paper/assemble_paper.py
 ```
 
 This script will:
-1. Execute the `render_mermaids.py` script to generate diagrams from Mermaid syntax (unless skipped via arguments).
-2. Process the main Markdown file (`CEREBRUM/CEREBRUM.md`).
-3. Find, order, and include appendix files (matching `CEREBRUM/Supplement_*.md` by default).
-4. Generate the final PDF file at `CEREBRUM/CEREBRUM.pdf`.
+1. Render all Mermaid diagrams from `paper/components/figures/` to PNG images
+2. Assemble all markdown components in the correct order
+3. Generate an HTML version of the paper
+4. Create the final PDF file at `paper/output/assembled_paper.pdf`
 
-The PDF includes proper formatting, a table of contents, section numbering, and embedded figures.
+For more detailed information about the paper building process, please see `paper/README.md`.
 
 ## Citation
 If you use CEREBRUM in your research, please cite:

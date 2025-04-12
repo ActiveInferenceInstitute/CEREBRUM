@@ -49,6 +49,7 @@ This directory contains case mapping analyses for the following languages:
 - [Kavalan](kavalan.md) - Formosan Austronesian language with voice system and person-marking clitics
 - [Amis](amis.md) - Formosan Austronesian language with five-voice system and dedicated benefactive focus
 - [Paiwan](paiwan.md) - Formosan Austronesian language with four-voice system and status-sensitive marking
+- [Serbian](serbian.md) - South Slavic language with 7 cases and animacy distinctions
 
 ## Structure of Each Language Document
 

@@ -1,0 +1,54 @@
+% Custom LaTeX header to display metadata fields prominently
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+% Define colors
+\definecolor{linkcolor}{RGB}{0, 102, 204}
+
+% Configure hyperlinks
+\hypersetup{
+  colorlinks=true,
+  linkcolor=linkcolor,
+  urlcolor=linkcolor
+}
+
+% Customize first page header
+\fancypagestyle{firstpage}{%
+  \fancyhf{}
+  \renewcommand{\headrulewidth}{0pt}
+  \fancyhead[C]{%
+    \Large\textbf{\@title}\par
+    \bigskip
+    \large\textbf{\@author}\par
+    \normalsize\@date\par
+    \vspace{0.5cm}
+    \begin{tabular}{ll}
+      \textbf{Institution:} & \@institute \\
+      \textbf{Email:} & \href{mailto:\@email}{\@email} \\
+      \textbf{ORCID:} & \href{https://orcid.org/\@orcid}{\@orcid} \\
+      \textbf{DOI:} & \href{https://doi.org/\@doi}{\@doi} \\
+      \textbf{URL:} & \href{\@url}{\@url} \\
+      \textbf{License:} & \@license \\
+    \end{tabular}
+    \vspace{1cm}
+  }
+}
+
+% Set the first page style
+\AtBeginDocument{%
+  \thispagestyle{firstpage}
+}
+
+% Redefine maketitle to use our custom style
+\renewcommand{\maketitle}{%
+  \thispagestyle{firstpage}
+  \vspace*{1cm}
+  \begin{center}
+    \Large\textbf{\@title}\par
+    \vspace{0.5cm}
+    \large\textbf{\@author}\par
+    \normalsize\@date\par
+  \end{center}
+  \vspace{2cm}
+} 

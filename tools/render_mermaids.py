@@ -181,10 +181,13 @@ def update_cerebrum_md(cerebrum_path, figure_paths):
                 caption = caption_match.group(1).strip() if caption_match else f"Figure {figure_num}"
                 
                 # Insert image reference (not the image itself) after the figure title
-                img_ref = f"\n\n![Figure {figure_num}: {caption}]({rel_image_path})\n\n"
-                insert_pos = match.end()
-                content = content[:insert_pos] + img_ref + content[insert_pos:]
-                print(f"Added image reference for Figure {figure_num}")
+                # img_ref = f"\\n\\n![Figure {figure_num}: {caption}]({rel_image_path})\\n\\n"
+                # insert_pos = match.end()
+                # content = content[:insert_pos] + img_ref + content[insert_pos:]
+                # print(f"Added image reference for Figure {figure_num}")
+                
+                # Log that the reference was found, but image insertion is skipped
+                print(f"Found reference for Figure {figure_num}, skipping image insertion.")
                 match_found = True
                 processed_figures.add(figure_num)
                 break

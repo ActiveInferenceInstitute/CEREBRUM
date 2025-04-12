@@ -1,0 +1,63 @@
+{
+  "models": [
+    {
+      "id": "test-model-1",
+      "name": "TestModel1",
+      "parameters": {
+        "learning_rate": 0.01,
+        "precision": 1.0,
+        "depth": 3
+      },
+      "case": "NOM"
+    },
+    {
+      "id": "test-model-2",
+      "name": "TestModel2",
+      "parameters": {
+        "learning_rate": 0.05,
+        "precision": 2.0,
+        "width": 10
+      },
+      "case": "ACC"
+    },
+    {
+      "id": "test-model-3",
+      "name": "TestModel3",
+      "parameters": {
+        "learning_rate": 0.001,
+        "precision": 0.5,
+        "filter_size": 5
+      },
+      "case": "GEN"
+    }
+  ],
+  "connections": [
+    {
+      "source": "test-model-1",
+      "target": "test-model-2",
+      "relation": "feedforward"
+    },
+    {
+      "source": "test-model-2",
+      "target": "test-model-3",
+      "relation": "feedforward"
+    },
+    {
+      "source": "test-model-3",
+      "target": "test-model-1",
+      "relation": "feedback"
+    }
+  ],
+  "test_vectors": {
+    "input": [
+      [1.0, 2.0, 3.0],
+      [0.5, 1.5, 2.5],
+      [-1.0, 0.0, 1.0]
+    ],
+    "expected_output": [
+      [1.0, 2.0, 3.0],
+      [0.5, 1.5, 2.5],
+      [-1.0, 0.0, 1.0]
+    ]
+  }
+} 
