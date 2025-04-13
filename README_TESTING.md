@@ -121,6 +121,97 @@ python src/scripts/run_tests.py --coverage --html
 
 The HTML report will be available in the `coverage_html_report` directory.
 
+## Running Linear Regression Tests
+
+The CEREBRUM framework includes comprehensive linear regression tests that demonstrate the linguistic case framework through statistical modeling. To run these tests and generate all visualizations:
+
+```bash
+# Run individual case tests (recommended approach)
+python3 -c "from src.tests.test_linear_regression import CaseDefinitions, DataGenerator, test_nominative_case; case_definitions = CaseDefinitions.get_all_cases(); linear_data = DataGenerator.linear_data(n_samples=150, slope=3.0, intercept=-2.0, noise_level=2.0); test_nominative_case(linear_data, case_definitions)"
+```
+
+You can replace `test_nominative_case` with other case test functions like:
+- `test_dative_case`
+- `test_genitive_case` 
+- `test_instrumental_case`
+- `test_locative_case`
+- `test_ablative_case`
+- `test_vocative_case`
+
+Note: There is currently an issue with the `test_accusative_case` related to array dimensions in the animation creation.
+
+All visualizations and animations will be generated in the `src/tests/output/linear_regression` directory, organized by case:
+
+```
+src/tests/output/linear_regression/
+├── nom/           # Nominative case visualizations
+├── acc/           # Accusative case visualizations
+├── dat/           # Dative case visualizations
+├── gen/           # Genitive case visualizations
+├── ins/           # Instrumental case visualizations
+├── loc/           # Locative case visualizations
+├── abl/           # Ablative case visualizations
+├── voc/           # Vocative case visualizations
+├── cerebrum_cases_overview.png     # Overview of all cases (generated after all tests)
+└── cerebrum_cases_simplified.png   # Simplified case overview (generated after all tests)
+```
+
+### Linear Regression Case Visualizations
+
+Each case test generates specific visualizations that demonstrate the linguistic case framework in the context of linear regression:
+
+1. **Nominative Case** (Model as active agent/subject):
+   - `linguistic_context.png` - Case explanation with linguistic context
+   - `fitting_visualization.png` - Model actively fitting data
+   - `fitting_animation.gif` - Animation of the model fitting process
+   - `parameter_space_visualization.png` - Model exploring parameter space
+   - `formula_visualization.png` - The mathematical representation
+   - `nominative_results.txt` - Summary of test results
+
+2. **Dative Case** (Model as data recipient):
+   - `linguistic_context.png` - Case explanation with linguistic context
+   - `data_flow_visualization.png` - Visualization of data flowing to the model
+   - `data_processing_visualization.png` - Model processing received data
+   - `dative_results.txt` - Summary of test results
+
+3. **Genitive Case** (Model as possessor/source):
+   - `linguistic_context.png` - Case explanation with linguistic context
+   - `predictions_visualization.png` - Model generating predictions with confidence intervals
+   - `summary_visualization.png` - Model as source of information
+   - `prediction_generation_animation.gif` - Animation of prediction generation
+   - `genitive_results.txt` - Summary of test results
+
+4. **Instrumental Case** (Model as tool/method):
+   - `linguistic_context.png` - Case explanation with linguistic context
+   - `methodology_visualization.png` - Model as method implementation
+   - `algorithm_animation.gif` - Animation of the algorithm process
+   - `instrumental_results.txt` - Summary of test results
+
+5. **Locative Case** (Model as location/context):
+   - `linguistic_context.png` - Case explanation with linguistic context
+   - `statistical_context_visualization.png` - Model as statistical assumption framework
+   - `statistical_context_animation.gif` - Animation showing statistical contexts
+   - `locative_results.txt` - Summary of test results
+
+6. **Ablative Case** (Model as error origin):
+   - `linguistic_context.png` - Case explanation with linguistic context
+   - `error_source_visualization.png` - Model as source of errors
+   - `error_origin_animation.gif` - Animation showing errors originating from model
+   - `ablative_results.txt` - Summary of test results
+
+7. **Vocative Case** (Model as addressable interface):
+   - `linguistic_context.png` - Case explanation with linguistic context
+   - `interface_visualization.png` - Model as interactive interface
+   - `interaction_animation.gif` - Animation of model interactions
+   - `vocative_results.txt` - Summary of test results
+
+8. **Accusative Case** (Model as evaluated object):
+   - `linguistic_context.png` - Case explanation with linguistic context
+   - `evaluation_visualization.png` - Model undergoing evaluation
+   - `hypothesis_testing.png` - Hypothesis testing of model significance
+   - `evaluation_animation.gif` - Animation of evaluation process (currently has an issue)
+   - `accusative_results.txt` - Summary of test results
+
 ## References
 
 For more information on testing approaches:
