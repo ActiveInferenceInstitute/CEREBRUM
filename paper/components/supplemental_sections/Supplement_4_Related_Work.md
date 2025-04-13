@@ -58,11 +58,11 @@ Category theory has emerged as a powerful mathematical framework for formalizing
 
 ### 4.2.1 Categorical Compositional Cognition
 
-**Categorical Compositional Distributed Semantics** [(Coecke et al., 2010)](#references):
-- Uses monoidal categories to formalize compositional meaning in natural language
-- Implements tensor product representations of linguistic structures
-- Provides mathematical foundations for semantic composition
-- Limitations: Focuses primarily on linguistic meaning rather than broader cognitive processes
+**Categorical Compositional Distributed Semantics (DisCoCat)** [(Coecke et al., 2010; Sadrzadeh et al., 2013)](#references):
+- Uses monoidal categories (specifically, compact closed categories or related structures like pregroup grammars [(Lambek, 2008)](#references)) to formalize compositional meaning in natural language, mapping grammar to tensor network operations.
+- Implements tensor product representations of linguistic structures, enabling semantic compositionality.
+- Foundational for modern computational linguistics approaches, with implementations like DisCoPy [(De Felice et al., 2020)](#references) extending its practical application.
+- Limitations: Primarily focuses on sentence-level semantics; extensions to discourse and broader cognition are ongoing research areas.
 
 **Applied Category Theory in Cognitive Science** [(Fong & Spivak, 2019)](#references):
 - Develops categorical foundations for knowledge representation
@@ -76,7 +76,7 @@ Category theory has emerged as a powerful mathematical framework for formalizing
 - Connects free energy minimization to categorical optimization
 - Limitations: Theoretical focus without concrete computational implementations
 
-CEREBRUM builds upon these category-theoretic approaches by specifically applying categorical structures to case relationships and transformations. By formalizing case functors, natural transformations, and commutative diagrams for model interactions, CEREBRUM provides a rigorous mathematical foundation for representing and reasoning about model ecosystems.
+CEREBRUM builds upon these category-theoretic approaches by specifically applying categorical structures (like functors and natural transformations) to model case relationships and transformations. While DisCoCat focuses on semantic composition *within* a sentence, CEREBRUM uses category theory to structure the relationships *between* models assigned different functional (case) roles, providing a rigorous mathematical foundation for representing and reasoning about model ecosystems.
 
 ## 4.3 Linguistic Approaches to Computation
 
@@ -102,9 +102,9 @@ The application of linguistic frameworks to computational systems has a rich his
 - Implements PropBank and FrameNet annotations
 - Limitations: Applies to text analysis rather than model relationships
 
-CEREBRUM repurposes linguistic case theory beyond natural language processing, using it as a structural framework for model relationships. This novel application enables the formalization of model interactions using the rich semantics of case relationships, creating a bridge between linguistic theory and computational model management.
+CEREBRUM repurposes linguistic case theory beyond natural language processing, using it as a structural framework for model relationships. This novel application enables the formalization of model interactions using the rich semantics of case relationships, creating a bridge between linguistic theory and computational model management. It draws inspiration from the structural insights of case grammar but applies them to a different domain: the functional roles of computational models.
 
-### 4.3.2 Morphological Computing
+### 4.3.2 Morphological Computing and Categorical Linguistics
 
 **Computing with Words** [(Zadeh, 1996)](#references):
 - Develops computational systems that operate on linguistic terms
@@ -118,7 +118,7 @@ CEREBRUM repurposes linguistic case theory beyond natural language processing, u
 - Bridges human communication and computational execution
 - Limitations: Applies linguistic structures to programming rather than model management
 
-CEREBRUM extends these approaches by applying declensional semantics to model management, treating models as entities that can assume different morphological forms based on their functional roles. This perspective enables more flexible and expressive representations of model relationships within computational ecosystems.
+CEREBRUM extends these approaches by applying declensional semantics (a form of morphological transformation) to model management, treating models as entities that can assume different morphological forms based on their functional roles. This aligns with broader trends in **Categorical Linguistics** which use category theory to formally model diverse linguistic phenomena, from syntax and semantics [(Lambek, 2008)](#references) to morphology and discourse structure, providing a powerful toolkit for analyzing structure-preserving transformations in language and, by extension, in model ecosystems. This perspective enables more flexible and expressive representations of model relationships within computational ecosystems.
 
 ## 4.4 Intelligence Production and Case Management
 
@@ -244,7 +244,9 @@ Atwood, C. P. (2015). Activity-based intelligence: Revolutionizing military inte
 
 Clark, R. M. (2019). *Intelligence analysis: A target-centric approach* (6th ed.). CQ Press.
 
-Coecke, B., Sadrzadeh, M., & Clark, S. (2010). Mathematical foundations for a compositional distributional model of meaning. *Linguistic Analysis*, 36(1-4), 345-384.
+Coecke, B., Sadrzadeh, M., Clark, S. (2010). Mathematical foundations for a compositional distributional model of meaning. *Linguistic Analysis*, 36(1-4), 345-384.
+
+De Felice, G., Toumi, A., & Coecke, B. (2020). DisCoPy: Monoidal categories in Python. *arXiv preprint arXiv:2011.13127*.
 
 Fillmore, C. J. (1968). The case for case. In E. Bach & R. T. Harms (Eds.), *Universals in linguistic theory* (pp. 1-88). Holt, Rinehart, and Winston.
 
@@ -276,6 +278,8 @@ Phillips, S., & Wilson, W. H. (2016). Categorical compositionality: A category t
 
 Reiling, D. (2010). *Technology for justice: How information technology can support judicial reform*. Leiden University Press.
 
+Sadrzadeh, M., Clark, S., & Coecke, B. (2013). The Frobenius anatomy of word meanings I: subject and object relative pronouns. *Journal of Logic and Computation*, 23(3), 609-643.
+
 Sajid, N., Ball, P. J., & Friston, K. J. (2021). Active inference: Demystified and compared. *Neural Computation*, 33(3), 674-712.
 
 Shafti, L. S., Hare, B., & Carpenter, P. A. (2020). Cognitive systems architecture based on the massive modularity hypothesis: A summary. *IEEE Access*, 8, 63243-63257.
@@ -284,4 +288,6 @@ Sun, R. (2016). Anatomy of the mind: Exploring psychological mechanisms and proc
 
 Woods, D. D., & Hollnagel, E. (2006). *Joint cognitive systems: Patterns in cognitive systems engineering*. CRC Press.
 
-Zadeh, L. A. (1996). Fuzzy logic = computing with words. *IEEE Transactions on Fuzzy Systems*, 4(2), 103-111. 
+Zadeh, L. A. (1996). Fuzzy logic = computing with words. *IEEE Transactions on Fuzzy Systems*, 4(2), 103-111.
+
+Lambek, J. (2008). From word to sentence: A computational algebraic approach to grammar. Polimetrica. 

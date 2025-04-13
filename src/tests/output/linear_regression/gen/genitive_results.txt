@@ -1,0 +1,28 @@
+GENITIVE CASE RESULTS
+===================
+
+Linguistic meaning: Possessive or source relation
+Statistical role: Model as prediction source
+Regression context: The model that generates predictions, intervals, and output reports
+
+Model Parameters (source of predictions):
+- Intercept: -1.896800
+- Coefficient 1: 3.034981
+
+Confidence Interval Information:
+- Confidence level: 95.0%
+- Number of prediction points: 50
+
+Linguistic Formula Example:
+The predictions BELONG TO the LINEAR MODEL.
+
+
+Model Summary (excerpt):
+--- Linear Regression Model Summary [GEN_model | GEN] ---
+Status: Trained
+
+MODEL PARAMETERS:
+  Intercept (β₀): -1.896800
+  Coefficient β1: 3.034981
+-----------------------------------------------------------
+...

@@ -92,9 +92,14 @@ def test_case_transition_properties(name, case1, case2, case3):
     # Property 4: Setting the same case twice should not add to history
     if case3 == case2:
         # Length should be unchanged from last assertion
-        expected_history_len = 1 if case1 == original_case else 2
+        expected_history_len = 0  # Default for the case where no transitions occur
+        
+        # If there was at least one actual case change, calculate the expected history length
+        if case1 != original_case:
+            expected_history_len += 1
         if case2 != case1:
-            expected_history_len = expected_history_len
+            expected_history_len += 1
+            
         assert len(model._case_history) == expected_history_len
     
     # Property 5: ID and name should be unchanged after case transitions

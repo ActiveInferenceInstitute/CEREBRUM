@@ -1,22 +1,25 @@
 ## Model Workflows as Case Transformations
 
 ## Computational Linguistics, Structural Alignment, and Model Relationships
-CEREBRUM supports different alignment systems for model relationships, mirroring linguistic morphosyntactic structures. These alignment patterns determine how models interact and transform based on their functional roles.
+CEREBRUM implements multiple alignment systems for model relationships, mirroring linguistic morphosyntactic structures. These alignment patterns determine how models interact and transform based on their functional roles.
 
-@fig:fig9 illustrates the core alignment patterns derived from linguistic theory, showing how models can be organized based on their case relationships. This includes nominative-accusative alignment (where models are distinguished by their role as agents or patients), ergative-absolutive alignment (where models are grouped by their relationship to actions), and tripartite alignment (where each case is marked distinctly).
+Figures 9 and 10 provide complementary perspectives on alignment patterns:
+
+* Figure 9 illustrates theoretical alignment patterns derived from linguistic theory (nominative-accusative, ergative-absolutive, and tripartite), showing the conceptual organization of models based on their case relationships.
+* Figure 10 demonstrates practical computational implementation of these patterns, including specific resource allocation strategies, message passing protocols, and transformation efficiency considerations.
 
 ![Core Linguistic Alignment Patterns in CEREBRUM Model Relationships.](Figure_9.png){#fig:fig9}
-
-@fig:fig10 demonstrates the practical implementation of these alignment patterns in model ecosystems. The diagram illustrates the computational implications of each alignment pattern, including resource allocation, message passing, and transformation efficiency. This implementation view complements the theoretical alignment patterns shown in @fig:fig9 by demonstrating their practical application in cognitive model management.
 
 ![Implementation of Alignment Patterns in CEREBRUM Model Ecosystems.](Figure_10.png){#fig:fig10}
 
 ## Implementation in Intelligence Production
-As previously discussed (see @fig:fig4 and @fig:fig6), CEREBRUM integrates case transformations into intelligence production workflows. @fig:fig11 and @fig:fig12 provide alternative state-based visualizations illustrating how models transition between cases during the intelligence lifecycle.
+CEREBRUM integrates case transformations into intelligence production workflows through several interconnected frameworks, as detailed in Supplement 3:
+
+* Figure 6 provides the operational overview of intelligence production with case-bearing models.
+* Figures 7 and 8 illustrate the category-theoretic foundations that formalize these transformations from complementary mathematical perspectives.
+* Figures 11 and 12 visualize alternative state-based transitions of models between cases during intelligence lifecycles.
 
 ![Intelligence Production Workflow with Case-Bearing Models.](Figure_6.png){#fig:fig6}
-
-Category theory provides a formal mathematical foundation for understanding these case transformations. @fig:fig7 and @fig:fig8 illustrate two complementary perspectives on the category-theoretic framework underlying CEREBRUM.
 
 ![CEREBRUM Category Theory Framework.](Figure_7.png){#fig:fig7}
 
@@ -26,18 +29,21 @@ Category theory provides a formal mathematical foundation for understanding thes
 
 ![State-Based Visualization of Intelligence Production Workflow (Variant B).](Figure_12.png){#fig:fig12}
 
-The intelligence production workflow, as managed by CEREBRUM, begins with raw data collection. In this initial phase, models assigned the instrumental case [INS] serve as data collection tools, implementing specific methods for information gathering.
+## Intelligence Production Workflow
+The CEREBRUM-managed intelligence production process follows a structured sequence of case transformations:
 
-As data moves to the preprocessing stage, models transition to the nominative case [NOM]. In this role, they become active agents, performing tasks such as cleaning, normalizing, and preparing the data for analysis.
+1. **Data Collection**: Models in instrumental case [INS] function as data collection tools, implementing specific methods for information gathering.
 
-During the analysis phase, models assume the locative case [LOC]. Here, they provide essential contextual understanding and define the environmental parameters that shape the analytical process, establishing the setting or conditions for the analysis.
+2. **Preprocessing**: Models transition to nominative case [NOM], becoming active agents that clean, normalize, and prepare data for analysis.
 
-Integration represents a critical transition point. Models in the genitive case [GEN] are responsible for generating intelligence products by synthesizing information gathered from multiple sources and previous stages.
+3. **Analysis**: Models transform to locative case [LOC], providing essential contextual understanding and defining environmental parameters that shape analytical processes.
 
-These generated products then undergo evaluation. Models assigned the accusative case [ACC] perform this function, acting as the objects of assessment processes. They are evaluated for quality, accuracy, and relevance, identifying areas requiring improvement.
+4. **Integration**: Models assume genitive case [GEN], generating intelligence products by synthesizing information from multiple sources and previous stages.
 
-The refinement phase employs models in the dative case [DAT]. These models are configured to receive feedback from the evaluation stage and implement necessary changes or adjustments to the intelligence products or the underlying analysis.
+5. **Evaluation**: Products undergo assessment by models in accusative case [ACC], which evaluate quality, accuracy, and relevance, identifying improvement areas.
 
-Finally, in the deployment stage, models often return to the nominative case [NOM] for the active implementation or dissemination of the refined intelligence solutions or products.
+6. **Refinement**: Models in dative case [DAT] receive feedback from evaluation and implement necessary adjustments to intelligence products or underlying analyses.
 
-This cyclical process demonstrates how case transformations enable models within the CEREBRUM framework to maintain their core identity while dynamically adapting to different functional requirements throughout the intelligence production lifecycle. Each case assignment optimizes specific aspects of model behavior—from data collection and processing to product generation and quality assessment—creating a flexible yet rigorously structured approach to managing intelligence workflows.
+7. **Deployment**: Models return to nominative case [NOM] for active implementation or dissemination of refined intelligence solutions.
+
+This systematic workflow demonstrates how case transformations enable models to maintain core identity while adapting to different functional requirements throughout the intelligence lifecycle. Each case assignment optimizes specific aspects of model behavior—from data collection and processing to product generation and quality assessment—creating a structured approach to managing intelligence workflows. Supplement 11 provides formal mathematical descriptions of these transformations, while Supplement 7 analyzes their computational complexity.

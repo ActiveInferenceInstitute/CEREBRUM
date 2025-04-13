@@ -1,0 +1,26 @@
+NOMINATIVE CASE RESULTS
+======================
+
+Linguistic meaning: Subject performing the action
+Statistical role: Model as parameter estimator
+Regression context: The model that fits coefficients to data, making the line 'act' on the data space
+
+Fitted Parameters:
+- Intercept: -1.896800
+- Coefficient 1: 3.034981
+
+Performance Metrics:
+- r2: 0.950164
+- mse: 4.219834
+- mae: 1.643877
+
+Linguistic Formula Example:
+The LINEAR MODEL fits the data points.
+
+
+Visualizations Generated:
+- Linguistic context: linguistic_context.png
+- Model fitting: fitting_visualization.png
+- Parameter space exploration: parameter_space_visualization.png
+- Fitting animation: fitting_animation.gif
+- Formula representation: formula_visualization.png

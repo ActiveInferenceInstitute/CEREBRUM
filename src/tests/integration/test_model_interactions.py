@@ -45,6 +45,13 @@ class SimpleActiveInferenceModel(ActiveInferenceModel):
         self._has_received_data = data is not None
         result["custom"] = "accusative_called"
         return result
+        
+    def _update_dative(self, data):
+        """Override dative update to track calls."""
+        result = super()._update_dative(data)
+        self._has_received_data = data is not None
+        result["custom"] = "dative_called"
+        return result
 
 @pytest.fixture
 def connected_models():

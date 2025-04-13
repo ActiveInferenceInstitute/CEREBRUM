@@ -1,5 +1,5 @@
 ## Abstract
 
-CEREBRUM implements a comprehensive approach to cognitive systems modeling by applying linguistic case systems to model management. This framework treats cognitive models as entities that can exist in different "cases", as in a morphologically rich language, based on their functional role within an intelligence production workflow. This enables more structured representation of model relationships and transformations.
+CEREBRUM implements a case-based approach to cognitive systems modeling by applying linguistic case frameworks to model management. The framework treats cognitive models as entities that can exist in different "cases"—analogous to nouns in morphologically rich languages—based on their functional roles within intelligence production workflows. This linguistic paradigm enables structured representation of model relationships and transformations through principled mathematical formulations. The immediate benefits include enhanced interoperability between models, reduced complexity in managing model ecosystems, and improved alignment between computational infrastructure and human cognitive patterns. 
 
-The code to generate this paper, and further open source development from are available at https://github.com/ActiveInferenceInstitute/CEREBRUM .
+The complete source code for generating this paper, along with implementation resources and further open source development materials, are available at the CEREBRUM GitHub repository: https://github.com/ActiveInferenceInstitute/CEREBRUM.

@@ -6,14 +6,10 @@ import numpy as np
 from typing import Dict, Any, Tuple
 from src.core.model import Case, Model
 from src.transformations.case_transformations import (
-    apply_nominative_transformation,
-    apply_accusative_transformation,
-    apply_genitive_transformation,
-    apply_dative_transformation,
-    apply_instrumental_transformation,
-    apply_locative_transformation,
-    apply_ablative_transformation,
-    apply_vocative_transformation
+    transform_case,
+    revert_case,
+    apply_morphosyntactic_alignment,
+    create_case_relationship
 )
 from src.tests.test_utils import assert_allclose
 
@@ -34,104 +30,93 @@ def base_model_data():
     
     return TestModel()
 
-# Transformation function mapping
-TRANSFORMATION_MAP = {
-    Case.NOMINATIVE: apply_nominative_transformation,
-    Case.ACCUSATIVE: apply_accusative_transformation,
-    Case.GENITIVE: apply_genitive_transformation,
-    Case.DATIVE: apply_dative_transformation,
-    Case.INSTRUMENTAL: apply_instrumental_transformation,
-    Case.LOCATIVE: apply_locative_transformation,
-    Case.ABLATIVE: apply_ablative_transformation,
-    Case.VOCATIVE: apply_vocative_transformation
-}
-
-# Expected transformations for each case
-@pytest.fixture
-def case_expectations():
-    """Define the expected transformations for each case."""
-    return {
-        Case.NOMINATIVE: {
-            'attention_weights': np.ones(3),  # No change
-            'connection_strengths': np.array([0.5, 0.3, 0.8]),  # No change
-            'value': 10  # No change
-        },
-        Case.ACCUSATIVE: {
-            'attention_weights': np.ones(3) * 0.8,  # Reduced attention
-            'connection_strengths': np.array([0.5, 0.3, 0.8]) * 1.2,  # Increased connectivity
-            'value': 12  # Value increased by 20%
-        },
-        Case.GENITIVE: {
-            'attention_weights': np.ones(3) * 1.5,  # Increased source attention
-            'connection_strengths': np.array([0.5, 0.3, 0.8]) * 0.7,  # Reduced output connectivity
-            'value': 7  # Value decreased
-        },
-        # Other cases defined similarly...
-    }
-
-# Parameterized test for all case transformations
+# Parameterized test for case transformations
 @pytest.mark.parametrize('target_case', list(Case))
-def test_case_transformation(base_model_data, case_expectations, target_case):
+def test_transform_case(base_model_data, target_case):
     """
-    Test that each case transformation correctly modifies the model.
+    Test that a model can be transformed to each case.
     
     Args:
         base_model_data: Fixture providing a test model
-        case_expectations: Fixture with expected values after transformation
         target_case: The case to transform the model into
     """
-    # Skip cases not defined in expectations
-    if target_case not in case_expectations:
-        pytest.skip(f"No expectations defined for {target_case}")
-    
-    # Get the transformation function
-    transform_func = TRANSFORMATION_MAP[target_case]
-    
     # Apply the transformation
     model = base_model_data
-    transform_func(model)
+    original_case = model.case
     
-    # Check expected values
-    expectations = case_expectations[target_case]
+    # Transform to target case
+    result = transform_case(model, target_case)
     
-    # Check numerical attributes with tolerance
-    if 'attention_weights' in expectations:
-        assert_allclose(
-            model.attention_weights, 
-            expectations['attention_weights'],
-            err_msg=f"attention_weights incorrect for {target_case}"
-        )
+    # Verify the model was transformed
+    assert result is model  # Should return the same instance
+    assert model.case == target_case
     
-    if 'connection_strengths' in expectations:
-        assert_allclose(
-            model.connection_strengths, 
-            expectations['connection_strengths'],
-            err_msg=f"connection_strengths incorrect for {target_case}"
-        )
-    
-    if 'value' in expectations:
-        assert_allclose(
-            model.value, 
-            expectations['value'],
-            err_msg=f"value incorrect for {target_case}"
-        )
+    # If we changed case, prior_case should be set
+    if original_case != target_case:
+        assert model._prior_case == original_case
+        assert (original_case, target_case) in model._case_history
 
-# Test transformation sequence
-def test_sequential_transformations(base_model_data):
-    """Test that sequential transformations work correctly."""
+def test_revert_case(base_model_data):
+    """Test that a model can be reverted to its previous case."""
     model = base_model_data
-    original_value = model.value
+    original_case = model.case
     
-    # Apply sequence: NOMINATIVE -> ACCUSATIVE -> GENITIVE -> NOMINATIVE
-    apply_accusative_transformation(model)
-    assert model.value != original_value, "Value should change after ACCUSATIVE transformation"
+    # First transform to a different case
+    transform_case(model, Case.ACCUSATIVE)
+    assert model.case == Case.ACCUSATIVE
     
-    interim_value = model.value
-    apply_genitive_transformation(model)
-    assert model.value != interim_value, "Value should change after GENITIVE transformation"
+    # Now revert to the previous case
+    revert_case(model)
+    assert model.case == original_case
+    assert model._case_history[-1] == (Case.ACCUSATIVE, original_case)
+
+def test_apply_morphosyntactic_alignment():
+    """Test applying morphosyntactic alignment to a group of models."""
+    # Create a set of test models
+    models = [
+        Model(name=f"Model_{i}") 
+        for i in range(3)
+    ]
     
-    apply_nominative_transformation(model)
-    # Check if transformation chain returns to original
-    # Note: This might not always be true depending on the implementation,
-    # but it's a good test of the transformation logic
-    assert_allclose(model.value, original_value, rtol=1e-5) 
+    # Apply nominative-accusative alignment
+    subject = models[0]
+    object_model = models[1]
+    
+    result = apply_morphosyntactic_alignment(
+        models,
+        alignment_type="nominative_accusative",
+        subject=subject,
+        object=object_model
+    )
+    
+    # Check the subject got nominative case
+    assert subject.case == Case.NOMINATIVE
+    assert subject in result["NOMINATIVE"]
+    
+    # Check the object got accusative case
+    assert object_model.case == Case.ACCUSATIVE
+    assert object_model in result["ACCUSATIVE"]
+
+def test_create_case_relationship():
+    """Test creating a case relationship between two models."""
+    source = Model(name="SourceModel")
+    target = Model(name="TargetModel")
+    
+    # Test "generates" relationship
+    source_result, target_result = create_case_relationship(
+        source, target, "generates"
+    )
+    
+    assert source_result is source
+    assert target_result is target
+    assert source.case == Case.NOMINATIVE
+    assert target.case == Case.DATIVE
+    
+    # Reset cases
+    source.case = Case.NOMINATIVE
+    target.case = Case.NOMINATIVE
+    
+    # Test another relationship type
+    create_case_relationship(source, target, "updates")
+    assert source.case == Case.NOMINATIVE  # Updates uses NOMINATIVE for source
+    # The rest of the test would depend on implementation 

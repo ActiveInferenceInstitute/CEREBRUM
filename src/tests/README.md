@@ -30,7 +30,8 @@ tests/
 ├── conftest.py               # Common pytest fixtures and configuration
 ├── test_*.py                 # Test modules for different components
 ├── test_utils.py             # Utility functions for tests
-└── data/                     # Test data directory
+├── data/                     # Test data directory
+└── output/                   # Test reports directory
 ```
 
 ## Running Tests
@@ -41,19 +42,19 @@ The simplest way to run tests is using the test runner script:
 
 ```bash
 # Run all tests
-python src/scripts/run_tests.py
+python3 src/scripts/run_tests.py
 
 # Run only unit tests
-python src/scripts/run_tests.py --unit-only
+python3 src/scripts/run_tests.py --unit-only
 
 # Run tests with coverage
-python src/scripts/run_tests.py --coverage
+python3 src/scripts/run_tests.py --coverage
 
 # Run tests with coverage and HTML report
-python src/scripts/run_tests.py --coverage --html
+python3 src/scripts/run_tests.py --coverage --html
 
 # Run tests for a specific module
-python src/scripts/run_tests.py --module model
+python3 src/scripts/run_tests.py --module model
 ```
 
 ### Using pytest Directly
@@ -62,19 +63,19 @@ You can also run pytest commands directly:
 
 ```bash
 # Run all tests
-pytest
+python3 -m pytest
 
 # Run specific test file
-pytest src/tests/test_model.py
+python3 -m pytest src/tests/test_model.py
 
 # Run tests matching a pattern
-pytest -k "model"
+python3 -m pytest -k "model"
 
 # Run tests with specific markers
-pytest -m "unit and model"
+python3 -m pytest -m "unit and model"
 
 # Run tests with coverage
-pytest --cov=src
+python3 -m pytest --cov=src
 ```
 
 ## Writing New Tests
@@ -114,13 +115,32 @@ Common fixtures are defined in `conftest.py` and testing utilities in `test_util
 
 Tests are automatically run as part of the CI/CD pipeline for every pull request and merge to main.
 
-## Coverage Reports
+## Test Reports
 
-Coverage reports show which parts of the code are covered by tests:
+When you run the tests, various reports are generated in the `src/tests/output` directory:
 
-```bash
-# Generate coverage report
-python src/scripts/run_tests.py --coverage --html
+```
+output/
+├── all_YYYYMMDD_HHMMSS_coverage_html/   # HTML coverage report (with --coverage)
+├── all_YYYYMMDD_HHMMSS_html/            # HTML test report (includes report.html)
+├── all_YYYYMMDD_HHMMSS_junit.xml        # JUnit XML report for CI integration
+├── all_YYYYMMDD_HHMMSS_log.txt          # Detailed test logs
+└── all_YYYYMMDD_HHMMSS_summary.txt      # Test run summary
 ```
 
-The HTML report will be available in the `coverage_html_report` directory. 
+Where `YYYYMMDD_HHMMSS` is a timestamp of when the tests were run.
+
+### Coverage Reports
+
+To generate a coverage report showing which parts of the code are covered by tests:
+
+```bash
+# Generate coverage report with HTML
+python3 src/scripts/run_tests.py --coverage --html
+```
+
+The HTML coverage report will be available at:
+`src/tests/output/all_YYYYMMDD_HHMMSS_coverage_html/index.html`
+
+The main test report can be accessed at:
+`src/tests/output/all_YYYYMMDD_HHMMSS_html/report.html` 

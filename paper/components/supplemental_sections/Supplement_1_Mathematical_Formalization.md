@@ -2,115 +2,125 @@
 
 This supplement contains all mathematical formalizations referenced throughout the paper, organized by equation number.
 
-## 1.1 Variational Free Energy and Case Transformations
+## 1.1 Variational Free Energy Framework
 
-**Equation 1: Variational Free Energy for Case Transformation**
+CEREBRUM builds on the foundational concept of variational free energy in active inference, establishing a principled approach to model transformations. The variational free energy $F$ for a model $m$ with internal states $s$ and observations $o$ is:
 
-$$
-F = D_{KL}[q(s|T(m))||p(s|m)] - \mathbb{E}_{p}[\log p(o|s,T(m))]  \tag{1}
-$$
+$$F = D_{KL}[q(s|T(m))||p(s|m)] - \mathbb{E}_{p}[\log p(o|s,T(m))]$$
 
-where T(m) represents the transformed model, s are internal states, and o are observations.
+This formulation, where $T(m)$ represents a case transformation applied to model $m$, captures two essential quantities: (1) the KL divergence between the recognition density and prior, measuring complexity; and (2) the expected log-likelihood, measuring accuracy. Together, they form the evidence lower bound that models seek to minimize.
 
-**Equation 2: Markov Blanket and Case Relationship**
+## 1.2 Markov Blanket Formulation
 
-$$\text{Case}(M) \subseteq \text{MB}(M)  \tag{2}$$
+A key insight in CEREBRUM is the interpretation of case transformations as operations on Markov blankets. The Markov blanket of a model $M$ contains all variables that shield it from the rest of the network, comprising parents, children, and co-parents. We define:
 
-where MB(M) denotes the Markov blanket of model M.
+$$\text{Case}(M) \subseteq \text{MB}(M)$$
 
-**Equation 3: Precision Weighting for Case Selection**
+This indicates that a case assignment acts on a subset of the Markov blanket, modifying how information flows between the model and its environment.
 
-$$\beta(c,m) = \frac{\exp(-F(c,m))}{\sum_{i}\exp(-F(c_i,m))}  \tag{3}$$
+## 1.3 Precision-Weighted Case Selection
 
-where (c,m) is the precision weight for case c and model m.
+The probability of a model assuming a particular case $c$ is determined by its ability to minimize free energy. The softmax function provides a natural mechanism for case selection:
 
-**Equation 4: Case-Specific Gradient Descent on Free Energy**
+$$\beta(c,m) = \frac{\exp(-F(c,m))}{\sum_{i}\exp(-F(c_i,m))}$$
 
-$$\frac{\partial m}{\partial t} = -\kappa_c \cdot \frac{\partial F}{\partial m}  \tag{4}$$
+Where $\beta(c,m)$ represents the probability of model $m$ adopting case $c$. This allows for dynamic case assignment based on contextual factors and observations.
 
-where $\kappa_c$ is the case-specific learning rate.
+## 1.4 Dynamical Implementation
 
-**Equation 5: Expected Free Energy Reduction in Case Transitions**
+The dynamics of case transformations can be implemented through gradient flows on free energy:
 
-$$
-\mathbb{E}[\Delta F] = \sum_{s,a}T(s'|s,a)\pi[a|s](F(s,c)-F(s',c'))  \tag{5}
-$$
+$$\frac{\partial m}{\partial t} = -\kappa_c \cdot \frac{\partial F}{\partial m}$$
 
-where c and c' represent the initial and target cases respectively.
+Here, $\kappa_c$ is a case-specific learning rate that determines how quickly the model adapts when in a particular case. This provides a continuous-time formulation of case-based learning.
 
-**Equation 6: Bayes Factor for Case Selection**
+## 1.5 Expected Free Energy Minimization
 
-$$BF = \frac{p(o|m,c_1)}{p(o|m,c_2)}  \tag{6}$$
+For planning and policy selection, CEREBRUM extends to expected free energy minimization over sequences of case transformations:
 
-**Equation 7: Free Energy Minimization in Case Transitions**
+$$\mathbb{E}[\Delta F] = \sum_{s,a}T(s'|s,a)\pi[a|s](F(s,c)-F(s',c'))$$
 
-$$
-F = D_{KL}[q(s|c,m) || p(s|m)] - \mathbb{E}_{q(s|c,m)}[\log p(o|s,c,m)]  \tag{7}
-$$
+Where $T(s'|s,a)$ is the transition probability from state $s$ to $s'$ given action $a$, and $\pi[a|s]$ is the policy. This allows for optimal sequencing of case transformations to achieve goals.
 
-## 1.2 Message Passing Rules for Different Cases
+## 1.6 Bayesian Model Comparison Between Cases
 
-These equations illustrate how case assignments modulate standard hierarchical message passing (e.g., in predictive coding) where beliefs/predictions ($\mu$) and prediction errors ($\varepsilon$) flow between adjacent levels (denoted by superscripts 0 and 1). The case-specific weights ($\kappa_c$) determine the influence of each message type based on the model's current functional role.
+To evaluate competing case assignments, we employ Bayesian model comparison using the Bayes Factor:
 
-**Equations 8-12: Case-Specific Message Passing Rules**
+$$BF = \frac{p(o|m,c_1)}{p(o|m,c_2)}$$
 
-$$\text{Nominative [NOM]}: \mu^0 = \mu^0 + \kappa_{NOM} \cdot (\mu^1 - \mu^0)  \tag{8}$$
+This quantifies the relative evidence for model $m$ being in case $c_1$ versus case $c_2$ given observations $o$.
+
+## 1.7 Case-Specific Free Energy
+
+The case-specific free energy explicitly includes the case $c$ in the formulation:
+
+$$F = D_{KL}[q(s|c,m) || p(s|m)] - \mathbb{E}_{q(s|c,m)}[\log p(o|s,c,m)]$$
+
+This allows different cases to maintain distinct recognition densities and likelihood functions while operating on the same underlying model.
+
+## 1.8 Core Linguistic Case Equations
+
+CEREBRUM defines mathematical operations for each core linguistic case, establishing precise transformations:
+
+$$\text{Nominative [NOM]}: \mu^0 = \mu^0 + \kappa_{NOM} \cdot (\mu^1 - \mu^0)$$
 *(Lower-level prediction $\mu^0$ updated by top-down prediction $\mu^1$, weighted by $\kappa_{NOM}$)*
 
-$$\text{Accusative [ACC]}: \varepsilon^1 = \varepsilon^1 + \kappa_{ACC} \cdot (\varepsilon^0 - \varepsilon^1)  \tag{9}$$
+$$\text{Accusative [ACC]}: \varepsilon^1 = \varepsilon^1 + \kappa_{ACC} \cdot (\varepsilon^0 - \varepsilon^1)$$
 *(Higher-level error $\varepsilon^1$ updated by bottom-up error $\varepsilon^0$, weighted by $\kappa_{ACC}$)*
 
-$$\text{Dative [DAT]}: \mu^0 = \mu^0 + \kappa_{DAT} \cdot (data - \mu^0)  \tag{10}$$
+$$\text{Dative [DAT]}: \mu^0 = \mu^0 + \kappa_{DAT} \cdot (data - \mu^0)$$
 *(Lower-level prediction $\mu^0$ updated directly by incoming 'data', weighted by $\kappa_{DAT}$)*
 
-$$\text{Genitive [GEN]}: output = \mu^0 + \kappa_{GEN} \cdot \eta  \tag{11}$$
-*(Output generated based on lower-level prediction $\mu^0$, weighted by $\kappa_{GEN}$, potentially with noise $\eta$)*
+$$\text{Genitive [GEN]}: output = \mu^0 + \kappa_{GEN} \cdot \eta$$
+*(Output generated based on lower-level prediction $\mu^0$, weighted by $\kappa_{GEN}$ and noise $\eta$)*
 
-$$\text{Instrumental [INS]}: process = f(\mu^1, \varepsilon^0) \cdot \kappa_{INS} \tag{12}$$
+$$\text{Instrumental [INS]}: process = f(\mu^1, \varepsilon^0) \cdot \kappa_{INS}$$
+*(Process defined as a function of top-down prediction and bottom-up error, scaled by $\kappa_{INS}$)*
 
-*(A process output determined by some function $f$ of top-down prediction $\mu^1$ and bottom-up error $\varepsilon^0$, weighted by $\kappa_{INS}$)*
+$$\text{Vocative [VOC]}: activation = \sigma(\kappa_{VOC} \cdot sim(id, address))$$
+*(Activation determined by similarity between model's identity and the addressing signal, weighted by $\kappa_{VOC}$)*
 
-$$\text{Vocative [VOC]}: activation = \sigma(\kappa_{VOC} \cdot sim(id, address)) \tag{12a}$$
+## 1.9 Precision-Weighted Mixture of Cases
 
-*(Activation state determined by similarity between model identity $id$ and incoming address, weighted by $\kappa_{VOC}$ and passed through activation function $\sigma$)*
+Models can simultaneously exist in multiple cases with varying probabilities. The case probability is precision-weighted:
 
-where $\kappa_c$ represents case-specific learning rates or precision weights, $\eta$ is a noise term, $\mu^0, \mu^1$ represent beliefs/predictions, and $\varepsilon^0, \varepsilon^1$ represent prediction errors at adjacent hierarchical levels.
+$$\beta(c,m) = \frac{\exp(-\gamma \cdot F(c,m))}{\sum_i \exp(-\gamma \cdot F(c_i,m))}$$
 
-## 1.3 Precision Allocation and Resource Optimization
+Where $\gamma$ represents the precision or confidence in case assignments. This enables nuanced, multimodal model behavior.
 
-**Equation 13: Precision Weight Allocation with Temperature**
+## 1.10 Composite Free Energy
 
-$$\beta(c,m) = \frac{\exp(-\gamma \cdot F(c,m))}{\sum_i \exp(-\gamma \cdot F(c_i,m))}  \tag{13}$$
+The effective free energy for a model in a mixture of cases is:
 
-where  is the inverse temperature parameter controlling allocation sharpness.
+$$F_{\beta}(m) = \sum_c \beta(c,m) \cdot F(c,m) \cdot R(c)$$
 
-**Equation 14: Resource-Weighted Free Energy**
+Where $R(c)$ represents the relevance or priority of case $c$. This formulation allows for weighted importance across different case assignments.
 
-$$F_{\beta}(m) = \sum_c \beta(c,m) \cdot F(c,m) \cdot R(c)  \tag{14}$$
+## 1.11 Conjunction of Models
 
-where R(c) represents the computational resources allocated to case c.
+For composite systems combining multiple models, the Conjunctive case [CNJ] has a specialized free energy:
 
-## 1.4 Novel Case Formalizations
+$$F_{CNJ} = D_{KL}[q(s|CNJ,m) || p(s|m)] - \mathbb{E}_{q(s|CNJ,m)}[\log p(o|s,\{m_i\})]$$
 
-**Equation 15: Conjunctive Case Free Energy**
+This formulation accounts for emergent properties arising from model interactions, where $\{m_i\}$ represents the set of constituent models.
 
-$$
-F_{CNJ} = D_{KL}[q(s|CNJ,m) || p(s|m)] - \mathbb{E}_{q(s|CNJ,m)}[\log p(o|s,\{m_i\})]  \tag{15}
-$$
+## 1.12 Conjunctive Mean Distribution
 
-where {m_i} represents the assembly of connected models.
+The mean prediction in the Conjunctive case is:
 
-**Equation 16: Conjunctive Case Message Passing**
+$$\mu^{CNJ} = \sum_i w_i \cdot \mu_i + \kappa_{CNJ} \cdot (\prod_i \mu_i - \sum_i w_i \cdot \mu_i)$$
 
-$$\mu^{CNJ} = \sum_i w_i \cdot \mu_i + \kappa_{CNJ} \cdot (\prod_i \mu_i - \sum_i w_i \cdot \mu_i)  \tag{16}$$
+This combines weighted averages with multiplicative interactions, controlled by $\kappa_{CNJ}$, representing nonlinear emergent effects.
 
-where w_i are model-specific weighting factors.
+## 1.13 Recursive Case Formulation
 
-**Equation 17: Recursive Case Precision Dynamics**
+The Recursive case [REC] allows for self-reference, with probability:
 
-$$\beta(REC,m) = \frac{\exp(-\gamma \cdot F(REC,m))}{\sum_i \exp(-\gamma \cdot F(c_i,m)) + \exp(-\gamma \cdot F(REC,m))}  \tag{17}$$
+$$\beta(REC,m) = \frac{\exp(-\gamma \cdot F(REC,m))}{\sum_i \exp(-\gamma \cdot F(c_i,m)) + \exp(-\gamma \cdot F(REC,m))}$$
 
-## 1.5 Glossary of Variables
+This creates a distinct pathway for models to operate on themselves, enabling self-modification capabilities.
+
+## 1.14 Glossary of Variables
 
 - $a$: Action (in MDP context, often selecting a case transition)
 - $\alpha$: Learning rate (in Neural Process Models context)
