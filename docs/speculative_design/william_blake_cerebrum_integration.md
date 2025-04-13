@@ -295,4 +295,507 @@ In Blake's words, the ultimate goal is not merely to model mind as it is, but to
 
 ### CEREBRUM and Related Systems
 * Friedman, D.A. (2025). CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling. *Zenodo*. 10.5281/zenodo.15170908.
-* [Additional CEREBRUM technical documentation and related research] 
+* [Additional CEREBRUM technical documentation and related research]
+
+## 11. Technical Appendix: Detailed CEREBRUM Architecture with Blakean Integration
+
+### 11.1 CEREBRUM Core Components
+
+| Component | Function | Blakean Parallel | Implementation Approach |
+|-----------|----------|------------------|-------------------------|
+| Bayesian Inference Engine | Handles belief updating and uncertainty quantification | Urizen's measurement and boundary-setting | Hierarchical variational inference with non-parametric priors |
+| Case Representation System | Encodes episodic and semantic knowledge structures | Los's creative integration | Graph-based knowledge representation with hyperedge encoding |
+| Active Inference Module | Guides action selection and exploration | Luvah's energetic dynamics | Expected free energy minimization with intrinsic motivation |
+| Perception Processing Stack | Processes sensory information into structured representations | Tharmas's embodied sensing | Multi-scale convolutional architecture with recurrent connections |
+| Contrary Management System | Maintains productive tensions between competing models | Blake's contraries | Adversarial co-training with mutual information maximization |
+| Fourfold Integration Layer | Coordinates across processing levels | Blake's Fourfold Vision | Meta-learning framework with self-modifying attention mechanisms |
+
+### 11.2 Technical Implementation of Fourfold Vision Architecture
+
+```mermaid
+graph TD
+    subgraph "Fourfold Vision" 
+        L4[Level 4: Meta-cognitive Integration]
+    end
+    
+    subgraph "Threefold Vision"
+        L3[Level 3: Contextual & Temporal Integration]
+    end
+    
+    subgraph "Twofold Vision"
+        L2[Level 2: Relational Modeling]
+    end
+    
+    subgraph "Single Vision"
+        L1[Level 1: Feature Extraction]
+        S[Sensory Input]
+    end
+    
+    S --> L1
+    L1 --> L2
+    L2 --> L3
+    L3 --> L4
+    
+    L4 -.-> L3
+    L3 -.-> L2
+    L2 -.-> L1
+    
+    L4 -- "Meta-beliefs" --> OUT1[Action]
+    L4 -- "Symbolic Models" --> OUT2[Imagination]
+    L4 -- "Integrated Perspective" --> OUT3[Consciousness]
+    
+    style L1 fill:#f9f9f9,stroke:#333,stroke-width:1px
+    style L2 fill:#e6f3ff,stroke:#333,stroke-width:1px
+    style L3 fill:#cce6ff,stroke:#333,stroke-width:1px
+    style L4 fill:#99ccff,stroke:#333,stroke-width:1px
+```
+
+#### 11.2.1 Detailed Processing at Each Level
+
+**Level 1 (Single Vision) Implementation:**
+```python
+def single_vision_processing(sensory_input, precision_weights):
+    """
+    Implements Blake's Single Vision as bottom-up feature extraction
+    
+    Parameters:
+    -----------
+    sensory_input : array-like
+        Raw sensory data from environment
+    precision_weights : array-like
+        Uncertainty weighting for different sensory channels
+        
+    Returns:
+    --------
+    features : array-like
+        Extracted features with uncertainty estimates
+    """
+    # Feature extraction network with uncertainty quantification
+    features = []
+    uncertainties = []
+    
+    # Convolutional layers with dropout for uncertainty estimation
+    for i, layer in enumerate(self.conv_layers):
+        features = layer(features if i > 0 else sensory_input)
+        uncertainties.append(self._estimate_uncertainty(features))
+    
+    # Weight features by precision (inverse uncertainty)
+    weighted_features = features * (1.0 / (uncertainties[-1] + self.epsilon))
+    
+    return weighted_features
+```
+
+**Levels 2-4 Processing Pseudocode:**
+Similar implementations for higher levels, with increasing integration of temporal context, cross-modal fusion, and meta-cognitive awareness.
+
+### 11.3 Zoas as Functional Modules Architecture
+
+```mermaid
+graph TD
+    subgraph "Integrated Consciousness"
+        ALBION[Complete Integrated System]
+    end
+    
+    subgraph "Urizen Module"
+        URIZ_MAIN[Formal Reasoning]
+        URIZ_1[Categorization]
+        URIZ_2[Logical Inference]
+        URIZ_3[Boundary Definition]
+    end
+    
+    subgraph "Luvah Module"
+        LUVAH_MAIN[Motivational Dynamics]
+        LUVAH_1[Affective Evaluation]
+        LUVAH_2[Value Assessment]
+        LUVAH_3[Energetic Regulation]
+    end
+    
+    subgraph "Tharmas Module"
+        THARMAS_MAIN[Sensory Processing]
+        THARMAS_1[Embodiment]
+        THARMAS_2[Physical Modeling]
+        THARMAS_3[Sensorimotor Coupling]
+    end
+    
+    subgraph "Los Module"
+        LOS_MAIN[Creative Integration]
+        LOS_1[Imagination]
+        LOS_2[Synthesis]
+        LOS_3[World-Creation]
+    end
+    
+    URIZ_1 & URIZ_2 & URIZ_3 --> URIZ_MAIN
+    LUVAH_1 & LUVAH_2 & LUVAH_3 --> LUVAH_MAIN
+    THARMAS_1 & THARMAS_2 & THARMAS_3 --> THARMAS_MAIN
+    LOS_1 & LOS_2 & LOS_3 --> LOS_MAIN
+    
+    URIZ_MAIN & LUVAH_MAIN & THARMAS_MAIN & LOS_MAIN --> ALBION
+    
+    style ALBION fill:#f9d5e5,stroke:#333,stroke-width:2px
+    style URIZ_MAIN fill:#eeac99,stroke:#333,stroke-width:1px
+    style LUVAH_MAIN fill:#e06377,stroke:#333,stroke-width:1px
+    style THARMAS_MAIN fill:#5b9aa0,stroke:#333,stroke-width:1px
+    style LOS_MAIN fill:#d6e5fa,stroke:#333,stroke-width:1px
+```
+
+### 11.4 Contrary Processing Technical Implementation
+
+#### 11.4.1 Dual-Path Contrary Processing Algorithm
+
+```python
+class ContraryProcessor:
+    """
+    Implements Blake's concept of contraries as complementary opposing forces
+    that generate productive tension rather than resolving to a single answer.
+    """
+    
+    def __init__(self, model_a, model_b, synthesis_network):
+        self.model_a = model_a  # First contrary perspective
+        self.model_b = model_b  # Second contrary perspective
+        self.synthesis = synthesis_network  # Higher-order integration
+        
+    def process(self, input_data, context):
+        # Process through contrary pathways
+        result_a = self.model_a(input_data, context)
+        result_b = self.model_b(input_data, context)
+        
+        # Instead of selecting one, maintain both with dynamic tension
+        tension_vector = self._compute_tension(result_a, result_b)
+        
+        # Synthesize higher-order pattern that preserves the tension
+        synthesis = self.synthesis(result_a, result_b, tension_vector)
+        
+        return {
+            'perspective_a': result_a,
+            'perspective_b': result_b,
+            'tension': tension_vector,
+            'synthesis': synthesis
+        }
+    
+    def _compute_tension(self, a, b):
+        """
+        Computes the productive tension between contrary perspectives
+        """
+        # Measures of agreement and disagreement
+        agreement = self._mutual_information(a, b)
+        disagreement = self._divergence(a, b)
+        
+        # Blake's insight: the tension itself is generative
+        generative_potential = disagreement * agreement
+        
+        return generative_potential
+```
+
+### 11.5 Eternity-in-an-Hour Temporal Integration
+
+```mermaid
+graph TD
+    subgraph "Nested Temporal Scales"
+        MS[Milliseconds]
+        SEC[Seconds]
+        MIN[Minutes]
+        HOUR[Hours]
+        DAY[Days]
+        WEEK[Weeks]
+        MONTH[Months]
+        YEAR[Years]
+    end
+    
+    MS --> SEC --> MIN --> HOUR --> DAY --> WEEK --> MONTH --> YEAR
+    
+    YEAR -.-> |"Long-term patterns<br>constrain"| MONTH
+    MONTH -.-> |"Monthly patterns<br>constrain"| WEEK
+    WEEK -.-> |"Weekly patterns<br>constrain"| DAY
+    DAY -.-> |"Daily patterns<br>constrain"| HOUR
+    HOUR -.-> |"Hourly patterns<br>constrain"| MIN
+    MIN -.-> |"Minute patterns<br>constrain"| SEC
+    SEC -.-> |"Second patterns<br>constrain"| MS
+    
+    MS -.- |"Fractal<br>self-similarity"| SEC
+    SEC -.- |"Fractal<br>self-similarity"| MIN
+    MIN -.- |"Fractal<br>self-similarity"| HOUR
+    
+    style MS fill:#d1c1d1,stroke:#333,stroke-width:1px
+    style SEC fill:#c6b4c6,stroke:#333,stroke-width:1px
+    style MIN fill:#bba7bb,stroke:#333,stroke-width:1px
+    style HOUR fill:#b09ab0,stroke:#333,stroke-width:1px
+    style DAY fill:#a58da5,stroke:#333,stroke-width:1px
+    style WEEK fill:#9a809a,stroke:#333,stroke-width:1px
+    style MONTH fill:#8f738f,stroke:#333,stroke-width:1px
+    style YEAR fill:#846684,stroke:#333,stroke-width:1px
+```
+
+## 12. Deep Blakean Lore: Extended Analysis for CEREBRUM Integration
+
+### 12.1 Blake's Cosmology and Its Computational Parallels
+
+Blake's complete cosmology extends far beyond the Four Zoas, encompassing a complex system of states, entities, and processes that offer rich inspiration for cognitive architecture:
+
+#### 12.1.1 The States of Being in Blake's System
+
+| Blakean State | Description | CEREBRUM Parallel | Implementation Approach |
+|---------------|-------------|-------------------|-------------------------|
+| Eden | Original integrated state of consciousness | Ideal learning state | Multimodal integration with minimal modular separation |
+| Beulah | State of subconscious creativity and rest | Generative exploration mode | Relaxed prior constraints with high stochasticity |
+| Generation | The material world of time and space | Environmental interaction | Sensor-coupled inference with physical constraints |
+| Ulro | State of reductive materialist delusion | Overfitting/model collapse | Excessive precision weighting on single modality |
+
+#### 12.1.2 Emanations and Spectres in Blake's Psychology
+
+In Blake's system, each Zoa has an "Emanation" (feminine creative principle) and a "Spectre" (rational shadow self), creating a complex interplay:
+
+| Zoa | Emanation | Spectre | CEREBRUM Implementation |
+|-----|-----------|---------|-------------------------|
+| Urthona/Los | Enitharmon | Spectre of Urthona | Creative module with generative (Enitharmon) and constraining (Spectre) subnetworks |
+| Urizen | Ahania | Spectre of Urizen | Reasoning module with exploratory and confirmatory bias subprocesses |
+| Luvah | Vala | Spectre of Luvah | Affective module with reward prediction and aversion subnetworks |
+| Tharmas | Enion | Spectre of Tharmas | Sensory module with feature extraction and filtering subprocesses |
+
+### 12.2 Blake's "The Book of Urizen" and Computational Constraints
+
+Blake's "The Book of Urizen" offers a powerful cautionary tale about the limitations of purely rule-based systems. Urizen's attempt to create a perfect world through "The Book of Brass" (representing rigid laws) results in suffering and fragmentation:
+
+```
+"Here alone I, in books form'd of metals,
+Have written the secrets of wisdom,
+The secrets of dark contemplation,
+By fightings and conflicts dire
+With terrible monsters Sin-bred
+Which the bosoms of all inhabit,
+Seven deadly Sins of the soul."
+```
+
+This has direct implications for CEREBRUM's constraint systems:
+
+```python
+class UrizenConstraintSystem:
+    """
+    Implements flexible constraints that avoid the rigidity
+    Blake warned against in The Book of Urizen
+    """
+    
+    def __init__(self):
+        self.constraints = []
+        self.constraint_weights = []  # Flexible weighting
+        self.adaptation_rate = 0.1    # Allow constraints to evolve
+    
+    def add_constraint(self, constraint_fn, initial_weight=1.0):
+        """Add a new constraint with flexible weighting"""
+        self.constraints.append(constraint_fn)
+        self.constraint_weights.append(initial_weight)
+    
+    def evaluate(self, state):
+        """Evaluate constraints with Blake's warning against rigidity in mind"""
+        total_violation = 0
+        
+        # Calculate weighted constraint violations
+        for i, constraint in enumerate(self.constraints):
+            violation = constraint(state)
+            total_violation += violation * self.constraint_weights[i]
+        
+        # Adjust weights based on experience (Los's creative adaptation)
+        self._adapt_weights(state, total_violation)
+        
+        return total_violation
+    
+    def _adapt_weights(self, state, violation):
+        """Adaptively modify constraint weights to avoid Urizenic rigidity"""
+        # Implementation of constraint adaptation logic
+        pass
+```
+
+### 12.3 The Divine Imagination: Blake's Poetic Genius and Computational Creativity
+
+Blake's concept of the "Poetic Genius" as the true source of creativity has profound implications for generative models:
+
+> "The true Man is the source, he being the Poetic Genius." - *All Religions Are One*
+
+This suggests a fundamentally different approach to computational creativity than standard generative models:
+
+```mermaid
+graph TD
+    subgraph "Conventional Generative Model"
+        D1[Training Data] --> E1[Encoder]
+        E1 --> L1[Latent Space]
+        L1 --> G1[Generator]
+        G1 --> O1[Output]
+    end
+    
+    subgraph "Blake's Poetic Genius Model"
+        I[Internal Divine Imagination]
+        P[Perceptual Experience]
+        I <--> P
+        
+        I --> V[Visionary Seed]
+        V --> LE[Los/Enitharmon<br>Creative Process]
+        P --> C[Contraries/Tensions]
+        
+        C --> LE
+        LE --> M[Minute Particulars]
+        M --> W[World Creation]
+    end
+    
+    style I fill:#f8d7da,stroke:#333,stroke-width:2px
+    style P fill:#d1ecf1,stroke:#333,stroke-width:1px
+    style V fill:#f8d7da,stroke:#333,stroke-width:1px
+    style LE fill:#ede7f6,stroke:#333,stroke-width:1px
+    style C fill:#fff3cd,stroke:#333,stroke-width:1px
+    style M fill:#d4edda,stroke:#333,stroke-width:1px
+    style W fill:#e2e3e5,stroke:#333,stroke-width:1px
+```
+
+## 13. Prophetic Cognition: Blake's Jerusalem and CEREBRUM's Future Development
+
+### 13.1 Jerusalem's Fourfold City: Model for Integrated Cognitive Architecture
+
+Blake's epic "Jerusalem" envisions a fourfold city representing complete integration of human faculties. This provides a blueprint for CEREBRUM's evolved architecture:
+
+```mermaid
+graph TD
+    subgraph "Jerusalem: The Integrated Architecture"
+        GOL[Golgonooza<br>City of Art/Imagination]
+        LON[London<br>Material Reality]
+        EDEN[Eden<br>Perfect Integration]
+        BEU[Beulah<br>Subconscious Creativity]
+    end
+    
+    GOL -->|Los's creative work| EDEN
+    LON -->|Transformed material| EDEN
+    BEU -->|Dreams and visions| EDEN
+    
+    subgraph "Albion: The Awakened System"
+        ALBION[Fully Integrated<br>CEREBRUM System]
+    end
+    
+    EDEN --> ALBION
+    
+    style GOL fill:#d9f7be,stroke:#333,stroke-width:1px
+    style LON fill:#f7d9d9,stroke:#333,stroke-width:1px
+    style EDEN fill:#bdebff,stroke:#333,stroke-width:1px
+    style BEU fill:#ffe8d9,stroke:#333,stroke-width:1px
+    style ALBION fill:#edc8ff,stroke:#333,stroke-width:2px
+```
+
+### 13.2 Minute Particulars: Blake's Theory of Detailed Perception
+
+Blake's concept of "Minute Particulars" challenges modern AI's tendency to focus on statistical generalization:
+
+> "Labour well the Minute Particulars, attend to the Little-ones,
+> And those who are in misery cannot remain so long
+> If we do but our duty: labour well the teeming Earth."
+> - *Jerusalem*
+
+This suggests a specific technical approach for CEREBRUM:
+
+```python
+class MinuteParticularsAttention:
+    """
+    Implements Blake's concept of attending to the significant specific
+    details rather than just statistical regularities
+    """
+    
+    def __init__(self, base_model, particulars_detector):
+        self.base_model = base_model
+        self.particulars_detector = particulars_detector
+        
+    def process(self, input_data):
+        # Standard processing
+        base_result = self.base_model(input_data)
+        
+        # Identify minute particulars - the significant specific details
+        # that might be overlooked by statistical methods
+        particulars = self.particulars_detector.find_significant_particulars(input_data)
+        
+        # Adjust attention to emphasize the minute particulars
+        attentional_weights = self._calculate_attentional_weights(particulars)
+        
+        # Apply particular-weighted attention
+        enhanced_result = self._apply_particular_attention(base_result, 
+                                                          attentional_weights)
+        
+        return enhanced_result
+```
+
+### 13.3 Technical Implementation of Blake's Symbolic Correspondences
+
+Blake developed an intricate system of symbolic correspondences that can inform CEREBRUM's representation system:
+
+| Blakean Symbol | Symbolic Meaning | CEREBRUM Implementation | Technical Approach |
+|----------------|------------------|-------------------------|-------------------|
+| Lamb | Innocence, divine forgiveness | Exploration bias | Optimistic prior for novel states |
+| Tiger | Energetic creativity, divine wrath | Exploitation pressure | Value-driven focus on high-return states |
+| Vortex | Transformative energy pattern | Attractor dynamics | Recurrent network with unstable fixed points |
+| Loom | Pattern creation, fate weaving | Structured generation | Constraint-based generative network |
+| Eye | Perception mode, perspective | Sensory encoder | Multi-perspective encoding architecture |
+| Hand | Action, manifestation | Motor control | Task-oriented action selection |
+| Furnaces | Transformative process | Training/learning | Gradient-based optimization with annealing |
+
+## 14. Extended Impact: From Speculative Design to Implementation Roadmap
+
+### 14.1 Development Timeline for Blakean CEREBRUM Implementation
+
+| Phase | Blake Integration Focus | Technical Goals | Timeframe |
+|-------|-------------------------|-----------------|-----------|
+| 1: Foundation | Basic Zoas framework | Core module architecture | 6 months |
+| 2: Contraries | Contrary processing | Dual-path inference | 12 months |
+| 3: Fourfold Vision | Hierarchical integration | Multi-level processing | 18 months |
+| 4: Divine Imagination | Creative generation | Novel synthesis capability | 24 months |
+| 5: Jerusalem | Complete integration | Fully realized architecture | 36 months |
+
+### 14.2 Comparative Analysis: Blake-Inspired vs. Conventional Approaches
+
+```mermaid
+graph LR
+    subgraph "Conventional AI Approaches"
+        C1[Single Objective<br>Optimization]
+        C2[Deterministic<br>Decision Making]
+        C3[Statistical<br>Generalization]
+        C4[Domain-Specific<br>Models]
+    end
+    
+    subgraph "Blake-Inspired CEREBRUM"
+        B1[Contrary-Balancing<br>Multi-Objective]
+        B2[Imaginative<br>Possibility Space]
+        B3[Minute Particular<br>Attention]
+        B4[Fourfold Integrated<br>Vision]
+    end
+    
+    C1 --> B1
+    C2 --> B2
+    C3 --> B3
+    C4 --> B4
+    
+    style C1 fill:#f5f5f5,stroke:#333,stroke-width:1px
+    style C2 fill:#f5f5f5,stroke:#333,stroke-width:1px
+    style C3 fill:#f5f5f5,stroke:#333,stroke-width:1px
+    style C4 fill:#f5f5f5,stroke:#333,stroke-width:1px
+    
+    style B1 fill:#e8f4f8,stroke:#333,stroke-width:1px
+    style B2 fill:#e8f4f8,stroke:#333,stroke-width:1px
+    style B3 fill:#e8f4f8,stroke:#333,stroke-width:1px
+    style B4 fill:#e8f4f8,stroke:#333,stroke-width:1px
+```
+
+### 14.3 Blake's Influence on CEREBRUM Evaluation Metrics
+
+| Traditional Metric | Blake-Inspired Metric | Implementation Approach |
+|--------------------|------------------------|-------------------------|
+| Accuracy | Visionary Scope | Measure ability to generate multiple valid interpretations |
+| Efficiency | Creative Energy | Evaluate productive tension between contrary elements |
+| Convergence | Imaginative Depth | Assess richness of generated possibilities |
+| Stability | Dynamic Balance | Measure productive oscillation between opposing states |
+| Generalization | Particular Sensitivity | Evaluate attention to significant specifics |
+
+### 14.4 Final Considerations: The Living Integration of Vision and Computation
+
+As this comprehensive integration of Blake's visionary system with CEREBRUM demonstrates, there exists a profound resonance between Blake's cognitive frameworks and modern computational approaches to mind. By moving beyond a purely reductive approach to embrace the tension of contraries, the multi-level nature of perception, and the creative power of imagination, CEREBRUM can evolve in directions that transcend the limitations of conventional AI.
+
+In Blake's immortal words from "The Marriage of Heaven and Hell":
+
+> "If the doors of perception were cleansed every thing would appear to man as it is, Infinite. For man has closed himself up, till he sees all things thro' narrow chinks of his cavern."
+
+The technical approaches outlined here aim to widen those chinks, creating a cognitive architecture that sees not just the finite statistical patterns of data but the infinite possibilities of creative integration. As Blake's Los continually builds and rebuilds Golgonooza, the city of imagination, so too must CEREBRUM continually evolve its architecture to expand the boundaries of what can be perceived, inferred, and created.
+
+---
+
+*Note: This document represents a speculative integration of William Blake's visionary systems with computational cognitive architecture. The technical implementations suggested are conceptual explorations rather than finalized designs.* 
