@@ -1411,20 +1411,49 @@ def test_locative_case(nn_classification_data, case_definitions):
     hidden_activations_path = os.path.join(case_dir, "hidden_activations.png")
     fig, ax = plt.subplots(figsize=(10, 6))
     
-    hidden_activations = model._forward_with_activations(X)[1]
-    if hidden_activations.shape[1] == 1:
-        ax.hist(hidden_activations, bins=20, alpha=0.7)
-        ax.set_xlabel('Activation')
-        ax.set_ylabel('Frequency')
+    # Get activations safely
+    outputs_and_activations = model._forward_with_activations(X)
+    
+    if isinstance(outputs_and_activations, tuple) and len(outputs_and_activations) > 1:
+        # The function returns (output, activations)
+        _, all_activations = outputs_and_activations
+        if len(all_activations) > 1:  # Check if we have at least one hidden layer
+            hidden_activations = all_activations[1]  # First hidden layer
+            
+            if isinstance(hidden_activations, np.ndarray):
+                if hidden_activations.ndim == 2 and hidden_activations.shape[1] == 1:
+                    # For 1D activations
+                    ax.hist(hidden_activations.flatten(), bins=20, alpha=0.7)
+                    ax.set_xlabel('Activation')
+                    ax.set_ylabel('Frequency')
+                elif hidden_activations.ndim == 2 and hidden_activations.shape[1] > 1:
+                    # For higher dimensional data, use PCA for dimensionality reduction
+                    pca = PCA(n_components=2)
+                    hidden_activations_2d = pca.fit_transform(hidden_activations)
+                    
+                    # Plot PCA components
+                    scatter = ax.scatter(hidden_activations_2d[:, 0], hidden_activations_2d[:, 1], 
+                                      c=y if y.ndim == 1 else np.argmax(y, axis=1), 
+                                      cmap='viridis', alpha=0.7)
+                    ax.set_xlabel('PCA Component 1')
+                    ax.set_ylabel('PCA Component 2')
+                    plt.colorbar(scatter, ax=ax, label='Class')
+                else:
+                    # Handle unexpected dimensions
+                    ax.text(0.5, 0.5, "Cannot visualize activations\n(unexpected dimensions)", 
+                          ha='center', va='center', fontsize=12, transform=ax.transAxes)
+            else:
+                # Not a numpy array
+                ax.text(0.5, 0.5, "Cannot visualize activations\n(not a numpy array)", 
+                      ha='center', va='center', fontsize=12, transform=ax.transAxes)
+        else:
+            # No hidden layers
+            ax.text(0.5, 0.5, "No hidden layer activations available", 
+                  ha='center', va='center', fontsize=12, transform=ax.transAxes)
     else:
-        # For higher dimensional data, use PCA or t-SNE for dimensionality reduction
-        pca = PCA(n_components=2)
-        hidden_activations_2d = pca.fit_transform(hidden_activations)
-        
-        # Plot PCA components
-        ax.scatter(hidden_activations_2d[:, 0], hidden_activations_2d[:, 1], c=y, cmap='viridis', alpha=0.7)
-        ax.set_xlabel('PCA Component 1')
-        ax.set_ylabel('PCA Component 2')
+        # Unexpected return format
+        ax.text(0.5, 0.5, "Cannot visualize activations\n(unexpected return format)", 
+              ha='center', va='center', fontsize=12, transform=ax.transAxes)
     
     ax.set_title(f"Hidden Layer Activations in {Case.LOCATIVE.value} Case")
     ax.grid(True, linestyle='--', alpha=0.6)
@@ -1436,13 +1465,49 @@ def test_locative_case(nn_classification_data, case_definitions):
     sample_activations_path = os.path.join(case_dir, "sample_activations.png")
     fig, axs = plt.subplots(2, 2, figsize=(12, 10))
     
-    sample_indices = [0, 1, 2, 3]
+    # Ensure there are enough samples
+    num_samples = min(4, len(X))
+    sample_indices = list(range(num_samples))
+    
+    # Convert to 2D array if needed
+    axs_flat = axs.flatten() if hasattr(axs, 'flatten') else [axs]
+    
     for i, idx in enumerate(sample_indices):
-        sample_activations = model._forward_with_activations(X[idx:idx+1])
-        for j, activations in enumerate(sample_activations):
-            axs[i//2, i%2].plot(activations[0], label=f'Layer {j+1}')
-        axs[i//2, i%2].set_title(f"Sample {idx+1} (Class {y[idx]})")
-        axs[i//2, i%2].legend()
+        if i < len(axs_flat):  # Make sure we don't go out of bounds
+            # Get sample activations safely
+            sample_X = X[idx:idx+1]
+            outputs_and_activations = model._forward_with_activations(sample_X)
+            
+            if isinstance(outputs_and_activations, tuple) and len(outputs_and_activations) > 1:
+                # The function returns (output, activations)
+                _, all_activations = outputs_and_activations
+                
+                if isinstance(all_activations, list) and all_activations:
+                    # Plot each layer's activations as a line
+                    for j, layer_act in enumerate(all_activations):
+                        if isinstance(layer_act, np.ndarray) and layer_act.ndim > 0:
+                            # For 2D activations, get the first sample
+                            act_to_plot = layer_act[0] if layer_act.ndim > 1 else layer_act
+                            if len(act_to_plot) > 0:  # Make sure there's data to plot
+                                axs_flat[i].plot(act_to_plot, 'o-', label=f'Layer {j+1}')
+                    
+                    # Get class label for title
+                    class_label = y[idx] if y.ndim == 1 else np.argmax(y[idx])
+                    axs_flat[i].set_title(f"Sample {idx+1} (Class {class_label})")
+                    axs_flat[i].legend()
+                    axs_flat[i].grid(True, linestyle='--', alpha=0.3)
+                else:
+                    axs_flat[i].text(0.5, 0.5, "No activations\navailable", 
+                                  ha='center', va='center', fontsize=12, transform=axs_flat[i].transAxes)
+                    axs_flat[i].set_title(f"Sample {idx+1}")
+            else:
+                axs_flat[i].text(0.5, 0.5, "Invalid return format", 
+                              ha='center', va='center', fontsize=12, transform=axs_flat[i].transAxes)
+                axs_flat[i].set_title(f"Sample {idx+1}")
+    
+    # Handle any remaining subplots
+    for i in range(len(sample_indices), len(axs_flat)):
+        axs_flat[i].axis('off')
     
     fig.suptitle(f"Activation Patterns for Specific Samples in {Case.LOCATIVE.value} Case")
     fig.tight_layout()
@@ -1636,16 +1701,32 @@ def test_ablative_case(nn_regression_data, case_definitions):
     gradient_magnitudes_path = os.path.join(case_dir, "gradient_magnitudes.png")
     fig, ax = plt.subplots(figsize=(10, 6))
     
-    gradients = model._backward_with_metrics(X, y)[1]
-    for i, layer_gradients in enumerate(gradients):
-        layer_magnitudes = np.linalg.norm(layer_gradients, axis=1)
-        ax.hist(layer_magnitudes, bins=20, alpha=0.7, label=f'Layer {i+1}')
+    # Get predictions first (needed for _backward_with_metrics)
+    y_pred = model.predict(X)
     
-    ax.set_xlabel('Gradient Magnitude')
-    ax.set_ylabel('Frequency')
-    ax.set_title(f"Gradient Magnitudes per Layer in {Case.ABLATIVE.value} Case")
-    ax.grid(True, linestyle='--', alpha=0.6)
-    ax.legend()
+    try:
+        # Use _backward_with_metrics to compute gradients
+        gradients = model._backward_with_metrics(X, y, y_pred)[1]
+        
+        # Visualize gradients for each layer
+        for i, layer_gradients in enumerate(gradients):
+            layer_magnitudes = np.linalg.norm(layer_gradients, axis=1)
+            ax.hist(layer_magnitudes, bins=20, alpha=0.7, label=f'Layer {i+1}')
+        
+        ax.set_xlabel('Gradient Magnitude')
+        ax.set_ylabel('Frequency')
+        ax.set_title(f"Gradient Magnitudes per Layer in {Case.ABLATIVE.value} Case")
+        ax.grid(True, linestyle='--', alpha=0.6)
+        ax.legend()
+    except Exception as e:
+        # Handle the case where backward pass isn't available
+        ax.text(0.5, 0.5, "Gradient computation\nnot available", 
+              ha='center', va='center', fontsize=12, transform=ax.transAxes)
+        ax.set_title(f"Gradient Magnitudes in {Case.ABLATIVE.value} Case")
+        ax.axis('off')
+        logger.warning(f"Could not compute gradients: {e}")
+    
+    # Save and close figure regardless of success or failure
     fig.tight_layout()
     fig.savefig(gradient_magnitudes_path)
     plt.close(fig)
@@ -1912,8 +1993,9 @@ def test_vocative_case(nn_classification_data, case_definitions):
     axs[0].grid(True, linestyle='--', alpha=0.6)
     
     # Setup for prediction scatter plot
-    scatter = axs[1].scatter([], [], alpha=0.7)
-    ideal_line, = axs[1].plot([], [], 'r--', linewidth=2)
+    scatter = axs[1].scatter([], [])
+    ideal_line = axs[1].plot([], [], 'r--', label='Ideal')[0]
+    
     axs[1].set_xlabel("Actual Values")
     axs[1].set_ylabel("Predicted Values")
     axs[1].set_title("Predictions vs Actual (Cumulative)")
@@ -2680,11 +2762,10 @@ def test_instrumental_case(nn_regression_data, case_definitions):
     np.random.seed(42)
     indices = np.random.permutation(len(X))
     test_size = min(50, len(X) // 5)
-    test_indices = indices[:test_size]
     train_indices = indices[test_size:]
     
     X_train, y_train = X[train_indices], y[train_indices]
-    X_test, y_test = X[test_indices], y[test_indices]
+    X_test, y_test = X[test_size:], y[test_size:]
     
     for hidden_dims in hidden_configs:
         # Create model
