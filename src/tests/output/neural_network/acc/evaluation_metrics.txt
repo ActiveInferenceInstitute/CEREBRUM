@@ -1,0 +1,9 @@
+Case: ACC - Direct object/Receiver of action
+Statistical Role: Target of optimization
+
+Neural Network Context: The neural network as an object being trained or evaluated
+
+Evaluation Metrics:
+  mse: 0.010405
+  mae: 0.078077
+  r2: 0.937965

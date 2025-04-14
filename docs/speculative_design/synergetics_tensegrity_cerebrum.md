@@ -397,4 +397,540 @@ In Fuller's vision and in CEREBRUM's development, we see a shared recognition th
 
 ### CEREBRUM and Related Systems
 * Friedman, D.A. (2025). CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling. *Zenodo*. 10.5281/zenodo.15170908.
-* [Additional CEREBRUM technical documentation and related research] 
+* [Additional CEREBRUM technical documentation and related research]
+
+## 12. Technical Diagrams: Visualizing CEREBRUM-Fuller Integration
+
+### 12.1 Fuller's Geometric Principles & CEREBRUM Integration
+
+```mermaid
+graph TD
+    classDef fullerGeometry fill:#f9d5e5,stroke:#333,stroke-width:1px
+    classDef cerebrumComponents fill:#d5e8d4,stroke:#333,stroke-width:1px
+    classDef integrationNodes fill:#ffe6cc,stroke:#333,stroke-width:1px
+    
+    %% Fuller's Geometric Core Concepts
+    F[Synergetics] --> F1[Tetrahedron]:::fullerGeometry
+    F --> F2[Vector Equilibrium]:::fullerGeometry
+    F --> F3[Isotropic Vector Matrix]:::fullerGeometry
+    F --> F4[Tensegrity]:::fullerGeometry
+    F --> F5[Geodesic Structures]:::fullerGeometry
+    
+    %% CEREBRUM Core Components
+    C[CEREBRUM Architecture] --> C1[Case-Based Reasoning]:::cerebrumComponents
+    C --> C2[Bayesian Framework]:::cerebrumComponents
+    C --> C3[Active Inference]:::cerebrumComponents
+    C --> C4[Modular Integration]:::cerebrumComponents
+    
+    %% Integration Points
+    F1 --> I1[Tetrahedral Computing Units]:::integrationNodes
+    F2 --> I2[Vector Equilibrium State Spaces]:::integrationNodes
+    F3 --> I3[IVM-Based Memory Architecture]:::integrationNodes
+    F4 --> I4[Tensegrity Cognitive Networks]:::integrationNodes
+    F5 --> I5[Geodesic Knowledge Representation]:::integrationNodes
+    
+    %% Connection to CEREBRUM
+    I1 --> C1
+    I2 --> C2
+    I3 --> C4
+    I4 --> C4
+    I5 --> C1
+    
+    %% Emergent Properties
+    I1 & I2 & I3 & I4 & I5 --> E1[Synergetic Cognitive Processing]
+    I4 & C3 --> E2[Dynamic Stability Across Scales]
+    I5 & C2 --> E3[Comprehensive Domain Mapping]
+    I3 & C4 --> E4[Omni-Triangulated Knowledge Structures]
+```
+
+### 12.2 Tensegrity-Inspired Cognitive Architecture
+
+```mermaid
+graph TB
+    classDef compression fill:#ff9999,stroke:#333,stroke-width:1px
+    classDef tension fill:#99ccff,stroke:#333,stroke-width:1px
+    classDef hybrid fill:#ffcc99,stroke:#333,stroke-width:1px
+    
+    subgraph "Tensegrity Cognitive Architecture"
+        %% Compression Elements (Fixed Knowledge)
+        C1[Facts]:::compression
+        C2[Axioms]:::compression
+        C3[Hard Constraints]:::compression
+        C4[Established Models]:::compression
+        C5[Core Beliefs]:::compression
+        
+        %% Tension Network (Flexible Associations)
+        T1[Probabilistic Relationships]:::tension
+        T2[Contextual Associations]:::tension
+        T3[Analogical Mappings]:::tension
+        T4[Temporal Sequences]:::tension
+        T5[Causal Networks]:::tension
+        
+        %% Structured Relationships
+        C1 --- T1 --- C2
+        C2 --- T2 --- C3
+        C3 --- T3 --- C4
+        C4 --- T4 --- C5
+        C5 --- T5 --- C1
+        
+        C1 --- T3 --- C3
+        C2 --- T4 --- C4
+        C3 --- T5 --- C5
+        C4 --- T1 --- C1
+        C5 --- T2 --- C2
+        
+        %% Emergent Properties
+        EP1[Global Coherence]:::hybrid
+        EP2[Local Flexibility]:::hybrid
+        EP3[Distributed Load Handling]:::hybrid
+        EP4[Resilience to Local Failures]:::hybrid
+        
+        %% Connect to emergent properties
+        {C1 & C2 & C3 & C4 & C5 & T1 & T2 & T3 & T4 & T5} --> EP1
+        {T1 & T2 & T3 & T4 & T5} --> EP2
+        {C1 & C2 & C3 & C4 & C5 & T1 & T2 & T3 & T4 & T5} --> EP3
+        {C1 & C2 & C3 & C4 & C5 & T1 & T2 & T3 & T4 & T5} --> EP4
+    end
+```
+
+### 12.3 Tetrahedral Bayesian Inference Unit
+
+```mermaid
+graph TD
+    classDef tetrahedron fill:#f9d5e5,stroke:#333,stroke-width:2px
+    classDef bayesianElements fill:#d5e8d4,stroke:#333,stroke-width:1px
+    
+    subgraph "Tetrahedral Bayesian Inference"
+        %% Core Bayesian Components
+        P[Prior]:::bayesianElements
+        L[Likelihood]:::bayesianElements
+        O[Observation]:::bayesianElements
+        Po[Posterior]:::bayesianElements
+        
+        %% Tetrahedral Structure
+        P --- L
+        P --- O
+        P --- Po
+        L --- O
+        L --- Po
+        O --- Po
+        
+        %% Information Flow
+        P -.-> |"Updates"| Po
+        L -.-> |"Constrains"| Po
+        O -.-> |"Conditions"| Po
+        Po -.-> |"Becomes"| P
+        
+        %% Emergent Properties
+        T[Tetrahedral Inference Unit]:::tetrahedron
+    end
+```
+
+### 12.4 Vector Equilibrium Knowledge Representation
+
+```mermaid
+graph TD
+    classDef ve fill:#ffe6cc,stroke:#333,stroke-width:1px
+    classDef veVertex fill:#f9d5e5,stroke:#333,stroke-width:1px
+    classDef center fill:#d5e8d4,stroke:#333,stroke-width:1px
+    
+    subgraph "Vector Equilibrium State Space"
+        %% VE Center
+        C[Central Concept]:::center
+        
+        %% VE Vertices (12 equidistant points)
+        V1[Dimension 1+]:::veVertex
+        V2[Dimension 1-]:::veVertex
+        V3[Dimension 2+]:::veVertex
+        V4[Dimension 2-]:::veVertex
+        V5[Dimension 3+]:::veVertex
+        V6[Dimension 3-]:::veVertex
+        V7[Dimension 4+]:::veVertex
+        V8[Dimension 4-]:::veVertex
+        V9[Dimension 5+]:::veVertex
+        V10[Dimension 5-]:::veVertex
+        V11[Dimension 6+]:::veVertex
+        V12[Dimension 6-]:::veVertex
+        
+        %% Connect all vertices to center
+        C --- V1
+        C --- V2
+        C --- V3
+        C --- V4
+        C --- V5
+        C --- V6
+        C --- V7
+        C --- V8
+        C --- V9
+        C --- V10
+        C --- V11
+        C --- V12
+        
+        %% Connect some perimeter vertices to illustrate structure
+        V1 --- V3
+        V3 --- V5
+        V5 --- V7
+        V7 --- V9
+        V9 --- V11
+        V11 --- V1
+        
+        V2 --- V4
+        V4 --- V6
+        V6 --- V8
+        V8 --- V10
+        V10 --- V12
+        V12 --- V2
+        
+        %% Vector Equilibrium as Neutral Prior
+        VE[Vector Equilibrium = Maximum Entropy Prior]:::ve
+    end
+```
+
+### 12.5 Geodesic Knowledge Dome
+
+```mermaid
+graph TD
+    classDef domain fill:#d5e8d4,stroke:#333,stroke-width:1px
+    classDef concept fill:#f9d5e5,stroke:#333,stroke-width:1px
+    classDef connection fill:#ffe6cc,stroke:#333,stroke-width:1px
+    
+    subgraph "Geodesic Knowledge Domain"
+        %% Core Domain Concept
+        D[Domain Center]:::domain
+        
+        %% First-level concepts (frequency-1 subdivision)
+        C1[Concept 1]:::concept
+        C2[Concept 2]:::concept
+        C3[Concept 3]:::concept
+        C4[Concept 4]:::concept
+        C5[Concept 5]:::concept
+        
+        %% Second-level concepts (frequency-2 subdivision)
+        C11[Subconcept 1.1]:::concept
+        C12[Subconcept 1.2]:::concept
+        C21[Subconcept 2.1]:::concept
+        C22[Subconcept 2.2]:::concept
+        C31[Subconcept 3.1]:::concept
+        C32[Subconcept 3.2]:::concept
+        C41[Subconcept 4.1]:::concept
+        C42[Subconcept 4.2]:::concept
+        C51[Subconcept 5.1]:::concept
+        C52[Subconcept 5.2]:::concept
+        
+        %% Connect center to first-level concepts
+        D --- C1
+        D --- C2
+        D --- C3
+        D --- C4
+        D --- C5
+        
+        %% Connect first-level concepts in a pentagon
+        C1 --- C2
+        C2 --- C3
+        C3 --- C4
+        C4 --- C5
+        C5 --- C1
+        
+        %% Connect first-level concepts to their subconcepts
+        C1 --- C11
+        C1 --- C12
+        C2 --- C21
+        C2 --- C22
+        C3 --- C31
+        C3 --- C32
+        C4 --- C41
+        C4 --- C42
+        C5 --- C51
+        C5 --- C52
+        
+        %% Connect subconcepts to create triangulated structure
+        C11 --- C12
+        C21 --- C22
+        C31 --- C32
+        C41 --- C42
+        C51 --- C52
+        
+        C12 --- C21
+        C22 --- C31
+        C32 --- C41
+        C42 --- C51
+        C52 --- C11
+        
+        %% Geodesic Properties
+        GD[Triangulated Stability]:::connection
+        GD1[Hierarchical Subdivision]:::connection
+        GD2[Self-Supporting Structure]:::connection
+    end
+```
+
+### 12.6 Isotropic Vector Matrix Memory Organization
+
+```mermaid
+graph TD
+    classDef tetrahedron fill:#f9d5e5,stroke:#333,stroke-width:1px
+    classDef octahedron fill:#d5e8d4,stroke:#333,stroke-width:1px
+    classDef junction fill:#ffe6cc,stroke:#333,stroke-width:1px
+    
+    subgraph "IVM Memory Architecture"
+        %% IVM Junction Points
+        J1[Memory Junction 1]:::junction
+        J2[Memory Junction 2]:::junction
+        J3[Memory Junction 3]:::junction
+        J4[Memory Junction 4]:::junction
+        J5[Memory Junction 5]:::junction
+        J6[Memory Junction 6]:::junction
+        J7[Memory Junction 7]:::junction
+        J8[Memory Junction 8]:::junction
+        
+        %% Tetrahedral Memory Cells
+        T1[Tetrahedral Memory Cell 1]:::tetrahedron
+        T2[Tetrahedral Memory Cell 2]:::tetrahedron
+        T3[Tetrahedral Memory Cell 3]:::tetrahedron
+        T4[Tetrahedral Memory Cell 4]:::tetrahedron
+        
+        %% Octahedral Memory Cells
+        O1[Octahedral Memory Cell 1]:::octahedron
+        O2[Octahedral Memory Cell 2]:::octahedron
+        
+        %% Connect junctions to form tetrahedral and octahedral cells
+        J1 --- J2
+        J1 --- J3
+        J1 --- J4
+        J2 --- J3
+        J2 --- J4
+        J3 --- J4
+        
+        J4 --- J5
+        J4 --- J6
+        J4 --- J7
+        J5 --- J6
+        J5 --- J7
+        J6 --- J7
+        
+        J4 --- J8
+        J5 --- J8
+        J6 --- J8
+        J7 --- J8
+        
+        %% Label the cells
+        J1 & J2 & J3 & J4 --- T1
+        J4 & J5 & J6 & J7 --- T2
+        J5 & J6 & J7 & J8 --- T3
+        J1 & J4 & J5 & J8 --- T4
+        
+        J4 & J5 & J6 & J7 & J8 --- O1
+        J1 & J2 & J3 & J4 & J8 --- O2
+        
+        %% IVM Properties
+        IVM1[Omni-triangulated Stability]:::junction
+        IVM2[Infinite Extensibility]:::junction
+        IVM3[3D Addressing System]:::junction
+    end
+```
+
+### 12.7 Tensegrity Neural Network Architecture
+
+```mermaid
+graph TD
+    classDef compression fill:#ff9999,stroke:#333,stroke-width:1px
+    classDef tension fill:#99ccff,stroke:#333,stroke-width:1px
+    classDef processing fill:#ffcc99,stroke:#333,stroke-width:1px
+    
+    subgraph "Tensegrity Neural Architecture"
+        %% Processing Modules (Compression Elements)
+        P1[Perception Module]:::compression
+        P2[Memory Module]:::compression
+        P3[Inference Module]:::compression
+        P4[Planning Module]:::compression
+        P5[Action Module]:::compression
+        
+        %% Tensional Network
+        T1[Attention Pathway]:::tension
+        T2[Prediction Pathway]:::tension
+        T3[Update Pathway]:::tension
+        T4[Integration Pathway]:::tension
+        T5[Decision Pathway]:::tension
+        
+        %% Processing Units
+        U1[Sensory Processing]:::processing
+        U2[Memory Retrieval]:::processing
+        U3[Bayesian Inference]:::processing
+        U4[Action Selection]:::processing
+        U5[Prediction Generation]:::processing
+        
+        %% Tensegrity Connections - Compression elements don't touch
+        P1 --- T1
+        T1 --- U1
+        U1 --- T2
+        T2 --- P2
+        
+        P2 --- T3
+        T3 --- U2
+        U2 --- T4
+        T4 --- P3
+        
+        P3 --- T2
+        T2 --- U3
+        U3 --- T5
+        T5 --- P4
+        
+        P4 --- T4
+        T4 --- U4
+        U4 --- T5
+        T5 --- P5
+        
+        P5 --- T1
+        T1 --- U5
+        U5 --- T3
+        T3 --- P1
+        
+        %% Tensegrity Properties
+        TP1[Distributed Processing]:::tension
+        TP2[Global Coherence]:::tension
+        TP3[Local Flexibility]:::tension
+        TP4[Resilience]:::tension
+    end
+```
+
+### 12.8 Synergetic System Organization
+
+```mermaid
+flowchart TB
+    classDef synergetic fill:#f9d5e5,stroke:#333,stroke-width:1px
+    classDef emergence fill:#d5e8d4,stroke:#333,stroke-width:1px
+    
+    subgraph "Synergetic CEREBRUM Organization"
+        %% Core Synergetic Principles
+        S1[Synergy: Behavior of Whole Unpredicted by Parts]:::synergetic
+        S2[Minimum Energy Pathways]:::synergetic
+        S3[60° Coordination]:::synergetic
+        S4[Tensegrity]:::synergetic
+        S5[Geometric Hierarchies]:::synergetic
+        
+        %% Implementation in CEREBRUM
+        I1[Emergent Cognitive Functions]:::emergence
+        I2[Geodesic Inference Paths]:::emergence
+        I3[Triangulated Knowledge Networks]:::emergence
+        I4[Tensegrity Module Organization]:::emergence
+        I5[Nested Processing Scales]:::emergence
+        
+        %% Connections
+        S1 --> I1
+        S2 --> I2
+        S3 --> I3
+        S4 --> I4
+        S5 --> I5
+        
+        %% Synergetic Properties
+        I1 & I2 --> SP1[Computational Efficiency]
+        I3 & I4 --> SP2[Structural Stability with Dynamic Adaptation]
+        I4 & I5 --> SP3[Scale-Invariant Processing]
+        I1 & I5 --> SP4[Emergence of Higher-Order Cognition]
+        I2 & I3 --> SP5[Self-Organizing Knowledge Structures]
+    end
+```
+
+### 12.9 Dymaxion Cognitive Processing
+
+```mermaid
+graph TD
+    classDef dym fill:#ffe6cc,stroke:#333,stroke-width:1px
+    classDef process fill:#d5e8d4,stroke:#333,stroke-width:1px
+    
+    subgraph "Dymaxion Cognitive Architecture"
+        %% Core Dymaxion Principles
+        D1[Maximum Performance per Unit Input]:::dym
+        D2[Triangulated Stability]:::dym
+        D3[Comprehensive Anticipatory Design]:::dym
+        D4[Doing More with Less]:::dym
+        
+        %% Processing Implementation
+        P1[Triangulated Inference]:::process
+        P2[Great Circle Reasoning]:::process
+        P3[Comprehensive Modeling]:::process
+        P4[Minimum-Energy Interventions]:::process
+        
+        %% Application Areas
+        A1[Decision Making]:::process
+        A2[Knowledge Integration]:::process
+        A3[Resource Optimization]:::process
+        A4[Predictive Modeling]:::process
+        
+        %% Connections
+        D1 --- P1
+        D1 --- P2
+        D2 --- P1
+        D2 --- P3
+        D3 --- P3
+        D3 --- P4
+        D4 --- P2
+        D4 --- P4
+        
+        P1 --- A1
+        P1 --- A2
+        P2 --- A1
+        P2 --- A3
+        P3 --- A2
+        P3 --- A4
+        P4 --- A3
+        P4 --- A4
+    end
+```
+
+### A12.10 Precession-Based Causal Modeling
+
+```mermaid
+graph LR
+    classDef direct fill:#f9d5e5,stroke:#333,stroke-width:1px
+    classDef perpendicular fill:#d5e8d4,stroke:#333,stroke-width:1px
+    classDef intervention fill:#ffe6cc,stroke:#333,stroke-width:1px
+    
+    subgraph "Precessional Effects in CEREBRUM"
+        %% Actions and Direct Effects
+        A1[Action 1]:::direct
+        A2[Action 2]:::direct
+        A3[Action 3]:::direct
+        
+        E1[Direct Effect 1]:::direct
+        E2[Direct Effect 2]:::direct
+        E3[Direct Effect 3]:::direct
+        
+        %% Precessional (90°) Effects
+        P1[Precessional Effect 1]:::perpendicular
+        P2[Precessional Effect 2]:::perpendicular
+        P3[Precessional Effect 3]:::perpendicular
+        
+        %% Trim-Tab Interventions
+        T1[Trim-Tab Point 1]:::intervention
+        T2[Trim-Tab Point 2]:::intervention
+        
+        %% Connections - Direct Effects
+        A1 --> E1
+        A2 --> E2
+        A3 --> E3
+        
+        %% Connections - Precessional Effects (90° to direct)
+        A1 -.-> P1
+        A2 -.-> P2
+        A3 -.-> P3
+        
+        %% Trim-Tab Interventions
+        T1 ===> P1
+        T1 ===> E2
+        T2 ===> P2
+        T2 ===> E3
+        
+        %% Precessional Effect Properties
+        PE1[Often Larger Than Direct Effects]:::perpendicular
+        PE2[Orthogonal to Intended Direction]:::perpendicular
+        PE3[Key to System Leverage]:::perpendicular
+        
+        P1 --- PE1
+        P2 --- PE2
+        P3 --- PE3
+    end
+```
+
+## 13. Appendices: Implementation Resources
+
+// ... existing code ... 

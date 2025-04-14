@@ -9,6 +9,9 @@ import os
 import sys
 import numpy as np
 import pandas as pd
+import matplotlib
+# Set matplotlib backend to a non-interactive one for test environment
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.animation import FuncAnimation
@@ -3039,9 +3042,13 @@ users can interact with through queries."""
     # 5. Create an animated interaction visualization
     interaction_anim_path = os.path.join(case_dir, "interaction_animation.gif")
     
-    # Create animation figure
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.axis('off')
+    # Create animation figure with two panels
+    fig = plt.figure(figsize=(14, 8))
+    main_ax = plt.subplot2grid((2, 3), (0, 0), colspan=2, rowspan=2)
+    viz_ax = plt.subplot2grid((2, 3), (0, 2), rowspan=1)
+    metrics_ax = plt.subplot2grid((2, 3), (1, 2), rowspan=1)
+    
+    main_ax.axis('off')
     
     # Settings
     query_types = ["predict", "parameters", "evaluate", "summary"]
@@ -3055,38 +3062,122 @@ users can interact with through queries."""
         f"predictions: [{prediction_response['predictions'][0]:.4f}]",
         f"intercept: {params_response['parameters']['intercept']:.4f}, coef: {params_response['parameters']['coefficients'][0]:.4f}",
         f"R²: {eval_response['evaluation']['r2']:.4f}, MSE: {eval_response['evaluation']['mse']:.4f}",
-        "Summary of trained linear regression model..."
+        "Summary: Linear regression model trained with Ordinary Least Squares"
     ]
     
-    # Animation elements
+    # Animation elements for main panel
     query_box = dict(boxstyle='round,pad=0.5', facecolor='#f0f8ff', edgecolor='#4682b4', alpha=0.0)
     response_box = dict(boxstyle='round,pad=0.5', facecolor='#f5f5f5', edgecolor='#2f4f4f', alpha=0.0)
     
-    # Add title
-    title = ax.text(0.5, 0.9, "VOCATIVE Case: Model as Interactive Interface", 
-                 ha='center', fontsize=14, fontweight='bold', transform=ax.transAxes,
+    # Add title to main panel
+    title = main_ax.text(0.5, 0.92, "VOCATIVE Case: Model as Interactive Interface", 
+                 ha='center', fontsize=14, fontweight='bold', transform=main_ax.transAxes,
                  bbox=dict(boxstyle='round,pad=0.6', facecolor='#e8f4f8', edgecolor='#4682b4', alpha=0.9))
     
     # Query and response text objects
-    query_text = ax.text(0.3, 0.65, "", ha='center', fontsize=12, transform=ax.transAxes, bbox=query_box)
-    response_text = ax.text(0.7, 0.5, "", ha='center', fontsize=12, transform=ax.transAxes, bbox=response_box)
+    query_text = main_ax.text(0.3, 0.65, "", ha='center', fontsize=12, transform=main_ax.transAxes, bbox=query_box)
+    response_text = main_ax.text(0.7, 0.5, "", ha='center', fontsize=12, transform=main_ax.transAxes, bbox=response_box)
+    
+    # Create user environment and model environment visual containers
+    user_env = patches.Rectangle((0.05, 0.3), 0.3, 0.4, transform=main_ax.transAxes, 
+                              fill=True, color='#f0f8ff', alpha=0.3, 
+                              linestyle='--', edgecolor='#4682b4')
+    model_env = patches.Rectangle((0.65, 0.3), 0.3, 0.4, transform=main_ax.transAxes, 
+                               fill=True, color='#f5f5f5', alpha=0.3, 
+                               linestyle='--', edgecolor='#2f4f4f')
+    main_ax.add_patch(user_env)
+    main_ax.add_patch(model_env)
+    
+    # Environment labels
+    main_ax.text(0.2, 0.73, "User Environment", ha='center', fontsize=10, 
+              transform=main_ax.transAxes, color='#4682b4')
+    main_ax.text(0.8, 0.73, "Model API", ha='center', fontsize=10, 
+              transform=main_ax.transAxes, color='#2f4f4f')
     
     # User icon and model icon
-    user_text = ax.text(0.2, 0.5, "👤", ha='center', fontsize=24, transform=ax.transAxes)
-    model_text = ax.text(0.8, 0.5, "📊", ha='center', fontsize=24, transform=ax.transAxes)
+    user_text = main_ax.text(0.2, 0.5, "👤", ha='center', fontsize=24, transform=main_ax.transAxes)
+    model_text = main_ax.text(0.8, 0.5, "📊", ha='center', fontsize=24, transform=main_ax.transAxes)
     
     # Arrows
-    query_arrow = ax.annotate("", xy=(0.75, 0.52), xytext=(0.25, 0.52), 
+    query_arrow = main_ax.annotate("", xy=(0.65, 0.52), xytext=(0.35, 0.52), 
                            arrowprops=dict(arrowstyle="->", color='#4682b4', alpha=0), 
-                           xycoords=ax.transAxes, textcoords=ax.transAxes)
+                           xycoords=main_ax.transAxes, textcoords=main_ax.transAxes)
     
-    response_arrow = ax.annotate("", xy=(0.25, 0.48), xytext=(0.75, 0.48), 
+    response_arrow = main_ax.annotate("", xy=(0.35, 0.48), xytext=(0.65, 0.48), 
                               arrowprops=dict(arrowstyle="->", color='#2f4f4f', alpha=0), 
-                              xycoords=ax.transAxes, textcoords=ax.transAxes)
+                              xycoords=main_ax.transAxes, textcoords=main_ax.transAxes)
     
     # Footer text
-    footer = ax.text(0.5, 0.1, "", ha='center', fontsize=10, fontstyle='italic', 
-                  transform=ax.transAxes, alpha=0)
+    footer = main_ax.text(0.5, 0.2, "", ha='center', fontsize=10, fontstyle='italic', 
+                  transform=main_ax.transAxes, alpha=0)
+    
+    # API documentation sidebar
+    api_panel = main_ax.text(0.5, 0.15, "", ha='center', fontsize=9, 
+                          transform=main_ax.transAxes, alpha=0,
+                          bbox=dict(boxstyle='round,pad=0.6', facecolor='#fffaf0', 
+                                  edgecolor='#d4a76a', alpha=0.9))
+    
+    # Setup visualization axis
+    viz_ax.set_title("Query Visualization", fontsize=10)
+    viz_ax.grid(True, alpha=0.3)
+    
+    # Generate data for visualization
+    x_data = np.linspace(-5, 5, 100)
+    # Get actual model parameters from response for accurate visualization
+    coef = params_response['parameters']['coefficients'][0]
+    intercept = params_response['parameters']['intercept']
+    y_data = coef * x_data + intercept
+    
+    # Create line and prediction point for viz_ax
+    model_line, = viz_ax.plot([], [], 'r-', linewidth=2, label="Model")
+    prediction_point = viz_ax.scatter([], [], s=80, color='blue', marker='o', label="Prediction")
+    prediction_line = viz_ax.axvline(x=2.5, color='blue', linestyle='--', alpha=0)
+    
+    # Set viz_ax limits
+    viz_ax.set_xlim(-5, 5)
+    min_y, max_y = min(y_data), max(y_data)
+    margin = (max_y - min_y) * 0.2
+    viz_ax.set_ylim(min_y - margin, max_y + margin)
+    viz_ax.set_xlabel("X")
+    viz_ax.set_ylabel("y")
+    viz_ax.legend(loc='upper left', fontsize=8)
+    
+    # Text element for showing formula in viz panel
+    formula_text = viz_ax.text(0.5, 0.12, "", ha='center', fontsize=9, 
+                            transform=viz_ax.transAxes, alpha=0,
+                            bbox=dict(boxstyle='round,pad=0.3', facecolor='#fffaf0', alpha=0.9))
+    
+    # Setup metrics axis
+    metrics_ax.set_title("Model Metrics", fontsize=10)
+    metrics_ax.set_xlim(0, 1)
+    metrics_ax.set_ylim(0, 3)
+    metrics_ax.set_yticks([0, 1, 2])
+    metrics_ax.set_yticklabels(['R²', 'MSE', 'MAE'])
+    metrics_ax.set_xlabel("Value (normalized)")
+    metrics_ax.grid(True, alpha=0.3)
+    
+    # Create metrics bars
+    r2_value = eval_response['evaluation']['r2']
+    mse_value = eval_response['evaluation']['mse']
+    mae_value = eval_response['evaluation']['mae']
+    
+    # Normalize MSE and MAE for better visualization
+    max_error = max(mse_value, mae_value)
+    norm_mse = min(mse_value / max_error, 1) if max_error > 0 else 0
+    norm_mae = min(mae_value / max_error, 1) if max_error > 0 else 0
+    
+    metric_bars = metrics_ax.barh(
+        [0, 1, 2], 
+        [0, 0, 0], 
+        color=['#2ecc71', '#3498db', '#f1c40f'],
+        alpha=0.7,
+        height=0.5
+    )
+    
+    # Text for metric values
+    r2_text = metrics_ax.text(0.1, 0, "", ha='left', va='center', fontsize=9, alpha=0)
+    mse_text = metrics_ax.text(0.1, 1, "", ha='left', va='center', fontsize=9, alpha=0)
+    mae_text = metrics_ax.text(0.1, 2, "", ha='left', va='center', fontsize=9, alpha=0)
     
     # Stages for each query type: 
     # 0-starting, 1-query appears, 2-query flies, 3-processing, 4-response appears, 5-response flies, 6-complete
@@ -3101,19 +3192,60 @@ users can interact with through queries."""
         query_arrow.arrow_patch.set_alpha(0)
         response_arrow.arrow_patch.set_alpha(0)
         footer.set_alpha(0)
-        return query_text, response_text, query_arrow, response_arrow, footer
+        api_panel.set_alpha(0)
+        formula_text.set_alpha(0)
+        model_line.set_data([], [])
+        prediction_point.set_offsets(np.empty((0, 2)))
+        prediction_line.set_alpha(0)
+        for bar in metric_bars:
+            bar.set_width(0)
+        r2_text.set_alpha(0)
+        mse_text.set_alpha(0)
+        mae_text.set_alpha(0)
+        return (query_text, response_text, query_arrow, response_arrow, footer, api_panel, 
+                formula_text, model_line, prediction_point, prediction_line, 
+                *metric_bars, r2_text, mse_text, mae_text)
     
     def update(frame):
         # Calculate which query we're on and which stage
         query_idx = frame // (frames_per_stage * total_stages)
         stage = (frame % (frames_per_stage * total_stages)) // frames_per_stage
+        phase = frame % frames_per_stage  # For smooth animations within a stage
         
         if query_idx >= len(query_types):
             # Animation complete, show all interactions
             summary = "Model provides a complete interactive API"
             footer.set_text(summary)
             footer.set_alpha(1.0)
-            return query_text, response_text, query_arrow, response_arrow, footer
+            
+            # Show comprehensive API documentation
+            api_docs = ("VOCATIVE Case API:\n" +
+                      "- predict(X): Make predictions for new data\n" +
+                      "- get_parameters(): Retrieve model coefficients\n" +
+                      "- evaluate(X, y): Compute performance metrics\n" +
+                      "- get_summary(): Get model description and metadata")
+            api_panel.set_text(api_docs)
+            api_panel.set_alpha(1.0)
+            
+            # Show the full regression line
+            model_line.set_data(x_data, y_data)
+            
+            # Show all metrics
+            metric_bars[0].set_width(r2_value)
+            metric_bars[1].set_width(norm_mse)
+            metric_bars[2].set_width(norm_mae)
+            
+            r2_text.set_text(f"{r2_value:.4f}")
+            mse_text.set_text(f"{mse_value:.4f}")
+            mae_text.set_text(f"{mae_value:.4f}")
+            
+            r2_text.set_alpha(1)
+            mse_text.set_alpha(1)
+            mae_text.set_alpha(1)
+            
+            return (query_text, response_text, query_arrow, response_arrow, footer, 
+                   api_panel, formula_text, model_line, prediction_point, prediction_line, 
+                   *metric_bars, r2_text, mse_text, mae_text)
         
         current_query = query_texts[query_idx]
         current_response = response_texts[query_idx]
@@ -3123,6 +3255,30 @@ users can interact with through queries."""
         response_text.get_bbox_patch().set_alpha(0)
         query_arrow.arrow_patch.set_alpha(0)
         response_arrow.arrow_patch.set_alpha(0)
+        formula_text.set_alpha(0)
+        prediction_line.set_alpha(0)
+        
+        # Reset visualization elements based on query type
+        if query_idx == 0:  # predict
+            # Clear any previous visualization
+            model_line.set_data([], [])
+            prediction_point.set_offsets(np.empty((0, 2)))
+            formula_text.set_text("")
+        elif query_idx == 1:  # parameters
+            # Clear prediction point
+            prediction_point.set_offsets(np.empty((0, 2)))
+        elif query_idx == 2:  # evaluate
+            # Ensure full line is shown
+            model_line.set_data(x_data, y_data)
+            # Reset metrics bars
+            for bar in metric_bars:
+                bar.set_width(0)
+            r2_text.set_alpha(0)
+            mse_text.set_alpha(0)
+            mae_text.set_alpha(0)
+        elif query_idx == 3:  # summary
+            # Ensure full model is shown
+            model_line.set_data(x_data, y_data)
         
         # Process current stage
         if stage == 0:  # Starting state
@@ -3130,20 +3286,91 @@ users can interact with through queries."""
             response_text.set_text("")
             footer.set_text(f"Query type: {query_types[query_idx]}")
             footer.set_alpha(1.0)
+            
+            # Reset specific visualization elements
+            if query_idx == 0:  # predict
+                viz_ax.set_title("Prediction Query Visualization", fontsize=10)
+            elif query_idx == 1:  # parameters
+                viz_ax.set_title("Parameter Query Visualization", fontsize=10)
+            elif query_idx == 2:  # evaluate
+                viz_ax.set_title("Evaluation Query Visualization", fontsize=10)
+                # Prepare metrics axis
+                metric_bars[0].set_width(0)
+                metric_bars[1].set_width(0)
+                metric_bars[2].set_width(0)
+            elif query_idx == 3:  # summary
+                viz_ax.set_title("Model Summary Visualization", fontsize=10)
         
         elif stage == 1:  # Query appears
             query_text.set_text(f"Query: {current_query}")
             query_text.get_bbox_patch().set_alpha(0.8)
+            
+            # Show what's being queried in the viz panel
+            if query_idx == 0:  # predict
+                # Show the x value line
+                prediction_line.set_alpha(0.5)
+            elif query_idx == 1:  # parameters
+                # Show the formula structure
+                formula_text.set_text("y = ? + ? · x")
+                formula_text.set_alpha(0.5)
+            elif query_idx == 2:  # evaluate
+                # Show blank metrics
+                metric_bars[0].set_width(0.1)
+                metric_bars[1].set_width(0.1)
+                metric_bars[2].set_width(0.1)
+            elif query_idx == 3:  # summary
+                # Show partial line
+                model_line.set_data(x_data[:20], y_data[:20])
         
         elif stage == 2:  # Query flies to model
             query_text.set_text(f"Query: {current_query}")
             query_text.get_bbox_patch().set_alpha(0.8)
             query_arrow.arrow_patch.set_alpha(1.0)
+            
+            # Update query visualization
+            if query_idx == 0:  # predict
+                prediction_line.set_alpha(0.8)
+            elif query_idx == 1:  # parameters
+                formula_text.set_text("y = ? + ? · x")
+                formula_text.set_alpha(0.8)
+            elif query_idx == 2:  # evaluate
+                # Preparing for evaluation
+                metric_bars[0].set_width(0.2)
+                metric_bars[1].set_width(0.2)
+                metric_bars[2].set_width(0.2)
+            elif query_idx == 3:  # summary
+                # Show more of the line
+                model_line.set_data(x_data[:40], y_data[:40])
         
         elif stage == 3:  # Processing
             query_text.set_text(f"Query: {current_query}")
             query_text.get_bbox_patch().set_alpha(0.8)
             model_text.set_text("🔄")  # Processing icon
+            
+            # Show processing in visualization
+            if query_idx == 0:  # predict
+                # Add the regression line but not the point yet
+                interp = min(1.0, phase / (frames_per_stage - 1))
+                num_points = int(interp * len(x_data))
+                model_line.set_data(x_data[:num_points], y_data[:num_points])
+            elif query_idx == 1:  # parameters
+                # Gradually reveal the formula
+                if phase < frames_per_stage * 0.5:
+                    formula_text.set_text(f"y = {intercept:.4f} + ? · x")
+                else:
+                    formula_text.set_text(f"y = {intercept:.4f} + {coef:.4f} · x")
+                formula_text.set_alpha(1.0)
+            elif query_idx == 2:  # evaluate
+                # Gradually fill metrics bars
+                progress = phase / (frames_per_stage - 1)
+                metric_bars[0].set_width(r2_value * progress)
+                metric_bars[1].set_width(norm_mse * progress)
+                metric_bars[2].set_width(norm_mae * progress)
+            elif query_idx == 3:  # summary
+                # Show more of the line
+                interp = min(1.0, phase / (frames_per_stage - 1))
+                num_points = int(interp * len(x_data))
+                model_line.set_data(x_data[:60+num_points], y_data[:60+num_points])
         
         elif stage == 4:  # Response appears
             query_text.set_text(f"Query: {current_query}")
@@ -3151,6 +3378,37 @@ users can interact with through queries."""
             response_text.set_text(f"Response: {current_response}")
             response_text.get_bbox_patch().set_alpha(0.8)
             model_text.set_text("📊")  # Back to model icon
+            
+            # Complete visualization based on query
+            if query_idx == 0:  # predict
+                # Show full line and prediction point
+                model_line.set_data(x_data, y_data)
+                pred_y = coef * 2.5 + intercept
+                prediction_point.set_offsets([[2.5, pred_y]])
+                prediction_line.set_alpha(0.8)
+            elif query_idx == 1:  # parameters
+                # Show complete formula
+                formula_text.set_text(f"y = {intercept:.4f} + {coef:.4f} · x")
+                formula_text.set_alpha(1.0)
+                # Show corresponding line
+                model_line.set_data(x_data, y_data)
+            elif query_idx == 2:  # evaluate
+                # Show full metrics with values
+                metric_bars[0].set_width(r2_value)
+                metric_bars[1].set_width(norm_mse)
+                metric_bars[2].set_width(norm_mae)
+                r2_text.set_text(f"{r2_value:.4f}")
+                mse_text.set_text(f"{mse_value:.4f}")
+                mae_text.set_text(f"{mae_value:.4f}")
+                r2_text.set_alpha(1)
+                mse_text.set_alpha(1)
+                mae_text.set_alpha(1)
+            elif query_idx == 3:  # summary
+                # Show full model
+                model_line.set_data(x_data, y_data)
+                # Show formula
+                formula_text.set_text(f"y = {intercept:.4f} + {coef:.4f} · x")
+                formula_text.set_alpha(1.0)
         
         elif stage == 5:  # Response flies to user
             query_text.set_text(f"Query: {current_query}")
@@ -3158,6 +3416,28 @@ users can interact with through queries."""
             response_text.set_text(f"Response: {current_response}")
             response_text.get_bbox_patch().set_alpha(0.8)
             response_arrow.arrow_patch.set_alpha(1.0)
+            
+            # Keep visualization complete
+            if query_idx == 0:  # predict
+                model_line.set_data(x_data, y_data)
+                pred_y = coef * 2.5 + intercept
+                prediction_point.set_offsets([[2.5, pred_y]])
+                prediction_line.set_alpha(0.8)
+            elif query_idx == 1:  # parameters
+                formula_text.set_text(f"y = {intercept:.4f} + {coef:.4f} · x")
+                formula_text.set_alpha(1.0)
+                model_line.set_data(x_data, y_data)
+            elif query_idx == 2:  # evaluate
+                metric_bars[0].set_width(r2_value)
+                metric_bars[1].set_width(norm_mse)
+                metric_bars[2].set_width(norm_mae)
+                r2_text.set_alpha(1)
+                mse_text.set_alpha(1)
+                mae_text.set_alpha(1)
+            elif query_idx == 3:  # summary
+                model_line.set_data(x_data, y_data)
+                formula_text.set_text(f"y = {intercept:.4f} + {coef:.4f} · x")
+                formula_text.set_alpha(1.0)
         
         elif stage == 6:  # Complete
             query_text.set_text(f"Query: {current_query}")
@@ -3166,17 +3446,189 @@ users can interact with through queries."""
             response_text.get_bbox_patch().set_alpha(0.8)
             footer.set_text(f"Completed {query_types[query_idx]} interaction")
             
-        return query_text, response_text, query_arrow, response_arrow, footer
+            # Keep visualization complete
+            if query_idx == 0:  # predict
+                model_line.set_data(x_data, y_data)
+                pred_y = coef * 2.5 + intercept
+                prediction_point.set_offsets([[2.5, pred_y]])
+                prediction_line.set_alpha(0.8)
+            elif query_idx == 1:  # parameters
+                formula_text.set_text(f"y = {intercept:.4f} + {coef:.4f} · x")
+                formula_text.set_alpha(1.0)
+                model_line.set_data(x_data, y_data)
+            elif query_idx == 2:  # evaluate
+                metric_bars[0].set_width(r2_value)
+                metric_bars[1].set_width(norm_mse)
+                metric_bars[2].set_width(norm_mae)
+                r2_text.set_alpha(1)
+                mse_text.set_alpha(1)
+                mae_text.set_alpha(1)
+            elif query_idx == 3:  # summary
+                model_line.set_data(x_data, y_data)
+                formula_text.set_text(f"y = {intercept:.4f} + {coef:.4f} · x")
+                formula_text.set_alpha(1.0)
+            
+        return (query_text, response_text, query_arrow, response_arrow, footer, 
+               api_panel, formula_text, model_line, prediction_point, prediction_line, 
+               *metric_bars, r2_text, mse_text, mae_text)
     
     # Create animation
     frames = frames_per_stage * total_stages * len(query_types) + 5  # Add a few extra frames at the end
     anim = FuncAnimation(fig, update, frames=frames, init_func=init, blit=True, interval=200)
     
     # Save animation
+    plt.tight_layout()
     anim.save(interaction_anim_path, writer='pillow', fps=5, dpi=100)
     plt.close(fig)
     
     assert os.path.exists(interaction_anim_path), "VOCATIVE interaction animation not created"
+    
+    # Also create an enhanced API documentation visualization
+    api_doc_path = os.path.join(case_dir, "api_documentation.png")
+    
+    # Create API documentation figure
+    api_fig, api_axs = plt.subplots(2, 2, figsize=(12, 10))
+    api_axs = api_axs.flatten()
+    
+    # Common styling
+    api_box_style = dict(boxstyle='round,pad=0.6', facecolor='#f5f5f5', alpha=0.9, edgecolor='#4682b4')
+    method_style = dict(boxstyle='round,pad=0.3', facecolor='#e6f7ff', alpha=0.9, edgecolor='#4682b4')
+    param_style = dict(boxstyle='round,pad=0.2', facecolor='#fff8e1', alpha=0.8, edgecolor='#ffa000')
+    return_style = dict(boxstyle='round,pad=0.2', facecolor='#e8f5e9', alpha=0.8, edgecolor='#4caf50')
+    example_style = dict(boxstyle='round,pad=0.3', facecolor='#f3e5f5', alpha=0.8, edgecolor='#9c27b0')
+    
+    # API Documentation Title
+    api_fig.suptitle("VOCATIVE Case: Regression Model API Reference", fontsize=16, fontweight='bold', y=0.98)
+    
+    # 1. Predict Method
+    api_axs[0].axis('off')
+    api_axs[0].set_title("Prediction Interface", fontsize=14)
+    
+    # Method signature
+    api_axs[0].text(0.5, 0.9, "predict(X)", ha='center', fontsize=12, fontweight='bold', 
+                 bbox=method_style, transform=api_axs[0].transAxes)
+    
+    # Parameters
+    api_axs[0].text(0.5, 0.8, "Parameters:\nX: array-like of shape (n_samples, n_features)\n   Input samples for prediction", 
+                 ha='center', fontsize=10, bbox=param_style, transform=api_axs[0].transAxes)
+    
+    # Returns
+    api_axs[0].text(0.5, 0.65, "Returns:\narray of shape (n_samples,)\n   Predicted values for each sample", 
+                 ha='center', fontsize=10, bbox=return_style, transform=api_axs[0].transAxes)
+    
+    # Example
+    example_text = "Example:\n>>> model.predict(np.array([[2.5]]))\narray([" + f"{prediction_response['predictions'][0]:.4f}" + "])"
+    api_axs[0].text(0.5, 0.5, example_text, ha='center', fontsize=10, bbox=example_style, transform=api_axs[0].transAxes)
+    
+    # Visualization
+    x_small = np.linspace(-3, 3, 50)
+    y_small = coef * x_small + intercept
+    api_axs[0].text(0.5, 0.3, "Visualization:", ha='center', fontsize=10, transform=api_axs[0].transAxes)
+    
+    pred_viz_ax = api_fig.add_axes([0.15, 0.05, 0.3, 0.15])
+    pred_viz_ax.plot(x_small, y_small, 'r-')
+    pred_viz_ax.scatter([2.5], [coef * 2.5 + intercept], s=80, color='blue')
+    pred_viz_ax.axvline(x=2.5, color='blue', linestyle='--', alpha=0.5)
+    pred_viz_ax.set_xlabel('X')
+    pred_viz_ax.set_ylabel('y')
+    pred_viz_ax.set_title('Prediction at X=2.5', fontsize=10)
+    
+    # 2. Parameters Method
+    api_axs[1].axis('off')
+    api_axs[1].set_title("Parameters Interface", fontsize=14)
+    
+    # Method signature
+    api_axs[1].text(0.5, 0.9, "get_parameters()", ha='center', fontsize=12, fontweight='bold', 
+                 bbox=method_style, transform=api_axs[1].transAxes)
+    
+    # Parameters
+    api_axs[1].text(0.5, 0.8, "Parameters:\nNone", 
+                 ha='center', fontsize=10, bbox=param_style, transform=api_axs[1].transAxes)
+    
+    # Returns
+    api_axs[1].text(0.5, 0.7, "Returns:\ndict with keys:\n  - 'coefficients': array of shape (n_features,)\n  - 'intercept': float", 
+                 ha='center', fontsize=10, bbox=return_style, transform=api_axs[1].transAxes)
+    
+    # Example
+    example_text = "Example:\n>>> model.get_parameters()\n{\n  'coefficients': [" + f"{params_response['parameters']['coefficients'][0]:.4f}" + "],\n"
+    example_text += f"  'intercept': {params_response['parameters']['intercept']:.4f}\n" + "}"
+    api_axs[1].text(0.5, 0.5, example_text, ha='center', fontsize=10, bbox=example_style, transform=api_axs[1].transAxes)
+    
+    # Visualization - formula
+    formula_box = dict(boxstyle='round,pad=0.5', facecolor='#fff8dc', alpha=0.9, edgecolor='#daa520')
+    api_axs[1].text(0.5, 0.3, f"Model Formula:\ny = {intercept:.4f} + {coef:.4f} · x", 
+                 ha='center', fontsize=12, bbox=formula_box, transform=api_axs[1].transAxes)
+    
+    # 3. Evaluate Method
+    api_axs[2].axis('off')
+    api_axs[2].set_title("Evaluation Interface", fontsize=14)
+    
+    # Method signature
+    api_axs[2].text(0.5, 0.9, "evaluate(X, y)", ha='center', fontsize=12, fontweight='bold', 
+                 bbox=method_style, transform=api_axs[2].transAxes)
+    
+    # Parameters
+    api_axs[2].text(0.5, 0.8, "Parameters:\nX: array-like of shape (n_samples, n_features)\n   Input samples\ny: array-like of shape (n_samples,)\n   True target values", 
+                 ha='center', fontsize=10, bbox=param_style, transform=api_axs[2].transAxes)
+    
+    # Returns
+    api_axs[2].text(0.5, 0.65, "Returns:\ndict with evaluation metrics:\n  - 'r2': Coefficient of determination\n  - 'mse': Mean squared error\n  - 'mae': Mean absolute error\n  - 'rmse': Root mean squared error", 
+                 ha='center', fontsize=10, bbox=return_style, transform=api_axs[2].transAxes)
+    
+    # Example
+    example_text = "Example:\n>>> model.evaluate(X, y)\n{\n"
+    for i, (k, v) in enumerate(eval_response['evaluation'].items()):
+        if i < 3:  # Just show a few metrics
+            example_text += f"  '{k}': {v:.4f},\n"
+    example_text += "  ...\n}"
+    api_axs[2].text(0.5, 0.45, example_text, ha='center', fontsize=10, bbox=example_style, transform=api_axs[2].transAxes)
+    
+    # Visualization - metric bars
+    eval_viz_ax = api_fig.add_axes([0.15, 0.05, 0.3, 0.15])
+    eval_viz_ax.barh(['R²', 'MSE', 'MAE'], [r2_value, norm_mse, norm_mae], color=['#2ecc71', '#3498db', '#f1c40f'])
+    eval_viz_ax.set_title('Performance Metrics', fontsize=10)
+    eval_viz_ax.set_xlim(0, 1.1)
+    
+    # 4. Summary Method
+    api_axs[3].axis('off')
+    api_axs[3].set_title("Summary Interface", fontsize=14)
+    
+    # Method signature
+    api_axs[3].text(0.5, 0.9, "get_summary()", ha='center', fontsize=12, fontweight='bold', 
+                 bbox=method_style, transform=api_axs[3].transAxes)
+    
+    # Parameters
+    api_axs[3].text(0.5, 0.8, "Parameters:\nNone", 
+                 ha='center', fontsize=10, bbox=param_style, transform=api_axs[3].transAxes)
+    
+    # Returns
+    api_axs[3].text(0.5, 0.7, "Returns:\nstr: Text summary of the model", 
+                 ha='center', fontsize=10, bbox=return_style, transform=api_axs[3].transAxes)
+    
+    # Example
+    example_text = "Example:\n>>> model.get_summary()\n'Linear Regression Model\n Model ID: VOCATIVE_model\n Fitted: True\n Features: 1\n Samples used: 100\n Formula: y = intercept + coef * x\n ...'"
+    api_axs[3].text(0.5, 0.5, example_text, ha='center', fontsize=10, bbox=example_style, transform=api_axs[3].transAxes)
+    
+    # Visualization - full model diagram
+    api_axs[3].text(0.5, 0.3, "Model Diagram:", ha='center', fontsize=10, transform=api_axs[3].transAxes)
+    
+    # Create small summary diagram
+    summary_viz_ax = api_fig.add_axes([0.65, 0.05, 0.3, 0.15])
+    summary_viz_ax.plot(x_small, y_small, 'r-', label='Model')
+    summary_viz_ax.scatter(X.flatten()[:15], y[:15], alpha=0.7, s=30, label='Data (sample)')
+    summary_viz_ax.set_xlabel('X')
+    summary_viz_ax.set_ylabel('y')
+    summary_viz_ax.set_title('Model Overview', fontsize=10)
+    summary_viz_ax.legend(fontsize=8)
+    
+    # Add footer with linguistic meaning
+    api_fig.text(0.5, 0.01, f"Linguistic Context: {case_info['linguistic_meaning']} - {case_info['example']}", 
+              ha='center', fontsize=10, fontstyle='italic')
+    
+    # Save API documentation
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    api_fig.savefig(api_doc_path, dpi=300)
+    plt.close(api_fig)
     
     # 6. Document all outputs for this case
     with open(os.path.join(case_dir, "vocative_results.txt"), 'w') as f:
@@ -3205,6 +3657,7 @@ users can interact with through queries."""
         f.write(f"- Linguistic context: linguistic_context.png\n")
         f.write(f"- Interface visualization: interface_visualization.png\n")
         f.write(f"- Interaction animation: interaction_animation.gif\n")
+        f.write(f"- API documentation: api_documentation.png\n")
         
         f.write(f"\nVOCATIVE Case Description:\n")
         f.write(f"The VOCATIVE case represents the model as an addressable entity that responds to\n")
@@ -3213,8 +3666,14 @@ users can interact with through queries."""
         f.write(f"this case emphasizes the interactive API aspects of the model, with clear query-response\n")
         f.write(f"patterns and interface conventions. The model is treated as an entity that can be\n")
         f.write(f"directly addressed, queried, and will respond with appropriate information.\n")
+        
+        f.write(f"\nEnhanced Visualizations:\n")
+        f.write(f"The enhanced animations now show the Vocative case with detailed visualizations of\n")
+        f.write(f"model predictions, parameter retrieval, evaluation metrics, and summary information.\n")
+        f.write(f"Each query-response interaction is visualized with corresponding regression line,\n")
+        f.write(f"prediction points, formula display, and performance metrics where appropriate.\n")
             
-    logger.info(f"Completed VOCATIVE case test with visualizations in {case_dir}")
+    logger.info(f"Completed VOCATIVE case test with enhanced visualizations in {case_dir}")
     
     return model
 
@@ -3858,7 +4317,7 @@ def test_ablative_case(linear_test_data, case_definitions):
             decomp_text.set_text(f"Phase 1: Model Introduction\n\n"
                                f"The model generates predictions\n"
                                f"y = {model.intercept_:.4f} + {model.coefficients_[0]:.4f}·x\n\n"
-                               f"Progress: {int(phase_progress*100)}%")
+                               f"Progress: {int(phase_progress*100)}%\n")
             
             # No histogram yet
             ax_hist.clear()
@@ -4134,6 +4593,9 @@ def run_all_case_tests(output_dir: str = OUTPUT_DIR) -> None:
     )
     
     logger.info(f"All case tests completed. Results saved to {output_dir}")
+    
+    # Return an empty dictionary since our tests don't currently return model objects
+    return {}
 
 # --- Helper Functions ---
 

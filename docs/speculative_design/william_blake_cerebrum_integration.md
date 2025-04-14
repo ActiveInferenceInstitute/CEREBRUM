@@ -353,40 +353,98 @@ graph TD
 #### 11.2.1 Detailed Processing at Each Level
 
 **Level 1 (Single Vision) Implementation:**
-```python
-def single_vision_processing(sensory_input, precision_weights):
-    """
-    Implements Blake's Single Vision as bottom-up feature extraction
-    
-    Parameters:
-    -----------
-    sensory_input : array-like
-        Raw sensory data from environment
-    precision_weights : array-like
-        Uncertainty weighting for different sensory channels
+```mermaid
+graph TD
+    subgraph "Single Vision Implementation"
+        SI[Sensory Input] --> FE[Feature Extraction Network]
+        FE --> UE[Uncertainty Estimation]
+        UE --> WF[Weighted Features]
         
-    Returns:
-    --------
-    features : array-like
-        Extracted features with uncertainty estimates
-    """
-    # Feature extraction network with uncertainty quantification
-    features = []
-    uncertainties = []
-    
-    # Convolutional layers with dropout for uncertainty estimation
-    for i, layer in enumerate(self.conv_layers):
-        features = layer(features if i > 0 else sensory_input)
-        uncertainties.append(self._estimate_uncertainty(features))
-    
-    # Weight features by precision (inverse uncertainty)
-    weighted_features = features * (1.0 / (uncertainties[-1] + self.epsilon))
-    
-    return weighted_features
+        PW[Precision Weights] --> WF
+        
+        subgraph "Internal Process"
+            direction LR
+            C1[Conv Layer 1] --> C2[Conv Layer 2] --> C3[Conv Layer 3]
+            D1[Dropout 1] --> U1[Uncertainty 1]
+            D2[Dropout 2] --> U2[Uncertainty 2]
+            D3[Dropout 3] --> U3[Uncertainty 3]
+            
+            C1 --> D1
+            C2 --> D2
+            C3 --> D3
+        end
+        
+        WF --> FL[Feature Layer]
+        
+        classDef input fill:#f9f9f9,stroke:#333,stroke-width:1px
+        classDef process fill:#e6f3ff,stroke:#333,stroke-width:1px
+        classDef internal fill:#f5f5f5,stroke:#333,stroke-dasharray: 5 5,stroke-width:1px
+        classDef output fill:#e6ffe6,stroke:#333,stroke-width:1px
+        
+        class SI input
+        class FE,UE,WF process
+        class C1,C2,C3,D1,D2,D3,U1,U2,U3 internal
+        class FL output
+        
+        %% Implementation details
+        SI -.-> |"def single_vision_processing(sensory_input, precision_weights)"| FE
+        WF -.-> |"weighted_features = features * (1.0 / (uncertainties[-1] + self.epsilon))"| FL
+    end
 ```
 
-**Levels 2-4 Processing Pseudocode:**
-Similar implementations for higher levels, with increasing integration of temporal context, cross-modal fusion, and meta-cognitive awareness.
+**Levels 2-4 Processing:**
+```mermaid
+graph TD
+    subgraph "Higher Vision Level Implementation"
+        L1[Level 1: Single Vision] --> L2[Level 2: Twofold Vision]
+        L2 --> L3[Level 3: Threefold Vision]
+        L3 --> L4[Level 4: Fourfold Vision]
+        
+        subgraph "Level 2: Twofold Vision"
+            RM[Relational Modeling]
+            CP[Contrast Processing]
+            TD[Temporal Dynamics]
+            
+            RM & CP & TD --> L2O[Level 2 Output]
+        end
+        
+        subgraph "Level 3: Threefold Vision"
+            CI[Contextual Integration]
+            TM[Temporal Memory]
+            NI[Narrative Integration]
+            
+            CI & TM & NI --> L3O[Level 3 Output]
+        end
+        
+        subgraph "Level 4: Fourfold Vision"
+            MC[Meta-Cognitive Awareness]
+            SI[Symbolic Integration]
+            SU[Self-Understanding]
+            
+            MC & SI & SU --> L4O[Level 4 Output]
+        end
+        
+        L4 -.-> L3
+        L3 -.-> L2
+        L2 -.-> L1
+        
+        L4O --> OUT1[Action]
+        L4O --> OUT2[Imagination]
+        L4O --> OUT3[Consciousness]
+        
+        classDef level fill:#f9f9f9,stroke:#333,stroke-width:1px
+        classDef level2 fill:#e6f3ff,stroke:#333,stroke-width:1px
+        classDef level3 fill:#cce6ff,stroke:#333,stroke-width:1px
+        classDef level4 fill:#99ccff,stroke:#333,stroke-width:1px
+        classDef output fill:#e6ffe6,stroke:#333,stroke-width:1px
+        
+        class L1 level
+        class L2,RM,CP,TD,L2O level2
+        class L3,CI,TM,NI,L3O level3
+        class L4,MC,SI,SU,L4O level4
+        class OUT1,OUT2,OUT3 output
+    end
+```
 
 ### 11.3 Zoas as Functional Modules Architecture
 

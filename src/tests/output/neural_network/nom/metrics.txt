@@ -1,0 +1,10 @@
+Case: NOM - Subject/Doer of action
+Statistical Role: Active predictor
+
+Neural Network Context: The neural network as an active agent generating predictions from inputs
+
+Training Metrics:
+  Final Loss: 0.006246
+  Initial Loss: 0.144553
+  Improvement: 95.68%
+  Epochs: 1400
