@@ -1,0 +1,6 @@
+Case: VOC - Direct address/Invocation
+Statistical Role: Interactive interface
+
+Neural Network Context: The neural network as an addressable entity with a query/response interface
+
+Training Metrics:

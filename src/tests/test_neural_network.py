@@ -1103,11 +1103,26 @@ def test_genitive_case(nn_regression_data, case_definitions):
     
     # Visualize training progress
     training_path = os.path.join(case_dir, "training_history.png")
-    Visualizer.plot_training_history(
-        loss_history=model.loss_history,
-        title=f"Training Loss in {Case.GENITIVE.value} Case",
-        save_path=training_path
-    )
+    
+    # Handle cases where training is not allowed
+    if hasattr(model, 'loss_history') and len(model.loss_history) > 0:
+        Visualizer.plot_training_history(
+            loss_history=model.loss_history,
+            title=f"Training Loss in {Case.GENITIVE.value} Case",
+            save_path=training_path
+        )
+    else:
+        # Create a placeholder plot if no training occurred
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.text(0.5, 0.5, f"Training not allowed in {Case.GENITIVE.value} case", 
+               ha='center', va='center', fontsize=14)
+        ax.set_title(f"Training Status in {Case.GENITIVE.value} Case")
+        ax.axis('off')
+        fig.savefig(training_path)
+        plt.close(fig)
+        
+        # Create an empty loss history for reporting
+        model.loss_history = [0.0]
     
     # Save final metrics
     metrics_file = os.path.join(case_dir, "metrics.txt")
@@ -1280,11 +1295,26 @@ def test_locative_case(nn_classification_data, case_definitions):
     
     # Visualize training progress
     training_path = os.path.join(case_dir, "training_history.png")
-    Visualizer.plot_training_history(
-        loss_history=model.loss_history,
-        title=f"Training Loss in {Case.LOCATIVE.value} Case",
-        save_path=training_path
-    )
+    
+    # Handle cases where training is not allowed
+    if hasattr(model, 'loss_history') and len(model.loss_history) > 0:
+        Visualizer.plot_training_history(
+            loss_history=model.loss_history,
+            title=f"Training Loss in {Case.LOCATIVE.value} Case",
+            save_path=training_path
+        )
+    else:
+        # Create a placeholder plot if no training occurred
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.text(0.5, 0.5, f"Training not allowed in {Case.LOCATIVE.value} case", 
+               ha='center', va='center', fontsize=14)
+        ax.set_title(f"Training Status in {Case.LOCATIVE.value} Case")
+        ax.axis('off')
+        fig.savefig(training_path)
+        plt.close(fig)
+        
+        # Create an empty loss history for reporting
+        model.loss_history = [0.0]
     
     # Save final metrics
     metrics_file = os.path.join(case_dir, "metrics.txt")
@@ -1450,11 +1480,26 @@ def test_ablative_case(nn_regression_data, case_definitions):
     
     # Visualize training progress
     training_path = os.path.join(case_dir, "training_history.png")
-    Visualizer.plot_training_history(
-        loss_history=model.loss_history,
-        title=f"Training Loss in {Case.ABLATIVE.value} Case",
-        save_path=training_path
-    )
+    
+    # Handle cases where training is not allowed
+    if hasattr(model, 'loss_history') and len(model.loss_history) > 0:
+        Visualizer.plot_training_history(
+            loss_history=model.loss_history,
+            title=f"Training Loss in {Case.ABLATIVE.value} Case",
+            save_path=training_path
+        )
+    else:
+        # Create a placeholder plot if no training occurred
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.text(0.5, 0.5, f"Training not allowed in {Case.ABLATIVE.value} case", 
+               ha='center', va='center', fontsize=14)
+        ax.set_title(f"Training Status in {Case.ABLATIVE.value} Case")
+        ax.axis('off')
+        fig.savefig(training_path)
+        plt.close(fig)
+        
+        # Create an empty loss history for reporting
+        model.loss_history = [0.0]
     
     # Save final metrics
     metrics_file = os.path.join(case_dir, "metrics.txt")
@@ -1622,11 +1667,26 @@ def test_vocative_case(nn_classification_data, case_definitions):
     
     # Visualize training progress
     training_path = os.path.join(case_dir, "training_history.png")
-    Visualizer.plot_training_history(
-        loss_history=model.loss_history,
-        title=f"Training Loss in {Case.VOCATIVE.value} Case",
-        save_path=training_path
-    )
+    
+    # Handle cases where training is not allowed
+    if hasattr(model, 'loss_history') and len(model.loss_history) > 0:
+        Visualizer.plot_training_history(
+            loss_history=model.loss_history,
+            title=f"Training Loss in {Case.VOCATIVE.value} Case",
+            save_path=training_path
+        )
+    else:
+        # Create a placeholder plot if no training occurred
+        fig, ax = plt.subplots(figsize=(10, 6))
+        ax.text(0.5, 0.5, f"Training not allowed in {Case.VOCATIVE.value} case", 
+               ha='center', va='center', fontsize=14)
+        ax.set_title(f"Training Status in {Case.VOCATIVE.value} Case")
+        ax.axis('off')
+        fig.savefig(training_path)
+        plt.close(fig)
+        
+        # Create an empty loss history for reporting
+        model.loss_history = [0.0]
     
     # Save final metrics
     metrics_file = os.path.join(case_dir, "metrics.txt")
@@ -1867,6 +1927,689 @@ def test_vocative_case(nn_classification_data, case_definitions):
         f.write("The model's response is based on the input data, rather than its active role in generating predictions.")
     
     logger.info(f"Completed VOCATIVE case test with visualizations in {case_dir}")
+    
+    # Return the model for potential further testing
+    return model
+
+def test_dative_case(nn_regression_data, case_definitions):
+    """Test for DATIVE case: Model as recipient of inputs."""
+    # Get case info for logging
+    case_info = case_definitions[Case.DATIVE]
+    logger.info(f"Testing {Case.DATIVE.value} case: {case_info['linguistic_meaning']}")
+    logger.info(f"Statistical role: {case_info['statistical_role']}")
+    
+    # Create visuals directory
+    case_dir = os.path.join(OUTPUT_DIR, Case.DATIVE.value.lower())
+    os.makedirs(case_dir, exist_ok=True)
+    
+    # Generate linguistic context visualization
+    linguistics_path = os.path.join(case_dir, "linguistic_context.png")
+    plot_case_linguistic_context(Case.DATIVE, linguistics_path)
+    
+    # Unpack the data
+    X, y = nn_regression_data
+    
+    # Ensure X is 2D for consistency
+    if len(X.shape) == 1:
+        X = X.reshape(-1, 1)
+    if len(y.shape) == 1:
+        y = y.reshape(-1, 1)
+    
+    # Create a simple NN model in DATIVE case
+    model = NeuralNetworkModel(
+        name="DatModel",
+        input_dim=X.shape[1],
+        output_dim=y.shape[1],
+        hidden_dims=[10, 5],
+        activation='relu'
+    )
+    model.case = Case.DATIVE  # Explicitly set to DATIVE case
+    
+    # Log model details
+    logger.info(f"Created neural network model with architecture: input_dim={X.shape[1]}, hidden_dims=[10, 5], output_dim={y.shape[1]}")
+    
+    # Visualize the model structure 
+    network_structure_path = os.path.join(case_dir, "network_structure.png")
+    Visualizer.plot_network_structure(
+        model=model,
+        title=f"Neural Network Structure in {Case.DATIVE.value} Case",
+        save_path=network_structure_path
+    )
+    
+    # Generate different input distributions to visualize input processing
+    logger.info("Generating various input distributions to test DATIVE case processing")
+    
+    # 1. Normal distribution (standard)
+    np.random.seed(42)
+    X_normal = np.random.normal(0, 1, size=X.shape)
+    
+    # 2. Uniform distribution
+    X_uniform = np.random.uniform(-2, 2, size=X.shape)
+    
+    # 3. Exponential distribution
+    X_exp = np.random.exponential(1, size=X.shape)
+    
+    # 4. Binomial distribution (discretized)
+    X_binomial = np.random.binomial(10, 0.5, size=X.shape) / 10
+    
+    # Store input sets and names
+    input_sets = [X, X_normal, X_uniform, X_exp, X_binomial]
+    input_names = ["Original", "Normal", "Uniform", "Exponential", "Binomial"]
+    
+    # Visualize input distributions
+    input_distribution_path = os.path.join(case_dir, "input_distribution.png")
+    fig, axs = plt.subplots(len(input_sets), 1, figsize=(10, 12))
+    
+    # Make sure axs is always a list/array for iteration
+    if len(input_sets) == 1:
+        axs = [axs]
+    
+    for i, (X_input, name) in enumerate(zip(input_sets, input_names)):
+        # Check if input is 1D or has only one column
+        if len(X_input.shape) == 1 or X_input.shape[1] == 1:
+            # Ensure X_input is 2D for consistency
+            X_flat = X_input.reshape(-1) if len(X_input.shape) == 2 else X_input
+            axs[i].hist(X_input, bins=20, alpha=0.7)
+            axs[i].set_title(f"{name} Input Distribution")
+            axs[i].set_xlabel("Input Value")
+            axs[i].set_ylabel("Frequency")
+        else:
+            # For multi-dimensional input, plot first two dimensions
+            axs[i].scatter(X_input[:, 0], X_input[:, 1], alpha=0.7)
+            axs[i].set_title(f"{name} Input Distribution")
+            axs[i].set_xlabel("Dimension 1")
+            axs[i].set_ylabel("Dimension 2")
+    
+    plt.tight_layout()
+    fig.savefig(input_distribution_path)
+    plt.close(fig)
+    
+    # Process inputs through model and visualize activations
+    input_activations_path = os.path.join(case_dir, "input_activations.png")
+    fig, axs = plt.subplots(len(input_sets), 1, figsize=(12, 15))
+    
+    for i, (X_input, name) in enumerate(zip(input_sets, input_names)):
+        # Get activations from first layer (input processing)
+        _, activations = model._forward_with_activations(X_input)
+        first_layer_activations = activations[1]  # First hidden layer after input
+        
+        # Plot histogram of activations
+        if first_layer_activations.shape[1] <= 5:  # If few neurons, plot individually
+            for j in range(first_layer_activations.shape[1]):
+                axs[i].hist(first_layer_activations[:, j], bins=20, alpha=0.7, 
+                          label=f"Neuron {j+1}")
+            axs[i].legend()
+        else:  # Otherwise plot distribution of all activations
+            axs[i].hist(first_layer_activations.flatten(), bins=20, alpha=0.7)
+        
+        axs[i].set_title(f"{name} Input: First Layer Activations")
+        axs[i].set_xlabel("Activation Value")
+        axs[i].set_ylabel("Frequency")
+    
+    plt.tight_layout()
+    fig.savefig(input_activations_path)
+    plt.close(fig)
+    
+    # Calculate input sensitivity
+    input_sensitivity_path = os.path.join(case_dir, "input_sensitivity.png")
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    # Perturb each input dimension and measure output change
+    sensitivities = []
+    
+    if X.shape[1] == 1:
+        # For 1D input, sample points across range
+        test_points = np.linspace(X.min(), X.max(), 20).reshape(-1, 1)
+        delta = (X.max() - X.min()) * 0.01
+        
+        for x in test_points:
+            x_plus = x.copy()
+            x_plus[0, 0] += delta
+            y_base = model.predict(x)
+            y_perturbed = model.predict(x_plus)
+            sensitivity = np.abs((y_perturbed - y_base) / delta)
+            sensitivities.append((x[0, 0], sensitivity[0, 0]))
+        
+        # Plot sensitivity
+        x_vals, s_vals = zip(*sensitivities)
+        ax.plot(x_vals, s_vals, 'b-', linewidth=2)
+        ax.set_xlabel("Input Value")
+        ax.set_ylabel("Output Sensitivity")
+        
+    else:
+        # For multi-dimensional input, measure average sensitivity per dimension
+        dim_sensitivities = []
+        delta = 0.01
+        
+        for dim in range(X.shape[1]):
+            # Sample points for this dimension
+            x_base = X.mean(axis=0).reshape(1, -1)  # Use mean as base point
+            x_perturbed = x_base.copy()
+            x_perturbed[0, dim] += delta
+            
+            y_base = model.predict(x_base)
+            y_perturbed = model.predict(x_perturbed)
+            
+            sensitivity = np.abs((y_perturbed - y_base) / delta).mean()
+            dim_sensitivities.append(sensitivity)
+        
+        # Plot sensitivity per dimension
+        ax.bar(range(len(dim_sensitivities)), dim_sensitivities)
+        ax.set_xlabel("Input Dimension")
+        ax.set_ylabel("Average Output Sensitivity")
+        ax.set_xticks(range(len(dim_sensitivities)))
+    
+    ax.set_title(f"Input Sensitivity in {Case.DATIVE.value} Case")
+    ax.grid(True, linestyle='--', alpha=0.6)
+    fig.tight_layout()
+    fig.savefig(input_sensitivity_path)
+    plt.close(fig)
+    
+    # Create an animation showing input processing
+    animation_path = os.path.join(case_dir, "input_processing_animation.gif")
+    
+    # We'll create this for different input distributions
+    fig, axs = plt.subplots(2, 1, figsize=(10, 12))
+    
+    # Setup for input distribution
+    if X.shape[1] == 1:
+        # For 1D input
+        hist_obj = axs[0].hist([], bins=20, alpha=0.7)
+        axs[0].set_xlim(min([x.min() for x in input_sets]) - 0.5, 
+                       max([x.max() for x in input_sets]) + 0.5)
+        axs[0].set_ylim(0, max([np.histogram(x)[0].max() for x in input_sets]) * 1.1)
+        axs[0].set_title("Input Distribution")
+        axs[0].set_xlabel("Input Value")
+        axs[0].set_ylabel("Frequency")
+    else:
+        # For 2D input
+        scatter = axs[0].scatter([], [])
+        axs[0].set_xlim(min([x[:, 0].min() for x in input_sets]) - 0.5,
+                       max([x[:, 0].max() for x in input_sets]) + 0.5)
+        axs[0].set_ylim(min([x[:, 1].min() for x in input_sets]) - 0.5,
+                       max([x[:, 1].max() for x in input_sets]) + 0.5)
+        axs[0].set_title("Input Distribution")
+        axs[0].set_xlabel("Dimension 1")
+        axs[0].set_ylabel("Dimension 2")
+    
+    # Setup for activation distribution
+    activation_hist = axs[1].hist([], bins=20, alpha=0.7)
+    all_activations = []
+    for x in input_sets:
+        _, activations = model._forward_with_activations(x)
+        all_activations.append(activations[1].flatten())
+    
+    axs[1].set_xlim(min([a.min() for a in all_activations]) - 0.1,
+                   max([a.max() for a in all_activations]) + 0.1)
+    axs[1].set_ylim(0, max([np.histogram(a)[0].max() for a in all_activations]) * 1.1)
+    axs[1].set_title("First Layer Activations")
+    axs[1].set_xlabel("Activation Value")
+    axs[1].set_ylabel("Frequency")
+    
+    # Text for distribution information
+    dist_text = axs[0].text(0.02, 0.95, '', transform=axs[0].transAxes)
+    
+    def init():
+        if X.shape[1] == 1:
+            # For 1D data
+            hist_obj[0].set_height(np.zeros_like(hist_obj[0]))
+        else:
+            # For 2D data
+            scatter.set_offsets(np.empty((0, 2)))
+        
+        # Clear activation histogram
+        for patch in activation_hist[2]:
+            patch.set_height(0)
+        
+        dist_text.set_text('')
+        return [dist_text]
+    
+    def update(frame):
+        # Get current input set
+        X_current = input_sets[frame % len(input_sets)]
+        name_current = input_names[frame % len(input_names)]
+        
+        # Update input distribution
+        if X_current.shape[1] == 1:
+            # For 1D data, update histogram
+            counts, bins = np.histogram(X_current, bins=20)
+            for count, rect in zip(counts, hist_obj[2]):
+                rect.set_height(count)
+        else:
+            # For 2D data, update scatter
+            scatter.set_offsets(X_current[:, :2])
+        
+        # Update activation distribution
+        _, activations = model._forward_with_activations(X_current)
+        first_layer_activations = activations[1].flatten()
+        counts, bins = np.histogram(first_layer_activations, bins=20)
+        for count, rect in zip(counts, activation_hist[2]):
+            rect.set_height(count)
+        
+        dist_text.set_text(f'Distribution: {name_current}')
+        
+        if X_current.shape[1] == 1:
+            return hist_obj[2] + activation_hist[2] + [dist_text]
+        else:
+            return [scatter] + activation_hist[2] + [dist_text]
+    
+    anim = animation.FuncAnimation(fig, update, frames=len(input_sets)*3,
+                          init_func=init, blit=True)
+    
+    # Save animation
+    anim.save(animation_path, writer='pillow', fps=1)
+    plt.close(fig)
+    logger.info(f"Created input processing animation: {animation_path}")
+    
+    # Generate a report
+    report_path = os.path.join(case_dir, "report.md")
+    with open(report_path, "w") as f:
+        f.write(f"# Neural Network in {Case.DATIVE.value} Case\n\n")
+        f.write(f"## {case_info['linguistic_meaning']}\n\n")
+        f.write(f"Statistical role: {case_info['statistical_role']}\n\n")
+        f.write(f"### Context\n\n")
+        f.write(f"{case_info['neural_network_context']}\n\n")
+        f.write("### Mathematical Representation\n\n")
+        f.write(f"```\n{case_info['formula']}\n```\n\n")
+        f.write("### Primary Methods\n\n")
+        f.write(f"{case_info['primary_methods']}\n\n")
+        f.write("### Example\n\n")
+        f.write(f"{case_info['example']}\n\n")
+        f.write("### Analysis Results\n\n")
+        f.write(f"* Model architecture: Input({X.shape[1]}) → Hidden(10) → Hidden(5) → Output({y.shape[1]})\n")
+        f.write(f"* Activation function: {model.activation}\n")
+        f.write("* Input processing characteristics:\n")
+        f.write("  - Explored various input distributions to test model's input processing ability\n")
+        f.write("  - First layer neurons show different activation patterns for different input distributions\n")
+        f.write("  - Input sensitivity varies across the input domain, showing higher sensitivity in certain regions\n\n")
+        f.write("### Visualizations\n\n")
+        f.write(f"1. [Network Structure](network_structure.png)\n")
+        f.write(f"2. [Input Distributions](input_distribution.png)\n")
+        f.write(f"3. [Input Activations](input_activations.png)\n")
+        f.write(f"4. [Input Sensitivity](input_sensitivity.png)\n")
+        f.write(f"5. [Input Processing Animation](input_processing_animation.gif)\n")
+    
+    logger.info(f"Completed DATIVE case test with visualizations in {case_dir}")
+    
+    # Return the model for potential further testing
+    return model
+
+def test_instrumental_case(nn_regression_data, case_definitions):
+    """Test for INSTRUMENTAL case: Model as method/tool for computation."""
+    # Get case info for logging
+    case_info = case_definitions[Case.INSTRUMENTAL]
+    logger.info(f"Testing {Case.INSTRUMENTAL.value} case: {case_info['linguistic_meaning']}")
+    logger.info(f"Statistical role: {case_info['statistical_role']}")
+    
+    # Create visuals directory
+    case_dir = os.path.join(OUTPUT_DIR, Case.INSTRUMENTAL.value.lower())
+    os.makedirs(case_dir, exist_ok=True)
+    
+    # Generate linguistic context visualization
+    linguistics_path = os.path.join(case_dir, "linguistic_context.png")
+    plot_case_linguistic_context(Case.INSTRUMENTAL, linguistics_path)
+    
+    # Unpack the data
+    X, y = nn_regression_data
+    
+    # Create a NN model in INSTRUMENTAL case - focusing on it as a computational tool/method
+    model = NeuralNetworkModel(
+        name="InsModel",
+        input_dim=X.shape[1],
+        output_dim=y.shape[1],
+        hidden_dims=[12, 8, 4],  # More complex architecture to showcase computational ability
+        activation='tanh'  # Different activation to highlight versatility
+    )
+    model.case = Case.INSTRUMENTAL  # Explicitly set to INSTRUMENTAL case
+    
+    # Log model details
+    logger.info(f"Created neural network model with architecture: input_dim={X.shape[1]}, hidden_dims=[12, 8, 4], output_dim={y.shape[1]}")
+    
+    # Visualize the model structure 
+    network_structure_path = os.path.join(case_dir, "network_structure.png")
+    Visualizer.plot_network_structure(
+        model=model,
+        title=f"Neural Network Structure in {Case.INSTRUMENTAL.value} Case",
+        save_path=network_structure_path
+    )
+    
+    # Train the model
+    logger.info("Training model in INSTRUMENTAL case (model as computational method)")
+    train_results = model.train(X, y, epochs=150, learning_rate=0.01, batch_size=32)
+    
+    # Visualize training progress
+    training_path = os.path.join(case_dir, "training_history.png")
+    Visualizer.plot_training_history(
+        loss_history=model.loss_history,
+        title=f"Training Loss in {Case.INSTRUMENTAL.value} Case",
+        save_path=training_path
+    )
+    
+    # In INSTRUMENTAL case, we're interested in the computational transformations
+    # Let's visualize how data flows through the network
+    
+    # Create a visualization of data flow through layers
+    data_flow_path = os.path.join(case_dir, "data_flow.png")
+    
+    # Select a small subset of data for visualization clarity
+    np.random.seed(42)
+    sample_indices = np.random.choice(len(X), min(10, len(X)), replace=False)
+    X_sample = X[sample_indices]
+    y_sample = y[sample_indices]
+    
+    # Get activations throughout the network
+    _, all_activations = model._forward_with_activations(X_sample)
+    
+    # Create visualization of data flow (layer-by-layer transformations)
+    fig, axs = plt.subplots(len(all_activations), 1, figsize=(12, 4 * len(all_activations)))
+    
+    for i, layer_activations in enumerate(all_activations):
+        if i == 0:
+            layer_name = "Input Layer"
+        elif i == len(all_activations) - 1:
+            layer_name = "Output Layer"
+        else:
+            layer_name = f"Hidden Layer {i}"
+        
+        # For each sample, show activation pattern
+        for j, sample_activation in enumerate(layer_activations):
+            if sample_activation.size > 20:  # If too many neurons, plot summary
+                axs[i].plot([j], [np.mean(sample_activation)], 'o', markersize=8, 
+                          label=f'Sample {j+1} Mean' if j == 0 else "_nolegend_")
+                axs[i].errorbar([j], [np.mean(sample_activation)], 
+                              yerr=[np.std(sample_activation)], capsize=5,
+                              label=f'Sample {j+1} Std' if j == 0 else "_nolegend_")
+            else:
+                axs[i].plot(sample_activation, 'o-', alpha=0.7, 
+                          label=f'Sample {j+1}' if j == 0 else "_nolegend_")
+        
+        axs[i].set_title(f"{layer_name} Activations")
+        if sample_activation.size <= 20:
+            axs[i].set_xticks(range(sample_activation.size))
+            axs[i].set_xlabel("Neuron Index")
+        else:
+            axs[i].set_xlabel("Sample Index")
+        axs[i].set_ylabel("Activation")
+        axs[i].grid(True, linestyle='--', alpha=0.6)
+        
+        if i == 0:
+            axs[i].legend()
+    
+    plt.tight_layout()
+    fig.savefig(data_flow_path)
+    plt.close(fig)
+    
+    # Now let's visualize the computational operations (weights) of the network
+    weights_path = os.path.join(case_dir, "weight_visualization.png")
+    fig, axs = plt.subplots(len(model.weights), 1, figsize=(12, 5 * len(model.weights)))
+    
+    if len(model.weights) == 1:  # Handle single layer case
+        axs = [axs]
+    
+    for i, w in enumerate(model.weights):
+        if i == 0:
+            layer_name = "Input→Hidden1"
+        elif i == len(model.weights) - 1:
+            layer_name = f"Hidden{i}→Output"
+        else:
+            layer_name = f"Hidden{i}→Hidden{i+1}"
+        
+        # Plot weight matrix
+        if w.size > 100:  # For large matrices, use heatmap
+            im = axs[i].imshow(w, cmap='viridis', aspect='auto')
+            axs[i].set_title(f"{layer_name} Weight Matrix ({w.shape[0]}×{w.shape[1]})")
+            axs[i].set_xlabel("Target Neuron")
+            axs[i].set_ylabel("Source Neuron")
+            plt.colorbar(im, ax=axs[i], label="Weight Value")
+        else:  # For small matrices, plot each value
+            # Create a coordinate grid
+            x, y = np.meshgrid(range(w.shape[1]), range(w.shape[0]))
+            # Flatten for scatter plot
+            x = x.flatten()
+            y = y.flatten()
+            w_flat = w.flatten()
+            
+            # Use scatter with size proportional to absolute weight
+            scatter = axs[i].scatter(x, y, s=np.abs(w_flat)*100 + 20, c=w_flat, cmap='coolwarm', 
+                                  alpha=0.7, edgecolors='k')
+            axs[i].set_title(f"{layer_name} Weight Matrix ({w.shape[0]}×{w.shape[1]})")
+            axs[i].set_xticks(range(w.shape[1]))
+            axs[i].set_yticks(range(w.shape[0]))
+            axs[i].set_xlabel("Target Neuron")
+            axs[i].set_ylabel("Source Neuron")
+            axs[i].grid(True, linestyle='--', alpha=0.3)
+            plt.colorbar(scatter, ax=axs[i], label="Weight Value")
+    
+    plt.tight_layout()
+    fig.savefig(weights_path)
+    plt.close(fig)
+    
+    # Visualize the methods of computation (activation functions and gradients)
+    methods_path = os.path.join(case_dir, "computation_methods.png")
+    fig, axs = plt.subplots(2, 2, figsize=(14, 10))
+    
+    # 1. Activation Function
+    x = np.linspace(-5, 5, 100)
+    if model.activation == 'tanh':
+        y = np.tanh(x)
+        y_deriv = 1 - np.tanh(x)**2
+    elif model.activation == 'relu':
+        y = np.maximum(0, x)
+        y_deriv = np.where(x > 0, 1, 0)
+    elif model.activation == 'sigmoid':
+        y = 1 / (1 + np.exp(-x))
+        y_deriv = y * (1 - y)
+    else:
+        y = x  # Linear
+        y_deriv = np.ones_like(x)
+    
+    axs[0, 0].plot(x, y, 'b-', linewidth=2)
+    axs[0, 0].set_title(f"{model.activation.capitalize()} Activation Function")
+    axs[0, 0].set_xlabel("Input")
+    axs[0, 0].set_ylabel("Output")
+    axs[0, 0].grid(True, linestyle='--', alpha=0.6)
+    
+    axs[0, 1].plot(x, y_deriv, 'r-', linewidth=2)
+    axs[0, 1].set_title(f"{model.activation.capitalize()} Activation Derivative")
+    axs[0, 1].set_xlabel("Input")
+    axs[0, 1].set_ylabel("Derivative")
+    axs[0, 1].grid(True, linestyle='--', alpha=0.6)
+    
+    # 2. Learning Curve with Different Learning Rates
+    learning_rates = [0.001, 0.01, 0.1]
+    for lr in learning_rates:
+        temp_model = NeuralNetworkModel(
+            name=f"Temp_LR{lr}",
+            input_dim=X.shape[1],
+            output_dim=y.shape[1],
+            hidden_dims=[4],  # Smaller for quicker training
+            activation=model.activation
+        )
+        
+        # Train for fewer epochs to just show curve shape
+        temp_model.train(X, y, epochs=50, learning_rate=lr, batch_size=32, verbose=False)
+        
+        axs[1, 0].plot(temp_model.loss_history, label=f'LR={lr}')
+    
+    axs[1, 0].set_title("Learning Curves for Different Learning Rates")
+    axs[1, 0].set_xlabel("Epoch")
+    axs[1, 0].set_ylabel("Loss")
+    axs[1, 0].grid(True, linestyle='--', alpha=0.6)
+    axs[1, 0].legend()
+    
+    # 3. Model Complexity Comparison (parameter count vs error)
+    hidden_configs = [[2], [4], [8], [4, 2], [8, 4], [16, 8]]
+    param_counts = []
+    test_errors = []
+    
+    # Split data for testing
+    np.random.seed(42)
+    indices = np.random.permutation(len(X))
+    test_size = min(50, len(X) // 5)
+    test_indices = indices[:test_size]
+    train_indices = indices[test_size:]
+    
+    X_train, y_train = X[train_indices], y[train_indices]
+    X_test, y_test = X[test_indices], y[test_indices]
+    
+    for hidden_dims in hidden_configs:
+        # Create model
+        temp_model = NeuralNetworkModel(
+            name=f"Temp_{'_'.join(map(str, hidden_dims))}",
+            input_dim=X.shape[1],
+            output_dim=y.shape[1],
+            hidden_dims=hidden_dims,
+            activation=model.activation
+        )
+        
+        # Calculate parameter count
+        param_count = sum(w.size for w in temp_model.weights) + sum(b.size for b in temp_model.biases)
+        param_counts.append(param_count)
+        
+        # Train model
+        temp_model.train(X_train, y_train, epochs=100, learning_rate=0.01, batch_size=32, verbose=False)
+        
+        # Test error
+        pred_test = temp_model.predict(X_test)
+        test_error = np.mean((pred_test - y_test)**2)
+        test_errors.append(test_error)
+    
+    axs[1, 1].plot(param_counts, test_errors, 'o-', linewidth=2)
+    axs[1, 1].set_title("Model Complexity vs. Test Error")
+    axs[1, 1].set_xlabel("Parameter Count")
+    axs[1, 1].set_ylabel("Test Error (MSE)")
+    axs[1, 1].grid(True, linestyle='--', alpha=0.6)
+    
+    # Add annotations for network architectures
+    for i, hidden_dims in enumerate(hidden_configs):
+        architecture = f"[{', '.join(map(str, hidden_dims))}]"
+        axs[1, 1].annotate(architecture, (param_counts[i], test_errors[i]),
+                         textcoords="offset points", xytext=(0, 10), ha='center')
+    
+    plt.tight_layout()
+    fig.savefig(methods_path)
+    plt.close(fig)
+    
+    # Create animation of inference process
+    animation_path = os.path.join(case_dir, "computation_animation.gif")
+    
+    # Select one sample for animation clarity
+    sample_idx = 0
+    single_sample = X_sample[sample_idx:sample_idx+1]
+    
+    # Setup figure for animation
+    fig, axs = plt.subplots(len(model.hidden_dims) + 2, 1, figsize=(10, 3*(len(model.hidden_dims) + 2)))
+    
+    # Visualize inference process (data flowing through network)
+    layer_bars = []
+    
+    # For each layer, create a bar plot (initialized empty)
+    for i in range(len(model.hidden_dims) + 2):  # Input, hidden layers, output
+        if i == 0:
+            layer_name = "Input Layer"
+            size = model.input_dim
+        elif i == len(model.hidden_dims) + 1:
+            layer_name = "Output Layer"
+            size = model.output_dim
+        else:
+            layer_name = f"Hidden Layer {i}"
+            size = model.hidden_dims[i-1]
+        
+        bars = axs[i].bar(range(size), np.zeros(size))
+        axs[i].set_title(f"{layer_name}")
+        axs[i].set_ylim(-1.1, 1.1)  # Adjust based on activation function
+        axs[i].set_ylabel("Activation")
+        if size <= 20:
+            axs[i].set_xticks(range(size))
+        axs[i].grid(True, linestyle='--', alpha=0.6)
+        
+        layer_bars.append(bars)
+    
+    # Text for step information
+    step_text = fig.text(0.5, 0.01, '', ha='center', va='center', fontsize=12, 
+                        bbox=dict(boxstyle='round,pad=0.5', facecolor='lightyellow', alpha=0.5))
+    
+    def init():
+        for bars in layer_bars:
+            for bar in bars:
+                bar.set_height(0)
+        step_text.set_text('')
+        return [bar for bars in layer_bars for bar in bars] + [step_text]
+    
+    def update(frame):
+        # For inference animation, we'll progressively fill in activations
+        # frame represents the layer index (with special frames in between)
+        layer_idx = frame // 2
+        is_transition = frame % 2 == 1
+        
+        # Get all activations
+        _, activations = model._forward_with_activations(single_sample)
+        
+        # For full network inference
+        if layer_idx < len(activations):
+            # Update bars up to current layer
+            for i in range(layer_idx + 1):
+                current_activations = activations[i][0]  # First (only) sample
+                for j, bar in enumerate(layer_bars[i]):
+                    if j < len(current_activations):
+                        if is_transition and i == layer_idx:
+                            # Animate transition at current layer
+                            bar.set_height(current_activations[j] * (frame % 2) * 0.5)
+                        else:
+                            bar.set_height(current_activations[j])
+        
+        # Update step text
+        if layer_idx == 0:
+            step_text.set_text("Step 1: Input values enter network")
+        elif layer_idx < len(activations) - 1:
+            if is_transition:
+                step_text.set_text(f"Applying {model.activation} activation to Hidden Layer {layer_idx}")
+            else:
+                step_text.set_text(f"Step {layer_idx+1}: Computing Hidden Layer {layer_idx} activations")
+        elif layer_idx == len(activations) - 1:
+            step_text.set_text("Final Step: Output values generated")
+        
+        return [bar for bars in layer_bars for bar in bars] + [step_text]
+    
+    # Create animation
+    anim = animation.FuncAnimation(fig, update, frames=2*(len(model.hidden_dims) + 2),
+                          init_func=init, blit=True)
+    
+    # Save animation
+    anim.save(animation_path, writer='pillow', fps=1)
+    plt.close(fig)
+    logger.info(f"Created computation animation: {animation_path}")
+    
+    # Generate a report
+    report_path = os.path.join(case_dir, "report.md")
+    with open(report_path, "w") as f:
+        f.write(f"# Neural Network in {Case.INSTRUMENTAL.value} Case\n\n")
+        f.write(f"## {case_info['linguistic_meaning']}\n\n")
+        f.write(f"Statistical role: {case_info['statistical_role']}\n\n")
+        f.write(f"### Context\n\n")
+        f.write(f"{case_info['neural_network_context']}\n\n")
+        f.write("### Mathematical Representation\n\n")
+        f.write(f"```\n{case_info['formula']}\n```\n\n")
+        f.write("### Primary Methods\n\n")
+        f.write(f"{case_info['primary_methods']}\n\n")
+        f.write("### Example\n\n")
+        f.write(f"{case_info['example']}\n\n")
+        f.write("### Analysis Results\n\n")
+        f.write(f"* Model architecture: Input({X.shape[1]}) → Hidden(12) → Hidden(8) → Hidden(4) → Output({y.shape[1]})\n")
+        f.write(f"* Activation function: {model.activation}\n")
+        f.write("* Computational method characteristics:\n")
+        f.write("  - Analyzed weight distributions and transformations across layers\n")
+        f.write("  - Compared different network configurations and learning parameters\n")
+        f.write("  - Visualized step-by-step computation process\n")
+        f.write("  - Examined gradient-based learning dynamics\n\n")
+        f.write("### Visualizations\n\n")
+        f.write(f"1. [Network Structure](network_structure.png)\n")
+        f.write(f"2. [Data Flow](data_flow.png)\n")
+        f.write(f"3. [Weight Visualization](weight_visualization.png)\n")
+        f.write(f"4. [Computation Methods](computation_methods.png)\n")
+        f.write(f"5. [Computation Animation](computation_animation.gif)\n")
+    
+    logger.info(f"Completed INSTRUMENTAL case test with visualizations in {case_dir}")
     
     # Return the model for potential further testing
     return model

@@ -864,4 +864,421 @@ The remarkable systematicity of Sanskrit grammar, from its phonological rules to
 
 The additional technical details presented in this expanded document illustrate how Sanskrit grammar's exoteric (widely known, practical) aspects provide implementation patterns for CEREBRUM's core functions, while its esoteric (specialized, philosophical) aspects offer conceptual frameworks for CEREBRUM's semantic processing and reasoning capabilities.
 
-By leveraging these ancient grammatical insights, CEREBRUM gains access to a sophisticated, time-tested framework for modeling complex relationships and transformations in computational systems. The one-to-one mapping between Sanskrit's grammatical cases and CEREBRUM's computational cases represents just the beginning of a profound alignment between linguistic structure and computational design. 
+By leveraging these ancient grammatical insights, CEREBRUM gains access to a sophisticated, time-tested framework for modeling complex relationships and transformations in computational systems. The one-to-one mapping between Sanskrit's grammatical cases and CEREBRUM's computational cases represents just the beginning of a profound alignment between linguistic structure and computational design.
+
+## 22. Sanskrit, CEREBRUM, and Active Inference: Integration Framework
+
+The deep parallels between Sanskrit grammar, CEREBRUM's computational case system, and the principles of Active Inference reveal a tripartite framework for unified understanding of information processing, language, and cognition.
+
+### 22.1 Fundamental Mappings Across All Three Systems
+
+| Sanskrit Grammatical Concept | CEREBRUM Implementation | Active Inference Principle | Functional Integration |
+|------------------------------|-------------------------|----------------------------|------------------------|
+| **Prathamā** (Nominative) | Model[NOM] as agent | Proprioceptive action policy | Primary generative agency in system |
+| **Dvitīyā** (Accusative) | Model[ACC] as patient | Prediction error target | Entity receiving updates/modifications |
+| **Tṛtīyā** (Instrumental) | Model[INS] as method | Precision-weighting mechanism | Tool/process for information transformation |
+| **Caturthī** (Dative) | Model[DAT] as recipient | Message passing target | Designated receiver of information flow |
+| **Pañcamī** (Ablative) | Model[ABL] as source | Prior belief origin | Historical/causal source of information |
+| **Ṣaṣṭhī** (Genitive) | Model[GEN] as producer | Generative model | Source of predictions/generation |
+| **Saptamī** (Locative) | Model[LOC] as context | Contextual layer in hierarchy | Environmental/situational framework |
+| **Sambodhana** (Vocative) | Model[VOC] as interface | Action selection attention | Direct system engagement protocol |
+
+### 22.2 Predictive Coding Hierarchy in Sanskrit Grammar and Active Inference
+
+```mermaid
+flowchart TD
+    subgraph "Active Inference Hierarchy"
+      A1[Higher-Level Prior] --> |Top-down prediction| B1[Mid-Level Representation]
+      B1 --> |Top-down prediction| C1[Sensory Input Level]
+      C1 --> |Bottom-up error| B1
+      B1 --> |Bottom-up error| A1
+    end
+    
+    subgraph "Sanskrit Grammatical Hierarchy"
+      A2[Mahāvākya\nComplete Discourse] --> |Semantic constraint| B2[Vākya\nSentence]
+      B2 --> |Syntactic constraint| C2[Pada\nWord]
+      C2 --> |Morphological constraint| D2[Prakṛti-Pratyaya\nRoot-Suffix]
+      D2 --> |Phonological constraint| E2[Varṇa\nPhoneme]
+      E2 --> |Bottom-up integration| D2
+      D2 --> |Bottom-up integration| C2
+      C2 --> |Bottom-up integration| B2
+      B2 --> |Bottom-up integration| A2
+    end
+    
+    subgraph "CEREBRUM Processing Hierarchy"
+      A3[System-Level Model] --> |Parameter constraints| B3[Function-Level Model]
+      B3 --> |Functional constraints| C3[Component-Level Model]
+      C3 --> |Feature constraints| D3[Parameter-Level Model]
+      D3 --> |Bottom-up updates| C3
+      C3 --> |Bottom-up updates| B3
+      B3 --> |Bottom-up updates| A3
+    end
+    
+    style A1 fill:#f8d7da,stroke:#333,stroke-width:1px
+    style B1 fill:#f8d7da,stroke:#333,stroke-width:1px
+    style C1 fill:#f8d7da,stroke:#333,stroke-width:1px
+    
+    style A2 fill:#d1ecf1,stroke:#333,stroke-width:1px
+    style B2 fill:#d1ecf1,stroke:#333,stroke-width:1px
+    style C2 fill:#d1ecf1,stroke:#333,stroke-width:1px
+    style D2 fill:#d1ecf1,stroke:#333,stroke-width:1px
+    style E2 fill:#d1ecf1,stroke:#333,stroke-width:1px
+    
+    style A3 fill:#d4edda,stroke:#333,stroke-width:1px
+    style B3 fill:#d4edda,stroke:#333,stroke-width:1px
+    style C3 fill:#d4edda,stroke:#333,stroke-width:1px
+    style D3 fill:#d4edda,stroke:#333,stroke-width:1px
+    style E3 fill:#d4edda,stroke:#333,stroke-width:1px
+```
+
+### 22.3 Active Inference Free Energy Minimization and Sanskrit Transformation
+
+```mermaid
+graph TD
+    subgraph "Free Energy Minimization in Active Inference"
+        A1[Prior Belief] -- "Generative Model" --> B1[Predicted Observation]
+        C1[Actual Observation] -- "Sensory Input" --> D1[Prediction Error]
+        B1 -- "Comparison" --> D1
+        D1 -- "Weighted by Precision" --> E1{Update Mechanism}
+        E1 -- "Perceptual Inference" --> A1
+        E1 -- "Active Inference" --> F1[Action Policy]
+        F1 -- "Changes Environment" --> C1
+    end
+    
+    subgraph "Sanskrit Grammatical Transformation"
+        A2[Base Form/Prakṛti] -- "Grammatical Rules" --> B2[Expected Form]
+        C2[Required Form in Context] -- "Discourse Requirements" --> D2[Form Mismatch]
+        B2 -- "Sandhi Evaluation" --> D2
+        D2 -- "Weighted by Vyākaraṇa Rules" --> E2{Transformation Process}
+        E2 -- "Internal Sandhi" --> A2
+        E2 -- "External Sandhi" --> F2[Modified Expression]
+        F2 -- "Changes Linguistic Context" --> C2
+    end
+    
+    subgraph "CEREBRUM Model Adaptation"
+        A3[Initial Model State] -- "Predictive Framework" --> B3[Expected Output]
+        C3[Target Output] -- "Performance Requirements" --> D3[Performance Gap]
+        B3 -- "Evaluation Function" --> D3
+        D3 -- "Weighted by Confidence Metrics" --> E3{Update Mechanism}
+        E3 -- "Parameter Update" --> A3
+        E3 -- "Model Transformation" --> F3[Case-Transformed Model]
+        F3 -- "Changes Operating Context" --> C3
+    end
+    
+    style A1 fill:#ffe6cc,stroke:#333,stroke-width:1px
+    style B1 fill:#ffe6cc,stroke:#333,stroke-width:1px
+    style C1 fill:#ffe6cc,stroke:#333,stroke-width:1px
+    style D1 fill:#ffe6cc,stroke:#333,stroke-width:1px
+    style E1 fill:#ffe6cc,stroke:#333,stroke-width:1px
+    style F1 fill:#ffe6cc,stroke:#333,stroke-width:1px
+    
+    style A2 fill:#e6ccff,stroke:#333,stroke-width:1px
+    style B2 fill:#e6ccff,stroke:#333,stroke-width:1px
+    style C2 fill:#e6ccff,stroke:#333,stroke-width:1px
+    style D2 fill:#e6ccff,stroke:#333,stroke-width:1px
+    style E2 fill:#e6ccff,stroke:#333,stroke-width:1px
+    style F2 fill:#e6ccff,stroke:#333,stroke-width:1px
+    
+    style A3 fill:#e6ffe6,stroke:#333,stroke-width:1px
+    style B3 fill:#e6ffe6,stroke:#333,stroke-width:1px
+    style C3 fill:#e6ffe6,stroke:#333,stroke-width:1px
+    style D3 fill:#e6ffe6,stroke:#333,stroke-width:1px
+    style E3 fill:#e6ffe6,stroke:#333,stroke-width:1px
+    style F3 fill:#e6ffe6,stroke:#333,stroke-width:1px
+```
+
+### 22.4 Precision Weighting in Active Inference and Sanskrit Grammar
+
+| Concept | Sanskrit Grammar | CEREBRUM Implementation | Active Inference | Functional Integration |
+|---------|-----------------|------------------------|------------------|------------------------|
+| **Precision** | Lakṣaṇa (defining characteristics) | Parameter confidence metrics | Precision weighting | Relative importance of information sources |
+| **Context Sensitivity** | Sāpekṣatva (contextual dependency) | Context-specific transformations | Context-sensitive precision | Adaptation to environmental factors |
+| **Uncertainty Handling** | Sandeha (doubt) and Vikalpa (alternative) | Probabilistic modeling | Uncertainty as precision inverse | Management of variable information quality |
+| **Anomaly Detection** | Apavāda (exception handling) | Error detection mechanisms | Prediction error processing | Identification of unexpected patterns |
+| **Hierarchical Weighting** | Guṇa/Doṣa (primary/secondary features) | Weighted parameter importance | Hierarchical precision control | Multi-level information prioritization |
+
+### 22.5 Markov Blanket Concept Across All Three Systems
+
+```mermaid
+graph TD
+    subgraph "Active Inference Markov Blanket"
+        MB1((Markov Blanket))
+        I1[Internal States] -- "Influence" --> MB1
+        MB1 -- "Shields" --> I1
+        MB1 -- "Interfaces with" --> E1[External States]
+        S1[Sensory States] -- "Part of" --> MB1
+        A1[Active States] -- "Part of" --> MB1
+    end
+    
+    subgraph "Sanskrit Grammatical Boundaries"
+        MB2((Sandhi Boundary))
+        I2[Internal Word Form] -- "Determines" --> MB2
+        MB2 -- "Protects" --> I2
+        MB2 -- "Interfaces with" --> E2[External Context]
+        S2[Receiving Form/Ādeśa] -- "Part of" --> MB2
+        A2[Transformative Rules/Vidhi] -- "Part of" --> MB2
+    end
+    
+    subgraph "CEREBRUM Model Encapsulation"
+        MB3((Case Interface))
+        I3[Model Internal State] -- "Defines" --> MB3
+        MB3 -- "Encapsulates" --> I3
+        MB3 -- "Interacts with" --> E3[External Models]
+        S3[Input Interfaces] -- "Part of" --> MB3
+        A3[Output Transformations] -- "Part of" --> MB3
+    end
+    
+    style MB1 fill:#ffcccc,stroke:#333,stroke-width:2px
+    style I1 fill:#ffcccc,stroke:#333,stroke-width:1px
+    style E1 fill:#ffcccc,stroke:#333,stroke-width:1px
+    style S1 fill:#ffcccc,stroke:#333,stroke-width:1px
+    style A1 fill:#ffcccc,stroke:#333,stroke-width:1px
+    
+    style MB2 fill:#ccccff,stroke:#333,stroke-width:2px
+    style I2 fill:#ccccff,stroke:#333,stroke-width:1px
+    style E2 fill:#ccccff,stroke:#333,stroke-width:1px
+    style S2 fill:#ccccff,stroke:#333,stroke-width:1px
+    style A2 fill:#ccccff,stroke:#333,stroke-width:1px
+    
+    style MB3 fill:#ccffcc,stroke:#333,stroke-width:2px
+    style I3 fill:#ccffcc,stroke:#333,stroke-width:1px
+    style E3 fill:#ccffcc,stroke:#333,stroke-width:1px
+    style S3 fill:#ccffcc,stroke:#333,stroke-width:1px
+    style A3 fill:#ccffcc,stroke:#333,stroke-width:1px
+```
+
+### 22.6 Belief Updating Processes Across Systems
+
+| Process Stage | Sanskrit Grammar Process | CEREBRUM Operation | Active Inference Mechanism | Integration Point |
+|--------------|--------------------------|-------------------|----------------------------|-------------------|
+| **Prior State** | Prakṛti (base form) | Initial model parameters | Prior belief distribution | Starting information state |
+| **Contextual Input** | Nimitta (grammatical trigger) | Input data | Sensory evidence | Environmental information |
+| **Transformation Rule** | Vidhi (prescriptive rule) | Processing algorithm | Generative model | Information processing mechanism |
+| **Conflict Resolution** | Paribhāṣā (interpretive rule) | Prioritization heuristic | Precision weighting | Uncertainty management |
+| **Update Execution** | Kārya (grammatical operation) | Model transformation | Belief updating | State transition implementation |
+| **Resultant State** | Siddharūpa (final form) | Updated model | Posterior belief | Refined information state |
+| **Side Effect** | Asiddhatva (transparency) | Cascade updates | Message passing | Process chain effects |
+
+### 22.7 Information Geometry in Sanskrit and Active Inference
+
+```mermaid
+graph LR
+    subgraph "Active Inference: Statistical Manifold"
+        A1[Belief Distribution] -- "KL Divergence" --> B1[Updated Belief]
+        B1 -- "Fisher Information" --> C1[Optimal Path]
+        C1 -- "Free Energy Minimization" --> A1
+    end
+    
+    subgraph "Sanskrit Grammar: Transformation Space"
+        A2[Prakṛti Form] -- "Lāghava Principle" --> B2[Transformed Form]
+        B2 -- "Optimization Rules" --> C2[Transformation Path]
+        C2 -- "Minimum Modification" --> A2
+    end
+    
+    subgraph "CEREBRUM: Parameter Manifold"
+        A3[Initial State] -- "Transformation Cost" --> B3[Target State]
+        B3 -- "Optimal Transformation" --> C3[Parameter Path]
+        C3 -- "Economy Principle" --> A3
+    end
+    
+    style A1 fill:#ffe6cc,stroke:#333,stroke-width:1px
+    style B1 fill:#ffe6cc,stroke:#333,stroke-width:1px
+    style C1 fill:#ffe6cc,stroke:#333,stroke-width:1px
+    
+    style A2 fill:#e6ccff,stroke:#333,stroke-width:1px
+    style B2 fill:#e6ccff,stroke:#333,stroke-width:1px
+    style C2 fill:#e6ccff,stroke:#333,stroke-width:1px
+    
+    style A3 fill:#ccffe6,stroke:#333,stroke-width:1px
+    style B3 fill:#ccffe6,stroke:#333,stroke-width:1px
+    style C3 fill:#ccffe6,stroke:#333,stroke-width:1px
+```
+
+### 22.8 Temporal Dynamics and Predictive Processing
+
+| Temporal Aspect | Sanskrit Grammar | CEREBRUM Implementation | Active Inference | Integration Principle |
+|----------------|------------------|------------------------|------------------|------------------------|
+| **Present Processing** | Laṭ (present tense) | Real-time computation | Current prediction generation | Immediate state assessment |
+| **Future Prediction** | Lṛṭ (future tense) | Predictive modeling | Expected future states | Forward planning |
+| **Past Integration** | Liṭ (perfect past) | Historical data integration | Posterior updating | Experience incorporation |
+| **Conditional Analysis** | Lṛṅ (conditional) | Scenario simulation | Counterfactual inference | Alternative evaluation |
+| **Iterative Processing** | Abhyāsa (reduplication) | Recursive computation | Iterative belief updating | Refinement through repetition |
+| **Processing Stages** | Krama (sequential application) | Pipeline processing | Hierarchical message passing | Ordered transformation sequence |
+| **Parallel Processing** | Yugapad (simultaneous application) | Parallel computation | Simultaneous update across hierarchy | Synchronized processing |
+
+### 22.9 Active Inference in Sanskrit Case Functions and CEREBRUM
+
+```mermaid
+flowchart TD
+    subgraph "Active Inference Framework"
+        AIF1[Predictive Model\nInference] --> AIF2[Precision Estimation]
+        AIF2 --> AIF3[Prediction Error]
+        AIF3 --> AIF4{Minimization\nStrategy}
+        AIF4 -->|Perception| AIF5[Update Model]
+        AIF4 -->|Action| AIF6[Change Environment]
+        AIF5 --> AIF1
+        AIF6 --> AIF1
+    end
+    
+    subgraph "Sanskrit Case System"
+        SC1[Nominative\nKartā] -->|Agent| SC2[Case-Based\nRelational Network]
+        SC3[Accusative\nKarma] -->|Patient| SC2
+        SC4[Instrumental\nKaraṇa] -->|Means| SC2
+        SC5[Dative\nSampradāna] -->|Recipient| SC2
+        SC6[Ablative\nApādāna] -->|Source| SC2
+        SC7[Genitive\nSambandha] -->|Relation| SC2
+        SC8[Locative\nAdhikaraṇa] -->|Location| SC2
+        SC2 --> SC9[Transformational\nGrammar Operation]
+        SC9 --> SC1
+    end
+    
+    subgraph "CEREBRUM Case Framework"
+        CC1[Model[NOM]\nActive Agent] --> CC2[Case-Based\nComputation Network]
+        CC3[Model[ACC]\nUpdate Target] --> CC2
+        CC4[Model[INS]\nProcessing Tool] --> CC2
+        CC5[Model[DAT]\nData Recipient] --> CC2
+        CC6[Model[ABL]\nData Source] --> CC2
+        CC7[Model[GEN]\nGenerator] --> CC2
+        CC8[Model[LOC]\nContext Provider] --> CC2
+        CC2 --> CC9[Case Transformation\nOperation]
+        CC9 --> CC1
+    end
+    
+    AIF1 -.-> SC1
+    AIF3 -.-> SC3
+    AIF2 -.-> SC4
+    AIF5 -.-> SC9
+    AIF6 -.-> SC1
+    
+    AIF1 -.-> CC1
+    AIF3 -.-> CC3
+    AIF2 -.-> CC4
+    AIF5 -.-> CC9
+    AIF6 -.-> CC1
+    
+    style AIF1 fill:#ffcccc,stroke:#333,stroke-width:1px
+    style AIF2 fill:#ffcccc,stroke:#333,stroke-width:1px
+    style AIF3 fill:#ffcccc,stroke:#333,stroke-width:1px
+    style AIF4 fill:#ffcccc,stroke:#333,stroke-width:1px
+    style AIF5 fill:#ffcccc,stroke:#333,stroke-width:1px
+    style AIF6 fill:#ffcccc,stroke:#333,stroke-width:1px
+    
+    style SC1 fill:#ccccff,stroke:#333,stroke-width:1px
+    style SC2 fill:#ccccff,stroke:#333,stroke-width:1px
+    style SC3 fill:#ccccff,stroke:#333,stroke-width:1px
+    style SC4 fill:#ccccff,stroke:#333,stroke-width:1px
+    style SC5 fill:#ccccff,stroke:#333,stroke-width:1px
+    style SC6 fill:#ccccff,stroke:#333,stroke-width:1px
+    style SC7 fill:#ccccff,stroke:#333,stroke-width:1px
+    style SC8 fill:#ccccff,stroke:#333,stroke-width:1px
+    style SC9 fill:#ccccff,stroke:#333,stroke-width:1px
+    
+    style CC1 fill:#ccffcc,stroke:#333,stroke-width:1px
+    style CC2 fill:#ccffcc,stroke:#333,stroke-width:1px
+    style CC3 fill:#ccffcc,stroke:#333,stroke-width:1px
+    style CC4 fill:#ccffcc,stroke:#333,stroke-width:1px
+    style CC5 fill:#ccffcc,stroke:#333,stroke-width:1px
+    style CC6 fill:#ccffcc,stroke:#333,stroke-width:1px
+    style CC7 fill:#ccffcc,stroke:#333,stroke-width:1px
+    style CC8 fill:#ccffcc,stroke:#333,stroke-width:1px
+    style CC9 fill:#ccffcc,stroke:#333,stroke-width:1px
+```
+
+### 22.10 Information Flow in Sanskrit Compounds and Active Inference
+
+| Compound Type | Sanskrit Structure | CEREBRUM Implementation | Active Inference Parallel | Integrated Function |
+|--------------|-------------------|------------------------|--------------------------|---------------------|
+| **Tatpuruṣa** (Dependent) | First member depends on second | Hierarchical dependency | Hierarchical generative models | Top-down constraint propagation |
+| **Karmadhāraya** (Descriptive) | Adjective-modified noun | Attribute-augmented model | Feature-enriched predictions | Qualitative specification |
+| **Dvandva** (Coordinate) | Equal members in sequence | Parallel ensemble models | Multiple hypothesis processing | Cooperative inference |
+| **Bahuvrīhi** (Possessive) | Exocentric reference | Interface-defined model | Emergent property representation | Interface-focused processing |
+| **Avyayībhāva** (Adverbial) | Invariant first member | Parameter-constrained model | Fixed prior constraints | Bounded optimization |
+| **Dvigu** (Numerical) | Number-qualified compound | Quantitative parameter model | Numerical prior specification | Precise magnitude processing |
+
+### 22.11 Model Architecture Comparison for Hierarchical Processing
+
+```mermaid
+graph TD
+    subgraph "Active Inference Hierarchical Model"
+        AH1[Highest-Level\nPriors] --> AH2[High-Level\nGenerative Models]
+        AH2 --> AH3[Mid-Level\nGenerative Models]
+        AH3 --> AH4[Low-Level\nGenerative Models]
+        AH4 --> AH5[Sensory\nInterface]
+        
+        AH5 -->|Prediction Errors| AH4
+        AH4 -->|Prediction Errors| AH3
+        AH3 -->|Prediction Errors| AH2
+        AH2 -->|Prediction Errors| AH1
+        
+        AH1 --> AH6[Strategic\nAction Planning]
+        AH2 --> AH7[Tactical\nAction Planning]
+        AH3 --> AH8[Operational\nAction Planning]
+        AH4 --> AH9[Motor\nAction Planning]
+    end
+    
+    subgraph "Sanskrit Grammatical Hierarchy"
+        SH1[Vākyārtha\nDiscourse Meaning] --> SH2[Vākya\nSentence]
+        SH2 --> SH3[Pada\nWord]
+        SH3 --> SH4[Prakṛti-Pratyaya\nStem-Affix]
+        SH4 --> SH5[Dhātu-Lakāra\nRoot-Tense]
+        SH5 --> SH6[Varṇa\nPhoneme]
+        
+        SH6 -->|Integration| SH5
+        SH5 -->|Integration| SH4
+        SH4 -->|Integration| SH3
+        SH3 -->|Integration| SH2
+        SH2 -->|Integration| SH1
+    end
+    
+    subgraph "CEREBRUM Hierarchical Structure"
+        CH1[System-Level\nOrchestration] --> CH2[Domain-Level\nModels]
+        CH2 --> CH3[Function-Level\nModels]
+        CH3 --> CH4[Component-Level\nModels]
+        CH4 --> CH5[Parameter-Level\nModels]
+        
+        CH5 -->|Updates| CH4
+        CH4 -->|Updates| CH3
+        CH3 -->|Updates| CH2
+        CH2 -->|Updates| CH1
+    end
+    
+    style AH1 fill:#ffe6e6,stroke:#333,stroke-width:1px
+    style AH2 fill:#ffe6e6,stroke:#333,stroke-width:1px
+    style AH3 fill:#ffe6e6,stroke:#333,stroke-width:1px
+    style AH4 fill:#ffe6e6,stroke:#333,stroke-width:1px
+    style AH5 fill:#ffe6e6,stroke:#333,stroke-width:1px
+    style AH6 fill:#ffe6e6,stroke:#333,stroke-width:1px
+    style AH7 fill:#ffe6e6,stroke:#333,stroke-width:1px
+    style AH8 fill:#ffe6e6,stroke:#333,stroke-width:1px
+    style AH9 fill:#ffe6e6,stroke:#333,stroke-width:1px
+    
+    style SH1 fill:#e6e6ff,stroke:#333,stroke-width:1px
+    style SH2 fill:#e6e6ff,stroke:#333,stroke-width:1px
+    style SH3 fill:#e6e6ff,stroke:#333,stroke-width:1px
+    style SH4 fill:#e6e6ff,stroke:#333,stroke-width:1px
+    style SH5 fill:#e6e6ff,stroke:#333,stroke-width:1px
+    style SH6 fill:#e6e6ff,stroke:#333,stroke-width:1px
+    
+    style CH1 fill:#e6ffe6,stroke:#333,stroke-width:1px
+    style CH2 fill:#e6ffe6,stroke:#333,stroke-width:1px
+    style CH3 fill:#e6ffe6,stroke:#333,stroke-width:1px
+    style CH4 fill:#e6ffe6,stroke:#333,stroke-width:1px
+    style CH5 fill:#e6ffe6,stroke:#333,stroke-width:1px
+```
+
+### 22.12 Variational Free Energy Components in Sanskrit and CEREBRUM
+
+| Free Energy Component | Active Inference Process | Sanskrit Parallel | CEREBRUM Implementation | Integrated Function |
+|----------------------|--------------------------|-------------------|------------------------|---------------------|
+| **Accuracy Term** | Prediction error minimization | Śabdānuśāsana (adherence to linguistic rules) | Model performance optimization | Conformity to system requirements |
+| **Complexity Penalty** | Deviation from prior | Lāghava (principle of economy) | Parameter regularization | Efficient representation |
+| **Ambiguity Resolution** | Precision estimation | Vyavasthā (disambiguation) | Confidence metric calculation | Uncertainty management |
+| **Temporal Integration** | Extended inference over time | Anvaya (temporal connection) | Sequential processing | Time-series coherence |
+| **Hierarchical Processing** | Multi-scale message passing | Viśleṣaṇa-Saṃśleṣaṇa (analysis-synthesis) | Multi-level model interaction | Integrated cross-scale processing |
+| **Action Selection** | Policy selection | Prayojana (purpose fulfillment) | Functional objective targeting | Goal-directed operation |
+
+## 23. Conclusion
+
+The remarkable and sophisticated parallels between Sanskrit grammar, CEREBRUM's computational framework, and Active Inference principles reveal a profound unified model of information processing. These three systems, separated by thousands of years and different domains, converge on similar structural principles for managing complexity, transformation, and hierarchical information flow.
+
+This tripartite integration framework offers unique insights for computational cognitive architectures by leveraging Sanskrit's time-tested grammatical wisdom, CEREBRUM's flexible computational implementation, and Active Inference's mathematically rigorous approach to understanding adaptive systems. Together, they form a comprehensive approach to modeling intelligent information processing that spans from ancient linguistic insights to cutting-edge computational cognitive science. 
