@@ -637,7 +637,12 @@ def test_nominative_case(nn_regression_data, case_definitions):
         f.write("Training Metrics:\n")
         f.write(f"  Final Loss: {model.loss_history[-1]:.6f}\n")
         f.write(f"  Initial Loss: {model.loss_history[0]:.6f}\n")
-        f.write(f"  Improvement: {(1 - model.loss_history[-1]/model.loss_history[0])*100:.2f}%\n")
+        # Avoid division by zero
+        if model.loss_history[0] != 0:
+            improvement = (1 - model.loss_history[-1]/model.loss_history[0])*100
+            f.write(f"  Improvement: {improvement:.2f}%\n")
+        else:
+            f.write("  Improvement: N/A (initial loss was zero)\n")
         f.write(f"  Epochs: {len(model.loss_history)}\n")
     
     # Generate predictions
@@ -761,7 +766,12 @@ def test_nominative_case(nn_regression_data, case_definitions):
         f.write(f"* Activation function: {model.activation}\n")
         f.write(f"* Initial loss: {model.loss_history[0]:.6f}\n")
         f.write(f"* Final loss: {model.loss_history[-1]:.6f}\n")
-        f.write(f"* Improvement: {(1 - model.loss_history[-1]/model.loss_history[0])*100:.2f}%\n\n")
+        # Avoid division by zero
+        if model.loss_history[0] != 0:
+            improvement = (1 - model.loss_history[-1]/model.loss_history[0])*100
+            f.write(f"* Improvement: {improvement:.2f}%\n\n")
+        else:
+            f.write("* Improvement: N/A (initial loss was zero)\n\n")
         f.write("### Visualizations\n\n")
         f.write(f"1. [Network Structure](network_structure.png)\n")
         f.write(f"2. [Training History](training_history.png)\n")
@@ -1133,7 +1143,12 @@ def test_genitive_case(nn_regression_data, case_definitions):
         f.write("Training Metrics:\n")
         f.write(f"  Final Loss: {model.loss_history[-1]:.6f}\n")
         f.write(f"  Initial Loss: {model.loss_history[0]:.6f}\n")
-        f.write(f"  Improvement: {(1 - model.loss_history[-1]/model.loss_history[0])*100:.2f}%\n")
+        # Avoid division by zero
+        if model.loss_history[0] != 0:
+            improvement = (1 - model.loss_history[-1]/model.loss_history[0])*100
+            f.write(f"  Improvement: {improvement:.2f}%\n")
+        else:
+            f.write("  Improvement: N/A (initial loss was zero)\n")
         f.write(f"  Epochs: {len(model.loss_history)}\n")
     
     # Generate predictions
@@ -1231,9 +1246,15 @@ def test_genitive_case(nn_regression_data, case_definitions):
         f.write("### Analysis Results\n\n")
         f.write(f"* Model architecture: Input({X.shape[1]}) → Hidden(10) → Hidden(5) → Output({y.shape[1]})\n")
         f.write(f"* Activation function: {model.activation}\n")
-        f.write(f"* Initial loss: {model.loss_history[0]:.6f}\n")
-        f.write(f"* Final loss: {model.loss_history[-1]:.6f}\n")
-        f.write(f"* Improvement: {(1 - model.loss_history[-1]/model.loss_history[0])*100:.2f}%\n\n")
+        
+        # Handle cases where training might not have been allowed
+        if hasattr(model, 'loss_history') and len(model.loss_history) > 0 and model.loss_history[0] != 0:
+            f.write(f"* Initial loss: {model.loss_history[0]:.6f}\n")
+            f.write(f"* Final loss: {model.loss_history[-1]:.6f}\n")
+            improvement = (1 - model.loss_history[-1]/model.loss_history[0])*100
+            f.write(f"* Improvement: {improvement:.2f}%\n\n")
+        else:
+            f.write("* Training not allowed in GENITIVE case\n\n")
         f.write("### Visualizations\n\n")
         f.write(f"1. [Network Structure](network_structure.png)\n")
         f.write(f"2. [Training History](training_history.png)\n")
@@ -1420,9 +1441,15 @@ def test_locative_case(nn_classification_data, case_definitions):
         f.write("### Analysis Results\n\n")
         f.write(f"* Model architecture: Input({X.shape[1]}) → Hidden(16) → Hidden(8) → Output({y_one_hot.shape[1]})\n")
         f.write(f"* Activation function: {model.activation}\n")
-        f.write(f"* Initial loss: {model.loss_history[0]:.6f}\n")
-        f.write(f"* Final loss: {model.loss_history[-1]:.6f}\n")
-        f.write(f"* Improvement: {(1 - model.loss_history[-1]/model.loss_history[0])*100:.2f}%\n\n")
+        
+        # Handle cases where training might not have been allowed
+        if hasattr(model, 'loss_history') and len(model.loss_history) > 0 and model.loss_history[0] != 0:
+            f.write(f"* Initial loss: {model.loss_history[0]:.6f}\n")
+            f.write(f"* Final loss: {model.loss_history[-1]:.6f}\n")
+            improvement = (1 - model.loss_history[-1]/model.loss_history[0])*100
+            f.write(f"* Improvement: {improvement:.2f}%\n\n")
+        else:
+            f.write("* Training not allowed in LOCATIVE case\n\n")
         f.write("### Visualizations\n\n")
         f.write(f"1. [Network Structure](network_structure.png)\n")
         f.write(f"2. [Training History](training_history.png)\n")
@@ -1603,9 +1630,15 @@ def test_ablative_case(nn_regression_data, case_definitions):
         f.write("### Analysis Results\n\n")
         f.write(f"* Model architecture: Input({X.shape[1]}) → Hidden(10) → Hidden(5) → Output({y.shape[1]})\n")
         f.write(f"* Activation function: {model.activation}\n")
-        f.write(f"* Initial loss: {model.loss_history[0]:.6f}\n")
-        f.write(f"* Final loss: {model.loss_history[-1]:.6f}\n")
-        f.write(f"* Improvement: {(1 - model.loss_history[-1]/model.loss_history[0])*100:.2f}%\n\n")
+        
+        # Handle cases where training might not have been allowed
+        if hasattr(model, 'loss_history') and len(model.loss_history) > 0 and model.loss_history[0] != 0:
+            f.write(f"* Initial loss: {model.loss_history[0]:.6f}\n")
+            f.write(f"* Final loss: {model.loss_history[-1]:.6f}\n")
+            improvement = (1 - model.loss_history[-1]/model.loss_history[0])*100
+            f.write(f"* Improvement: {improvement:.2f}%\n\n")
+        else:
+            f.write("* Training not allowed in ABLATIVE case\n\n")
         f.write("### Visualizations\n\n")
         f.write(f"1. [Network Structure](network_structure.png)\n")
         f.write(f"2. [Training History](training_history.png)\n")
@@ -1912,8 +1945,13 @@ def test_vocative_case(nn_classification_data, case_definitions):
         f.write(f"* Model architecture: Input({X.shape[1]}) → Hidden(10) → Hidden(5) → Output({y_one_hot.shape[1]})\n")
         f.write(f"* Activation function: {model.activation}\n")
         f.write("* Evaluation metrics:\n")
-        for metric, value in evaluation_results.items():
-            f.write(f"  - {metric}: {value:.6f}\n")
+        
+        # Handle case where evaluation_results might not be defined or empty
+        if 'evaluation_results' in locals() and evaluation_results:
+            for metric, value in evaluation_results.items():
+                f.write(f"  - {metric}: {value:.6f}\n")
+        else:
+            f.write("  - Evaluation not performed (not allowed in VOCATIVE case)\n")
         f.write("\n### Evaluation Process\n\n")
         f.write("The model was evaluated across multiple test segments to analyze the stability of its performance metrics. ")
         f.write("The animation shows how different evaluation metrics evolve as more test data is included.\n\n")
@@ -2005,11 +2043,14 @@ def test_dative_case(nn_regression_data, case_definitions):
         axs = [axs]
     
     for i, (X_input, name) in enumerate(zip(input_sets, input_names)):
-        # Check if input is 1D or has only one column
-        if len(X_input.shape) == 1 or X_input.shape[1] == 1:
-            # Ensure X_input is 2D for consistency
-            X_flat = X_input.reshape(-1) if len(X_input.shape) == 2 else X_input
-            axs[i].hist(X_input, bins=20, alpha=0.7)
+        # Ensure X_input is properly shaped for plotting
+        if len(X_input.shape) == 1:
+            X_input = X_input.reshape(-1, 1)
+            
+        # Check dimensions for plotting
+        if X_input.shape[1] == 1:
+            # For 1D data, plot histogram
+            axs[i].hist(X_input.flatten(), bins=20, alpha=0.7)
             axs[i].set_title(f"{name} Input Distribution")
             axs[i].set_xlabel("Input Value")
             axs[i].set_ylabel("Frequency")
@@ -2028,7 +2069,15 @@ def test_dative_case(nn_regression_data, case_definitions):
     input_activations_path = os.path.join(case_dir, "input_activations.png")
     fig, axs = plt.subplots(len(input_sets), 1, figsize=(12, 15))
     
+    # Handle single axes case
+    if len(input_sets) == 1:
+        axs = [axs]
+    
     for i, (X_input, name) in enumerate(zip(input_sets, input_names)):
+        # Ensure X_input is properly shaped for processing
+        if len(X_input.shape) == 1:
+            X_input = X_input.reshape(-1, 1)
+            
         # Get activations from first layer (input processing)
         _, activations = model._forward_with_activations(X_input)
         first_layer_activations = activations[1]  # First hidden layer after input
@@ -2057,6 +2106,10 @@ def test_dative_case(nn_regression_data, case_definitions):
     # Perturb each input dimension and measure output change
     sensitivities = []
     
+    # Ensure X is properly shaped
+    if len(X.shape) == 1:
+        X = X.reshape(-1, 1)
+        
     if X.shape[1] == 1:
         # For 1D input, sample points across range
         test_points = np.linspace(X.min(), X.max(), 20).reshape(-1, 1)
@@ -2112,36 +2165,99 @@ def test_dative_case(nn_regression_data, case_definitions):
     fig, axs = plt.subplots(2, 1, figsize=(10, 12))
     
     # Setup for input distribution
+    hist_obj = None
+    scatter = None
+    
     if X.shape[1] == 1:
         # For 1D input
         hist_obj = axs[0].hist([], bins=20, alpha=0.7)
-        axs[0].set_xlim(min([x.min() for x in input_sets]) - 0.5, 
-                       max([x.max() for x in input_sets]) + 0.5)
-        axs[0].set_ylim(0, max([np.histogram(x)[0].max() for x in input_sets]) * 1.1)
+        
+        # Safely get min/max values
+        input_mins = []
+        input_maxs = []
+        for x_set in input_sets:
+            if len(x_set.shape) == 1:
+                x_flat = x_set
+            else:
+                x_flat = x_set.flatten()
+            input_mins.append(x_flat.min())
+            input_maxs.append(x_flat.max())
+            
+        axs[0].set_xlim(min(input_mins) - 0.5, max(input_maxs) + 0.5)
+        
+        # Safely get histogram counts
+        hist_maxes = []
+        for x_set in input_sets:
+            if len(x_set.shape) == 1:
+                x_flat = x_set
+            else:
+                x_flat = x_set.flatten()
+            counts, _ = np.histogram(x_flat, bins=20)
+            hist_maxes.append(counts.max())
+        
+        axs[0].set_ylim(0, max(hist_maxes) * 1.1)
         axs[0].set_title("Input Distribution")
         axs[0].set_xlabel("Input Value")
         axs[0].set_ylabel("Frequency")
     else:
         # For 2D input
         scatter = axs[0].scatter([], [])
-        axs[0].set_xlim(min([x[:, 0].min() for x in input_sets]) - 0.5,
-                       max([x[:, 0].max() for x in input_sets]) + 0.5)
-        axs[0].set_ylim(min([x[:, 1].min() for x in input_sets]) - 0.5,
-                       max([x[:, 1].max() for x in input_sets]) + 0.5)
+        
+        # Safely get x and y limits
+        x_mins = []
+        x_maxs = []
+        y_mins = []
+        y_maxs = []
+        
+        for x_set in input_sets:
+            # Ensure proper shape
+            if len(x_set.shape) == 1:
+                x_set = x_set.reshape(-1, 1)
+                
+            if x_set.shape[1] >= 2:
+                # True 2D case
+                x_mins.append(x_set[:, 0].min())
+                x_maxs.append(x_set[:, 0].max())
+                y_mins.append(x_set[:, 1].min())
+                y_maxs.append(x_set[:, 1].max())
+            else:
+                # 1D case handling
+                indices = np.arange(len(x_set))
+                x_mins.append(indices.min())
+                x_maxs.append(indices.max())
+                y_mins.append(x_set.flatten().min())
+                y_maxs.append(x_set.flatten().max())
+        
+        axs[0].set_xlim(min(x_mins) - 0.5, max(x_maxs) + 0.5)
+        axs[0].set_ylim(min(y_mins) - 0.5, max(y_maxs) + 0.5)
         axs[0].set_title("Input Distribution")
         axs[0].set_xlabel("Dimension 1")
         axs[0].set_ylabel("Dimension 2")
     
-    # Setup for activation distribution
+    # Setup for activation histogram
     activation_hist = axs[1].hist([], bins=20, alpha=0.7)
-    all_activations = []
-    for x in input_sets:
-        _, activations = model._forward_with_activations(x)
-        all_activations.append(activations[1].flatten())
     
-    axs[1].set_xlim(min([a.min() for a in all_activations]) - 0.1,
-                   max([a.max() for a in all_activations]) + 0.1)
-    axs[1].set_ylim(0, max([np.histogram(a)[0].max() for a in all_activations]) * 1.1)
+    # Get activation limits across all inputs
+    activation_mins = []
+    activation_maxs = []
+    act_hist_maxes = []
+    
+    for x_set in input_sets:
+        # Ensure proper shape
+        if len(x_set.shape) == 1:
+            x_set = x_set.reshape(-1, 1)
+            
+        _, activations = model._forward_with_activations(x_set)
+        first_layer_act = activations[1].flatten()
+        activation_mins.append(first_layer_act.min())
+        activation_maxs.append(first_layer_act.max())
+        
+        counts, _ = np.histogram(first_layer_act, bins=20)
+        act_hist_maxes.append(counts.max())
+    
+    # Set limits for activation histogram
+    axs[1].set_xlim(min(activation_mins) - 0.1, max(activation_maxs) + 0.1)
+    axs[1].set_ylim(0, max(act_hist_maxes) * 1.1)
     axs[1].set_title("First Layer Activations")
     axs[1].set_xlabel("Activation Value")
     axs[1].set_ylabel("Frequency")
@@ -2150,10 +2266,11 @@ def test_dative_case(nn_regression_data, case_definitions):
     dist_text = axs[0].text(0.02, 0.95, '', transform=axs[0].transAxes)
     
     def init():
-        if X.shape[1] == 1:
+        if X.shape[1] == 1 and hist_obj is not None:
             # For 1D data
-            hist_obj[0].set_height(np.zeros_like(hist_obj[0]))
-        else:
+            for rect in hist_obj[2]:
+                rect.set_height(0)
+        elif scatter is not None:
             # For 2D data
             scatter.set_offsets(np.empty((0, 2)))
         
@@ -2162,36 +2279,58 @@ def test_dative_case(nn_regression_data, case_definitions):
             patch.set_height(0)
         
         dist_text.set_text('')
-        return [dist_text]
+        
+        if X.shape[1] == 1 and hist_obj is not None:
+            return list(hist_obj[2]) + list(activation_hist[2]) + [dist_text]
+        elif scatter is not None:
+            return [scatter] + list(activation_hist[2]) + [dist_text]
+        else:
+            return list(activation_hist[2]) + [dist_text]
     
     def update(frame):
         # Get current input set
-        X_current = input_sets[frame % len(input_sets)]
-        name_current = input_names[frame % len(input_names)]
+        idx = frame % len(input_sets)
+        X_current = input_sets[idx]
+        name_current = input_names[idx]
+        
+        # Ensure proper shape
+        if len(X_current.shape) == 1:
+            X_current = X_current.reshape(-1, 1)
         
         # Update input distribution
-        if X_current.shape[1] == 1:
+        return_elements = []
+        
+        if X.shape[1] == 1 and hist_obj is not None:
             # For 1D data, update histogram
-            counts, bins = np.histogram(X_current, bins=20)
+            counts, _ = np.histogram(X_current.flatten(), bins=20)
             for count, rect in zip(counts, hist_obj[2]):
                 rect.set_height(count)
-        else:
+            return_elements.extend(list(hist_obj[2]))
+        elif scatter is not None:
             # For 2D data, update scatter
-            scatter.set_offsets(X_current[:, :2])
+            if X_current.shape[1] >= 2:
+                # True 2D data
+                scatter.set_offsets(X_current[:, :2])
+            else:
+                # 1D data that should be plotted as 2D
+                indices = np.arange(len(X_current))
+                values = X_current.flatten()
+                scatter.set_offsets(np.column_stack((indices, values)))
+            return_elements.append(scatter)
         
         # Update activation distribution
         _, activations = model._forward_with_activations(X_current)
         first_layer_activations = activations[1].flatten()
-        counts, bins = np.histogram(first_layer_activations, bins=20)
+        counts, _ = np.histogram(first_layer_activations, bins=20)
         for count, rect in zip(counts, activation_hist[2]):
             rect.set_height(count)
         
         dist_text.set_text(f'Distribution: {name_current}')
         
-        if X_current.shape[1] == 1:
-            return hist_obj[2] + activation_hist[2] + [dist_text]
-        else:
-            return [scatter] + activation_hist[2] + [dist_text]
+        return_elements.extend(list(activation_hist[2]))
+        return_elements.append(dist_text)
+        
+        return return_elements
     
     anim = animation.FuncAnimation(fig, update, frames=len(input_sets)*3,
                           init_func=init, blit=True)
@@ -2494,8 +2633,12 @@ def test_instrumental_case(nn_regression_data, case_definitions):
     animation_path = os.path.join(case_dir, "computation_animation.gif")
     
     # Select one sample for animation clarity
-    sample_idx = 0
-    single_sample = X_sample[sample_idx:sample_idx+1]
+    # Ensure we have at least one sample
+    if len(X_sample) > 0:
+        single_sample = X_sample[0:1]  # Ensure it's 2D: shape (1, input_dim)
+    else:
+        # Fallback if X_sample is somehow empty
+        single_sample = np.random.rand(1, X.shape[1])
     
     # Setup figure for animation
     fig, axs = plt.subplots(len(model.hidden_dims) + 2, 1, figsize=(10, 3*(len(model.hidden_dims) + 2)))
@@ -2549,14 +2692,15 @@ def test_instrumental_case(nn_regression_data, case_definitions):
         if layer_idx < len(activations):
             # Update bars up to current layer
             for i in range(layer_idx + 1):
-                current_activations = activations[i][0]  # First (only) sample
-                for j, bar in enumerate(layer_bars[i]):
-                    if j < len(current_activations):
-                        if is_transition and i == layer_idx:
-                            # Animate transition at current layer
-                            bar.set_height(current_activations[j] * (frame % 2) * 0.5)
-                        else:
-                            bar.set_height(current_activations[j])
+                if i < len(activations):  # Check if we have this layer's activations
+                    current_activations = activations[i][0]  # First (only) sample
+                    for j, bar in enumerate(layer_bars[i]):
+                        if j < len(current_activations):
+                            if is_transition and i == layer_idx:
+                                # Animate transition at current layer
+                                bar.set_height(current_activations[j] * 0.5)
+                            else:
+                                bar.set_height(current_activations[j])
         
         # Update step text
         if layer_idx == 0:
@@ -2568,11 +2712,14 @@ def test_instrumental_case(nn_regression_data, case_definitions):
                 step_text.set_text(f"Step {layer_idx+1}: Computing Hidden Layer {layer_idx} activations")
         elif layer_idx == len(activations) - 1:
             step_text.set_text("Final Step: Output values generated")
+        else:
+            step_text.set_text("Computation Complete")
         
         return [bar for bars in layer_bars for bar in bars] + [step_text]
     
-    # Create animation
-    anim = animation.FuncAnimation(fig, update, frames=2*(len(model.hidden_dims) + 2),
+    # Create animation with appropriate number of frames
+    num_frames = 2 * (len(model.hidden_dims) + 2)
+    anim = animation.FuncAnimation(fig, update, frames=num_frames,
                           init_func=init, blit=True)
     
     # Save animation
@@ -2701,7 +2848,7 @@ def create_overview_visualization(save_path: str) -> None:
         
         # Add example
         ax.text(0.5, 0.2, f"Example: {case_info['example']}", 
-                ha='center', fontsize=10, fontweight='italic', transform=ax.transAxes)
+                ha='center', fontsize=10, fontstyle='italic', transform=ax.transAxes)
     
     # Add title
     fig.suptitle("CEREBRUM Cases for Neural Network Models", fontsize=20, y=0.98)

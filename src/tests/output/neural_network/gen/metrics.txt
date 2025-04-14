@@ -4,3 +4,7 @@ Statistical Role: Output source
 Neural Network Context: The neural network as a source of outputs and predictions
 
 Training Metrics:
+  Final Loss: 0.000000
+  Initial Loss: 0.000000
+  Improvement: N/A (initial loss was zero)
+  Epochs: 1

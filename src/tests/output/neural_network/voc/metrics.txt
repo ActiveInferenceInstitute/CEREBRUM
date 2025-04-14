@@ -4,3 +4,5 @@ Statistical Role: Interactive interface
 Neural Network Context: The neural network as an addressable entity with a query/response interface
 
 Training Metrics:
+  Final Loss: 0.000000
+  Initial Loss: 0.000000
