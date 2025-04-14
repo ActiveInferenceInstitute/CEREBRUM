@@ -171,55 +171,50 @@ Each case test generates specific visualizations that demonstrate the linguistic
 
 1. **Nominative Case** (Model as active agent/subject):
    - `linguistic_context.png` - Case explanation with linguistic context
-   - `fitting_visualization.png` - Model actively fitting data
-   - `fitting_animation.gif` - Animation of the model fitting process
-   - `parameter_space_visualization.png` - Model exploring parameter space
-   - `formula_visualization.png` - The mathematical representation
+   - `active_fitting.png` - Model actively fitting data
+   - `gradient_descent_animation.gif` - Animation of the model fitting process
+   - `nominative_linguistic.png` - Visual representation of the linguistic structure
    - `nominative_results.txt` - Summary of test results
 
-2. **Dative Case** (Model as data recipient):
+2. **Accusative Case** (Model as evaluated object):
    - `linguistic_context.png` - Case explanation with linguistic context
-   - `data_flow_visualization.png` - Visualization of data flowing to the model
-   - `data_processing_visualization.png` - Model processing received data
+   - `cross_validation_animation.gif` - Animation showing model under evaluation
+   - `residuals_analysis_animation.gif` - Animation showing residual analysis
+   - `accusative_results.txt` - Summary of test results
+
+3. **Dative Case** (Model as data recipient):
+   - `linguistic_context.png` - Case explanation with linguistic context
+   - `data_flow_animation.gif` - Animation showing data flowing to the model
    - `dative_results.txt` - Summary of test results
 
-3. **Genitive Case** (Model as possessor/source):
+4. **Genitive Case** (Model as possessor/source):
    - `linguistic_context.png` - Case explanation with linguistic context
    - `predictions_visualization.png` - Model generating predictions with confidence intervals
-   - `summary_visualization.png` - Model as source of information
-   - `prediction_generation_animation.gif` - Animation of prediction generation
+   - `intervals_visualization.png` - Summary of prediction intervals
    - `genitive_results.txt` - Summary of test results
 
-4. **Instrumental Case** (Model as tool/method):
+5. **Instrumental Case** (Model as tool/method):
    - `linguistic_context.png` - Case explanation with linguistic context
-   - `methodology_visualization.png` - Model as method implementation
-   - `algorithm_animation.gif` - Animation of the algorithm process
+   - `feature_importance_animation.gif` - Animation showing model as analytical instrument
    - `instrumental_results.txt` - Summary of test results
 
-5. **Locative Case** (Model as location/context):
+6. **Locative Case** (Model as location/context):
    - `linguistic_context.png` - Case explanation with linguistic context
-   - `statistical_context_visualization.png` - Model as statistical assumption framework
-   - `statistical_context_animation.gif` - Animation showing statistical contexts
+   - `parameter_space_animation.gif` - Animation showing model in parameter space
    - `locative_results.txt` - Summary of test results
 
-6. **Ablative Case** (Model as error origin):
+7. **Ablative Case** (Model as error origin):
    - `linguistic_context.png` - Case explanation with linguistic context
-   - `error_source_visualization.png` - Model as source of errors
-   - `error_origin_animation.gif` - Animation showing errors originating from model
+   - `error_propagation_animation.gif` - Animation showing errors originating from model
    - `ablative_results.txt` - Summary of test results
 
-7. **Vocative Case** (Model as addressable interface):
+8. **Vocative Case** (Model as addressable interface):
    - `linguistic_context.png` - Case explanation with linguistic context
-   - `interface_visualization.png` - Model as interactive interface
-   - `interaction_animation.gif` - Animation of model interactions
+   - `model_component_communication.png` - Model as communication interface
+   - `data_addressing_model.png` - Data points addressing the model
+   - `model_addressing_data.png` - Model addressing data points
+   - `vocative_communication.gif` - Animation of model interactions
    - `vocative_results.txt` - Summary of test results
-
-8. **Accusative Case** (Model as evaluated object):
-   - `linguistic_context.png` - Case explanation with linguistic context
-   - `evaluation_visualization.png` - Model undergoing evaluation
-   - `hypothesis_testing.png` - Hypothesis testing of model significance
-   - `evaluation_animation.gif` - Animation of evaluation process (currently has an issue)
-   - `accusative_results.txt` - Summary of test results
 
 ## References
 

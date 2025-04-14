@@ -34,7 +34,7 @@ def test_instrumental_case(linear_test_data, output_dir):
     logger.info(f"Statistical role: {case_info['statistical_role']}")
     
     # Create visuals directory
-    case_dir = os.path.join(output_dir, Case.INSTRUMENTAL.value.lower())
+    case_dir = os.path.join(output_dir, "instrumental")
     os.makedirs(case_dir, exist_ok=True)
     
     # Generate linguistic context visualization

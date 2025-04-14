@@ -1,0 +1,36 @@
+VOCATIVE CASE RESULTS
+====================
+
+Linguistic meaning: Direct address or calling
+Statistical role: Direct model interaction
+Regression context: Querying or commanding the model directly
+
+Model Parameters:
+- Intercept: 4.977458
+- Slope: 1.966485
+- Model Formula: y = 4.977458 + 1.966485x
+
+Communication Analysis (VOCATIVE Case):
+- Data-to-Model Communication: Residuals represent 'messages' from data to model
+- Mean Squared Error (MSE): 43.282361
+- Root Mean Squared Error (RMSE): 6.578933
+- Mean Absolute Error (MAE): 5.256358
+- R-squared: 0.000000
+
+Linguistic Formula Example:
+MODEL, what is the predicted value for this input?
+
+VOCATIVE Case Interpretation:
+In the VOCATIVE case, we explore how model components 'address' each other
+and how data and model communicate. Key insights include:
+
+1. Data-to-Model Communication:
+   - Each data point 'addresses' the model with its true value
+   - The model responds with its prediction
+   - The residual represents the 'conversation' between data and model
+
+2. Model Component Communication:
+   - Input features address the coefficients (slope)
+   - Coefficients address the prediction function
+   - Intercept addresses the prediction independently
+

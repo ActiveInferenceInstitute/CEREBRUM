@@ -7,15 +7,21 @@ Tests the ACCUSATIVE case in the linear regression context
 import os
 import logging
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+import seaborn as sns
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 from sklearn.model_selection import KFold
 
 from src.models.base import Case
 from src.models.case_definitions import CaseDefinitions
 from src.models.linear_regression import LinearRegressionModel
+from src.utils.animation import save_animation
 from src.utils.visualization import plot_case_linguistic_context
+
+# Prevent interactive display
+plt.ioff()
 
 # Setup logging
 logger = logging.getLogger("cerebrum-accusative-test")
@@ -36,7 +42,7 @@ def test_accusative_case(linear_test_data, output_dir):
     logger.info(f"Statistical role: {case_info['statistical_role']}")
     
     # Create visuals directory
-    case_dir = os.path.join(output_dir, Case.ACCUSATIVE.value.lower())
+    case_dir = os.path.join(output_dir, "accusative")
     os.makedirs(case_dir, exist_ok=True)
     
     # Generate linguistic context visualization
@@ -128,14 +134,89 @@ def test_accusative_case(linear_test_data, output_dir):
     # 2. Animation: Cross-validation showing model undergoing multiple evaluations
     cv_animation_path = os.path.join(case_dir, "cross_validation_animation.gif")
     
+    # Setup the animation figure
+    fig, ax = plt.subplots(figsize=(10, 8))
+    fig.patch.set_facecolor('white')  # Set explicit background for better animation
+    
+    # Set plot limits
+    ax.set_xlim(X.min() - 0.5, X.max() + 0.5)
+    ax.set_ylim(y.min() - 0.5, y.max() + 0.5)
+    
+    # Plot all data points
+    scatter = ax.scatter(X, y, color='blue', alpha=0.5, label='Data')
+    
+    # Initialize elements for animation
+    train_scatter = ax.scatter([], [], color='green', alpha=0.7, marker='o', s=80, label='Training')
+    test_scatter = ax.scatter([], [], color='red', alpha=0.7, marker='x', s=80, label='Testing')
+    line, = ax.plot([], [], 'r-', linewidth=2, label='Fold Model')
+    
+    # Add text for fold information
+    fold_text = ax.text(0.02, 0.98, '', transform=ax.transAxes, fontsize=12,
+                      va='top', ha='left', bbox=dict(facecolor='white', alpha=0.8))
+    
+    # Add legend
+    ax.legend(loc='upper right')
+    ax.set_title('ACCUSATIVE Case: Cross-Validation Analysis', fontsize=14)
+    ax.set_xlabel('X', fontsize=12)
+    ax.set_ylabel('y', fontsize=12)
+    ax.grid(True, alpha=0.3)
+    
+    # Animation update function
+    def update(frame):
+        # For frames before the fold count, show intro animation
+        if frame == 0:
+            # Just show all data points
+            train_scatter.set_offsets(np.empty((0, 2)))
+            test_scatter.set_offsets(np.empty((0, 2)))
+            line.set_data([], [])
+            fold_text.set_text("Cross-Validation: ACCUSATIVE Case\nModel is being evaluated")
+            return train_scatter, test_scatter, line, fold_text
+        
+        # Show each fold
+        fold_idx = min(frame - 1, len(fold_indices) - 1)  # Ensure index is valid
+        
+        # Get train and test indices for this fold
+        train_idx, test_idx = fold_indices[fold_idx]
+        
+        # Get the model for this fold
+        fold_model = fold_models[fold_idx]
+        
+        # Set train/test scatter points
+        train_data = np.column_stack((X[train_idx], y[train_idx]))
+        test_data = np.column_stack((X[test_idx], y[test_idx]))
+        
+        train_scatter.set_offsets(train_data)
+        test_scatter.set_offsets(test_data)
+        
+        # Get model parameters
+        intercept = fold_model._params['intercept']
+        slope = fold_model._params['coefficients'][0]
+        
+        # Set model line
+        x_line = np.linspace(X.min() - 0.5, X.max() + 0.5, 100)
+        y_line = intercept + slope * x_line
+        line.set_data(x_line, y_line)
+        
+        # Update text
+        test_predictions = fold_model.predict(X[test_idx])
+        test_mse = mean_squared_error(y[test_idx], test_predictions)
+        
+        fold_text.set_text(f"Fold {fold_idx+1}/{len(fold_indices)}\n"
+                         f"Test MSE: {test_mse:.4f}\n"
+                         f"Slope: {slope:.4f}, Intercept: {intercept:.4f}")
+        
+        return train_scatter, test_scatter, line, fold_text
+    
     # Prepare cross-validation
     n_splits = 5
     kf = KFold(n_splits=n_splits, shuffle=True, random_state=42)
     
-    # Storage for validation results
+    # Storage for fold data and models
+    fold_indices = []
+    fold_models = []
     fold_metrics = []
     
-    # Run cross-validation (just to collect metrics, we'll animate them later)
+    # Run cross-validation and collect data for animation
     for fold, (train_idx, test_idx) in enumerate(kf.split(X)):
         # Split data
         X_train, X_test = X[train_idx], X[test_idx]
@@ -153,235 +234,43 @@ def test_accusative_case(linear_test_data, output_dir):
         fold_r2 = r2_score(y_test, y_pred_test)
         
         # Store results
+        fold_indices.append((train_idx, test_idx))
+        fold_models.append(fold_model)
         fold_metrics.append({
             'fold': fold + 1,
-            'train_indices': train_idx,
-            'test_indices': test_idx,
             'mse': fold_mse,
-            'r2': fold_r2,
-            'model': fold_model
+            'r2': fold_r2
         })
     
     logger.info(f"Completed {n_splits}-fold cross-validation for ACCUSATIVE case")
     
     # Create animation
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
+    logger.info(f"Creating ACCUSATIVE case cross-validation animation with {len(fold_indices) + 1} frames")
+    anim = FuncAnimation(fig, update, frames=len(fold_indices) + 1, blit=True)
+    animation_success = save_animation(anim, cv_animation_path, fps=1, dpi=120)
     
-    # Define animation update function
-    def update(frame):
-        # For frames before the fold count, show intro animation
-        if frame < n_splits:
-            # Clear axes
-            ax1.clear()
-            ax2.clear()
-            
-            # Get current fold data
-            fold_data = fold_metrics[frame]
-            fold_num = fold_data['fold']
-            train_idx = fold_data['train_indices']
-            test_idx = fold_data['test_indices']
-            fold_model = fold_data['model']
-            
-            # Plot training and validation sets
-            ax1.scatter(X[train_idx], y[train_idx], color='blue', alpha=0.7, label='Training Data')
-            ax1.scatter(X[test_idx], y[test_idx], color='red', alpha=0.7, label='Validation Data')
-            
-            # Plot the fold model's prediction line
-            x_range = np.linspace(X.min(), X.max(), 100).reshape(-1, 1)
-            y_range = fold_model.predict(x_range)
-            ax1.plot(x_range, y_range, 'g-', linewidth=2, 
-                     label=f'Fold {fold_num} Model')
-            
-            # Add arrows pointing to the validation points (showing model being validated)
-            for idx in test_idx:
-                # Check if arrays are 2D or 1D and index accordingly
-                if len(X.shape) > 1:
-                    x_val = X[idx, 0]
-                else:
-                    x_val = X[idx]
-                    
-                if len(y.shape) > 1:
-                    y_true = y[idx, 0]
-                else:
-                    y_true = y[idx]
-                
-                # Get prediction for this point
-                if len(X.shape) > 1:
-                    x_input = X[idx].reshape(1, -1)
-                else:
-                    x_input = np.array([X[idx]]).reshape(1, -1)
-                
-                # Get prediction
-                y_pred_val = fold_model.predict(x_input)
-                
-                # Extract prediction value based on its shape
-                if len(y_pred_val.shape) > 1:
-                    y_pred = y_pred_val[0, 0]
-                else:
-                    y_pred = y_pred_val[0]
-                
-                residual = y_true - y_pred
-                
-                # Add arrow pointing to validation point
-                ax1.annotate("", xy=(x_val, y_true), 
-                            xytext=(x_val - 0.1, y_true + 0.1 * np.sign(residual)),
-                            arrowprops=dict(arrowstyle="->", color='orange', lw=1))
-            
-            # Style plot 1
-            ax1.set_title(f"Fold {fold_num}/{n_splits}: Model Being Evaluated", fontsize=14)
-            ax1.set_xlabel("X", fontsize=12)
-            ax1.set_ylabel("Y", fontsize=12)
-            ax1.legend()
-            ax1.grid(True, alpha=0.3)
-            
-            # Set axes limits consistently
-            ax1.set_xlim(X.min() - 0.1, X.max() + 0.1)
-            ax1.set_ylim(y.min() - 0.5, y.max() + 0.5)
-            
-            # Add accusative case text pointing to the model
-            validation_text = (
-                f"MODEL is being\nEVALUATED on\nfold {fold_num} data"
-            )
-            
-            # Position the text consistently
-            text_x = X.min() + (X.max() - X.min()) * 0.15
-            text_y = y.max() - (y.max() - y.min()) * 0.2
-            
-            ax1.text(text_x, text_y, validation_text, 
-                    bbox=dict(boxstyle="round,pad=0.3", fc="#E3F4F4", ec="blue", alpha=0.8),
-                    ha='center', va='center', fontsize=12)
-            
-            # Plot metrics on the right side
-            # Bar chart showing current fold metrics and previous folds
-            fold_nums = list(range(1, fold_num + 1))
-            mse_values = [fold_metrics[i]['mse'] for i in range(fold_num)]
-            r2_values = [fold_metrics[i]['r2'] for i in range(fold_num)]
-            
-            # Plot MSE bars
-            bar_width = 0.35
-            ax2.bar(np.array(fold_nums) - bar_width/2, mse_values, bar_width, 
-                   alpha=0.7, color='red', label='MSE')
-            
-            # Add R² on the second y-axis
-            ax2_r2 = ax2.twinx()
-            ax2_r2.bar(np.array(fold_nums) + bar_width/2, r2_values, bar_width, 
-                      alpha=0.7, color='green', label='R²')
-            
-            # Add fold average lines if we have multiple folds
-            if fold_num > 1:
-                avg_mse = np.mean(mse_values)
-                avg_r2 = np.mean(r2_values)
-                ax2.axhline(y=avg_mse, color='red', linestyle='--', alpha=0.7, 
-                          label=f'Avg MSE: {avg_mse:.4f}')
-                ax2_r2.axhline(y=avg_r2, color='green', linestyle='--', alpha=0.7,
-                             label=f'Avg R²: {avg_r2:.4f}')
-            
-            # Style plot 2
-            ax2.set_title("Cross-Validation Metrics", fontsize=14)
-            ax2.set_xlabel("Fold", fontsize=12)
-            ax2.set_ylabel("Mean Squared Error", color='red', fontsize=12)
-            ax2_r2.set_ylabel("R² Score", color='green', fontsize=12)
-            
-            # Set y-axis limits
-            if fold_num > 0:
-                max_mse = max(mse_values) * 1.2
-                ax2.set_ylim(0, max_mse)
-                ax2_r2.set_ylim(0, 1.1)
-            
-            # Add legend for both axes
-            lines1, labels1 = ax2.get_legend_handles_labels()
-            lines2, labels2 = ax2_r2.get_legend_handles_labels()
-            ax2.legend(lines1 + lines2, labels1 + labels2, loc='upper right')
-            
-            # Show fold information
-            fold_info = (
-                f"Fold {fold_num}/{n_splits}:\n"
-                f"MSE: {fold_data['mse']:.4f}\n"
-                f"R²: {fold_data['r2']:.4f}"
-            )
-            
-            ax2.text(0.05, 0.95, fold_info, transform=ax2.transAxes, fontsize=12,
-                    va='top', ha='left', bbox=dict(facecolor='white', alpha=0.8))
-            
-        else:
-            # Summary frame after showing all folds
-            ax1.clear()
-            ax2.clear()
-            
-            # Create a visual summary in ax1
-            ax1.text(0.5, 0.5, "ACCUSATIVE CASE SUMMARY\nModel as Object of Evaluation", 
-                    ha='center', va='center', fontsize=16, fontweight='bold',
-                    transform=ax1.transAxes)
-            
-            # Create subject-verb-object diagram
-            ax1.text(0.2, 0.7, "Evaluator\n(Subject)", ha='center', va='center', 
-                    fontsize=14, fontweight='bold',
-                    bbox=dict(boxstyle="round,pad=0.3", fc="lightblue", ec="blue", alpha=0.8))
-            
-            ax1.text(0.5, 0.7, "Evaluates\n(Verb)", ha='center', va='center', 
-                    fontsize=14, fontweight='bold',
-                    bbox=dict(boxstyle="round,pad=0.3", fc="lightgreen", ec="green", alpha=0.8))
-            
-            ax1.text(0.8, 0.7, "MODEL\n(Object)", ha='center', va='center', 
-                    fontsize=14, fontweight='bold',
-                    bbox=dict(boxstyle="round,pad=0.3", fc="#F8E8EE", ec="pink", alpha=0.8))
-            
-            # Add arrows
-            ax1.annotate("", xy=(0.35, 0.7), xytext=(0.2, 0.7), 
-                        xycoords='axes fraction', textcoords='axes fraction',
-                        arrowprops=dict(arrowstyle="->", color='blue', lw=2))
-            
-            ax1.annotate("", xy=(0.65, 0.7), xytext=(0.5, 0.7), 
-                        xycoords='axes fraction', textcoords='axes fraction',
-                        arrowprops=dict(arrowstyle="->", color='green', lw=2))
-            
-            # Add explanation
-            accusative_explanation = (
-                "In the ACCUSATIVE case, the model is the DIRECT OBJECT receiving the action.\n"
-                "The model is being evaluated, tested, or validated by an external agent.\n"
-                "The model experiences the action but does not perform it."
-            )
-            
-            ax1.text(0.5, 0.3, accusative_explanation, ha='center', va='center', 
-                    fontsize=12, transform=ax1.transAxes,
-                    bbox=dict(boxstyle="round,pad=0.5", fc="white", alpha=0.9))
-            
-            # Show overall performance in ax2
-            all_mse = [fold['mse'] for fold in fold_metrics]
-            all_r2 = [fold['r2'] for fold in fold_metrics]
-            avg_mse = np.mean(all_mse)
-            avg_r2 = np.mean(all_r2)
-            std_mse = np.std(all_mse)
-            std_r2 = np.std(all_r2)
-            
-            # Create a summary table
-            summary_text = (
-                "CROSS-VALIDATION SUMMARY\n\n"
-                f"Mean MSE: {avg_mse:.4f} ± {std_mse:.4f}\n"
-                f"Mean R²: {avg_r2:.4f} ± {std_r2:.4f}\n\n"
-                f"Fold-by-fold results:\n"
-            )
-            
-            for i, fold_data in enumerate(fold_metrics):
-                summary_text += f"Fold {i+1}: MSE={fold_data['mse']:.4f}, R²={fold_data['r2']:.4f}\n"
-            
-            ax2.text(0.5, 0.5, summary_text, ha='center', va='center', 
-                    fontsize=12, transform=ax2.transAxes,
-                    bbox=dict(boxstyle="round,pad=0.5", fc="white", alpha=0.9))
-            
-            # Turn off axes
-            ax1.axis('off')
-            ax2.axis('off')
+    # If animation fails, create static images
+    if not animation_success:
+        logger.warning(f"Failed to create animation at {cv_animation_path}. Creating static images instead.")
+        # Create a directory for static frames
+        frames_dir = os.path.join(case_dir, "cv_frames")
+        os.makedirs(frames_dir, exist_ok=True)
         
-        return [ax1, ax2]
+        # Save key frames as static images
+        for i in range(len(fold_indices) + 1):
+            frame_path = os.path.join(frames_dir, f"fold_{i:02d}.png")
+            update(i)
+            plt.savefig(frame_path, dpi=120, bbox_inches='tight')
     
-    # Create animation with n_splits + 1 frames (including summary)
-    anim = FuncAnimation(fig, update, frames=n_splits+1, interval=2000, blit=True)
-    
-    # Save animation
-    logger.info(f"Creating ACCUSATIVE case cross-validation animation with {n_splits+1} frames")
-    anim.save(cv_animation_path, writer='pillow', fps=1, dpi=100)
     plt.close(fig)
+    
+    # Calculate cross-validation metrics for use in the residuals animation
+    all_mse = [fold['mse'] for fold in fold_metrics]
+    all_r2 = [fold['r2'] for fold in fold_metrics]
+    avg_mse = np.mean(all_mse)
+    avg_r2 = np.mean(all_r2)
+    std_mse = np.std(all_mse)
+    std_r2 = np.std(all_r2)
     
     # 3. Residuals analysis animation - another form of model evaluation
     residuals_animation_path = os.path.join(case_dir, "residuals_analysis_animation.gif")
@@ -529,7 +418,22 @@ def test_accusative_case(linear_test_data, output_dir):
     
     # Save animation
     logger.info("Creating ACCUSATIVE case residuals analysis animation")
-    anim.save(residuals_animation_path, writer='pillow', fps=0.5, dpi=100)
+    animation_success = save_animation(anim, residuals_animation_path, fps=0.5, dpi=100)
+    
+    # If animation fails, create static images
+    if not animation_success:
+        logger.warning(f"Failed to create animation at {residuals_animation_path}. Creating static images instead.")
+        # Create a directory for static frames
+        frames_dir = os.path.join(case_dir, "residuals_frames")
+        os.makedirs(frames_dir, exist_ok=True)
+        
+        # Save key frames as static images
+        for i in range(3):
+            frame_path = os.path.join(frames_dir, f"residuals_frame_{i}.png")
+            update_residuals(i)
+            plt.savefig(frame_path, dpi=100, bbox_inches='tight')
+        
+        logger.info(f"Saved static residuals frames to {frames_dir}")
     plt.close(fig)
     
     # 4. Document all results for this case

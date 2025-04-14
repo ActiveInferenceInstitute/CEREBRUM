@@ -12,11 +12,14 @@ import imageio
 from matplotlib.animation import FuncAnimation
 from scipy.stats import norm
 import pandas as pd
+import seaborn as sns
+from sklearn.metrics import mean_squared_error, r2_score
 
 from src.models.base import Case
 from src.models.case_definitions import CaseDefinitions
 from src.models.linear_regression import LinearRegressionModel
 from src.utils.visualization import plot_case_linguistic_context
+from src.utils.animation import ensure_scalar, save_animation
 
 # Setup logging
 logger = logging.getLogger("cerebrum-vocative-test")
@@ -37,12 +40,15 @@ def test_vocative_case(linear_test_data, output_dir):
     logger.info(f"Statistical role: {case_info['statistical_role']}")
     
     # Create visuals directory
-    case_dir = os.path.join(output_dir, Case.VOCATIVE.value.lower())
+    case_dir = os.path.join(output_dir, "vocative")
     os.makedirs(case_dir, exist_ok=True)
     
     # Generate linguistic context visualization
     linguistics_path = os.path.join(case_dir, "linguistic_context.png")
     plot_case_linguistic_context(Case.VOCATIVE, linguistics_path)
+    
+    # Define animation output path
+    animation_path = os.path.join(case_dir, "vocative_communication_animation.gif")
     
     # Get data
     X, y = linear_test_data
@@ -51,11 +57,20 @@ def test_vocative_case(linear_test_data, output_dir):
     model = LinearRegressionModel(model_id=f"{Case.VOCATIVE.value}_model", case=Case.VOCATIVE)
     model.fit(X, y)
     
-    logger.info(f"Fitted VOCATIVE case model with parameters: {model._params}")
+    # Extract parameters and ensure they are scalar values, not numpy arrays
+    intercept = ensure_scalar(model._params['intercept'])
+    coefficients = model._params['coefficients']
     
-    # Extract parameters
-    intercept = model._params['intercept']
-    slope = model._params['coefficients'][0]
+    # Handle coefficients - ensure we get a scalar value for the slope
+    if isinstance(coefficients, np.ndarray):
+        if coefficients.ndim > 0:
+            slope = ensure_scalar(coefficients[0])
+        else:
+            slope = ensure_scalar(coefficients)
+    else:
+        slope = coefficients
+        
+    logger.info(f"Fitted VOCATIVE case model with parameters: {{'intercept': np.float64({intercept}), 'coefficients': array([{slope}])}}")
     
     # 1. Data points addressing the model (vocative visualization)
     vocative_path = os.path.join(case_dir, "data_addressing_model.png")
@@ -253,24 +268,38 @@ def test_vocative_case(linear_test_data, output_dir):
     # Create visualization
     fig, ax = plt.subplots(figsize=(10, 8))
     
-    # Sort by x for connecting lines
+    # Sort data by X for better visualization
     indices = np.argsort(X.flatten())
-    
-    # Check dimensionality of arrays and handle accordingly
     X_sorted = X[indices].flatten() if hasattr(X, 'shape') and len(X.shape) > 1 else np.array(X).flatten()[indices]
     
     # Handle y and y_pred based on their dimensions
     if hasattr(y, 'shape') and len(y.shape) > 1:
         y_sorted = y[indices].flatten()
     else:
-        # If y is a single value or 1D array
-        y_sorted = np.array([y] if np.isscalar(y) else y).flatten()[indices]
+        # If y is 1D array or a list
+        y_arr = np.array(y).flatten()
+        if len(y_arr) == len(indices):
+            y_sorted = y_arr[indices]
+        else:
+            # Handle the case where dimensions don't match
+            y_sorted = y_arr
     
     if hasattr(y_pred, 'shape') and len(y_pred.shape) > 1:
         y_pred_sorted = y_pred[indices].flatten()
     else:
-        # If y_pred is a single value or 1D array
-        y_pred_sorted = np.array([y_pred] if np.isscalar(y_pred) else y_pred).flatten()[indices]
+        # If y_pred is 1D array or a list
+        y_pred_arr = np.array(y_pred).flatten()
+        if len(y_pred_arr) == len(indices):
+            y_pred_sorted = y_pred_arr[indices]
+        else:
+            # Handle the case where dimensions don't match
+            y_pred_sorted = y_pred_arr
+    
+    # Ensure arrays are the same length
+    min_len = min(len(X_sorted), len(y_sorted), len(y_pred_sorted))
+    X_sorted = X_sorted[:min_len]
+    y_sorted = y_sorted[:min_len]
+    y_pred_sorted = y_pred_sorted[:min_len]
     
     # Calculate residuals after sorting
     residuals_sorted = y_sorted - y_pred_sorted
@@ -338,14 +367,42 @@ def test_vocative_case(linear_test_data, output_dir):
     # Create a function for animation frames
     fig, ax = plt.subplots(figsize=(10, 8))
     
+    # Ensure X and y are properly formatted as arrays
+    X_anim = np.array(X)
+    y_anim = np.array(y) if not np.isscalar(y) else np.array([y])
+    
+    # Handle shape for comparison
+    X_shape = X_anim.shape[0] if hasattr(X_anim, 'shape') else len(X_anim)
+    y_shape = y_anim.shape[0] if hasattr(y_anim, 'shape') else len(y_anim)
+    
+    # Ensure arrays are the same size for animation
+    if X_shape != y_shape:
+        # Find minimum size
+        min_size = min(X_shape, y_shape)
+        X_anim = X_anim[:min_size]
+        y_anim = y_anim[:min_size]
+    
+    # Calculate margins for plot limits
+    if X_anim.size > 0:
+        x_min, x_max = X_anim.min(), X_anim.max()
+        x_margin = (x_max - x_min) * 0.2 if x_max > x_min else 1.0
+    else:
+        x_min, x_max, x_margin = -1, 1, 0.4
+
+    if y_anim.size > 0:
+        y_min, y_max = y_anim.min(), y_anim.max()
+        y_margin = (y_max - y_min) * 0.2 if y_max > y_min else 1.0
+    else:
+        y_min, y_max, y_margin = -1, 1, 0.4
+    
     # Plot data points and initial regression line
-    scatter = ax.scatter(X, y, color='blue', alpha=0.7, label='Data')
+    scatter = ax.scatter(X_anim, y_anim, color='blue', alpha=0.7, label='Data')
     line, = ax.plot([], [], 'r-', linewidth=2, label='Model')
-    residual_lines = [ax.plot([], [], 'k-', alpha=0.3)[0] for _ in range(len(X))]
+    residual_lines = [ax.plot([], [], 'k-', alpha=0.3)[0] for _ in range(len(X_anim))]
     
     # Create text elements for speech bubbles
     speech_bubbles = []
-    for i in range(len(X)):
+    for i in range(len(X_anim)):
         # Create a text object for each data point
         bubble = ax.text(0, 0, '', bbox=dict(boxstyle="round,pad=0.3", fc="white", 
                                            ec="gray", alpha=0.0), visible=False)
@@ -356,11 +413,9 @@ def test_vocative_case(linear_test_data, output_dir):
                           bbox=dict(boxstyle="round,pad=0.5", fc="#E3F4F4", ec="blue", alpha=0.0),
                           ha='center', va='center', fontsize=12, visible=False)
     
-    # Set axis limits
-    x_margin = (X.max() - X.min()) * 0.2
-    y_margin = (y.max() - y.min()) * 0.2
-    ax.set_xlim(X.min() - x_margin, X.max() + x_margin)
-    ax.set_ylim(y.min() - y_margin, y.max() + y_margin)
+    # Set axis limits with safe values and expansion
+    ax.set_xlim(x_min - x_margin, x_max + x_margin)
+    ax.set_ylim(y_min - y_margin, y_max + y_margin)
     
     # Add labels and grid
     ax.set_title("VOCATIVE Case: Communication Animation", fontsize=14)
@@ -387,7 +442,7 @@ def test_vocative_case(linear_test_data, output_dir):
         if i < 20:
             # Phase 1: Draw the regression line gradually
             progress = i / 19
-            x_line = np.linspace(X.min() - x_margin, X.min() + (X.max() - X.min() + 2*x_margin) * progress, 100)
+            x_line = np.linspace(x_min - x_margin, x_min + (x_max - x_min + 2*x_margin) * progress, 100)
             y_line = intercept + slope * x_line
             line.set_data(x_line, y_line)
             
@@ -408,32 +463,50 @@ def test_vocative_case(linear_test_data, output_dir):
         elif i < 25:
             # Phase 2: Model introduction
             # Keep the regression line complete
-            x_line = np.linspace(X.min() - x_margin, X.max() + x_margin, 100)
+            x_line = np.linspace(x_min - x_margin, x_max + x_margin, 100)
             y_line = intercept + slope * x_line
             line.set_data(x_line, y_line)
             
             # Keep model bubble visible
             model_bubble.set_visible(True)
             
-        elif i < 25 + len(X):
+        elif i < 25 + len(X_anim):
             # Phase 3: Add predictions one by one
             point_idx = i - 25
             
             # Keep the regression line complete
-            x_line = np.linspace(X.min() - x_margin, X.max() + x_margin, 100)
+            x_line = np.linspace(x_min - x_margin, x_max + x_margin, 100)
             y_line = intercept + slope * x_line
             line.set_data(x_line, y_line)
             
-            # Update the model speech bubble
-            x_val = X[point_idx, 0]
-            y_true = y[point_idx, 0]
+            # Get current data point
+            if len(X_anim.shape) > 1:
+                x_val = X_anim[point_idx, 0]
+            else:
+                x_val = X_anim[point_idx]
+                
+            if len(y_anim.shape) > 1:
+                y_true = y_anim[point_idx, 0]
+            else:
+                y_true = y_anim[point_idx]
+                
             y_pred_val = intercept + slope * x_val
+            
+            # Update the model speech bubble
             model_bubble.set_text(f"Point at x={x_val:.2f}, I predict y={y_pred_val:.2f}")
             model_bubble.set_visible(True)
             
             # Show predictions up to current point
-            pred_data = np.column_stack([X[:point_idx+1], model.predict(X[:point_idx+1])])
-            pred_scatter.set_offsets(pred_data)
+            pred_data = []
+            for j in range(point_idx + 1):
+                if len(X_anim.shape) > 1:
+                    x_j = X_anim[j, 0]
+                else:
+                    x_j = X_anim[j]
+                y_j_pred = intercept + slope * x_j
+                pred_data.append([x_j, y_j_pred])
+            
+            pred_scatter.set_offsets(np.array(pred_data))
             
             # Draw residual line for current point
             residual_lines[point_idx].set_data([x_val, x_val], [y_true, y_pred_val])
@@ -446,27 +519,59 @@ def test_vocative_case(linear_test_data, output_dir):
             speech_bubbles[point_idx].set_bbox(dict(boxstyle="round,pad=0.3", fc="#F8E8EE", ec="pink", alpha=0.9))
             speech_bubbles[point_idx].set_visible(True)
             
-        elif i < 25 + len(X) + 10:
+        elif i < 25 + len(X_anim) + 10:
             # Phase 4: All predictions shown, model summarizes
             # Keep the regression line complete
-            x_line = np.linspace(X.min() - x_margin, X.max() + x_margin, 100)
+            x_line = np.linspace(x_min - x_margin, x_max + x_margin, 100)
             y_line = intercept + slope * x_line
             line.set_data(x_line, y_line)
             
             # Show all predictions
-            pred_data = np.column_stack([X, model.predict(X)])
-            pred_scatter.set_offsets(pred_data)
+            pred_data = []
+            for j in range(len(X_anim)):
+                if len(X_anim.shape) > 1:
+                    x_j = X_anim[j, 0]
+                else:
+                    x_j = X_anim[j]
+                y_j_pred = intercept + slope * x_j
+                pred_data.append([x_j, y_j_pred])
+            
+            pred_scatter.set_offsets(np.array(pred_data))
             
             # Draw all residual lines
             for j, residual_line in enumerate(residual_lines):
-                x_val = X[j, 0]
-                y_true = y[j, 0]
+                if len(X_anim.shape) > 1:
+                    x_val = X_anim[j, 0]
+                else:
+                    x_val = X_anim[j]
+                    
+                if len(y_anim.shape) > 1:
+                    y_true = y_anim[j, 0]
+                else:
+                    y_true = y_anim[j]
+                    
                 y_pred_val = intercept + slope * x_val
                 residual_line.set_data([x_val, x_val], [y_true, y_pred_val])
             
+            # Calculate residuals manually
+            residuals = []
+            for j in range(len(X_anim)):
+                if len(X_anim.shape) > 1:
+                    x_j = X_anim[j, 0]
+                else:
+                    x_j = X_anim[j]
+                    
+                if len(y_anim.shape) > 1:
+                    y_true_j = y_anim[j, 0]
+                else:
+                    y_true_j = y_anim[j]
+                    
+                y_pred_j = intercept + slope * x_j
+                residuals.append(y_true_j - y_pred_j)
+            
+            mse = np.mean(np.array(residuals)**2)
+            
             # Update model speech bubble with summary
-            residuals = y - model.predict(X)
-            mse = np.mean(residuals**2)
             model_bubble.set_text(f"Thanks for the feedback! My MSE is {mse:.4f}")
             model_bubble.set_visible(True)
             
@@ -477,18 +582,34 @@ def test_vocative_case(linear_test_data, output_dir):
         else:
             # Phase 5: Final frame - keep everything visible but change model message
             # Keep the regression line complete
-            x_line = np.linspace(X.min() - x_margin, X.max() + x_margin, 100)
+            x_line = np.linspace(x_min - x_margin, x_max + x_margin, 100)
             y_line = intercept + slope * x_line
             line.set_data(x_line, y_line)
             
             # Show all predictions
-            pred_data = np.column_stack([X, model.predict(X)])
-            pred_scatter.set_offsets(pred_data)
+            pred_data = []
+            for j in range(len(X_anim)):
+                if len(X_anim.shape) > 1:
+                    x_j = X_anim[j, 0]
+                else:
+                    x_j = X_anim[j]
+                y_j_pred = intercept + slope * x_j
+                pred_data.append([x_j, y_j_pred])
+            
+            pred_scatter.set_offsets(np.array(pred_data))
             
             # Draw all residual lines
             for j, residual_line in enumerate(residual_lines):
-                x_val = X[j, 0]
-                y_true = y[j, 0]
+                if len(X_anim.shape) > 1:
+                    x_val = X_anim[j, 0]
+                else:
+                    x_val = X_anim[j]
+                    
+                if len(y_anim.shape) > 1:
+                    y_true = y_anim[j, 0]
+                else:
+                    y_true = y_anim[j]
+                    
                 y_pred_val = intercept + slope * x_val
                 residual_line.set_data([x_val, x_val], [y_true, y_pred_val])
             
@@ -500,8 +621,16 @@ def test_vocative_case(linear_test_data, output_dir):
             for j in range(min(5, len(speech_bubbles))):
                 idx = j * len(speech_bubbles) // 5
                 if idx < len(speech_bubbles):
-                    x_val = X[idx, 0]
-                    y_true = y[idx, 0]
+                    if len(X_anim.shape) > 1:
+                        x_val = X_anim[idx, 0]
+                    else:
+                        x_val = X_anim[idx]
+                        
+                    if len(y_anim.shape) > 1:
+                        y_true = y_anim[idx, 0]
+                    else:
+                        y_true = y_anim[idx]
+                        
                     y_pred_val = intercept + slope * x_val
                     residual = y_true - y_pred_val
                     bubble_text = f"Residual: {residual:.2f}"
@@ -512,13 +641,35 @@ def test_vocative_case(linear_test_data, output_dir):
         
         return [line, *residual_lines, model_bubble, *speech_bubbles, pred_scatter]
     
-    # Create animation
-    frames = 25 + len(X) + 15  # Total number of frames
-    ani = FuncAnimation(fig, animate, frames=frames, init_func=init, blit=True)
+    # Create animation with fewer frames to avoid issues
+    num_frames = 50  # Reduced frame count
     
-    # Save animation as GIF
-    logger.info(f"Creating VOCATIVE case animation with {frames} frames")
-    ani.save(animation_path, writer='pillow', fps=5, dpi=80)
+    # Create and save animation
+    logger.info(f"Creating VOCATIVE case animation with {num_frames} frames")
+    anim = FuncAnimation(fig, animate, frames=num_frames, init_func=init, blit=True)
+    animation_success = save_animation(anim, animation_path, fps=2, dpi=120)
+    
+    # If animation fails, create a series of static images instead
+    if not animation_success:
+        logger.warning(f"Failed to create animation at {animation_path}. Creating static images instead.")
+        # Create a directory for static frames
+        frames_dir = os.path.join(case_dir, "dialogue_frames")
+        os.makedirs(frames_dir, exist_ok=True)
+        
+        # Save key frames as static images
+        for i in [0, 10, 20, 30, 40]:
+            frame_path = os.path.join(frames_dir, f"frame_{i:02d}.png")
+            # Temporarily clear the axis
+            plt.figure(fig.number)
+            animate(i)
+            plt.savefig(frame_path, dpi=120, bbox_inches='tight')
+            logger.info(f"Saved static frame to {frame_path}")
+            
+        # Add a note about static frames
+        with open(os.path.join(case_dir, "animation_note.txt"), 'w') as f:
+            f.write("Animation could not be generated as a GIF. Please see the 'dialogue_frames' directory for static images.")
+            f.write("\n\nTo view the animation sequence, open the numbered frame images in order.")
+    
     plt.close(fig)
     
     # 5. Document all results for this case
@@ -537,11 +688,19 @@ def test_vocative_case(linear_test_data, output_dir):
         
         # Calculate residuals and statistics
         y_pred = model.predict(X)
-        residuals = y - y_pred
+        y_pred_array = np.array(y_pred)
+        y_array = np.array(y)
+        residuals = y_array - y_pred_array
         mse = np.mean(residuals**2)
         rmse = np.sqrt(mse)
         mae = np.mean(np.abs(residuals))
-        r_squared = 1 - np.sum(residuals**2) / np.sum((y - np.mean(y))**2)
+        
+        # Handle potential division by zero in R²
+        ss_total = np.sum((y_array - np.mean(y_array))**2)
+        if ss_total > 0:
+            r_squared = 1 - np.sum(residuals**2) / ss_total
+        else:
+            r_squared = 0  # Default if total sum of squares is zero
         
         f.write(f"Communication Analysis (VOCATIVE Case):\n")
         f.write(f"- Data-to-Model Communication: Residuals represent 'messages' from data to model\n")
@@ -566,12 +725,10 @@ def test_vocative_case(linear_test_data, output_dir):
         f.write(f"   - Input features address the coefficients (slope)\n")
         f.write(f"   - Coefficients address the prediction function\n")
         f.write(f"   - Intercept addresses the prediction independently\n\n")
-        
-        f.write(f"3. Summary of Communication Effectiveness:\n")
-        f.write(f"   - Overall quality of communication: {'Good' if r_squared > 0.7 else 'Moderate' if r_squared > 0.4 else 'Poor'}\n")
-        f.write(f"   - Clarity of model's message: {'Clear' if rmse < 1.0 else 'Somewhat clear' if rmse < 2.0 else 'Unclear'}\n")
-        f.write(f"   - Communication consistency: {'Consistent' if np.std(residuals) < 1.0 else 'Variable'}\n")
     
-    logger.info(f"Completed VOCATIVE case test with visualizations in {case_dir}")
-    
-    return model 
+    return {
+        'model': model,
+        'intercept': intercept,
+        'slope': slope,
+        'case_dir': case_dir
+    } 

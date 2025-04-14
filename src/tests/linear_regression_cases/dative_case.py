@@ -9,11 +9,19 @@ import logging
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from sklearn.metrics import r2_score
 
 from src.models.base import Case
 from src.models.case_definitions import CaseDefinitions
 from src.models.linear_regression import LinearRegressionModel
-from src.utils.visualization import plot_case_linguistic_context
+from src.utils.animation import save_animation
+from src.utils.visualization import (
+    plot_case_linguistic_context,
+    visualize_causal_mechanism
+)
+
+# Prevent interactive display
+plt.ioff()
 
 # Setup logging
 logger = logging.getLogger("cerebrum-dative-test")
@@ -34,7 +42,7 @@ def test_dative_case(linear_test_data, output_dir):
     logger.info(f"Statistical role: {case_info['statistical_role']}")
     
     # Create visuals directory
-    case_dir = os.path.join(output_dir, Case.DATIVE.value.lower())
+    case_dir = os.path.join(output_dir, "dative")
     os.makedirs(case_dir, exist_ok=True)
     
     # Generate linguistic context visualization
@@ -116,8 +124,25 @@ def test_dative_case(linear_test_data, output_dir):
     # Save final animation
     animation_path = os.path.join(case_dir, "data_receiving_animation.gif")
     anim = FuncAnimation(fig, animate_data_receiving, frames=n_batches, interval=1000)
-    anim.save(animation_path, writer='pillow', fps=1, dpi=100)
-    plt.close(fig)
+    
+    # Save animation
+    logger.info("Creating DATIVE case animation")
+    animation_success = save_animation(anim, animation_path, fps=4, dpi=100)
+    
+    # If animation fails, create static images
+    if not animation_success:
+        logger.warning(f"Failed to create animation at {animation_path}. Creating static images instead.")
+        # Create a directory for static frames
+        frames_dir = os.path.join(case_dir, "dative_frames")
+        os.makedirs(frames_dir, exist_ok=True)
+        
+        # Save key frames as static images
+        for i in range(0, 24, 4):  # Save every 4th frame
+            frame_path = os.path.join(frames_dir, f"dative_frame_{i:02d}.png")
+            animate_data_receiving(i)
+            plt.savefig(frame_path, dpi=100, bbox_inches='tight')
+        
+        logger.info(f"Saved static frames to {frames_dir}")
     
     # 4. Process the received data (DATIVE case action)
     logger.info(f"DATIVE case: Model processing received data")
@@ -149,34 +174,88 @@ def test_dative_case(linear_test_data, output_dir):
     
     # 6. Fit a reference model with the processed data
     reference_model = LinearRegressionModel(model_id="reference_for_dative", case=Case.NOMINATIVE)
-    reference_model.fit(X_processed, y_processed)
     
-    # 7. Evaluate on test data
-    metrics = reference_model.evaluate(X_test, y_test)
+    # Only fit if we have data
+    X_combined = np.array(X_processed)
+    y_combined = np.array(y_processed)
     
-    # 8. Document all outputs for this case
-    with open(os.path.join(case_dir, "dative_results.txt"), 'w') as f:
-        f.write(f"DATIVE CASE RESULTS\n")
-        f.write(f"===================\n\n")
-        f.write(f"Linguistic meaning: {case_info['linguistic_meaning']}\n")
-        f.write(f"Statistical role: {case_info['statistical_role']}\n")
-        f.write(f"Regression context: {case_info['regression_context']}\n\n")
+    # Ensure we have data before fitting
+    if len(X_combined) > 0 and len(y_combined) > 0:
+        reference_model.fit(X_combined, y_combined)
         
-        f.write(f"Data Processing Summary:\n")
-        f.write(f"- Original data: {len(X_train)} training points\n")
-        f.write(f"- Processed in {n_batches} batches of ~{batch_size} points each\n")
-        f.write(f"- Mean of original y: {np.mean(y_train):.4f}\n")
-        f.write(f"- Mean of processed y: {np.mean(y_processed):.4f}\n")
-        f.write(f"- Standard deviation change: {np.std(y_train):.4f} → {np.std(y_processed):.4f}\n\n")
-        
-        f.write(f"Model Results (after receiving data):\n")
-        f.write(f"- R²: {metrics['r2']:.4f}\n")
-        f.write(f"- MSE: {metrics['mse']:.4f}\n")
-        f.write(f"- MAE: {metrics['mae']:.4f}\n\n")
-        
-        f.write(f"Linguistic Formula Example:\n")
-        f.write(f"{case_info['example']}\n\n")
+        # Check that X_test is not empty before predicting
+        if X_test.size > 0:
+            y_pred_ref = reference_model.predict(X_test)
             
+            # Calculate metrics
+            mse_ref = np.mean((y_test - y_pred_ref) ** 2)
+            r2_ref = r2_score(y_test, y_pred_ref)
+        else:
+            logger.warning("X_test is empty. Cannot calculate reference model predictions.")
+            mse_ref = None
+            r2_ref = None
+        
+        with open(os.path.join(case_dir, "dative_results.txt"), 'w') as f:
+            f.write(f"DATIVE CASE RESULTS\n")
+            f.write(f"===================\n\n")
+            f.write(f"Linguistic meaning: {case_info['linguistic_meaning']}\n")
+            f.write(f"Statistical role: {case_info['statistical_role']}\n")
+            f.write(f"Regression context: {case_info['regression_context']}\n\n")
+            
+            f.write(f"Data Processing Summary:\n")
+            f.write(f"- Original data: {len(X_train)} training points\n")
+            f.write(f"- Processed in {n_batches} batches of ~{batch_size} points each\n")
+            f.write(f"- Mean of original y: {np.mean(y_train):.4f}\n")
+            f.write(f"- Mean of processed y: {np.mean(y_processed):.4f}\n")
+            f.write(f"- Standard deviation change: {np.std(y_train):.4f} → {np.std(y_processed):.4f}\n\n")
+            
+            f.write(f"Model Results (after receiving data):\n")
+            if mse_ref is not None and r2_ref is not None:
+                f.write(f"- R²: {r2_ref:.4f}\n")
+                f.write(f"- MSE: {mse_ref:.4f}\n")
+                f.write(f"- MAE: {np.mean(np.abs(y_test - y_pred_ref)):.4f}\n\n")
+            else:
+                f.write(f"- R²: Not available (empty test set)\n")
+                f.write(f"- MSE: Not available (empty test set)\n")
+                f.write(f"- MAE: Not available (empty test set)\n\n")
+            
+            f.write(f"Linguistic Formula Example:\n")
+            f.write(f"{case_info['example']}\n\n")
+            
+            f.write(f"\nReference model (trained on all data):\n")
+            if mse_ref is not None and r2_ref is not None:
+                f.write(f"- MSE: {mse_ref:.6f}\n")
+                f.write(f"- R²: {r2_ref:.6f}\n")
+            else:
+                f.write(f"- MSE: Not available (empty test set)\n")
+                f.write(f"- R²: Not available (empty test set)\n")
+    else:
+        # Handle the case when no data is available
+        logger.warning("Not enough data to fit reference model")
+        with open(os.path.join(case_dir, "dative_results.txt"), 'w') as f:
+            f.write(f"DATIVE CASE RESULTS\n")
+            f.write(f"===================\n\n")
+            f.write(f"Linguistic meaning: {case_info['linguistic_meaning']}\n")
+            f.write(f"Statistical role: {case_info['statistical_role']}\n")
+            f.write(f"Regression context: {case_info['regression_context']}\n\n")
+            
+            f.write(f"Data Processing Summary:\n")
+            f.write(f"- Original data: {len(X_train)} training points\n")
+            f.write(f"- Processed in {n_batches} batches of ~{batch_size} points each\n")
+            f.write(f"- Mean of original y: {np.mean(y_train):.4f}\n")
+            f.write(f"- Mean of processed y: {np.mean(y_processed):.4f}\n")
+            f.write(f"- Standard deviation change: {np.std(y_train):.4f} → {np.std(y_processed):.4f}\n\n")
+            
+            f.write(f"Model Results (after receiving data):\n")
+            f.write(f"- R²: Not available (insufficient data)\n")
+            f.write(f"- MSE: Not available (insufficient data)\n")
+            f.write(f"- MAE: Not available (insufficient data)\n\n")
+            
+            f.write(f"Linguistic Formula Example:\n")
+            f.write(f"{case_info['example']}\n\n")
+            
+            f.write(f"\nReference model: Not fitted (insufficient data)\n")
+    
     logger.info(f"Completed DATIVE case test with visualizations in {case_dir}")
     
     return model 

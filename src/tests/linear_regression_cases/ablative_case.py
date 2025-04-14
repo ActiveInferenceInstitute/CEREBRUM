@@ -16,7 +16,11 @@ import seaborn as sns
 from src.models.base import Case
 from src.models.case_definitions import CaseDefinitions
 from src.models.linear_regression import LinearRegressionModel
+from src.utils.animation import save_animation
 from src.utils.visualization import plot_case_linguistic_context
+
+# Prevent interactive display
+plt.ioff()
 
 # Setup logging
 logger = logging.getLogger("cerebrum-ablative-test")
@@ -37,7 +41,7 @@ def test_ablative_case(linear_test_data, output_dir):
     logger.info(f"Statistical role: {case_info['statistical_role']}")
     
     # Create visuals directory
-    case_dir = os.path.join(output_dir, Case.ABLATIVE.value.lower())
+    case_dir = os.path.join(output_dir, "ablative")
     os.makedirs(case_dir, exist_ok=True)
     
     # Generate linguistic context visualization
@@ -132,14 +136,24 @@ def test_ablative_case(linear_test_data, output_dir):
     # 2. Animation: Showing data flowing FROM the model (source) to different outputs
     source_animation_path = os.path.join(case_dir, "ablative_source_animation.gif")
     
-    # Create animation
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
+    # Create a directory for individual frames as fallback
+    frames_dir = os.path.join(case_dir, "prediction_frames")
+    os.makedirs(frames_dir, exist_ok=True)
     
+    # Create animation with better setup
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8), facecolor='white')
+    
+    # Create fixed data for consistent plotting
     # Generate data for different transformations
     np.random.seed(42)
     
     # Original predictions
     base_predictions = model.predict(X)
+    
+    # Set up consistent axis limits based on data
+    x_min, x_max = X.min() - 0.5, X.max() + 0.5
+    y_overall_min = min(y.min(), base_predictions.min()) - 2.0
+    y_overall_max = max(y.max(), base_predictions.max()) + 2.0
     
     # 1. Add noise to show variation from source
     noise_levels = [0.0, 0.2, 0.5, 1.0, 2.0]
@@ -158,11 +172,31 @@ def test_ablative_case(linear_test_data, output_dir):
         # Scale predictions by factor
         scaled_predictions.append(base_predictions * scale)
     
-    # Define animation update function
+    # Prepare model line once for reuse
+    x_range = np.linspace(X.min(), X.max(), 100).reshape(-1, 1)
+    y_range = model.predict(x_range)
+    
+    # Initialize elements that will be animated
+    scatter_orig = ax1.scatter([], [], alpha=0.5, color='blue', label='Original Data')
+    scatter_pred = ax1.scatter([], [], alpha=0.7, color='red', label='Predictions')
+    line_model, = ax1.plot([], [], 'r-', linewidth=2, label='Model')
+    
+    # Initialize arrow annotation
+    arrow = None
+    
+    # Initialize info text elements
+    info_text = ax1.text(0.05, 0.95, "", transform=ax1.transAxes, fontsize=12,
+                   va='top', ha='left', bbox=dict(facecolor='white', alpha=0.8))
+    
+    # Define animation update function with improved error handling
     def update(frame):
-        # Clear axes
+        # Clear only content, not the axes themselves
         ax1.clear()
         ax2.clear()
+        
+        # Set consistent axis limits
+        ax1.set_xlim(x_min, x_max)
+        ax1.set_ylim(y_overall_min, y_overall_max)
         
         # For the first set of frames, show noise transformations
         if frame < len(noise_levels):
@@ -208,11 +242,6 @@ def test_ablative_case(linear_test_data, output_dir):
             ax1.legend()
             ax1.grid(True, alpha=0.3)
             
-            # Set axes limits consistently
-            y_min = min(y.min(), current_predictions.min()) - 0.5
-            y_max = max(y.max(), current_predictions.max()) + 0.5
-            ax1.set_ylim(y_min, y_max)
-            
             # Add ablative explanation
             source_text = (
                 "ABLATIVE CASE: MODEL AS SOURCE\n\n"
@@ -250,7 +279,7 @@ def test_ablative_case(linear_test_data, output_dir):
             
             ax2.text(0.95, 0.95, metrics_text, transform=ax2.transAxes, fontsize=12,
                     va='top', ha='right', bbox=dict(facecolor='white', alpha=0.8))
-            
+        
         # For the second set of frames, show scaling transformations
         elif frame < len(noise_levels) + len(scaling_factors):
             # Get current scaling factor
@@ -299,11 +328,6 @@ def test_ablative_case(linear_test_data, output_dir):
             ax1.set_ylabel("Y", fontsize=12)
             ax1.legend()
             ax1.grid(True, alpha=0.3)
-            
-            # Set axes limits consistently
-            y_min = min(y.min(), current_predictions.min()) - 0.5
-            y_max = max(y.max(), current_predictions.max()) + 0.5
-            ax1.set_ylim(y_min, y_max)
             
             # Add ablative explanation
             source_text = (
@@ -426,16 +450,42 @@ def test_ablative_case(linear_test_data, output_dir):
                     transform=ax2.transAxes, fontsize=14,
                     bbox=dict(boxstyle="round,pad=0.5", fc="white", alpha=0.9))
         
+        # Save the current frame as a backup (in case animation fails)
+        frame_path = os.path.join(frames_dir, f"frame_{frame:02d}.png")
+        plt.savefig(frame_path, dpi=100, bbox_inches='tight')
+        
         return [ax1, ax2]
     
-    # Create animation with all frames (noise + scaling + summary)
-    total_frames = len(noise_levels) + len(scaling_factors) + 1
-    anim = FuncAnimation(fig, update, frames=total_frames, interval=2000, blit=True)
+    # Calculate the total number of frames and limit to a reasonable number
+    total_frames = min(12, len(noise_levels) + len(scaling_factors) + 1)
     
-    # Save animation
-    logger.info(f"Creating ABLATIVE case animation with {total_frames} frames")
-    anim.save(source_animation_path, writer='pillow', fps=1, dpi=100)
-    plt.close(fig)
+    try:
+        # Create and save animation with consistent settings
+        logger.info(f"Creating ABLATIVE case animation with {total_frames} frames")
+        anim = FuncAnimation(fig, update, frames=total_frames, interval=2000, blit=False)
+        animation_success = save_animation(anim, source_animation_path, fps=1, dpi=100)
+        
+        # If animation fails, create static images
+        if not animation_success:
+            logger.warning(f"Failed to create animation at {source_animation_path}. Creating static images instead.")
+            # Create a directory for static frames
+            frames_dir = os.path.join(case_dir, "ablative_frames")
+            os.makedirs(frames_dir, exist_ok=True)
+            
+            # Save key frames as static images
+            for i in range(0, total_frames, 2):  # Save every other frame
+                frame_path = os.path.join(frames_dir, f"ablative_frame_{i:02d}.png")
+                update(i)
+                plt.savefig(frame_path, dpi=100, bbox_inches='tight')
+            
+            logger.info(f"Saved static frames to {frames_dir}")
+        else:
+            logger.info(f"Successfully saved animation to {source_animation_path}")
+    except Exception as e:
+        logger.error(f"Error saving animation to {source_animation_path}: {str(e)}")
+        logger.info(f"Falling back to individual frames saved in {frames_dir}")
+    finally:
+        plt.close(fig)
     
     # 3. Cause-effect analysis showing model as origin of outcomes
     causal_path = os.path.join(case_dir, "causal_analysis.png")

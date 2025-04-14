@@ -9,12 +9,14 @@ import logging
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+import pandas as pd
 from sklearn.metrics import mean_squared_error, r2_score
 
 from src.models.base import Case
 from src.models.case_definitions import CaseDefinitions
 from src.models.linear_regression import LinearRegressionModel
 from src.utils.visualization import plot_case_linguistic_context
+from src.utils.animation import save_animation
 
 # Setup logging
 logger = logging.getLogger("cerebrum-nominative-test")
@@ -35,7 +37,7 @@ def test_nominative_case(linear_test_data, output_dir):
     logger.info(f"Statistical role: {case_info['statistical_role']}")
     
     # Create visuals directory
-    case_dir = os.path.join(output_dir, Case.NOMINATIVE.value.lower())
+    case_dir = os.path.join(output_dir, "nominative")
     os.makedirs(case_dir, exist_ok=True)
     
     # Generate linguistic context visualization
@@ -160,94 +162,160 @@ def test_nominative_case(linear_test_data, output_dir):
     
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
     
-    # Define animation update function
+    # Set explicit figure background color for better animation
+    fig.patch.set_facecolor('white')
+    
+    # Sort X for smooth line plotting
+    X_sorted = np.sort(X, axis=0)
+    
+    # Plot settings
+    ax1.set_xlabel("X")
+    ax1.set_ylabel("Y")
+    ax1.set_title("Model Fitting Process (NOMINATIVE Case)")
+    ax1.grid(True, alpha=0.3)
+    
+    ax2.set_xlabel("Iteration")
+    ax2.set_ylabel("Cost (MSE)")
+    ax2.set_title("Cost Function")
+    ax2.grid(True, alpha=0.3)
+    
+    # Plot data
+    scatter = ax1.scatter(X, y, color='blue', alpha=0.6, label='Data')
+    
+    # Set fixed axis limits for better animation
+    x_min, x_max = X.min()-0.5, X.max()+0.5
+    y_min, y_max = y.min()-0.5, y.max()+0.5
+    ax1.set_xlim(x_min, x_max)
+    ax1.set_ylim(y_min, y_max)
+    
+    # Set fixed cost axis limits
+    cost_min, cost_max = min(cost_history), max(cost_history)
+    margin = (cost_max - cost_min) * 0.1
+    ax2.set_xlim(0, len(cost_history))
+    ax2.set_ylim(max(0, cost_min - margin), cost_max + margin)
+    
+    # Initialize animated elements
+    line, = ax1.plot([], [], 'r-', lw=2, label='Model')
+    cost_line, = ax2.plot([], [], 'g-', lw=2)
+    
+    # Initialize text elements for parameter updates
+    theta_text = ax1.text(0.02, 0.95, '', transform=ax1.transAxes,
+                     bbox=dict(facecolor='white', alpha=0.8))
+    
+    # Initialize annotation for "active model" representation
+    agent_annotation = ax1.annotate("", xy=(0, 0), xytext=(0, 0),
+                               arrowprops=dict(arrowstyle="->", color='green', lw=2, alpha=0))
+    
+    # Add legends for both axes
+    ax1.legend(loc='lower right')
+    
+    # Animation initialization function
+    def init():
+        line.set_data([], [])
+        cost_line.set_data([], [])
+        theta_text.set_text("")
+        agent_annotation.set_alpha(0)
+        return line, cost_line, theta_text, agent_annotation
+    
+    # Animation update function with safeguards
     def update(frame):
-        # Clear the axes
-        ax1.clear()
-        ax2.clear()
+        # Ensure frame index is valid
+        frame_idx = min(frame, len(theta_history) - 1)
         
         # Get current parameters
-        theta = theta_history[frame]
-        intercept_val = theta[0, 0]
-        slope_val = theta[1, 0]
+        theta = theta_history[frame_idx]
+        intercept, slope = theta[0, 0], theta[1, 0]
         
-        # Plot data
-        ax1.scatter(X, y, alpha=0.7, color='blue', label='Data Points')
+        # Update model line
+        x_line = np.linspace(x_min, x_max, 100)
+        y_line = intercept + slope * x_line
+        line.set_data(x_line, y_line)
         
-        # Plot current line
-        x_line = np.linspace(X.min(), X.max(), 100).reshape(-1, 1)
-        X_line_b = np.c_[np.ones((100, 1)), x_line]
-        y_line = X_line_b.dot(theta)
-        ax1.plot(x_line, y_line, 'r-', linewidth=2, 
-                label=f'Iteration {frame}: y = {intercept_val:.4f} + {slope_val:.4f}x')
+        # Update cost plot
+        if frame_idx > 0:
+            iterations = range(frame_idx + 1)
+            costs = cost_history[:frame_idx + 1]
+            cost_line.set_data(iterations, costs)
         
-        # Add active verbs to show model is the subject performing actions
-        iter_text = (
-            f"Iteration {frame}:\n"
-            f"Model COMPUTES predictions\n"
-            f"Model MEASURES error\n"
-            f"Model ADJUSTS parameters\n"
-            f"Model REDUCES cost\n"
-        )
+        # Update parameters text
+        cost_val = cost_history[frame_idx] if frame_idx < len(cost_history) else cost_history[-1]
+        theta_text.set_text(f"Iteration: {frame_idx}\nIntercept: {intercept:.4f}\nSlope: {slope:.4f}\nMSE: {cost_val:.4f}")
         
-        ax1.text(0.02, 0.98, iter_text, transform=ax1.transAxes, fontsize=10,
-                va='top', ha='left', bbox=dict(facecolor='white', alpha=0.8))
+        # Update agent annotation - make the model "move" around the parameter space
+        if frame_idx > 0 and frame_idx < len(theta_history):
+            prev_idx = max(0, frame_idx-1)
+            prev_theta = theta_history[prev_idx]
+            curr_theta = theta
+            
+            # Project this movement onto the data space for visualization
+            mid_x = np.mean(X)
+            prev_y = prev_theta[0, 0] + prev_theta[1, 0] * mid_x
+            curr_y = curr_theta[0, 0] + curr_theta[1, 0] * mid_x
+            
+            # Make arrow indicating model movement direction
+            agent_annotation.xy = (mid_x, curr_y)
+            agent_annotation.xytext = (mid_x, prev_y)
+            agent_annotation.set_alpha(0.7)
+        else:
+            agent_annotation.set_alpha(0)
         
-        # Style plot 1
-        ax1.set_title("NOMINATIVE Case: Model Actively Fitting Data", fontsize=14)
-        ax1.set_xlabel("X", fontsize=12)
-        ax1.set_ylabel("Y", fontsize=12)
-        ax1.legend()
-        ax1.grid(True, alpha=0.3)
+        return line, cost_line, theta_text, agent_annotation
+    
+    # Create and save animation
+    num_frames = min(20, len(theta_history))  # Reduce number of frames for better compatibility
+    frame_indices = np.linspace(0, len(theta_history)-1, num_frames, dtype=int)
+    
+    anim = FuncAnimation(fig, update, frames=frame_indices, 
+                      init_func=init, blit=True)
+    
+    # Save using our improved animation utility
+    logger.info(f"Creating NOMINATIVE case gradient descent animation with {num_frames} frames")
+    animation_success = save_animation(anim, animation_path, fps=3, dpi=120)
+    
+    if not animation_success:
+        logger.warning(f"Failed to create animation at {animation_path}. Creating a static visualization instead.")
+        # Create a final static frame as fallback
+        static_path = os.path.join(case_dir, "gradient_descent_static.png")
+        
+        # Get final parameters
+        final_theta = theta_history[-1]
+        final_intercept, final_slope = final_theta[0, 0], final_theta[1, 0]
+        
+        # Create static visualization
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
+        
+        # Plot data and final model
+        ax1.scatter(X, y, color='blue', alpha=0.6, label='Data')
+        x_line = np.linspace(X.min()-0.5, X.max()+0.5, 100)
+        y_line = final_intercept + final_slope * x_line
+        ax1.plot(x_line, y_line, 'r-', lw=2, label='Final Model')
         
         # Plot cost history
-        if frame > 0:
-            iterations = list(range(frame))
-            costs = cost_history[:frame]
-            ax2.plot(iterations, costs, 'b-', linewidth=2)
-            ax2.scatter(iterations, costs, color='blue')
-            
-            # Highlight the current point
-            if frame > 0:
-                ax2.scatter([frame-1], [cost_history[frame-1]], color='red', s=100, zorder=10)
-                
-                # Add arrow to show the direction of progress
-                if frame > 1:
-                    ax2.annotate('', xy=(frame-1, cost_history[frame-1]), 
-                                xytext=(frame-2, cost_history[frame-2]),
-                                arrowprops=dict(arrowstyle='->', color='green', lw=2))
+        ax2.plot(range(len(cost_history)), cost_history, 'g-', lw=2)
         
-        # Add cost info
-        if frame > 0:
-            cost_info = (
-                f"Current cost: {cost_history[frame-1]:.4f}\n"
-                f"Initial cost: {cost_history[0]:.4f}\n"
-                f"Improvement: {(1 - cost_history[frame-1]/cost_history[0])*100:.1f}%"
-            )
-            ax2.text(0.02, 0.98, cost_info, transform=ax2.transAxes, fontsize=10,
-                    va='top', ha='left', bbox=dict(facecolor='white', alpha=0.8))
+        # Add text and annotations
+        ax1.text(0.02, 0.95, f"Final Parameters:\nIntercept: {final_intercept:.4f}\nSlope: {final_slope:.4f}\nMSE: {cost_history[-1]:.4f}",
+                transform=ax1.transAxes, bbox=dict(facecolor='white', alpha=0.5))
         
-        # Style plot 2
-        ax2.set_title("Cost Reduction over Iterations", fontsize=14)
-        ax2.set_xlabel("Iteration", fontsize=12)
-        ax2.set_ylabel("Cost (MSE)", fontsize=12)
+        # Add warning about animation failure
+        fig.suptitle("Gradient Descent Optimization (Static Version - Animation Failed)", fontsize=14)
+        
+        # Set labels and grid
+        ax1.set_xlabel("X")
+        ax1.set_ylabel("Y")
+        ax1.set_title("Final Model Fit")
+        ax1.grid(True, alpha=0.3)
+        ax1.legend()
+        
+        ax2.set_xlabel("Iteration")
+        ax2.set_ylabel("Cost (MSE)")
+        ax2.set_title("Cost Function History")
         ax2.grid(True, alpha=0.3)
         
-        if frame > 0:
-            # Try to set y-axis limits reasonably
-            y_min = min(cost_history[:frame])
-            y_max = max(cost_history[:frame])
-            buffer = (y_max - y_min) * 0.1
-            ax2.set_ylim([max(0, y_min - buffer), y_max + buffer])
-        
-        return [ax1, ax2]
+        plt.tight_layout()
+        plt.savefig(static_path, dpi=100, bbox_inches='tight')
+        plt.close(fig)
     
-    # Create animation
-    anim = FuncAnimation(fig, update, frames=len(theta_history), interval=200, blit=True)
-    
-    # Save animation
-    logger.info(f"Creating NOMINATIVE case animation with {len(theta_history)} frames")
-    anim.save(animation_path, writer='pillow', fps=3, dpi=100)
     plt.close(fig)
     
     # 3. Create a visualization showing the "subject -> verb -> object" structure

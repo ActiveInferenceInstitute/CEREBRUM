@@ -7,13 +7,20 @@ Tests the LOCATIVE case in the linear regression context
 import os
 import logging
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+from mpl_toolkits.mplot3d import Axes3D
+from sklearn.metrics import mean_squared_error, r2_score
 
 from src.models.base import Case
 from src.models.case_definitions import CaseDefinitions
 from src.models.linear_regression import LinearRegressionModel
+from src.utils.animation import save_animation
 from src.utils.visualization import plot_case_linguistic_context
+
+# Prevent interactive display
+plt.ioff()
 
 # Setup logging
 logger = logging.getLogger("cerebrum-locative-test")
@@ -34,7 +41,7 @@ def test_locative_case(linear_test_data, output_dir):
     logger.info(f"Statistical role: {case_info['statistical_role']}")
     
     # Create visuals directory
-    case_dir = os.path.join(output_dir, Case.LOCATIVE.value.lower())
+    case_dir = os.path.join(output_dir, "locative")
     os.makedirs(case_dir, exist_ok=True)
     
     # Generate linguistic context visualization
@@ -251,8 +258,24 @@ def test_locative_case(linear_test_data, output_dir):
     
     # Create and save the animation
     anim = FuncAnimation(fig, update, frames=n_steps, blit=True)
-    anim.save(parameter_path, writer='pillow', fps=3, dpi=100)
-    plt.close(fig)
+    
+    # Save animation
+    animation_success = save_animation(anim, parameter_path, fps=3, dpi=100)
+    
+    # If animation fails, create static images
+    if not animation_success:
+        logger.warning(f"Failed to create animation at {parameter_path}. Creating static images instead.")
+        # Create a directory for static frames
+        frames_dir = os.path.join(case_dir, "locative_frames")
+        os.makedirs(frames_dir, exist_ok=True)
+        
+        # Save key frames as static images
+        for i in range(0, n_steps, max(1, n_steps//5)):  # Save a subset of frames
+            frame_path = os.path.join(frames_dir, f"locative_frame_{i:02d}.png")
+            update(i)
+            plt.savefig(frame_path, dpi=100, bbox_inches='tight')
+        
+        logger.info(f"Saved static frames to {frames_dir}")
     
     # Create a zoomed-in visualization of the parameter space vicinity around the optimal parameters
     vicinity_path = os.path.join(case_dir, "parameter_vicinity.png")
