@@ -2,6 +2,22 @@
 
 This guide helps new developers get started with the CEREBRUM framework. It covers setting up the development environment, installing dependencies, and building a simple CEREBRUM model.
 
+## Table of Contents
+
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+  - [Python Implementation](#python-implementation)
+  - [JavaScript Implementation](#javascript-implementation)
+  - [Rust Implementation](#rust-implementation)
+- [Your First CEREBRUM Model](#your-first-cerebrum-model)
+  - [Python Example](#python-example)
+  - [Using the Model](#using-the-model)
+- [Key Components](#key-components)
+- [Development Workflow](#development-workflow)
+- [Contributing to CEREBRUM](#contributing-to-cerebrum)
+- [Next Steps](#next-steps)
+- [Troubleshooting](#troubleshooting)
+
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
@@ -12,6 +28,8 @@ Before you begin, ensure you have the following installed:
 - Git for version control
 
 ## Installation
+
+Choose the implementation language that best suits your project and follow the corresponding installation instructions.
 
 ### Python Implementation
 
@@ -68,7 +86,7 @@ Before you begin, ensure you have the following installed:
 
 ## Your First CEREBRUM Model
 
-Let's create a simple temperature model that can transform between different cases.
+Let's create a simple temperature model that can transform between different cases. This example demonstrates the core concepts of CEREBRUM including case transformations and role-specific behaviors.
 
 ### Python Example
 
@@ -210,6 +228,19 @@ print(f"System status: {report['system_status']}")
 print(f"Efficiency: {report['efficiency']}%")
 ```
 
+#### Expected Output
+
+```
+Predicted temperature: 72.5°F
+System state: heating
+Update status: success
+Updated parameters: {'current_temp': 68.0, 'target_temp': 72.0}
+Current temperature: 68.0°F
+Target temperature: 72.0°F
+System status: heating
+Efficiency: 80.0%
+```
+
 ## Key Components
 
 When working with CEREBRUM, keep these key components in mind:
@@ -297,11 +328,12 @@ If you're interested in contributing to CEREBRUM, we welcome contributions acros
 
 1. Choose an area that matches your interests and skills
 2. Check the GitHub issues for "good first issue" tags
-3. Read the [CONTRIBUTING.md](https://github.com/ActiveInferenceInstitute/CEREBRUM/blob/main/CONTRIBUTING.md) document for detailed guidelines
+3. Read our contribution guides:
+   - [Technical Contributions](contributing_technical.md)
+   - [Research Contributions](contributing_research.md)
+   - [Documentation Contributions](contributing_documentation.md)
 4. Join our community channels to connect with other contributors
 5. Start with small contributions to familiarize yourself with the codebase
-
-For more detailed information about contribution opportunities, please see our comprehensive [contribution guide](https://github.com/ActiveInferenceInstitute/CEREBRUM/blob/main/CONTRIBUTING.md).
 
 ## Next Steps
 
@@ -310,17 +342,36 @@ After building your first model, explore these advanced topics:
 1. [Active Inference Integration](active_inference_integration.md): Learn how to apply free energy principles
 2. [Model Examples](model_examples.md): Study more complex example implementations
 3. [Core Specification](cerebrum_core_spec.md): Understand the complete framework architecture
+4. [Language Nuance Handling](language_nuance_handling.md): Explore linguistic features and capabilities
+5. [Implementation Roadmap](implementation_roadmap.md): Learn about upcoming features and improvements
 
 ## Troubleshooting
 
 ### Common Issues
 
 1. **Case transformation errors**: Ensure your model supports the target case
+   ```python
+   # Check supported cases
+   print(f"Supported cases: {[case.abbreviation for case in model.supported_cases]}")
+   ```
+
 2. **Prediction/update errors**: Check that you've implemented the appropriate methods for each case
+   ```python
+   # Debug case-specific method dispatch
+   print(f"Current case: {model.current_case.abbreviation}")
+   if model.current_case.abbreviation == 'NOM':
+       print("Using nominative prediction method")
+   ```
+
 3. **Registry errors**: Verify that your model is properly registered with the correct initial case
+   ```python
+   # Verify model registration
+   registered_model = registry.get_model(model.model_id)
+   print(f"Is registered: {registered_model is not None}")
+   ```
 
 ### Getting Help
 
 - Check the [GitHub Issues](https://github.com/ActiveInferenceInstitute/CEREBRUM/issues) for known problems
-- Join the community discussion forum
+- Join the [community discussion forum](https://github.com/ActiveInferenceInstitute/CEREBRUM/discussions)
 - Review the detailed documentation in the `docs/` directory 

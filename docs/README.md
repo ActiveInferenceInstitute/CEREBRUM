@@ -11,11 +11,18 @@ CEREBRUM is a synthetic intelligence framework that integrates linguistic case s
 This documentation is organized as follows:
 
 - **[Core Specification](cerebrum_core_spec.md)**: Defines the core components, interfaces, and behaviors required for a compliant implementation
+- **[How It Works](how_it_works.md)**: Overview of CEREBRUM's core mechanics and architecture
 - **[Getting Started](getting_started.md)**: A beginner's guide to help new developers start using CEREBRUM
 - **[Language Implementations](language_implementations.md)**: Guidelines for implementing CEREBRUM in different programming languages
 - **[Model Examples](model_examples.md)**: Examples of CEREBRUM models in various domains
 - **[Active Inference Integration](active_inference_integration.md)**: Details on how CEREBRUM integrates with Active Inference principles
 - **[Implementation Roadmap](implementation_roadmap.md)**: Phased development plan for implementing the framework
+- **[Language Nuance Handling](language_nuance_handling.md)**: Explanation of how CEREBRUM handles linguistic nuances
+
+### Contributing Guides
+- **[Technical Contributions](contributing_technical.md)**: Guide for developers and technical contributors
+- **[Research Contributions](contributing_research.md)**: Guide for researchers and academic contributors
+- **[Documentation Contributions](contributing_documentation.md)**: Guide for documentation and educational content contributors
 
 ## Core Concepts
 
@@ -65,13 +72,16 @@ CEREBRUM is an open-source project and welcomes contributions from researchers, 
 ### Where to Start
 - Browse our [GitHub Issues](https://github.com/ActiveInferenceInstitute/CEREBRUM/issues) for tagged opportunities
 - Explore the [Implementation Roadmap](implementation_roadmap.md) for phase-specific contributions
-- Check our comprehensive [CONTRIBUTING.md](https://github.com/ActiveInferenceInstitute/CEREBRUM/blob/main/CONTRIBUTING.md) document for detailed guidelines
+- Check our comprehensive contribution guides:
+  - [Technical Contributions](contributing_technical.md)
+  - [Research Contributions](contributing_research.md)
+  - [Documentation Contributions](contributing_documentation.md)
 
 For specific contribution ideas aligned with the current development phase, see the [Contribution Opportunities by Roadmap Phase](implementation_roadmap.md#contribution-opportunities-by-roadmap-phase) section.
 
 ## License
 
-CEREBRUM is released under [LICENSE] - see the root directory for details.
+CEREBRUM is released under the MIT License - see the [LICENSE](../LICENSE) file in the root directory for details.
 
 ## Contact
 

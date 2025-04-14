@@ -2,6 +2,19 @@
 
 This document outlines the phased development plan for implementing the CEREBRUM framework across multiple languages and environments. It provides a structured approach to building the core components and expanding the framework's capabilities.
 
+## Table of Contents
+
+- [Phase 1: Foundation](#phase-1-foundation-3-months)
+- [Phase 2: Expansion](#phase-2-expansion-3-months)
+- [Phase 3: Maturation](#phase-3-maturation-6-months)
+- [Phase 4: Ecosystem Development](#phase-4-ecosystem-development-ongoing)
+- [Implementation Priorities](#implementation-priorities)
+- [Phased Deliverables](#phased-deliverables)
+- [Resource Requirements](#resource-requirements)
+- [Success Metrics](#success-metrics)
+- [Risk Management](#risk-management)
+- [Contribution Opportunities by Roadmap Phase](#contribution-opportunities-by-roadmap-phase)
+
 ## Phase 1: Foundation (3 months)
 
 ### 1.1 Core Framework Design
@@ -27,9 +40,9 @@ This document outlines the phased development plan for implementing the CEREBRUM
 
 ### 1.4 Documentation
 
-- [ ] Create comprehensive API documentation
-- [ ] Develop architectural diagrams
-- [ ] Write implementation guides for core components
+- [x] Create comprehensive API documentation
+- [x] Develop architectural diagrams
+- [x] Write implementation guides for core components
 - [ ] Establish documentation website
 
 ## Phase 2: Expansion (3 months)
@@ -97,7 +110,7 @@ This document outlines the phased development plan for implementing the CEREBRUM
 ### 4.1 Community Building
 
 - [ ] Establish governance model
-- [ ] Create contribution guidelines
+- [x] Create contribution guidelines
 - [ ] Develop plugin architecture
 - [ ] Build community support channels
 
@@ -239,10 +252,6 @@ This document outlines the phased development plan for implementing the CEREBRUM
 - **Adoption challenges**: Focus on documentation and examples
 - **Community engagement**: Establish clear contribution guidelines early
 
-## Conclusion
-
-The CEREBRUM framework implementation roadmap provides a structured approach to developing this complex system across multiple phases. By prioritizing core components and gradually expanding capabilities, the framework can evolve into a robust ecosystem for case-based cognitive modeling while managing technical and project risks.
-
 ## Contribution Opportunities by Roadmap Phase
 
 This section outlines specific contribution opportunities aligned with each phase of the CEREBRUM implementation roadmap. Contributors can use this to identify where their skills and interests might best support the project's development.
@@ -335,4 +344,7 @@ This section outlines specific contribution opportunities aligned with each phas
 - Community support and mentoring
 - Writing blog posts, articles, and papers about CEREBRUM
 
-For detailed information on how to contribute in these areas, please see our [CONTRIBUTING.md](https://github.com/ActiveInferenceInstitute/CEREBRUM/blob/main/CONTRIBUTING.md) document. 
+For detailed information on how to contribute in these areas, please see our contribution guides:
+- [Technical Contributions](contributing_technical.md)
+- [Research Contributions](contributing_research.md)
+- [Documentation Contributions](contributing_documentation.md) 
