@@ -1,0 +1,23 @@
+LOCATIVE CASE RESULTS
+====================
+
+Linguistic meaning: Location or position indication
+Statistical role: Model position in parameter space
+Regression context: Model at a position in parameter/hypothesis space
+
+Parameter Space Analysis:
+- Optimal parameters: Slope=2.777778, Intercept=-2.333333
+- Fitted parameters: Slope=2.954023, Intercept=-2.014790
+- MSE at optimal: 1.149486
+- Parameter space size: 10x10 grid
+- Slope range: [1.00, 5.00]
+- Intercept range: [-5.00, 1.00]
+
+Path Analysis:
+- Starting position: Slope=3.6667, Intercept=-3.0000
+- Path length: 20 steps
+- Distance traveled in parameter space: 1.1111
+
+Linguistic Formula Example:
+The optimal solution exists in the MODEL's parameter space.
+
