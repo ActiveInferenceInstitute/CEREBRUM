@@ -36,6 +36,7 @@ class POMDPModel(ActiveInferenceModel):
         # Initialize with simple 2-state POMDP
         n_states = 2
         n_obs = 2
+        n_actions = 2
         
         # Create simple transition matrix (states x states)
         # Row i, column j gives p(s_j | s_i)
@@ -60,7 +61,8 @@ class POMDPModel(ActiveInferenceModel):
             "transition_matrix": transition_matrix,
             "observation_matrix": observation_matrix,
             "n_states": n_states,
-            "n_observations": n_obs
+            "n_observations": n_obs,
+            "n_actions": n_actions
         }
             
         # Initialize base class
@@ -2702,15 +2704,30 @@ def test_locative_case(pomdp_test_data, case_definitions):
     
     # Calculate log likelihood for each parameter combination
     log_likelihood = np.zeros((n_grid, n_grid))
-    true_transitions = model.parameters["transition_matrix"].copy()
+    
+    # Get transition matrix
+    if len(model.parameters["transition_matrix"].shape) == 3:
+        # If 3D: states x actions x states
+        true_transitions = model.parameters["transition_matrix"][:, 0, :]  # Use first action for visualization
+    else:
+        # If 2D: states x states
+        true_transitions = model.parameters["transition_matrix"]
     
     # Create a dataset to evaluate likelihood
     n_steps = 100
-    states, actions, observations = DataGenerator.generate_trajectory(
-        transition_matrix=true_transitions,
-        observation_matrix=model.parameters["observation_matrix"],
-        n_steps=n_steps
-    )
+    # Generate synthetic trajectory
+    states = np.zeros(n_steps+1, dtype=int)
+    states[0] = 0  # Start in state 0
+    actions = np.zeros(n_steps, dtype=int)  # Always take action 0 for simplicity
+    
+    # Generate state sequence using the true transition matrix
+    for t in range(n_steps):
+        # Sample next state
+        if len(model.parameters["transition_matrix"].shape) == 3:
+            trans_probs = model.parameters["transition_matrix"][states[t], actions[t]]
+        else:
+            trans_probs = model.parameters["transition_matrix"][states[t]]
+        states[t+1] = np.random.choice(model.parameters["n_states"], p=trans_probs)
     
     # Calculate log likelihood for each parameter combination
     for i, t00 in enumerate(transition_00):
@@ -2722,8 +2739,10 @@ def test_locative_case(pomdp_test_data, case_definitions):
             ])
             
             # Calculate likelihood of the data under this model
-            log_likelihood[i, j] = sum(np.log(transition_matrix[states[t], actions[t], states[t+1]])
-                                      for t in range(n_steps-1))
+            log_lik = 0
+            for t in range(n_steps):
+                log_lik += np.log(transition_matrix[states[t], states[t+1]])
+            log_likelihood[i, j] = log_lik
     
     # Plot parameter space
     fig, ax = plt.subplots(figsize=(10, 8))
@@ -2731,8 +2750,13 @@ def test_locative_case(pomdp_test_data, case_definitions):
     contour = ax.contourf(transition_00, transition_11, log_likelihood, levels=20, cmap='viridis')
     
     # Mark the true parameter values
-    true_t00 = true_transitions[0, 0]
-    true_t11 = true_transitions[1, 1]
+    if len(model.parameters["transition_matrix"].shape) == 3:
+        true_t00 = model.parameters["transition_matrix"][0, 0, 0]  # prob of staying in state 0 with action 0
+        true_t11 = model.parameters["transition_matrix"][1, 0, 1]  # prob of staying in state 1 with action 0
+    else:
+        true_t00 = model.parameters["transition_matrix"][0, 0]
+        true_t11 = model.parameters["transition_matrix"][1, 1]
+        
     ax.plot(true_t00, true_t11, 'ro', markersize=10, label="True Parameters")
     
     # Add colorbar
@@ -3077,11 +3101,28 @@ def test_vocative_case(pomdp_test_data, case_definitions):
     
     # Generate a trajectory
     n_steps = 15
-    states, actions, observations = DataGenerator.generate_trajectory(
-        transition_matrix=model.parameters["transition_matrix"],
-        observation_matrix=observation_matrix,
-        n_steps=n_steps
-    )
+    # Generate synthetic trajectory
+    states = np.zeros(n_steps+1, dtype=int)
+    states[0] = 0  # Start in state 0
+    actions = np.zeros(n_steps, dtype=int)
+    observations = np.zeros(n_steps, dtype=int)
+    
+    # Generate state, action, observation sequence
+    for t in range(n_steps):
+        # Choose action based on current state
+        actions[t] = 0 if np.random.rand() < 0.5 else 1
+        
+        # Get next state
+        if len(model.parameters["transition_matrix"].shape) == 3:
+            trans_probs = model.parameters["transition_matrix"][states[t], actions[t]]
+        else:
+            trans_probs = model.parameters["transition_matrix"][states[t]]
+            
+        states[t+1] = np.random.choice(model.parameters["n_states"], p=trans_probs)
+        
+        # Get observation for the next state
+        obs_probs = model.parameters["observation_matrix"][states[t+1]]
+        observations[t] = np.random.choice(model.parameters["n_observations"], p=obs_probs)
     
     # Calculate mutual information and other channel properties
     # State-Observation mutual information
@@ -3121,10 +3162,13 @@ def test_vocative_case(pomdp_test_data, case_definitions):
                 obs = observations[t]
                 for prev_s in range(model.parameters["n_states"]):
                     # Transition probability
-                    if t < len(actions):
-                        trans_prob = model.parameters["transition_matrix"][prev_s, actions[t], s]
+                    if len(model.parameters["transition_matrix"].shape) == 3:
+                        if t < len(actions):
+                            trans_prob = model.parameters["transition_matrix"][prev_s, actions[t], s]
+                        else:
+                            trans_prob = model.parameters["transition_matrix"][prev_s, 0, s]
                     else:
-                        trans_prob = model.parameters["transition_matrix"][prev_s, 0, s]
+                        trans_prob = model.parameters["transition_matrix"][prev_s, s]
                     
                     # Observation probability
                     obs_prob = observation_matrix[s, obs]
@@ -3158,13 +3202,8 @@ def test_vocative_case(pomdp_test_data, case_definitions):
     # Create a new model for the animation
     model = POMDPModel(model_id="VocPOMDP_Anim", case=Case.VOCATIVE)
     
-    # Generate a trajectory
+    # Reuse the generated trajectory or generate a new one
     n_steps = 10
-    states, actions, observations = DataGenerator.generate_trajectory(
-        transition_matrix=model.parameters["transition_matrix"],
-        observation_matrix=model.parameters["observation_matrix"],
-        n_steps=n_steps
-    )
     
     # Track belief state
     belief_history = []
@@ -3193,7 +3232,10 @@ def test_vocative_case(pomdp_test_data, case_definitions):
             # Apply observation update
             for prev_s in range(model.parameters["n_states"]):
                 # Transition probability
-                trans_prob = model.parameters["transition_matrix"][prev_s, action, s]
+                if len(model.parameters["transition_matrix"].shape) == 3:
+                    trans_prob = model.parameters["transition_matrix"][prev_s, action, s]
+                else:
+                    trans_prob = model.parameters["transition_matrix"][prev_s, s]
                 
                 # Observation probability
                 obs_prob = model.parameters["observation_matrix"][s, obs]
@@ -3298,7 +3340,33 @@ def run_all_case_tests(output_dir: str = OUTPUT_DIR, specific_case: Optional[str
     case_defs = CaseDefinitions.get_all_cases()
     
     # Create POMDP test data
-    # Create POMDP test data manually instead of using the fixture
+    # Create test data manually instead of using the fixture
+    n_states = 2
+    n_actions = 2
+    n_observations = 2
+    
+    # Create transition matrix (states x actions x states)
+    transition_matrix = np.zeros((n_states, n_actions, n_states))
+    # Action 0
+    transition_matrix[0, 0] = [0.7, 0.3]
+    transition_matrix[1, 0] = [0.3, 0.7]
+    # Action 1
+    transition_matrix[0, 1] = [0.8, 0.2]
+    transition_matrix[1, 1] = [0.2, 0.8]
+    
+    # Create observation matrix (states x observations)
+    observation_matrix = np.array([
+        [0.8, 0.2],
+        [0.2, 0.8]
+    ])
+    
+    pomdp_test_data = {
+        "transition_matrix": transition_matrix,
+        "observation_matrix": observation_matrix,
+        "states": ["State 0", "State 1"],
+        "actions": ["Left", "Right"],
+        "observations": ["Red", "Blue"]
+    }
     
     # Initialize model dictionary
     model_dict = {}
@@ -3322,21 +3390,21 @@ def run_all_case_tests(output_dir: str = OUTPUT_DIR, specific_case: Optional[str
             logger.info(f"Running test for {case.value} case")
             
             if case == Case.NOMINATIVE:
-                model = test_nominative_case(test_data, case_defs)
+                model = test_nominative_case(pomdp_test_data, case_defs)
             elif case == Case.ACCUSATIVE:
-                model = test_accusative_case(test_data, case_defs)
+                model = test_accusative_case(pomdp_test_data, case_defs)
             elif case == Case.DATIVE:
-                model = test_dative_case(test_data, case_defs)
+                model = test_dative_case(pomdp_test_data, case_defs)
             elif case == Case.GENITIVE:
-                model = test_genitive_case(test_data, case_defs)
+                model = test_genitive_case(pomdp_test_data, case_defs)
             elif case == Case.INSTRUMENTAL:
-                model = test_instrumental_case(test_data, case_defs)
+                model = test_instrumental_case(pomdp_test_data, case_defs)
             elif case == Case.LOCATIVE:
-                model = test_locative_case(test_data, case_defs)
+                model = test_locative_case(pomdp_test_data, case_defs)
             elif case == Case.ABLATIVE:
-                model = test_ablative_case(test_data, case_defs)
+                model = test_ablative_case(pomdp_test_data, case_defs)
             elif case == Case.VOCATIVE:
-                model = test_vocative_case(test_data, case_defs)
+                model = test_vocative_case(pomdp_test_data, case_defs)
             
             # Store model in dictionary
             model_dict[case] = model
@@ -3345,10 +3413,13 @@ def run_all_case_tests(output_dir: str = OUTPUT_DIR, specific_case: Optional[str
             logger.error(f"Error in {case.value} case test: {str(e)}")
     
     # Generate overview visualization
-    overview_path = os.path.join(output_dir, "pomdp_cases_overview.png")
-    create_overview_visualization(overview_path)
+    try:
+        overview_path = os.path.join(output_dir, "pomdp_cases_overview.png")
+        create_overview_visualization(overview_path)
+        logger.info(f"All POMDP case tests completed. Overview available at {overview_path}")
+    except Exception as e:
+        logger.error(f"Error creating overview visualization: {str(e)}")
     
-    logger.info(f"All POMDP case tests completed. Overview available at {overview_path}")
     return model_dict
 
 def create_overview_visualization(save_path: str) -> None:
@@ -3390,20 +3461,14 @@ def create_overview_visualization(save_path: str) -> None:
                 bbox=dict(boxstyle='round,pad=0.3', facecolor='lightblue', alpha=0.3))
         
         # Add example
-        ax.text(0.5, 0.2, f"Example: {case_info['example']}", 
-                ha='center', va='top', fontweight='italic', transform=ax.transAxes)
+        ax.text(0.5, 0.2, f"Example: {case_info['example']}",
+                ha='center', fontsize=10, style='normal', transform=ax.transAxes,
+                bbox=dict(boxstyle='round,pad=0.3', facecolor='mistyrose', alpha=0.3))
     
-    # Add title
-    fig.suptitle("CEREBRUM Cases for POMDP Models", fontsize=20, y=0.98)
-    
-    # Add explanatory text
-    fig.text(0.5, 0.01, 
-             "CEREBRUM framework applies linguistic cases to model different functional roles in POMDPs", 
-             ha='center', fontsize=12, fontweight='bold')
-    
-    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    fig.savefig(save_path, dpi=300)
+    plt.tight_layout()
+    fig.savefig(save_path)
     plt.close(fig)
+    logger.info(f"Created overview visualization: {save_path}")
 
 if __name__ == "__main__":
     run_all_case_tests() 

@@ -356,3 +356,354 @@ The assignment of a model to a specific case has significant implications for it
 5. **Error Handling**: Each case has characteristic error modes - NOM cases may suffer from generative inaccuracy, while ACC cases might exhibit belief instability.
 
 This comprehensive case system provides a principled foundation for the design and implementation of CEREBRUM models, ensuring consistent functional roles across the framework. 
+
+## 11.11 Ergative Case [ERG]
+
+### 11.11.1 Semantic Role
+Agent of transitive verbs in ergative-absolutive languages, causer of an action with direct impact.
+
+### 11.11.2 Computational Role
+Active transformer, causative agent, high-impact state modifier, direct intervention mechanism.
+
+### 11.11.3 Formal Definition
+A model $M$ in ergative case [ERG] is characterized by the following free energy formulation:
+
+$$F_{ERG}[q] = D_{KL}[q(s, i) || p(s, i)] - \gamma_{ERG} \cdot E_q[\log p(o|s, i)]$$
+
+Where $i$ represents intervention parameters that directly cause state changes. The precision weighting emphasizes intervention efficacy:
+
+$$\gamma_{ERG} > 1.5$$
+
+The intervention-specific gradient emphasizes causal impact:
+
+$$\nabla_i F_{ERG} = \nabla_i D_{KL}[q(s, i) || p(s, i)] - \gamma_{ERG} \cdot \nabla_i E_q[\log p(o|s, i)]$$
+
+### 11.11.4 Expected Input/Output Signature
+- **Input:** Causal triggers, intervention specifications, impact objectives
+- **Output:** High-impact transformations, direct state alterations, causal effects
+
+### 11.11.5 Operational Definition
+A model operates in ERG case when:
+- It functions as a direct causal agent with high-impact interventions
+- It generates substantial changes in target systems with minimal mediation
+- Its operations have greater impact than complexity would suggest
+- It maintains specialized intervention parameters optimized for causal efficacy
+
+### 11.11.6 Implementation Requirements
+- Intervention-focused architectures with amplification mechanisms
+- High-precision causal parameters with direct state modification capabilities
+- Optimization criteria that emphasize intervention impact magnitude
+- Feedback mechanisms that monitor and adjust intervention efficacy
+
+## 11.12 Allative Case [ALL]
+
+### 11.12.1 Semantic Role
+Destination, target location, or endpoint of movement or directional action.
+
+### 11.12.2 Computational Role
+Goal state representation, target configuration, convergence point, attractor state.
+
+### 11.12.3 Formal Definition
+A model $M$ in allative case [ALL] is characterized by the following free energy formulation:
+
+$$F_{ALL}[q] = D_{KL}[q(s, d) || p(s, d)] - E_q[\log p(o|s, d)]$$
+
+Where $d$ represents destination or target state parameters. The precision weighting emphasizes goal stability:
+
+$$\pi_{ALL}(d) > \pi_{ALL}(s)$$
+
+The goal-specific gradient emphasizes attractor dynamics:
+
+$$\nabla_d F_{ALL} = \nabla_d D_{KL}[q(s, d) || p(s, d)] - \nabla_d E_q[\log p(o|s, d)]$$
+
+### 11.12.4 Expected Input/Output Signature
+- **Input:** Target queries, goal state parameters, convergence criteria
+- **Output:** Attractor descriptions, convergence metrics, distance-to-goal indicators
+
+### 11.12.5 Operational Definition
+A model operates in ALL case when:
+- It represents destination states or target configurations
+- It serves as an attractor in dynamical systems
+- It provides reference signals for convergent processes
+- It maintains stable representations of desired end states
+
+### 11.12.6 Implementation Requirements
+- Attractor dynamics with stable fixed points
+- Goal representation architectures with distance metrics
+- Parameter regimes optimized for representational stability
+- Mechanisms for evaluating proximity to target states
+
+## 11.13 Comitative Case [COM]
+
+### 11.13.1 Semantic Role
+Accompaniment, partnership, or entity acting in conjunction with another.
+
+### 11.13.2 Computational Role
+Co-processing, collaborative computation, parallel operation, mutual constraint.
+
+### 11.13.3 Formal Definition
+A model $M$ in comitative case [COM] is characterized by the following free energy formulation:
+
+$$F_{COM}[q] = D_{KL}[q(s, p) || p(s, p)] - E_q[\log p(o|s, p)]$$
+
+Where $p$ represents partnership or collaboration parameters. The precision weighting emphasizes coordination:
+
+$$\pi_{COM}(p) \approx \pi_{COM}(s)$$
+
+The collaboration-specific gradient emphasizes mutual adjustment:
+
+$$\nabla_p F_{COM} = \nabla_p D_{KL}[q(s, p) || p(s, p)] - \nabla_p E_q[\log p(o|s, p)]$$
+
+### 11.13.4 Expected Input/Output Signature
+- **Input:** Coordination signals, collaboration requests, synchronization cues
+- **Output:** Joint representations, coordinated states, mutual constraints
+
+### 11.13.5 Operational Definition
+A model operates in COM case when:
+- It functions in coordination with other models rather than independently
+- It maintains representations that synchronize with partner models
+- It adjusts its operations based on collaborative constraints
+- Its effectiveness depends on successful coordination with partners
+
+### 11.13.6 Implementation Requirements
+- Synchronization mechanisms with partner models
+- Parameter sharing architectures for collaborative computation
+- Multi-model optimization objectives that reward coordination
+- Interface designs that support bidirectional constraint satisfaction
+
+## 11.14 Extended Case Relationships and Transformations
+
+The extended case system introduces additional functional roles and transformation pathways within the CEREBRUM framework, enhancing its expressivity and computational flexibility.
+
+### 11.14.1 Additional Case Transformations
+
+| Source Case | Target Case | Transformation Description | Primary Parameter Shifts |
+|-------------|-------------|----------------------------|--------------------------|
+| NOM → ERG | Generation to Intervention | Model shifts from generating predictions to causing direct impacts | $\alpha_{NOM} \to \gamma_{ERG}$ (precision shift from accuracy to impact) |
+| ERG → INS | Intervention to Process | Model shifts from direct causation to implementing processes | $\gamma_{ERG} \to \pi_{INS}(a)$ (precision shift from impact to action execution) |
+| ABL → ALL | Source to Destination | Model shifts from representing origins to representing destinations | $\pi_{ABL}(o) \to \pi_{ALL}(d)$ (precision shift from origin to destination) |
+| LOC → ALL | Context to Goal | Model shifts from representing environment to representing target states | $\pi_{LOC}(e) \to \pi_{ALL}(d)$ (precision shift from environment to goal) |
+| ACC → COM | Update to Collaboration | Model shifts from receiving updates to collaborative processing | $\beta_{ACC} \to \pi_{COM}(p)$ (precision shift from complexity to coordination) |
+| COM → DAT | Collaboration to Goal | Model shifts from collaborative processing to goal representation | $\pi_{COM}(p) \to \pi_{DAT}(g)$ (precision shift from coordination to goals) |
+
+### 11.14.2 Extended Case Properties Summary
+
+| Case | Primary Focus | Precision Emphasis | Interface Direction | Update Priority | Typical Role |
+|------|--------------|-------------------|---------------------|----------------|-------------|
+| ERG | Causal intervention | Impact ($\gamma_{ERG} > 1.5$) | Interventional | Causal efficacy | Direct modifier |
+| ALL | Goal representation | Destination parameters ($\pi_{ALL}(d)$) | Attractional | Goal stability | Target state |
+| COM | Collaboration | Balanced ($\pi_{COM}(p) \approx \pi_{COM}(s)$) | Coordinational | Mutual consistency | Co-processor |
+
+### 11.14.3 Computational Implications of Extended Case System
+
+The extended case system enhances the CEREBRUM framework with additional functional specializations:
+
+1. **Enhanced Causal Modalities**: The ERG case provides explicit representation for high-impact causal interventions distinct from general transformations.
+
+2. **Improved Goal-Directed Processing**: The ALL case complements the ABL case, providing balanced representation of process endpoints alongside origins.
+
+3. **Collaborative Computation**: The COM case enables explicit modeling of coordinated processing, supporting multi-model constraint satisfaction.
+
+4. **Richer Transformation Pathways**: The extended transformation network provides more nuanced ways to shift functional roles within complex computational systems.
+
+5. **Expanded Compositional Grammar**: Additional cases enable more expressive model composition patterns, supporting more sophisticated computational architectures.
+
+This extended case system further enhances CEREBRUM's capacity to represent and implement diverse computational relationships while maintaining a principled linguistic foundation. 
+
+## 11.15 Case Composition and Hierarchical Structures
+
+The CEREBRUM framework supports sophisticated compositional patterns where models can participate in multiple case relationships simultaneously or hierarchically. This section details the principles and mechanisms by which case assignments can be composed to create complex computational structures.
+
+### 11.15.1 Case Composition Principles
+
+Case compositions in CEREBRUM follow several key principles:
+
+1. **Dominance Hierarchies**: When a model participates in multiple case relationships, case dominance determines which free energy formulation takes precedence:
+   
+   $$F_{combined}[q] = \omega_1 F_{case1}[q] + \omega_2 F_{case2}[q]$$
+   
+   Where $\omega_1$ and $\omega_2$ are dominance weights satisfying $\omega_1 + \omega_2 = 1$.
+
+2. **Context-Sensitive Case Assignments**: Models may shift their case assignments based on computational context:
+   
+   $$P(Case_i | Context_j) = \frac{exp(\psi_{i,j})}{\sum_k exp(\psi_{k,j})}$$
+   
+   Where $\psi_{i,j}$ represents the compatibility between Case $i$ and Context $j$.
+
+3. **Recursive Case Structures**: Case assignments can be nested, with a model-in-case containing sub-models with their own case assignments:
+   
+   $$F_{outer:inner}[q] = F_{outer}[q_{outer}] + \lambda \cdot F_{inner}[q_{inner}|q_{outer}]$$
+   
+   Where $\lambda$ represents the coupling strength between hierarchical levels.
+
+4. **Case Inheritance**: Sub-models may inherit case properties from parent models, creating consistent computational patterns:
+   
+   $$P(Case_{child} = c | Case_{parent} = p) = I(c,p)$$
+   
+   Where $I(c,p)$ is the inheritance matrix specifying case transition probabilities.
+
+### 11.15.2 Common Case Composition Patterns
+
+Several case composition patterns are particularly important in CEREBRUM architectures:
+
+#### 11.15.2.1 NOM-GEN Composition
+
+The NOM-GEN composition creates generative models that maintain explicit relationship representations:
+
+$$F_{NOM-GEN}[q] = D_{KL}[q(s,r) || p(s,r)] - \alpha_{NOM} \cdot E_q[\log p(o|s,r)]$$
+
+This pattern is essential for generative models operating within structured relationship networks.
+
+#### 11.15.2.2 ACC-COM Composition
+
+The ACC-COM composition creates collaborative update structures that coordinate belief revisions across multiple models:
+
+$$F_{ACC-COM}[q] = \beta_{ACC} \cdot D_{KL}[q(s,p) || p(s,p)] - E_q[\log p(o|s,p)]$$
+
+This pattern enables coordinated learning across model ensembles.
+
+#### 11.15.2.3 DAT-ALL Composition
+
+The DAT-ALL composition creates goal-directed recipient structures that balance current reception with target state representation:
+
+$$F_{DAT-ALL}[q] = D_{KL}[q(s,g,d) || p(s,g,d)] - E_q[\log p(o|s,g,d)]$$
+
+This pattern is crucial for models that serve as waypoints in goal-directed information flows.
+
+#### 11.15.2.4 INS-ERG Composition
+
+The INS-ERG composition creates high-impact transformation agents that combine process implementation with direct causal intervention:
+
+$$F_{INS-ERG}[q] = D_{KL}[q(s,a,i) || p(s,a,i)] - \gamma_{ERG} \cdot E_q[\log p(o|s,a,i)]$$
+
+This pattern enables precise, high-efficacy transformations in complex processing pipelines.
+
+### 11.15.3 Case Composition Implementation
+
+Implementing case compositions requires specialized architectural components:
+
+1. **Interface Adaptors**: Components that reconcile potentially conflicting interface requirements from different case assignments.
+
+2. **Multi-Case Optimizers**: Gradient-based optimization processes that balance multiple free energy objectives:
+   
+   $$\nabla_q F_{combined} = \omega_1 \nabla_q F_{case1} + \omega_2 \nabla_q F_{case2}$$
+
+3. **Case Transition Controllers**: Mechanisms that manage smooth transitions between dominant case assignments:
+   
+   $$\omega_i(t+1) = \omega_i(t) + \eta \cdot \nabla_{\omega} F_{combined}$$
+
+4. **Hierarchical Message Passing**: Schemes that coordinate information flow across multiple levels of nested case structures:
+   
+   $$m_{upper \to lower} = f_{down}(q_{upper})$$
+   $$m_{lower \to upper} = f_{up}(q_{lower})$$
+
+### 11.15.4 Computational Benefits of Case Composition
+
+Case composition provides several critical advantages in CEREBRUM implementations:
+
+1. **Functional Polymorphism**: Models can serve multiple functional roles simultaneously, increasing computational efficiency.
+
+2. **Graceful Degradation**: If a particular case-specific functionality is compromised, composed models can fall back to alternative functional modes.
+
+3. **Computational Factorization**: Complex computational tasks can be factorized into simpler case-specific sub-computations.
+
+4. **Emergent Capabilities**: Novel computational capabilities emerge from the interaction of composed case assignments that are not present in any individual case.
+
+5. **Learning Transfer**: Case composition facilitates transfer learning by maintaining certain case-specific parameters while adapting others.
+
+Case composition represents a core innovation of the CEREBRUM framework, enabling a vast space of sophisticated computational architectures while maintaining the clarity and rigor of the linguistic case metaphor. By composing cases at multiple levels, CEREBRUM models can implement computational structures of arbitrary complexity without sacrificing the conceptual clarity provided by the case system.
+
+## 11.16 Cross-Linguistic Case Parallels
+
+The CEREBRUM case system draws inspiration from linguistic case systems across diverse human languages, leveraging cross-linguistic patterns to create a comprehensive and universal computational framework. This section explores how CEREBRUM's formal case definitions align with case systems from various language families.
+
+### 11.16.1 Indo-European Case Parallels
+
+CEREBRUM's core cases show strong parallels with Indo-European case systems:
+
+| CEREBRUM Case | Sanskrit | Latin | Russian | Greek | Computational Significance |
+|---------------|----------|-------|---------|-------|----------------------------|
+| NOM | Nominative | Nominative | Именительный | Ονομαστική | Agent-driven computation patterns consistent across IE languages |
+| ACC | Accusative | Accusative | Винительный | Αιτιατική | Direct object computation consistently marks information recipients |
+| GEN | Genitive | Genitive | Родительный | Γενική | Possessive/relational computation reflects IE genitive functions |
+| DAT | Dative | Dative | Дательный | Δοτική | Indirect object/goal patterns align with cross-IE semantic roles |
+| INS | Instrumental | Ablative (partial) | Творительный | Instrumental (ancient) | Tools/means computation reflects cross-IE patterns |
+| LOC | Locative | Locative (archaic) | Предложный | Locative (ancient) | Location/context encoding aligns with IE locative cases |
+| ABL | Ablative | Ablative | - | Ablative (ancient) | Source/origin semantics preserved across available IE cases |
+| VOC | Vocative | Vocative | Звательный (old) | Κλητική | Addressee/attention relationships consistent with IE vocatives |
+
+Notable computationally-relevant patterns include the widespread nominative-accusative alignment in IE languages, mirroring CEREBRUM's agent-patient computational asymmetry.
+
+### 11.16.2 Non-Indo-European Case Systems
+
+CEREBRUM's extended case system incorporates insights from non-IE language families:
+
+#### 11.16.2.1 Ergative-Absolutive Languages
+
+The ERG case in CEREBRUM draws inspiration from ergative-absolutive languages like Basque, Georgian, and many Australian aboriginal languages:
+
+$$F_{ERG}[q] = D_{KL}[q(s, i) || p(s, i)] - \gamma_{ERG} \cdot E_q[\log p(o|s, i)]$$
+
+Computational parallels include:
+- High-impact causal intervention similar to ergative case marking transitive agents
+- Distinct treatment of high-agency computational processes vs. passive state holders
+- Precision weighting ($\gamma_{ERG} > 1.5$) reflecting the marked nature of ergative case
+
+#### 11.16.2.2 Agglutinative Case Systems
+
+CEREBRUM's compositional case approach draws from agglutinative languages with extensive case systems:
+
+| Language | Case Count | CEREBRUM Parallel |
+|----------|------------|-------------------|
+| Finnish | 15 cases | Compositional case patterns with specialized spatial relationships |
+| Hungarian | 18 cases | Fine-grained goal/location distinctions mirrored in ALL-LOC distinctions |
+| Turkish | 6 core + derived | Case stacking parallels case composition rules |
+| Japanese | Case particles | Interface-focused case marking similar to VOC and COM implementations |
+
+The CEREBRUM approach to case composition (Section 11.15) particularly reflects the compositional nature of case marking in these languages, where multiple case markers can combine to create complex semantic relationships.
+
+#### 11.16.2.3 Polysynthetic Languages
+
+Polysynthetic languages with incorporated case functions provide insights for CEREBRUM's hierarchical case structures:
+
+```
+Inuktitut example: tusaa-vunga (I hear)
+CEREBRUM parallel: F_{NOM:ACC}[q] = F_{NOM}[q_{outer}] + λ·F_{ACC}[q_{inner}|q_{outer}]
+```
+
+The recursive case formulation in Section 11.15.1 mirrors how polysynthetic languages embed case relationships within complex word-sentences.
+
+### 11.16.3 Universal Case Tendencies
+
+Cross-linguistic research reveals case patterns that appear to be computational universals, strongly reflected in CEREBRUM's design:
+
+1. **Markedness Asymmetry**: Across languages, subject/agent roles (NOM/ERG) are often unmarked or minimally marked, while object/patient roles receive more explicit marking. CEREBRUM's precision weighting follows this pattern:
+
+   $$\alpha_{NOM} > 1 \text{ (enhancing prediction)} \quad \text{vs.} \quad \beta_{ACC} < 1 \text{ (reducing complexity cost)}$$
+
+2. **Animacy Hierarchies**: Languages often treat cases differently based on animacy. CEREBRUM's context-sensitive case assignment parallels this:
+
+   $$P(Case_i | Context_j) = \frac{exp(\psi_{i,j})}{\sum_k exp(\psi_{k,j})}$$
+
+3. **Semantic Role Universality**: Despite surface differences, core semantic roles (agent, patient, instrument, location, etc.) appear across all language families, validating CEREBRUM's case-based computational abstractions.
+
+4. **Compositionality Constraints**: Languages constrain how cases can combine in principled ways. CEREBRUM's case composition rules formalize similar constraints:
+   
+   ```
+   Valid: NOM-GEN composition
+   Invalid: *VOC-ABL composition
+   ```
+
+### 11.16.4 Computational Implementations of Linguistic Insights
+
+CEREBRUM's implementation leverages these cross-linguistic insights in several key ways:
+
+1. **Differential Precision**: Case-specific precision parameters ($\alpha_{NOM}$, $\beta_{ACC}$, etc.) implement markedness patterns seen across languages.
+
+2. **Interface Asymmetries**: The input/output signatures for each case reflect linguistic argument structure patterns.
+
+3. **Hierarchical Composition**: The case composition system draws from how cases stack and interact in agglutinative and polysynthetic languages.
+
+4. **Case Transitions**: Transformation rules between cases (Section 11.10.1) parallel how languages grammaticalize case shifts for different functions.
+
+By grounding its computational framework in linguistic universals about case systems, CEREBRUM achieves a balance between domain-general computing principles and human-interpretable functional roles. This cross-linguistic foundation enhances both the theoretical coherence and practical implementability of the framework. 
