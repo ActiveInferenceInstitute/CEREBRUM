@@ -12,6 +12,26 @@ The CEREBRUM testing approach follows several key principles:
 4. **Automated Testing**: All tests can be run automatically via the test runner.
 5. **Regression Prevention**: Tests ensure new changes don't break existing functionality.
 
+## Dependencies
+
+The following packages are required to run the tests:
+
+- pandas
+- numpy 
+- matplotlib
+- seaborn
+- scipy
+- scikit-learn (sklearn)
+- pytest
+
+Install them using pip:
+
+```bash
+pip install pandas numpy matplotlib seaborn scipy scikit-learn pytest
+```
+
+Most test files have built-in dependency checking that will notify you of missing packages.
+
 ## Test Structure
 
 Tests are organized into several categories:
@@ -77,6 +97,88 @@ python3 -m pytest -m "unit and model"
 # Run tests with coverage
 python3 -m pytest --cov=src
 ```
+
+### Running Individual Test Files
+
+Some test files can be run directly:
+
+```bash
+# Run linear regression tests
+python3 src/tests/test_linear_regression.py
+```
+
+## Visualization Testing
+
+The CEREBRUM framework includes tests that generate visualizations and animations to verify model behavior. These tests are particularly important for validating the different linguistic case implementations.
+
+### Visualization Directory Structure
+
+Visualizations and animations are stored in the `output` directory with the following structure:
+
+```
+output/
+├── linear_regression/
+│   ├── nom/                  # NOMINATIVE case visualizations
+│   │   ├── fitting_visualization.png
+│   │   ├── fitting_animation.gif
+│   │   └── linguistic_context.png
+│   ├── acc/                  # ACCUSATIVE case visualizations
+│   ├── dat/                  # DATIVE case visualizations
+│   ├── gen/                  # GENITIVE case visualizations
+│   ├── ins/                  # INSTRUMENTAL case visualizations
+│   ├── loc/                  # LOCATIVE case visualizations
+│   ├── abl/                  # ABLATIVE case visualizations
+│   └── voc/                  # VOCATIVE case visualizations
+└── other_test_modules/
+    └── ...
+```
+
+### Viewing Visualizations
+
+The visualizations can be viewed directly in the output directories. Each case directory contains:
+
+- Static images (PNG) showing model behavior
+- Animations (GIF) demonstrating dynamic behavior
+- Linguistic context visualizations explaining the case implementation
+
+## Error Handling
+
+### Common Test Errors
+
+Here are common errors you might encounter and their solutions:
+
+1. **Missing Dependencies**:
+   ```
+   ModuleNotFoundError: No module named 'X'
+   ```
+   Solution: Install the missing package: `pip install X`
+
+2. **Animation Errors**:
+   ```
+   ValueError: operands could not be broadcast together with shapes (X,) (Y,)
+   ```
+   Solution: Ensure array shapes match in animation functions
+
+3. **Permission Errors when Writing Output**:
+   ```
+   PermissionError: [Errno 13] Permission denied: 'path/to/file'
+   ```
+   Solution: Check directory permissions or run with higher privileges
+
+4. **Import Errors for Local Modules**:
+   ```
+   ImportError: No module named 'src'
+   ```
+   Solution: Add the project root to PYTHONPATH or run from the project root
+
+### Debugging Failed Tests
+
+For failed tests, check:
+
+1. The test logs in the output directory
+2. The traceback for the specific error message
+3. Generated visualizations for anomalies
+4. The state of the model after failure
 
 ## Writing New Tests
 
