@@ -302,4 +302,395 @@ graph LR
     style deployment fill:#a9d3f9
     style blacksox fill:#f9a9d3
     style alignment fill:#f9a9d3
+```
+
+```mermaid
+sequenceDiagram
+    participant P as Pitcher (Nominative)
+    participant C as Catcher (Dative)
+    participant B as Batter (Accusative)
+    participant F as Fielders (Instrumental)
+    participant U as Umpire (Precision Weighting)
+    
+    Note over P,U: CEREBRUM Prediction Generation Phase
+    P->>P: Generate internal model (pitch selection)
+    P->>+C: Signal pitch type (prior distribution)
+    C->>-P: Acknowledge/modify (posterior update)
+    
+    Note over P,B: CEREBRUM Action Execution Phase
+    P->>+B: Execute pitch (state transition)
+    
+    Note over B,U: CEREBRUM Perception Phase
+    B->>B: Process sensory input (visual tracking)
+    U->>B: Call strike/ball (belief state boundary)
+    
+    alt Hit Ball (Policy Selection)
+        B->>+F: Hit ball (action execution)
+        F->>F: Optimize position (active inference)
+        F->>-B: Field ball (entropy minimization)
+    else Swing and Miss (Error Signal)
+        B->>C: Miss ball (prediction error)
+        C->>U: Present ball (evidence accumulation)
+        U->>P: Update count (belief state revision)
+    end
+    
+    Note over P,F: CEREBRUM Learning Update Cycle
+    P->>P: Update pitch model (parameter optimization)
+    B->>B: Update swing model (variational inference)
+```
+
+```mermaid
+stateDiagram-v2
+    [*] --> AtBat: Game Initialization (Model Loading)
+    
+    state AtBat {
+        [*] --> PitcherThinking: Prior Formation
+        PitcherThinking --> WindUp: Parameter Selection
+        WindUp --> Pitch: Action Execution
+        Pitch --> BatterDecision: Sensory Input
+        
+        state BatterDecision {
+            [*] --> Processing: Feature Extraction
+            Processing --> Swing: Policy Selection
+            Processing --> TakePitch: Alternative Policy
+        }
+        
+        BatterDecision --> BallInPlay: Successful Contact
+        BatterDecision --> Strike: Failed Contact/No Swing
+        Strike --> PitcherThinking: Count Update
+        BallInPlay --> FielderAction: Domain Transition
+    }
+    
+    state FielderAction {
+        [*] --> FielderPerception: Environmental Sampling
+        FielderPerception --> FielderMovement: Path Planning
+        FielderMovement --> BallFielded: Goal Achievement
+    }
+    
+    AtBat --> OutRecorded: Free Energy Minimization Complete
+    AtBat --> RunScored: Alternative Optimization Outcome
+    
+    OutRecorded --> [*]: Model Reset & Persistence
+    RunScored --> [*]: Performance Metric Update
+    
+    note right of AtBat
+        CEREBRUM Case System Transition Network
+        Models transform between grammatical cases
+        as computational roles change
+    end note
+    
+    note left of FielderAction
+        Active Inference Loop:
+        Perception → Belief Update → 
+        Policy Selection → Action
+    end note
+```
+
+```mermaid
+journey
+    title CEREBRUM Model Lifecycle & Baseball Pitch Sequence
+    section Initialization Phase
+        Model Architecture Definition: 5: Pitcher, Manager, Coach
+        Data Collection & Preprocessing: 3: Scout, Analyst
+        Parameter Initialization: 4: Pitcher, Catcher
+    section Training Phase
+        Forward Pass (Pitch Thrown): 5: Pitcher, Catcher
+        Prediction Error Calculation: 2: Batter, Umpire
+        Backpropagation (Adjustment): 4: Coach, Pitcher
+        Parameter Update: 3: Pitcher
+    section Inference Phase
+        Context Evaluation: 5: Pitcher, Catcher, Manager
+        Decision Under Uncertainty: 2: Pitcher
+        Action Selection: 4: Pitcher
+        Performance Evaluation: 3: Manager, Fans, Analyst
+    section Model Evolution
+        Error Analysis: 5: Manager, Coach, Pitcher
+        Architecture Modification: 2: Coach, Manager
+        Retraining On New Data: 4: Pitcher, Coach
+        Deployment In New Context: 3: Team, League
+```
+
+```mermaid
+gantt
+    title CEREBRUM Processing Pipeline & Baseball Game Timeline
+    dateFormat  s
+    axisFormat %S
+    
+    section Perception Phase
+        Visual Input Processing      :vis, 0, 0.05s
+        Auditory Signal Processing   :aud, after vis, 0.03s
+        Multimodal Integration       :int, after aud, 0.02s
+        
+    section Inference Phase
+        Prior Belief Formation       :pri, after int, 0.04s
+        Evidence Accumulation        :evi, after pri, 0.03s
+        Posterior Computation        :pos, after evi, 0.05s
+        
+    section Decision Phase
+        Policy Enumeration           :enum, after pos, 0.02s
+        Expected Free Energy Calc    :efe, after enum, 0.04s
+        Policy Selection             :sel, after efe, 0.01s
+        
+    section Action Phase
+        Motor Command Generation     :cmd, after sel, 0.03s
+        Execution & Feedback         :exe, after cmd, 0.06s
+        Performance Evaluation       :eval, after exe, 0.04s
+        
+    section Learning Update
+        Prediction Error Calculation :err, after eval, 0.03s
+        Parameter Optimization       :opt, after err, 0.05s
+        Model Refinement             :ref, after opt, 0.04s
+```
+
+```mermaid
+pie
+    title "CEREBRUM Computational Resource Allocation in Baseball Intelligence"
+    "Perception Module (Batter's Eye)" : 22
+    "Prediction Generation (Pitcher's Mind)" : 25
+    "Motor Control (Muscle Memory)" : 18
+    "Strategic Planning (Manager's Brain)" : 15
+    "Historical Knowledge (Team Statistics)" : 10
+    "Rules Enforcement (Umpire Function)" : 8
+    "Adaptability (In-Game Adjustments)" : 12
+```
+
+```mermaid
+erDiagram
+    CEREBRUM ||--o{ CASE-SYSTEM : implements
+    BASEBALL-GAME ||--o{ PLAYER : consists_of
+    
+    CASE-SYSTEM {
+        string role
+        function transformation
+        boolean is_active
+    }
+    
+    PLAYER {
+        string position
+        float batting_avg
+        int jersey_number
+    }
+    
+    CASE-SYSTEM ||--o{ GRAMMATICAL-CASE : contains
+    PLAYER ||--o{ FIELD-POSITION : occupies
+    
+    GRAMMATICAL-CASE {
+        string name
+        string function
+        string transformation_rules
+    }
+    
+    FIELD-POSITION {
+        string name
+        string defensive_responsibility
+        float fielding_percentage
+    }
+    
+    GRAMMATICAL-CASE ||--|| FIELD-POSITION : analogous_to
+    
+    NOMINATIVE-CASE ||--|| PITCHER : maps_to
+    ACCUSATIVE-CASE ||--|| BATTER : maps_to
+    DATIVE-CASE ||--|| CATCHER : maps_to
+    GENITIVE-CASE ||--|| TEAM-OWNER : maps_to
+    INSTRUMENTAL-CASE ||--|| EQUIPMENT : maps_to
+    LOCATIVE-CASE ||--|| FIELD : maps_to
+    ABLATIVE-CASE ||--|| TEAM-HISTORY : maps_to
+    VOCATIVE-CASE ||--|| ANNOUNCER : maps_to
+    
+    ACTIVE-INFERENCE ||--|| GAME-STRATEGY : corresponds_to
+    FREE-ENERGY ||--|| UNCERTAINTY : represents
+    PRECISION-WEIGHTING ||--|| UMPIRE-JUDGMENT : similar_to
+    PREDICTION-ERROR ||--|| MISSED-PITCH : equivalent_to
+    BELIEF-UPDATE ||--|| STATISTICAL-ADJUSTMENT : parallels
+```
+
+```mermaid
+mindmap
+    root((CEREBRUM-Baseball<br/>Conceptual System))
+        (Case Grammar Structure)
+            (Nominative: The Actor)
+                [Pitcher on the mound]
+                [Ruth's pointing gesture]
+            (Accusative: Recipient of Action)
+                [Batter facing pitch]
+                [Ball crossing plate]
+            (Dative: Receiver of Data)
+                [Catcher's signals]
+                [Coach's signs]
+            (Genitive: Source/Origin)
+                [Team owner/manager]
+                [Strategy development]
+        (Active Inference Framework)
+            (Prediction Generation)
+                [Pitcher's windup]
+                [Batter anticipation]
+            (Sensory Sampling)
+                [Visual tracking]
+                [Proprioception]
+            (Prediction Error)
+                [Swing and miss]
+                [Unexpected pitch]
+            (Belief Updating)
+                [Adjusting stance]
+                [Changing strategy]
+        (Technical Machinery)
+            (Variational Free Energy)
+                [Statistical uncertainty]
+                [Performance metrics]
+            (Precision Weighting)
+                [Umpire's strike zone]
+                [Fan confidence]
+            (Parameter Optimization)
+                [Practice sessions]
+                [Season-long adjustments]
+            (Non-linear Dynamics)
+                [Slumps and streaks]
+                [Momentum shifts]
+        (Historical Context)
+            (1920s Baseball Revolution)
+                [Ruth's home run era]
+                [Radio broadcasting]
+            (AI Development Trajectory)
+                [Transformer models]
+                [Deep learning advances]
+```
+
+```mermaid
+flowchart TD
+    subgraph "Hierarchical Predictive Processing"
+        direction TB
+        L1["Level 1: Sensory Input"] --> L2["Level 2: Feature Extraction"]
+        L2 --> L3["Level 3: Object Recognition"]
+        L3 --> L4["Level 4: Scene Understanding"]
+        L4 --> L5["Level 5: Strategic Planning"]
+        
+        L5 -.-> L4
+        L4 -.-> L3
+        L3 -.-> L2
+        L2 -.-> L1
+        
+        classDef prediction fill:#f9f,stroke:#333,stroke-width:2px
+        classDef error fill:#ff9,stroke:#333,stroke-width:2px
+        
+        class L1,L2,L3,L4,L5 prediction
+    end
+    
+    subgraph "Baseball Execution Hierarchy"
+        direction TB
+        B1["Level 1: Physical Mechanics"] --> B2["Level 2: Technique Execution"]
+        B2 --> B3["Level 3: Situational Awareness"]
+        B3 --> B4["Level 4: Game State Understanding"]
+        B4 --> B5["Level 5: Season-Long Strategy"]
+        
+        B5 -.-> B4
+        B4 -.-> B3
+        B3 -.-> B2
+        B2 -.-> B1
+        
+        classDef action fill:#9ff,stroke:#333,stroke-width:2px
+        classDef feedback fill:#f99,stroke:#333,stroke-width:2px
+        
+        class B1,B2,B3,B4,B5 action
+    end
+    
+    L1 -.-> B1
+    L2 -.-> B2
+    L3 -.-> B3
+    L4 -.-> B4
+    L5 -.-> B5
+```
+
+```mermaid
+graph TB
+    subgraph "Bayesian Network of Baseball Outcomes"
+        direction TB
+        P[Pitcher Skill] --> PT[Pitch Type]
+        P --> PL[Pitch Location]
+        W[Weather] --> PL
+        W --> BH[Ball Height]
+        PT --> BH
+        PL --> BH
+        BS[Batter Skill] --> C[Contact]
+        BH --> C
+        C --> H[Hit]
+        BS --> H
+        H --> O[Out Probability]
+        H --> R[Run Probability]
+        FS[Fielder Skill] --> O
+        BR[Base Runners] --> R
+    end
+    
+    subgraph "CEREBRUM Belief Propagation Network"
+        direction TB
+        S[Sensory Input] --> F[Feature Extraction]
+        F --> PE[Prediction Error]
+        PM[Precision Modulation] --> PE
+        PE --> BU[Belief Update]
+        BU --> PA[Policy/Action Selection]
+        PA --> A[Action Execution]
+        A --> S
+        BU --> PM
+    end
+    
+    P -.-> S
+    BS -.-> F
+    PT -.-> PE
+    PL -.-> PE
+    BH -.-> BU
+    C -.-> PA
+    H -.-> A
+    
+    style P fill:#f9d3a9
+    style BS fill:#d3f9a9
+    style PT fill:#a9d3f9
+    style H fill:#f9a9d3
+    
+    style S fill:#f9d3a9
+    style F fill:#d3f9a9
+    style PE fill:#a9d3f9
+    style A fill:#f9a9d3
+```
+
+```mermaid
+sankey-beta
+    config showValues false
+    HistoricalStats(100) --> ScoutingReport(25)
+    HistoricalStats(100) --> ComputationalModels(45)
+    HistoricalStats(100) --> InstinctiveKnowledge(30)
+    
+    ScoutingReport(25) --> PitchSelection(40)
+    ComputationalModels(45) --> PitchSelection(40)
+    InstinctiveKnowledge(30) --> PitchSelection(40)
+    
+    PitchSelection(40) --> Fastball(60)
+    PitchSelection(40) --> OffSpeed(25)
+    PitchSelection(40) --> Breaking(15)
+    
+    Fastball(60) --> Strike(45)
+    Fastball(60) --> Ball(15)
+    OffSpeed(25) --> Strike(10)
+    OffSpeed(25) --> Ball(15)
+    Breaking(15) --> Strike(5)
+    Breaking(15) --> Ball(10)
+    
+    Strike(60) --> TakenStrike(20)
+    Strike(60) --> SwingStrike(15)
+    Strike(60) --> Contact(25)
+    Ball(40) --> TakenBall(35)
+    Ball(40) --> BadSwing(5)
+    
+    Contact(25) --> FieldedOut(15)
+    Contact(25) --> Hit(10)
+    SwingStrike(15) --> Strikeout(15)
+    TakenStrike(20) --> Strikeout(5)
+    TakenStrike(20) --> NextPitch(15)
+    TakenBall(35) --> Walk(10)
+    TakenBall(35) --> NextPitch(25)
+    BadSwing(5) --> Strikeout(5)
+    
+    FieldedOut(15) --> DefensiveSuccess(15)
+    Hit(10) --> OffensiveSuccess(10)
+    Strikeout(25) --> DefensiveSuccess(25)
+    Walk(10) --> OffensiveSuccess(10)
+    NextPitch(40) --> PitchSelection(40)
 ``` 
