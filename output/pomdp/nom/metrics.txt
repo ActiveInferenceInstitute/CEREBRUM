@@ -1,0 +1,12 @@
+Case: NOM - Subject/Doer of action
+Statistical Role: Active decision-maker
+
+POMDP Context: The POMDP as an agent actively choosing actions to maximize reward
+
+Simulation Metrics:
+  Number of Steps: 20
+  Number of States: 3
+  Number of Actions: 2
+  Number of Observations: 4
+  Final State: 0
+  Accuracy: 0.90

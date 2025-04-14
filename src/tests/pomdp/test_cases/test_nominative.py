@@ -102,7 +102,8 @@ def test_nominative_case(pomdp_test_data, case_definitions, logger=None):
     
     for step in range(n_steps):
         # Model actively chooses the action (NOMINATIVE case)
-        action_idx = np.argmax(model.posterior_means)  # Simplified action selection
+        # Make sure action_idx is within valid range
+        action_idx = np.argmax(model.posterior_means) % len(actions)
         action_history.append(action_idx)
         
         # Transition to new state based on action

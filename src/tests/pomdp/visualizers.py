@@ -1,3 +1,9 @@
+"""
+POMDP Visualization Module
+
+This module provides functions for visualizing POMDP models and their dynamics.
+"""
+
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -248,48 +254,45 @@ class Visualizer:
             policy: The policy to visualize (mapping from states to actions)
             title: Title for the visualization
             save_path: Path to save the visualization to
-            action_labels: Optional labels for actions
+            action_labels: Labels for the actions
             logger: Optional logger for logging progress
         """
         if logger:
             logger.info(f"Creating policy visualization")
         
+        n_states = len(policy)
+        
         fig, ax = plt.subplots(figsize=(12, 6))
         
-        # Set up action labels if not provided
-        if action_labels is None:
-            action_labels = [f"Action {i}" for i in range(np.max(policy) + 1)]
+        # Plot policy as bars
+        x = np.arange(n_states)
+        bars = ax.bar(x, policy, width=0.6)
         
-        # Create a colormap with distinct colors
-        cmap = plt.cm.get_cmap('tab10', len(action_labels))
-        colors = [cmap(i) for i in range(len(action_labels))]
-        
-        # Plot policy as a state-to-action mapping
-        x = np.arange(len(policy))
-        scatter = ax.scatter(x, policy, c=policy, cmap=cmap, s=100, alpha=0.8)
-        
-        # Add connecting lines for visual clarity
-        ax.plot(x, policy, 'k-', alpha=0.3)
+        # Add value labels on top of bars
+        for i, v in enumerate(policy):
+            ax.text(i, v + 0.1, f"{int(v)}", ha='center', va='bottom', fontsize=10)
         
         # Set labels and title
         ax.set_xlabel('State')
         ax.set_ylabel('Action')
         ax.set_title(title, fontsize=14, fontweight='bold')
         
-        # Set axis ticks
+        # Set axis limits
+        max_action = np.max(policy)
+        ax.set_ylim(0, max_action + 1)
         ax.set_xticks(x)
-        ax.set_yticks(np.arange(len(action_labels)))
-        ax.set_yticklabels(action_labels)
+        
+        # Set action labels on y-axis if provided
+        if action_labels:
+            ax.set_yticks(np.arange(len(action_labels)))
+            ax.set_yticklabels(action_labels)
         
         # Add grid
-        ax.grid(linestyle='--', alpha=0.7)
+        ax.grid(axis='y', linestyle='--', alpha=0.7)
         
-        # Add legend
-        legend_elements = [plt.Line2D([0], [0], marker='o', color='w', 
-                                     markerfacecolor=colors[i], markersize=10, 
-                                     label=label) 
-                          for i, label in enumerate(action_labels)]
-        ax.legend(handles=legend_elements, title="Actions", loc='best')
+        # Color the bars based on action
+        for i, bar in enumerate(bars):
+            bar.set_color(plt.cm.tab10(policy[i] % 10))
         
         # Save figure
         fig.tight_layout()
@@ -297,4 +300,53 @@ class Visualizer:
         plt.close(fig)
         
         if logger:
-            logger.info(f"Policy visualization saved to {save_path}") 
+            logger.info(f"Policy visualization saved to {save_path}")
+    
+    @staticmethod
+    def plot_value_function(
+        value_function: np.ndarray,
+        title: str,
+        save_path: str,
+        logger: Optional[Any] = None
+    ) -> None:
+        """
+        Visualize a value function for a POMDP model.
+        
+        Args:
+            value_function: The value function to visualize
+            title: Title for the visualization
+            save_path: Path to save the visualization to
+            logger: Optional logger for logging progress
+        """
+        if logger:
+            logger.info(f"Creating value function visualization")
+        
+        fig, ax = plt.subplots(figsize=(10, 6))
+        
+        # Plot value function as bars
+        x = np.arange(len(value_function))
+        ax.bar(x, value_function, width=0.6, color='green', alpha=0.7)
+        
+        # Add value labels on top of bars
+        for i, v in enumerate(value_function):
+            ax.text(i, v + 0.1, f"{v:.2f}", ha='center', va='bottom', fontsize=10)
+        
+        # Set labels and title
+        ax.set_xlabel('State')
+        ax.set_ylabel('Value')
+        ax.set_title(title, fontsize=14, fontweight='bold')
+        
+        # Set axis limits
+        ax.set_ylim(min(value_function) - 0.5, max(value_function) + 0.5)
+        ax.set_xticks(x)
+        
+        # Add grid
+        ax.grid(axis='y', linestyle='--', alpha=0.7)
+        
+        # Save figure
+        fig.tight_layout()
+        fig.savefig(save_path, dpi=150)
+        plt.close(fig)
+        
+        if logger:
+            logger.info(f"Value function visualization saved to {save_path}") 

@@ -1,8 +1,11 @@
 from typing import Dict, Any, Optional, List, Callable, Tuple, Union
 import numpy as np
 from scipy.stats import multivariate_normal
+import logging
 
 from src.core.model import Model, Case
+
+logger = logging.getLogger(__name__)
 
 class ActiveInferenceModel(Model):
     """
@@ -73,6 +76,20 @@ class ActiveInferenceModel(Model):
         # Prediction errors and free energy history
         self.prediction_errors = []
         self.free_energy_history = []
+        
+        # Ensure required parameters are available
+        required_params = ['transition_matrix', 'observation_matrix', 'n_states', 'n_actions', 'n_observations']
+        for param in required_params:
+            if param not in parameters:
+                raise ValueError(f"Parameter '{param}' is required for ActiveInferenceModel")
+        
+        # Initialize posterior (belief state)
+        self.posterior_means = np.ones(parameters['n_states']) / parameters['n_states']
+        
+        # By default, set to NOMINATIVE case (model as active agent)
+        self.case = Case.NOMINATIVE
+        
+        logger.info(f"Initialized ActiveInferenceModel '{name}' with {parameters['n_states']} states")
     
     def _setup_case_configurations(self):
         """Set up case-specific configurations for parameter access."""
@@ -243,44 +260,114 @@ class ActiveInferenceModel(Model):
         
         return free_energy
     
-    def update_posterior(self, observations: np.ndarray, learning_rate: float = 0.1) -> Dict[str, Any]:
+    def update_posterior(self, observation: np.ndarray) -> None:
         """
-        Update posterior beliefs based on observations using gradient descent on free energy.
+        Update posterior belief based on new observation.
         
         Args:
-            observations: The observations to update beliefs with
-            learning_rate: Learning rate for gradient descent
+            observation: Observation vector (one-hot encoding or distribution)
+        """
+        # Get parameters
+        observation_matrix = self.parameters['observation_matrix']
+        n_states = self.parameters['n_states']
+        
+        # Prior is current posterior
+        prior = self.posterior_means.copy()
+        
+        # Calculate likelihood for each state
+        likelihood = np.zeros(n_states)
+        for s in range(n_states):
+            # Observation likelihood for state s
+            # Using dot product for distribution observations
+            likelihood[s] = np.dot(observation_matrix[s, :], observation)
+        
+        # Bayes rule: posterior ∝ likelihood * prior
+        posterior = likelihood * prior
+        
+        # Normalize
+        if np.sum(posterior) > 0:
+            posterior = posterior / np.sum(posterior)
+        else:
+            # If all probabilities are zero, maintain prior
+            logger.warning("All posterior probabilities are zero, maintaining prior")
+            posterior = prior
+        
+        # Update posterior means
+        self.posterior_means = posterior
+        
+        logger.debug(f"Updated posterior: {np.round(self.posterior_means, 3)}")
+    
+    def get_optimal_action(self) -> int:
+        """
+        Get the optimal action based on current beliefs.
+        
+        Returns:
+            Index of the optimal action
+        """
+        # Simple implementation: use action that maximizes expected reward
+        # In more complex implementations, this would use a policy or value function
+        
+        # For now, just return the action corresponding to the most likely state
+        max_state = np.argmax(self.posterior_means)
+        
+        # In a more sophisticated implementation, we would:
+        # 1. Compute expected rewards for each action
+        # 2. Select action with highest expected reward
+        
+        # For simplicity, we'll just use the state index (modulo n_actions)
+        n_actions = self.parameters['n_actions']
+        optimal_action = max_state % n_actions
+        
+        logger.debug(f"Selected optimal action {optimal_action} for max state {max_state}")
+        
+        return optimal_action
+    
+    def predict_next_state(self, action: int) -> np.ndarray:
+        """
+        Predict distribution over next states given an action.
+        
+        Args:
+            action: Action index
             
         Returns:
-            Dictionary of update results
+            Distribution over next states
         """
-        # Compute prediction error
-        expected_obs = self.likelihood(self.posterior_means)
-        prediction_error = observations - expected_obs
-        self.prediction_errors.append(prediction_error)
+        # Get transition matrix
+        transition_matrix = self.parameters['transition_matrix']
         
-        # Compute gradient of free energy with respect to posterior means
-        # Oversimplified gradient calculation - subclasses should implement proper gradients
-        gradient = -learning_rate * prediction_error
+        # Compute expected next state distribution
+        next_state_dist = np.zeros(self.parameters['n_states'])
         
-        # Update posterior means using gradient descent
-        self.posterior_means -= gradient
+        for s in range(self.parameters['n_states']):
+            # Weight transitions by current belief in each state
+            next_state_dist += self.posterior_means[s] * transition_matrix[s, action, :]
         
-        # Store updated beliefs in history
-        self.belief_history.append({
-            "posterior_means": self.posterior_means.copy(),
-            "posterior_precision": self.posterior_precision.copy(),
-            "prediction_error": prediction_error.copy()
-        })
+        return next_state_dist
+    
+    def predict_observation(self, state_dist: Optional[np.ndarray] = None) -> np.ndarray:
+        """
+        Predict expected observation given a state distribution.
         
-        # Calculate new free energy
-        new_fe = self.free_energy(observations)
+        Args:
+            state_dist: Distribution over states (if None, uses current belief)
+            
+        Returns:
+            Expected observation distribution
+        """
+        if state_dist is None:
+            state_dist = self.posterior_means
         
-        return {
-            "status": "success",
-            "prediction_error": prediction_error,
-            "free_energy": new_fe
-        }
+        # Get observation matrix
+        observation_matrix = self.parameters['observation_matrix']
+        
+        # Compute expected observation
+        expected_observation = np.zeros(self.parameters['n_observations'])
+        
+        for s in range(self.parameters['n_states']):
+            # Weight observation probabilities by state probabilities
+            expected_observation += state_dist[s] * observation_matrix[s, :]
+        
+        return expected_observation
     
     # Implement case-specific updates
     def _update_nominative(self, data: Any) -> Dict[str, Any]:

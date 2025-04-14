@@ -1,0 +1,123 @@
+Dialog with POMDP in VOC Case
+==================================================
+
+Step 1:
+Query: What state are you in?
+Response: My belief distribution is [0.33 0.33 0.33], most likely state: 0, true state: 0
+Observation: 2
+True State: 0
+
+Step 2:
+Query: How certain are you?
+Response: My confidence is 0.80 in state 0
+Observation: 2
+True State: 0
+
+Step 3:
+Query: What observation do you expect?
+Response: I expect observation 2
+Observation: 1
+True State: 0
+
+Step 4:
+Query: What action would you take?
+Response: I would take action 0
+Observation: 2
+True State: 0
+
+Step 5:
+Query: How certain are you?
+Response: My confidence is 0.99 in state 0
+Observation: 2
+True State: 0
+
+Step 6:
+Query: How certain are you?
+Response: My confidence is 1.00 in state 0
+Observation: 2
+True State: 2
+
+Step 7:
+Query: What state are you in?
+Response: My belief distribution is [1. 0. 0.], most likely state: 0, true state: 2
+Observation: 0
+True State: 0
+
+Step 8:
+Query: What state are you in?
+Response: My belief distribution is [1. 0. 0.], most likely state: 0, true state: 0
+Observation: 3
+True State: 0
+
+Step 9:
+Query: What state are you in?
+Response: My belief distribution is [0.99 0.01 0.  ], most likely state: 0, true state: 0
+Observation: 1
+True State: 0
+
+Step 10:
+Query: What action would you take?
+Response: I would take action 0
+Observation: 2
+True State: 0
+
+Step 11:
+Query: What action would you take?
+Response: I would take action 0
+Observation: 2
+True State: 0
+
+Step 12:
+Query: What observation do you expect?
+Response: I expect observation 2
+Observation: 3
+True State: 0
+
+Step 13:
+Query: How certain are you?
+Response: My confidence is 1.00 in state 0
+Observation: 2
+True State: 0
+
+Step 14:
+Query: What state are you in?
+Response: My belief distribution is [1. 0. 0.], most likely state: 0, true state: 0
+Observation: 2
+True State: 0
+
+Step 15:
+Query: What state are you in?
+Response: My belief distribution is [1. 0. 0.], most likely state: 0, true state: 0
+Observation: 2
+True State: 0
+
+Step 16:
+Query: What action would you take?
+Response: I would take action 0
+Observation: 3
+True State: 0
+
+Step 17:
+Query: What action would you take?
+Response: I would take action 0
+Observation: 2
+True State: 0
+
+Step 18:
+Query: What observation do you expect?
+Response: I expect observation 2
+Observation: 3
+True State: 0
+
+Step 19:
+Query: How certain are you?
+Response: My confidence is 1.00 in state 0
+Observation: 2
+True State: 0
+
+Step 20:
+Query: What action would you take?
+Response: I would take action 0
+Observation: 3
+True State: 0
+

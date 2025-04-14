@@ -2675,137 +2675,218 @@ def test_instrumental_case(pomdp_test_data, case_definitions):
     return model
 
 def test_locative_case(pomdp_test_data, case_definitions):
-    """Test for LOCATIVE case: Model as decision context."""
-    # Get case info for logging
+    """Test for LOCATIVE case: Model as location in inference space."""
+    
+    # Get case info
     case_info = case_definitions[Case.LOCATIVE]
     logger.info(f"Testing {Case.LOCATIVE.value} case: {case_info['linguistic_meaning']}")
-    logger.info(f"Statistical role: {case_info['statistical_role']}")
     
-    # Create visuals directory
+    # Create case directory
     case_dir = os.path.join(OUTPUT_DIR, Case.LOCATIVE.value.lower())
     os.makedirs(case_dir, exist_ok=True)
     
-    # Generate linguistic context visualization
-    linguistics_path = os.path.join(case_dir, "linguistic_context.png")
-    plot_case_linguistic_context(Case.LOCATIVE, linguistics_path)
+    # Create visualization of case context
+    case_context_path = os.path.join(case_dir, "case_context.png")
+    plot_case_linguistic_context(Case.LOCATIVE, case_context_path)
     
-    # Implement the test
-    # TODO: Implement detailed LOCATIVE case test with visualizations
+    # Create a model
+    model = POMDPModel(model_id="LocPOMDP", case=Case.LOCATIVE)
     
-    logger.info(f"Completed LOCATIVE case test with visualizations in {case_dir}")
+    # Create visualization of parameter space
+    parameter_space_path = os.path.join(case_dir, "parameter_space.png")
+    
+    # Generate grid of parameter values
+    n_grid = 20
+    transition_00 = np.linspace(0.1, 0.9, n_grid)  # Probability of staying in state 0
+    transition_11 = np.linspace(0.1, 0.9, n_grid)  # Probability of staying in state 1
+    
+    # Calculate log likelihood for each parameter combination
+    log_likelihood = np.zeros((n_grid, n_grid))
+    true_transitions = model.parameters["transition_matrix"].copy()
+    
+    # Create a dataset to evaluate likelihood
+    n_steps = 100
+    states, actions, observations = DataGenerator.generate_trajectory(
+        transition_matrix=true_transitions,
+        observation_matrix=model.parameters["observation_matrix"],
+        n_steps=n_steps
+    )
+    
+    # Calculate log likelihood for each parameter combination
+    for i, t00 in enumerate(transition_00):
+        for j, t11 in enumerate(transition_11):
+            # Create transition matrix with these parameters
+            transition_matrix = np.array([
+                [t00, 1-t00],
+                [1-t11, t11]
+            ])
+            
+            # Calculate likelihood of the data under this model
+            log_likelihood[i, j] = sum(np.log(transition_matrix[states[t], actions[t], states[t+1]])
+                                      for t in range(n_steps-1))
+    
+    # Plot parameter space
+    fig, ax = plt.subplots(figsize=(10, 8))
+    
+    contour = ax.contourf(transition_00, transition_11, log_likelihood, levels=20, cmap='viridis')
+    
+    # Mark the true parameter values
+    true_t00 = true_transitions[0, 0]
+    true_t11 = true_transitions[1, 1]
+    ax.plot(true_t00, true_t11, 'ro', markersize=10, label="True Parameters")
+    
+    # Add colorbar
+    cbar = fig.colorbar(contour, ax=ax)
+    cbar.set_label('Log Likelihood')
+    
+    ax.set_xlabel('P(s0 | s0, a)')
+    ax.set_ylabel('P(s1 | s1, a)')
+    ax.set_title(f'Parameter Space for {Case.LOCATIVE.value} Case: Location in Inference Space')
+    ax.legend()
+    
+    fig.savefig(parameter_space_path)
+    plt.close(fig)
+    
+    # Create animation of parameter space traversal
+    animation_path = os.path.join(case_dir, "parameter_space_animation.gif")
+    
+    # Create a new figure for animation
+    fig, ax = plt.subplots(figsize=(10, 8))
+    
+    # Set up animation
+    contour = ax.contourf(transition_00, transition_11, log_likelihood, levels=20, cmap='viridis')
+    point, = ax.plot([], [], 'ro', markersize=10)
+    text = ax.text(0.05, 0.95, '', transform=ax.transAxes, 
+                  bbox=dict(facecolor='white', alpha=0.8))
+    
+    ax.set_xlabel('P(s0 | s0, a)')
+    ax.set_ylabel('P(s1 | s1, a)')
+    ax.set_title(f'Parameter Space Traversal - {Case.LOCATIVE.value} Case')
+    
+    # Add colorbar
+    cbar = fig.colorbar(contour, ax=ax)
+    cbar.set_label('Log Likelihood')
+    
+    # Animation functions
+    def init():
+        point.set_data([], [])
+        text.set_text('')
+        return point, text
+    
+    def update(frame):
+        # Create a spiral path through parameter space
+        t = frame / 20.0
+        radius = 0.4 * (1 - t/3)
+        angle = t * 4 * np.pi
+        
+        # Calculate position
+        center_x = true_t00
+        center_y = true_t11
+        x = center_x + radius * np.cos(angle)
+        y = center_y + radius * np.sin(angle)
+        
+        # Ensure we stay within bounds
+        x = np.clip(x, transition_00.min(), transition_00.max())
+        y = np.clip(y, transition_11.min(), transition_11.max())
+        
+        point.set_data([x], [y])
+        
+        # Find nearest grid point and get log likelihood
+        i = np.argmin(np.abs(transition_00 - x))
+        j = np.argmin(np.abs(transition_11 - y))
+        ll = log_likelihood[i, j]
+        
+        # Update text
+        text.set_text(f'P(s0|s0,a) = {x:.2f}\nP(s1|s1,a) = {y:.2f}\nLog L = {ll:.2f}')
+        
+        return point, text
+    
+    anim = FuncAnimation(fig, update, frames=60, init_func=init, blit=True)
+    
+    anim.save(animation_path, writer='pillow', fps=5, dpi=100)
+    plt.close(fig)
+    logger.info(f"Created parameter space animation: {animation_path}")
+    
+    return model
 
 def test_ablative_case(pomdp_test_data, case_definitions):
     """Test for ABLATIVE case: Model as source of uncertainty."""
-    # Get case info for logging
+    
+    # Get case info
     case_info = case_definitions[Case.ABLATIVE]
     logger.info(f"Testing {Case.ABLATIVE.value} case: {case_info['linguistic_meaning']}")
-    logger.info(f"Statistical role: {case_info['statistical_role']}")
     
-    # Create visuals directory
+    # Create case directory
     case_dir = os.path.join(OUTPUT_DIR, Case.ABLATIVE.value.lower())
     os.makedirs(case_dir, exist_ok=True)
     
-    # Generate linguistic context visualization
-    linguistics_path = os.path.join(case_dir, "linguistic_context.png")
-    plot_case_linguistic_context(Case.ABLATIVE, linguistics_path)
+    # Create visualization of case context
+    case_context_path = os.path.join(case_dir, "case_context.png")
+    plot_case_linguistic_context(Case.ABLATIVE, case_context_path)
     
-    # Unpack the test data
-    transition_matrix = pomdp_test_data["transition_matrix"]
-    observation_matrix = pomdp_test_data["observation_matrix"]
-    states = pomdp_test_data["states"]
-    actions = pomdp_test_data["actions"]
-    observations = pomdp_test_data["observations"]
-    
-    # Create a POMDP model in ABLATIVE case (as reference point/baseline)
+    # Create a model
     model = POMDPModel(model_id="AblPOMDP", case=Case.ABLATIVE)
-    logger.info(f"Created POMDP model in {Case.ABLATIVE.value} case (model as reference point/baseline)")
     
-    # Visualize POMDP structure
-    structure_path = os.path.join(case_dir, "pomdp_structure.png")
-    Visualizer.plot_pomdp_structure(
-        transition_matrix=model.parameters["transition_matrix"],
-        observation_matrix=model.parameters["observation_matrix"],
-        title=f"POMDP Structure in {Case.ABLATIVE.value} Case",
-        save_path=structure_path
-    )
-    
-    # In ABLATIVE case, focus on the model as a reference point or baseline
-    # We'll create variations from the baseline and measure divergence
-    
-    # Define variations to compare with the baseline
-    n_variations = 3
-    
-    # Variation descriptions:
-    # 1. Higher transition uncertainty (more stochastic transitions)
-    # 2. Higher observation uncertainty (more observation noise)
-    # 3. Different policy (random vs optimal)
-    
-    # Simulation parameters
+    # Run simulations with different uncertainty sources
+    n_simulations = 5
     n_steps = 20
-    n_simulations = 5  # Run multiple simulations per variation
     
-    # Create variation 1: Higher transition uncertainty
-    var1_transition = transition_matrix.copy()
-    # Make transitions more stochastic
-    var1_transition = np.clip(var1_transition * 0.7 + 0.15, 0, 1)
-    # Normalize rows to sum to 1
-    for i in range(var1_transition.shape[0]):
-        var1_transition[i] = var1_transition[i] / np.sum(var1_transition[i])
-    
-    # Create variation 2: Higher observation uncertainty
-    var2_observation = observation_matrix.copy()
-    # Make observations more noisy
-    if len(var2_observation.shape) == 2:
-        var2_observation = np.clip(var2_observation * 0.6 + 0.2, 0, 1)
-        # Normalize rows to sum to 1
-        for i in range(var2_observation.shape[0]):
-            var2_observation[i] = var2_observation[i] / np.sum(var2_observation[i])
-    
-    # Variation 3 uses a different policy (random)
-    # We'll implement this in the simulation loop
-    
-    # Store the baseline model's results
-    baseline_results = {
-        "initial_states": [],
-        "state_histories": [],
-        "observation_histories": [],
-        "action_histories": [],
-        "belief_histories": []
-    }
-    
-    # Store variation results
-    variation_results = [
+    # Define variations with different sources of uncertainty
+    variations = [
         {
-            "name": "Higher Transition Uncertainty",
-            "transition_matrix": var1_transition,
-            "observation_matrix": observation_matrix.copy(),
-            "initial_states": [],
+            "name": "Baseline",
+            "description": "Standard POMDP with nominal parameters",
+            "transition_noise": 0.0,
+            "observation_noise": 0.0,
+            "belief_noise": 0.0,
             "state_histories": [],
-            "observation_histories": [],
             "action_histories": [],
+            "observation_histories": [],
             "belief_histories": []
         },
         {
-            "name": "Higher Observation Uncertainty",
-            "transition_matrix": transition_matrix.copy(),
-            "observation_matrix": var2_observation,
-            "initial_states": [],
+            "name": "Transition Uncertainty",
+            "description": "POMDP with noise in transition dynamics",
+            "transition_noise": 0.2,
+            "observation_noise": 0.0,
+            "belief_noise": 0.0,
             "state_histories": [],
-            "observation_histories": [],
             "action_histories": [],
+            "observation_histories": [],
             "belief_histories": []
         },
         {
-            "name": "Random Policy",
-            "transition_matrix": transition_matrix.copy(),
-            "observation_matrix": observation_matrix.copy(),
-            "initial_states": [],
+            "name": "Observation Uncertainty",
+            "description": "POMDP with noise in observations",
+            "transition_noise": 0.0,
+            "observation_noise": 0.2,
+            "belief_noise": 0.0,
             "state_histories": [],
-            "observation_histories": [],
             "action_histories": [],
+            "observation_histories": [],
+            "belief_histories": []
+        },
+        {
+            "name": "Belief Uncertainty",
+            "description": "POMDP with noise in belief updates",
+            "transition_noise": 0.0,
+            "observation_noise": 0.0,
+            "belief_noise": 0.1,
+            "state_histories": [],
+            "action_histories": [],
+            "observation_histories": [],
             "belief_histories": []
         }
     ]
+    
+    # Store baseline results for comparison
+    baseline_results = {
+        "initial_states": [],
+        "entropy": [],
+    }
+    
+    # Track overall uncertainty metrics
+    variation_results = variations.copy()
     
     # Run simulations for each variation
     for var_idx, variation in enumerate(variation_results):
@@ -2849,179 +2930,351 @@ def test_ablative_case(pomdp_test_data, case_definitions):
                 variation["action_histories"].append(action_history)
                 variation["observation_histories"].append(observation_history)
                 variation["belief_histories"].append(belief_history)
+    
+    # Create visualization comparing uncertainty propagation
+    uncertainty_path = os.path.join(case_dir, "uncertainty_comparison.png")
+    
+    # Create figure with subplots for each variation
+    fig, axs = plt.subplots(2, 2, figsize=(14, 12))
+    axs = axs.flatten()
+    
+    # Plot belief entropy over time for each variation
+    for i, variation in enumerate(variation_results):
+        ax = axs[i]
+        
+        # Calculate entropy for all simulation runs
+        entropy_over_time = []
+        
+        for belief_history in variation["belief_histories"]:
+            # Calculate entropy at each step
+            run_entropy = []
+            for belief in belief_history:
+                # Avoid log(0)
+                entropy = -np.sum(np.clip(belief, 1e-10, 1.0) * np.log2(np.clip(belief, 1e-10, 1.0)))
+                run_entropy.append(entropy)
             
-            # Store final belief
-            baseline_results["belief_histories"].append(belief_history[-1])
+            entropy_over_time.append(run_entropy)
         
-        # Calculate and store metrics for this variation
-        variation["metrics"] = {
-            "state_accuracy": sum(1 for s, t in zip(state_history, states) if s == t) / n_steps,
-            "belief_entropy": -np.sum(belief_history[-1] * np.log2(belief_history[-1])),
-            "average_decision_time": np.mean(model.history[1:][0]),
-            "average_belief_update": np.mean(np.sum(np.abs(np.diff(belief_history, axis=0)), axis=1))
-        }
-    
-    # Visualize state accuracy for each variation
-    state_accuracy_path = os.path.join(case_dir, "state_accuracy.png")
-    fig, axs = plt.subplots(n_variations, 1, figsize=(12, 5*n_variations))
-    
-    if n_variations == 1:
-        axs = [axs]
-    
-    for i, variation in enumerate(variation_results):
-        ax = axs[i]
-        ax.plot(range(1, n_steps+1), variation["state_histories"][0], label="True State")
-        ax.plot(range(1, n_steps+1), variation["state_histories"][1], label="Predicted State")
-        ax.set_xlabel("Step")
-        ax.set_ylabel("State")
-        ax.set_title(f"{variation['name']}: State Accuracy")
+        # Plot all runs
+        for entropy in entropy_over_time:
+            ax.plot(entropy, alpha=0.3, color='blue')
+        
+        # Plot average
+        if entropy_over_time:
+            avg_entropy = np.mean(entropy_over_time, axis=0)
+            ax.plot(avg_entropy, linewidth=2, color='red', label='Average')
+        
+        ax.set_title(f"{variation['name']}")
+        ax.set_xlabel('Step')
+        ax.set_ylabel('Belief Entropy (bits)')
         ax.legend()
         ax.grid(True, linestyle='--', alpha=0.6)
     
     plt.tight_layout()
-    fig.savefig(state_accuracy_path)
+    fig.savefig(uncertainty_path)
     plt.close(fig)
     
-    # Visualize belief entropy for each variation
-    belief_entropy_path = os.path.join(case_dir, "belief_entropy.png")
-    fig, axs = plt.subplots(n_variations, 1, figsize=(12, 5*n_variations))
+    # Create animation of uncertainty propagation
+    animation_path = os.path.join(case_dir, "uncertainty_propagation_animation.gif")
     
-    if n_variations == 1:
-        axs = [axs]
+    # Use the observation uncertainty variation for animation
+    obs_var_idx = 2  # Index of observation uncertainty variation
+    variation = variation_results[obs_var_idx]
     
-    for i, variation in enumerate(variation_results):
-        ax = axs[i]
-        ax.plot(range(1, n_steps+1), variation["belief_histories"][0][1:], label="Belief Entropy")
-        ax.set_xlabel("Step")
-        ax.set_ylabel("Entropy")
-        ax.set_title(f"{variation['name']}: Belief Entropy")
-        ax.legend()
-        ax.grid(True, linestyle='--', alpha=0.6)
-    
-    plt.tight_layout()
-    fig.savefig(belief_entropy_path)
-    plt.close(fig)
-    
-    # Visualize average decision time for each variation
-    decision_time_path = os.path.join(case_dir, "average_decision_time.png")
-    fig, axs = plt.subplots(n_variations, 1, figsize=(12, 5*n_variations))
-    
-    if n_variations == 1:
-        axs = [axs]
-    
-    for i, variation in enumerate(variation_results):
-        ax = axs[i]
-        ax.plot(range(1, n_simulations+1), variation["metrics"]["average_decision_time"], label="Average Decision Time")
-        ax.set_xlabel("Simulation")
-        ax.set_ylabel("Time (a.u.)")
-        ax.set_title(f"{variation['name']}: Average Decision Time")
-        ax.legend()
-        ax.grid(True, linestyle='--', alpha=0.6)
-    
-    plt.tight_layout()
-    fig.savefig(decision_time_path)
-    plt.close(fig)
-    
-    # Visualize average belief update magnitude for each variation
-    belief_update_path = os.path.join(case_dir, "average_belief_update.png")
-    fig, axs = plt.subplots(n_variations, 1, figsize=(12, 5*n_variations))
-    
-    if n_variations == 1:
-        axs = [axs]
-    
-    for i, variation in enumerate(variation_results):
-        ax = axs[i]
-        ax.plot(range(1, n_simulations+1), variation["metrics"]["average_belief_update"], label="Average Belief Update")
-        ax.set_xlabel("Simulation")
-        ax.set_ylabel("Update Magnitude")
-        ax.set_title(f"{variation['name']}: Average Belief Update")
-        ax.legend()
-        ax.grid(True, linestyle='--', alpha=0.6)
-    
-    plt.tight_layout()
-    fig.savefig(belief_update_path)
-    plt.close(fig)
-    
-    # Generate a detailed report
-    report_path = os.path.join(case_dir, "report.md")
-    with open(report_path, "w") as f:
-        f.write(f"# POMDP Model in {Case.ABLATIVE.value} Case\n\n")
-        f.write(f"## {case_info['linguistic_meaning']}\n\n")
-        f.write(f"Statistical role: {case_info['statistical_role']}\n\n")
-        f.write(f"### Context\n\n")
-        f.write(f"{case_info['pomdp_context']}\n\n")
-        f.write("### Mathematical Representation\n\n")
-        f.write(f"```\n{case_info['formula']}\n```\n\n")
-        f.write("### Primary Methods\n\n")
-        f.write(f"{case_info['primary_methods']}\n\n")
-        f.write("### Example\n\n")
-        f.write(f"{case_info['example']}\n\n")
-        f.write("### Analysis Results\n\n")
-        f.write(f"* Number of variations tested: {n_variations}\n")
-        f.write(f"* Simulation steps: {n_steps}\n")
-        f.write(f"* Model parameters:\n")
-        f.write(f"  - States: {model.parameters['n_states']}\n")
-        f.write(f"  - Observations: {model.parameters['n_observations']}\n")
-        f.write(f"  - Actions: {model.action_space}\n")
+    # Use the first simulation run
+    if variation["belief_histories"]:
+        belief_history = variation["belief_histories"][0]
+        state_history = variation["state_histories"][0]
         
-        # Calculate overall state accuracy for each variation
-        f.write("\n* State accuracy by variation:\n")
-        for i, variation in enumerate(variation_results):
-            f.write(f"  - Variation {i+1}: {variation['metrics']['state_accuracy']:.4f}\n")
+        # Create a figure for animation
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 12))
         
-        f.write("\n* Belief entropy by variation:\n")
-        for i, variation in enumerate(variation_results):
-            f.write(f"  - Variation {i+1}: {variation['metrics']['belief_entropy']:.4f}\n")
+        # Setup for belief state plot
+        bars = ax1.bar(range(model.parameters["n_states"]), belief_history[0])
+        ax1.set_ylim(0, 1)
+        ax1.set_xlabel('State')
+        ax1.set_ylabel('Probability')
+        ax1.set_title('Current Belief State')
         
-        f.write("\n* Average decision time by variation:\n")
-        for i, variation in enumerate(variation_results):
-            f.write(f"  - Variation {i+1}: {variation['metrics']['average_decision_time']:.4f} a.u.\n")
+        # Setup for entropy plot
+        entropy_vals = []
+        for belief in belief_history:
+            entropy = -np.sum(np.clip(belief, 1e-10, 1.0) * np.log2(np.clip(belief, 1e-10, 1.0)))
+            entropy_vals.append(entropy)
         
-        f.write("\n* Average belief update magnitude by variation:\n")
-        for i, variation in enumerate(variation_results):
-            f.write(f"  - Variation {i+1}: {variation['metrics']['average_belief_update']:.4f}\n")
+        line, = ax2.plot([], [], 'r-', linewidth=2)
+        ax2.set_xlim(0, len(belief_history))
+        ax2.set_ylim(0, max(entropy_vals) * 1.1)
+        ax2.set_xlabel('Step')
+        ax2.set_ylabel('Belief Entropy (bits)')
+        ax2.set_title('Uncertainty Propagation Over Time')
+        ax2.grid(True, linestyle='--', alpha=0.6)
         
-        f.write("\n### ABLATIVE Case Analysis\n\n")
-        f.write("In the ABLATIVE case, the POMDP is treated as a source of uncertainty. ")
-        f.write("The focus is on how different variations of the model's structure impact its performance. ")
-        f.write("The visualizations show state accuracy, belief entropy, average decision time, and average belief update magnitude for each variation.\n\n")
-        f.write("Key insights:\n")
-        f.write("1. Higher transition uncertainty generally leads to lower state accuracy but higher belief entropy\n")
-        f.write("2. Higher observation uncertainty generally leads to lower state accuracy but higher belief entropy\n")
-        f.write("3. Random policy performs poorly compared to optimal policy\n")
-        f.write("4. The optimal POMDP method outperforms simpler heuristics, especially in difficult scenarios\n")
-        f.write("5. Initial beliefs and observation noise impact convergence rates and computational efficiency\n\n")
-        f.write("### Visualizations\n\n")
-        f.write(f"1. [POMDP Structure](pomdp_structure.png)\n")
-        f.write(f"2. [State Accuracy](state_accuracy.png)\n")
-        f.write(f"3. [Belief Entropy](belief_entropy.png)\n")
-        f.write(f"4. [Average Decision Time](average_decision_time.png)\n")
-        f.write(f"5. [Average Belief Update](average_belief_update.png)\n")
+        # Text to show step information
+        step_text = ax1.text(0.02, 0.95, '', transform=ax1.transAxes)
+        
+        def init():
+            for bar in bars:
+                bar.set_height(0)
+            line.set_data([], [])
+            step_text.set_text('')
+            return tuple(bars) + (line, step_text)
+        
+        def update(frame):
+            # Update belief bars
+            for i, bar in enumerate(bars):
+                bar.set_height(belief_history[frame][i])
+                # Color the bar differently for the true state
+                if i == state_history[frame]:
+                    bar.set_color('red')
+                else:
+                    bar.set_color('blue')
+            
+            # Update entropy plot
+            x_data = range(frame + 1)
+            line.set_data(x_data, entropy_vals[:frame + 1])
+            
+            # Update step text
+            entropy = entropy_vals[frame]
+            step_text.set_text(f'Step: {frame}\nEntropy: {entropy:.4f} bits')
+            
+            return tuple(bars) + (line, step_text)
+        
+        anim = FuncAnimation(fig, update, frames=len(belief_history),
+                             init_func=init, blit=True)
+        
+        anim.save(animation_path, writer='pillow', fps=2, dpi=100)
+        plt.close(fig)
+        logger.info(f"Created uncertainty propagation animation: {animation_path}")
     
-    logger.info(f"Completed ABLATIVE case test with visualizations in {case_dir}")
-    
-    # Return the model for potential further testing
     return model
 
 def test_vocative_case(pomdp_test_data, case_definitions):
-    """Test for VOCATIVE case: Model as addressable interface."""
-    # Get case info for logging
+    """Test for VOCATIVE case: Model as communication channel."""
+    
+    # Get case info
     case_info = case_definitions[Case.VOCATIVE]
     logger.info(f"Testing {Case.VOCATIVE.value} case: {case_info['linguistic_meaning']}")
-    logger.info(f"Statistical role: {case_info['statistical_role']}")
     
-    # Create visuals directory
+    # Create case directory
     case_dir = os.path.join(OUTPUT_DIR, Case.VOCATIVE.value.lower())
     os.makedirs(case_dir, exist_ok=True)
     
-    # Generate linguistic context visualization
-    linguistics_path = os.path.join(case_dir, "linguistic_context.png")
-    plot_case_linguistic_context(Case.VOCATIVE, linguistics_path)
+    # Create visualization of case context
+    case_context_path = os.path.join(case_dir, "case_context.png")
+    plot_case_linguistic_context(Case.VOCATIVE, case_context_path)
     
-    # Implement the test
-    # TODO: Implement detailed VOCATIVE case test with visualizations
+    # Create a model
+    model = POMDPModel(model_id="VocPOMDP", case=Case.VOCATIVE)
     
-    logger.info(f"Completed VOCATIVE case test with visualizations in {case_dir}")
+    # Analyze the communication channels in the POMDP
+    
+    # Channel 1: Environment -> Agent (Observation Channel)
+    observation_matrix = model.parameters["observation_matrix"]
+    
+    # Channel 2: Agent -> Environment (Action Channel)
+    # For this, we'll use a simple policy: choose action 0 if belief in state 0 > 0.5
+    
+    # Generate a trajectory
+    n_steps = 15
+    states, actions, observations = DataGenerator.generate_trajectory(
+        transition_matrix=model.parameters["transition_matrix"],
+        observation_matrix=observation_matrix,
+        n_steps=n_steps
+    )
+    
+    # Calculate mutual information and other channel properties
+    # State-Observation mutual information
+    state_obs_mi = 0
+    for s in range(model.parameters["n_states"]):
+        p_s = np.sum(states == s) / len(states)
+        if p_s > 0:
+            for o in range(model.parameters["n_observations"]):
+                p_o_given_s = observation_matrix[s, o]
+                p_o = np.sum(observations == o) / len(observations)
+                if p_o > 0 and p_o_given_s > 0:
+                    state_obs_mi += p_s * p_o_given_s * np.log2(p_o_given_s / p_o)
+    
+    # Create a visualization of the communication channels
+    channel_path = os.path.join(case_dir, "communication_channels.png")
+    
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 6))
+    
+    # Plot observation channel
+    im1 = ax1.imshow(observation_matrix, cmap='Blues')
+    ax1.set_title("Observation Channel\nP(o|s)")
+    ax1.set_xlabel("Observation")
+    ax1.set_ylabel("State")
+    fig.colorbar(im1, ax=ax1)
+    
+    # Plot belief dynamics
+    # Run a belief update simulation
+    belief = np.ones(model.parameters["n_states"]) / model.parameters["n_states"]
+    belief_history = [belief]
+    
+    for t in range(n_steps):
+        # Update belief based on observation
+        new_belief = np.zeros_like(belief)
+        for s in range(model.parameters["n_states"]):
+            # Apply observation update
+            if t < len(observations):
+                obs = observations[t]
+                for prev_s in range(model.parameters["n_states"]):
+                    # Transition probability
+                    if t < len(actions):
+                        trans_prob = model.parameters["transition_matrix"][prev_s, actions[t], s]
+                    else:
+                        trans_prob = model.parameters["transition_matrix"][prev_s, 0, s]
+                    
+                    # Observation probability
+                    obs_prob = observation_matrix[s, obs]
+                    
+                    # Update belief
+                    new_belief[s] += trans_prob * obs_prob * belief[prev_s]
+        
+        # Normalize
+        new_belief /= np.sum(new_belief)
+        belief = new_belief
+        belief_history.append(belief.copy())
+    
+    # Plot belief evolution
+    belief_history = np.array(belief_history)
+    for s in range(model.parameters["n_states"]):
+        ax2.plot(belief_history[:, s], label=f"State {s}")
+    
+    ax2.set_title("Belief Communication Channel")
+    ax2.set_xlabel("Step")
+    ax2.set_ylabel("Belief Probability")
+    ax2.legend()
+    ax2.grid(True, linestyle='--', alpha=0.6)
+    
+    plt.tight_layout()
+    fig.savefig(channel_path)
+    plt.close(fig)
+    
+    # Create animation of communication between components
+    animation_path = os.path.join(case_dir, "component_communication_animation.gif")
+    
+    # Create a new model for the animation
+    model = POMDPModel(model_id="VocPOMDP_Anim", case=Case.VOCATIVE)
+    
+    # Generate a trajectory
+    n_steps = 10
+    states, actions, observations = DataGenerator.generate_trajectory(
+        transition_matrix=model.parameters["transition_matrix"],
+        observation_matrix=model.parameters["observation_matrix"],
+        n_steps=n_steps
+    )
+    
+    # Track belief state
+    belief_history = []
+    belief = np.ones(model.parameters["n_states"]) / model.parameters["n_states"]
+    belief_history.append(belief.copy())
+    
+    for t in range(n_steps):
+        # Choose action based on current belief
+        action = 0 if belief[0] > 0.5 else 1
+        
+        # Get next state
+        if t < len(states) - 1:
+            next_state = states[t+1]
+        else:
+            next_state = states[-1]
+        
+        # Get observation
+        if t < len(observations):
+            obs = observations[t]
+        else:
+            obs = 0
+        
+        # Update belief
+        new_belief = np.zeros_like(belief)
+        for s in range(model.parameters["n_states"]):
+            # Apply observation update
+            for prev_s in range(model.parameters["n_states"]):
+                # Transition probability
+                trans_prob = model.parameters["transition_matrix"][prev_s, action, s]
+                
+                # Observation probability
+                obs_prob = model.parameters["observation_matrix"][s, obs]
+                
+                # Update belief
+                new_belief[s] += trans_prob * obs_prob * belief[prev_s]
+        
+        # Normalize
+        new_belief /= np.sum(new_belief)
+        belief = new_belief
+        belief_history.append(belief.copy())
+    
+    # Create animation
+    fig, ax = plt.subplots(figsize=(10, 8))
+    
+    # Create POMDP diagram elements
+    env_rect = plt.Rectangle((0.15, 0.6), 0.3, 0.3, fill=True, color='lightblue', alpha=0.7)
+    agent_rect = plt.Rectangle((0.55, 0.6), 0.3, 0.3, fill=True, color='lightgreen', alpha=0.7)
+    
+    # Add elements to plot
+    ax.add_patch(env_rect)
+    ax.add_patch(agent_rect)
+    
+    # Add text labels
+    env_text = ax.text(0.3, 0.75, "Environment\nState: ?", ha='center', va='center')
+    agent_text = ax.text(0.7, 0.75, "Agent\nBelief: ?", ha='center', va='center')
+    
+    # Create arrows for communication
+    obs_arrow = ax.arrow(0.45, 0.7, 0.1, 0, head_width=0.02, head_length=0.02, fc='black', ec='black')
+    act_arrow = ax.arrow(0.55, 0.8, -0.1, 0, head_width=0.02, head_length=0.02, fc='black', ec='black')
+    
+    # Add arrow labels
+    obs_text = ax.text(0.5, 0.68, "Observation: ?", ha='center', va='center', fontsize=10)
+    act_text = ax.text(0.5, 0.82, "Action: ?", ha='center', va='center', fontsize=10)
+    
+    # Add step counter
+    step_text = ax.text(0.1, 0.1, "Step: 0", fontsize=12)
+    
+    # Add mutual information
+    mi_text = ax.text(0.7, 0.1, f"MI(S,O): {state_obs_mi:.4f} bits", fontsize=12)
+    
+    # Remove axis ticks
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    
+    # Set title
+    ax.set_title(f"POMDP Communication Channels - {Case.VOCATIVE.value} Case")
+    
+    # Create animation
+    def update(frame):
+        # Update environment state
+        if frame < len(states):
+            env_text.set_text(f"Environment\nState: {states[frame]}")
+        
+        # Update observation
+        if frame < len(observations):
+            obs_text.set_text(f"Observation: {observations[frame]}")
+        
+        # Update action
+        if frame < len(actions):
+            act_text.set_text(f"Action: {actions[frame]}")
+        
+        # Update belief
+        if frame < len(belief_history):
+            belief_str = '\n'.join([f"P(s={i})={b:.2f}" for i, b in enumerate(belief_history[frame])])
+            agent_text.set_text(f"Agent\n{belief_str}")
+        
+        # Update step counter
+        step_text.set_text(f"Step: {frame}")
+        
+        return env_text, agent_text, obs_text, act_text, step_text
+    
+    anim = FuncAnimation(fig, update, frames=n_steps+1, interval=1000)
+    
+    anim.save(animation_path, writer='pillow', fps=1, dpi=100)
+    plt.close(fig)
+    logger.info(f"Created component communication animation: {animation_path}")
+    
+    return model
 
 def run_all_case_tests(output_dir: str = OUTPUT_DIR, specific_case: Optional[str] = None) -> Dict[Case, POMDPModel]:
     """

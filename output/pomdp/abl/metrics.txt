@@ -1,0 +1,22 @@
+Case: ABL - Origin or source
+Statistical Role: Starting point of inference
+
+POMDP Context: The POMDP as an origin of observations or signals
+
+Simulation Metrics:
+  Number of Steps: 20
+  Number of States: 3
+  Number of Actions: 2
+  Number of Observations: 4
+  Final Source State: 0
+
+Receiver Performance:
+  Fast Learner (LR=0.8):
+    - Final Accuracy: 0.90
+    - Confidence in Final Belief: 1.00
+  Medium Learner (LR=0.4):
+    - Final Accuracy: 0.90
+    - Confidence in Final Belief: 0.83
+  Slow Learner (LR=0.1):
+    - Final Accuracy: 0.90
+    - Confidence in Final Belief: 0.44

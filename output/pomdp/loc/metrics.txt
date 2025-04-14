@@ -1,0 +1,15 @@
+Case: LOC - Location or context
+Statistical Role: Environment or context
+
+POMDP Context: The POMDP as an environment where agents operate
+
+Simulation Metrics:
+  Number of Steps: 20
+  Number of States: 3
+  Number of Actions: 2
+  Number of Observations: 4
+  Final State: 0
+  Exploration Phases:
+    - Random: 5 steps
+    - Greedy: 5 steps
+    - Balanced: 10 steps
