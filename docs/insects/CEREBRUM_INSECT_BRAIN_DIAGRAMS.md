@@ -12,16 +12,16 @@ flowchart TD
         subgraph "Input Region: Calyx"
             PN[Projection Neurons] --> KC1[Kenyon Cells - Class I]
             PN --> KC2[Kenyon Cells - Class II]
-            MBIN1[Modulatory Input - Octopaminergic] -.-> Calyx[Calyx]
-            MBIN2[Modulatory Input - Dopaminergic] -.-> Calyx
+            MBIN1[Modulatory Input - Octopaminergic] -. modulates .-> Calyx[Calyx]
+            MBIN2[Modulatory Input - Dopaminergic] -. modulates .-> Calyx
             Calyx --> KC1
             Calyx --> KC2
         end
         
         subgraph "Intrinsic Neurons: Kenyon Cells"
-            KC1 --> alpha[α Lobe Axons]
-            KC1 --> beta[β Lobe Axons]
-            KC2 --> gamma[γ Lobe Axons]
+            KC1 --> alpha[Alpha Lobe Axons]
+            KC1 --> beta[Beta Lobe Axons]
+            KC2 --> gamma[Gamma Lobe Axons]
         end
         
         subgraph "Output Region: Vertical and Medial Lobes"
@@ -29,9 +29,9 @@ flowchart TD
             beta --> MBON2[MBON - Inhibitory]
             gamma --> MBON3[MBON - Recurrent]
             
-            MBIN3[Dopaminergic Neurons - α1] -.-> alpha
-            MBIN4[Dopaminergic Neurons - β1] -.-> beta
-            MBIN5[Dopaminergic Neurons - γ1] -.-> gamma
+            MBIN3[Dopaminergic Neurons - Alpha1] -. modulates .-> alpha
+            MBIN4[Dopaminergic Neurons - Beta1] -. modulates .-> beta
+            MBIN5[Dopaminergic Neurons - Gamma1] -. modulates .-> gamma
         end
     end
     
@@ -43,7 +43,7 @@ flowchart TD
     classDef primary fill:#f9f,stroke:#333,stroke-width:2px
     classDef secondary fill:#bbf,stroke:#333,stroke-width:1px
     classDef tertiary fill:#fbb,stroke:#333,stroke-width:1px
-    classDef calyx fill:#fff,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5
+    classDef calyx fill:#fff,stroke:#333,stroke-width:1px,stroke-dasharray:5 5
     
     class KC1,KC2,alpha,beta,gamma primary
     class PN,MBON1,MBON2,MBON3 secondary
@@ -79,7 +79,7 @@ flowchart TD
             
             EPG[E-PG Neurons] --> EBr1
             EIP[EIP Neurons] --> EBr2
-            EB_NO[EB-NO Neurons] -.-> EBr3
+            EB_NO[EB-NO Neurons] -. modulates .-> EBr3
         end
         
         subgraph "Protocerebral Bridge (PB) [INS]"
@@ -99,8 +99,8 @@ flowchart TD
         end
         
         EPG --> PEG
-        PEN -.-> FB3
-        NO2 -.-> FB4
+        PEN -. modulates .-> FB3
+        NO2 -. modulates .-> FB4
     end
     
     Visual[Visual Input\n[DAT]] --> EPG
@@ -144,15 +144,15 @@ flowchart TD
             GL1 --- GL2
             GL2 --- GL3
             GL3 --- GL4
-            GL4 -..- GLn
+            GL4 -. lateral .-> GLn
         end
         
         subgraph "Local Processing"
-            LN1[Excitatory LN] -.-> GL1
-            LN1 -.-> GL2
-            LN2[Inhibitory LN] -.-> GL3
-            LN2 -.-> GL4
-            LN3[Multiglomerular LN] -.-> GLn
+            LN1[Excitatory LN] -. modulates .-> GL1
+            LN1 -. modulates .-> GL2
+            LN2[Inhibitory LN] -. modulates .-> GL3
+            LN2 -. modulates .-> GL4
+            LN3[Multiglomerular LN] -. modulates .-> GLn
         end
         
         subgraph "Output Pathways"
@@ -164,9 +164,9 @@ flowchart TD
         end
         
         subgraph "Modulatory Input"
-            SER[Serotonergic] -.-> LN1
-            OCT[Octopaminergic] -.-> LN2
-            DA[Dopaminergic] -.-> LN3
+            SER[Serotonergic] -. modulates .-> LN1
+            OCT[Octopaminergic] -. modulates .-> LN2
+            DA[Dopaminergic] -. modulates .-> LN3
         end
     end
     
@@ -318,8 +318,8 @@ flowchart TD
         KCs --> V_Lobe[Vertical Lobe Output]
         KCs --> M_Lobe[Medial Lobe Output]
         
-        DA[Dopaminergic Input] -.-> KCs
-        OA[Octopaminergic Input] -.-> KCs
+        DA[Dopaminergic Input] -. modulates .-> KCs
+        OA[Octopaminergic Input] -. modulates .-> KCs
     end
     
     subgraph "Navigation [LOC]"
@@ -331,7 +331,7 @@ flowchart TD
         PB --> EB
         
         HeadDir[Head Direction Cells] --> EB
-        MechanicalFeatures -.-> HeadDir
+        MechanicalFeatures -. influences .-> HeadDir
     end
     
     subgraph "Action Selection [NOM]"
@@ -346,8 +346,8 @@ flowchart TD
         LAL --> FB
         FB --> LAL
         
-        SER[Serotonergic Input] -.-> FB
-        GustatoryFeatures -.-> SMP
+        SER[Serotonergic Input] -. modulates .-> FB
+        GustatoryFeatures -. influences .-> SMP
     end
     
     subgraph "Motor Control [GEN]"
@@ -358,17 +358,17 @@ flowchart TD
     end
     
     subgraph "Modulation [MET]"
-        PI[Pars Intercerebralis] -.-> DA
-        PI -.-> OA
-        PI -.-> SER
+        PI[Pars Intercerebralis] -. modulates .-> DA
+        PI -. modulates .-> OA
+        PI -. modulates .-> SER
         
-        CA[Corpora Allata] -.-> Hormones[Hormonal Signaling]
-        Hormones -.-> V_Lobe
-        Hormones -.-> FB
-        Hormones -.-> VNC
+        CA[Corpora Allata] -. controls .-> Hormones[Hormonal Signaling]
+        Hormones -. modulates .-> V_Lobe
+        Hormones -. modulates .-> FB
+        Hormones -. modulates .-> VNC
     end
     
-    SMP -.-> PI
+    SMP -. feedback .-> PI
     
     classDef dat fill:#9ff,stroke:#333,stroke-width:2px,color:#000
     classDef acc fill:#f9f,stroke:#333,stroke-width:2px,color:#000

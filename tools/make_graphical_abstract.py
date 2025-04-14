@@ -81,6 +81,7 @@ def find_images(project_root, max_images=15):
     """
     # Priority search locations
     search_paths = [
+        os.path.join(project_root, "paper", "output", "Figure_*.png"),  # Add paper/output path with priority
         os.path.join(project_root, "CEREBRUM", "output", "*.png"),
         os.path.join(project_root, "CEREBRUM", "figures", "*.png"),
         os.path.join(project_root, "docs", "images", "*.png"),
