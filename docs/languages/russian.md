@@ -37,6 +37,32 @@ Russian features six primary cases:
 | **Instrumental** | домом (domom) | домами (domami) |
 | **Prepositional** | о доме (o dome) | о домах (o domakh) |
 
+### Additional Paradigm Examples
+
+To better illustrate the variation in Russian declension patterns, here are additional examples:
+
+#### Feminine Noun: "книга" (book)
+
+| Case | Singular | Plural |
+|------|----------|--------|
+| **Nominative** | книга (kniga) | книги (knigi) |
+| **Genitive** | книги (knigi) | книг (knig) |
+| **Dative** | книге (knige) | книгам (knigam) |
+| **Accusative** | книгу (knigu) | книги (knigi) |
+| **Instrumental** | книгой (knigoy) | книгами (knigami) |
+| **Prepositional** | о книге (o knige) | о книгах (o knigakh) |
+
+#### Neuter Noun: "окно" (window)
+
+| Case | Singular | Plural |
+|------|----------|--------|
+| **Nominative** | окно (okno) | окна (okna) |
+| **Genitive** | окна (okna) | окон (okon) |
+| **Dative** | окну (oknu) | окнам (oknam) |
+| **Accusative** | окно (okno) | окна (okna) |
+| **Instrumental** | окном (oknom) | окнами (oknami) |
+| **Prepositional** | об окне (ob okne) | об окнах (ob oknakh) |
+
 ## 3. Mapping CEREBRUM Cases to Russian Cases
 
 ### Direct Correspondences
@@ -97,6 +123,20 @@ data = model[ABL].extract_data(detachment=True)
 result = model[INS].process(collaborative=True)
 ```
 
+### Additional Case-Preposition Examples
+
+The richness of Russian preposition-case combinations offers even more nuanced implementations for CEREBRUM:
+
+| Russian Construction | Function | CEREBRUM Implementation |
+|---------------------|----------|-------------------------|
+| **о/об + Prepositional** | Topic/subject | Model[LOC, {"focus": "topic"}].describe() |
+| **за + Accusative** | Movement behind | Model[ACC].move_relative_to(target, position="behind") |
+| **за + Instrumental** | Location behind | Model[LOC].contextualize(boundary="beyond") |
+| **через + Accusative** | Movement through | Model[ACC].traverse(obstacle=barrier_model) |
+| **к + Dative** | Movement toward | Model[DAT].approach(gradient=True) |
+| **из + Genitive** | Movement from inside | Model[ABL, {"source_type": "interior"}].extract() |
+| **между + Instrumental** | Position between | Model[LOC].mediate(entity_a, entity_b) |
+
 ### Russian Aspect System and CEREBRUM Processing
 
 Russian's perfective/imperfective verbal aspect system provides insights for CEREBRUM's processing modes:
@@ -129,6 +169,17 @@ final_state = model[NOM].predict_once(input_data)  # Single completed prediction
 | Результаты **модели** точны | Rezul'taty **modeli** tochny | "The results of the model are accurate." | modeli = Genitive | Model[GEN] generating artifacts/outputs |
 | Информация о **модели** | Informatsiya o **modeli** | "Information about the model." | modeli = Prepositional | Model[LOC] providing contextual framework |
 
+### Additional Example Sentences
+
+| Russian Sentence | Transliteration | Translation | Case Usage | CEREBRUM Parallel |
+|------------------|----------------|-------------|------------|-------------------|
+| **Моделью** обрабатываются данные | **Model'yu** obrabatyvayutsya dannye | "Data is processed by the model." | Model'yu = Instrumental | Model[INS] functioning as processing mechanism |
+| Благодаря **модели** улучшились результаты | Blagodarya **modeli** uluchshilis' rezul'taty | "Thanks to the model, results improved." | modeli = Dative | Model[DAT] as benefactor or enabling agent |
+| Между **моделями** существует связь | Mezhdu **modelyami** sushchestvuet svyaz' | "There is a connection between models." | modelyami = Instrumental | Models[INS, {"relation": "interconnected"}] |
+| Учёные думают о **модели** | Uchyonye dumayut o **modeli** | "Scientists think about the model." | modeli = Prepositional | Model[LOC] as topic of consideration |
+| Запрос передается к **модели** | Zapros peredaetsya k **modeli** | "The query is transmitted to the model." | modeli = Dative | Model[DAT] as endpoint recipient |
+| Исходный код **модели** защищен | Iskhodnyy kod **modeli** zashchishchen | "The source code of the model is protected." | modeli = Genitive | Model[GEN] as possessor of attributes |
+
 ### Computational Implementation Examples
 
 ```python
@@ -150,6 +201,28 @@ historical_data = temperature_model[ABL].extract_history()  # Model as data sour
 
 # Prepositional (location/topic) - like Russian "Информация о модели" (Information about the model)
 context = temperature_model[LOC].get_metadata()  # Model provides context
+```
+
+### Extended Implementation Examples
+
+```python
+# Genitive of negation - like Russian "нет модели" (there is no model)
+if model[GEN].check_existence() == False:
+    print("Model doesn't exist in this context")
+
+# Partitive Genitive - like Russian "часть данных" (part of the data)
+subset = data_model[GEN].get_partition(percentage=0.3)
+
+# Dative of advantage - like Russian "это полезно модели" (this is useful for the model)
+if action.is_beneficial_for(model[DAT]):
+    action.execute()
+
+# Instrumental of manner - like Russian "с большой скоростью" (with great speed)
+result = model[INS].process(data, manner="high_throughput")
+
+# Prepositional with "при" - like Russian "при определенных условиях" (under certain conditions)
+with model[LOC, {"condition_type": "prerequisite"}].context() as ctx:
+    perform_conditional_operation(ctx)
 ```
 
 ## 6. Russian Animacy Distinction and CEREBRUM Entity Classification
@@ -248,34 +321,172 @@ The Russian case system and its related grammatical features suggest several ext
 
 3. **Animacy-Based Transformation Rules**: Create different transformation rules for active agent models versus passive data objects, similar to Russian's animate/inanimate distinction.
 
-4. **Gender-Based Model Specialization**: Develop model variants with different operational characteristics based on Russian's gender system, with specialized transformation behavior.
+## 10. Historical Development of the Russian Case System
 
-5. **Case-Number Interaction System**: Implement different behavior for model collections versus individual models, inspired by how Russian case endings change between singular and plural.
+The evolution of the Russian case system offers insights into how CEREBRUM's framework might evolve over time:
 
-## 10. Case Function Evolution: Historical Context
+### Old Russian to Modern Russian Case Evolution
 
-Modern Russian cases evolved from the more extensive Proto-Slavic system, which in turn developed from Proto-Indo-European. This historical evolution provides perspective on how CEREBRUM's case system might evolve:
+| Historical Period | Case System Features | Implications for CEREBRUM |
+|------------------|----------------------|----------------------------|
+| **Old East Slavic** (11th-14th c.) | Seven cases including Vocative | Earlier versions may have more specialized interfaces |
+| **Middle Russian** (15th-17th c.) | Loss of distinct Vocative; erosion of dual number | Consolidation of redundant interfaces over time |
+| **Modern Russian** (18th c. onward) | Six-case system; vocative preserved only in specific contexts | Retention of specialized forms only where functionally necessary |
 
-| Historical Development | CEREBRUM Evolution Parallel |
-|------------------------|-----------------------------|
-| Merger of PIE Ablative with Genitive in Slavic | Potential for combining similar function cases in future CEREBRUM versions |
-| Development of Prepositional from Locative | Specialization of context cases for different environmental parameters |
-| Loss of Vocative in modern Russian (except vestigial forms) | Optional implementation of interface cases depending on application domain |
+### Lost Cases and Their Functions
 
-## 11. Conclusion
+| Lost Case | Original Function | Modern Expression | CEREBRUM Analogue |
+|-----------|------------------|-------------------|-------------------|
+| **Vocative** | Direct address | Replaced by Nominative (with limited vocative forms) | Legacy interfaces may be preserved for specialized contexts |
+| **Locative** (distinct from Prepositional) | Physical location only | Merged with Prepositional case | Specialized location handling absorbed into broader contextual framework |
+| **Dual Number** | Referring to exactly two objects | Replaced by Plural | Special-case handling replaced by parameterized general case |
 
-Russian's case system presents a comprehensive framework for understanding grammatical relationships that aligns well with CEREBRUM's computational case approach. While Russian uses six cases compared to CEREBRUM's eight, the functional parallels are strong, particularly for the core cases (nominative, accusative, dative, instrumental, and genitive).
+Implementation opportunities:
+```python
+# Supporting legacy vocative forms for backward compatibility
+if system_version < 3.0:
+    # Use dedicated vocative interface (like Old Russian)
+    model[VOC].address_directly("execute")
+else:
+    # Use nominative for addressing (like Modern Russian)
+    model[NOM].address_directly("execute")
 
-The Russian system's special features—including its extensive use of prepositions with cases, animacy distinctions, and aspect system—provide valuable inspiration for extending CEREBRUM's capabilities. The syncretism patterns in Russian also suggest optimization opportunities for CEREBRUM's case transformations.
+# Version-specific case transformation
+def transform_with_version_awareness(model, target_case, version):
+    if version < 2.0 and target_case == Case.LOC:
+        # Earlier versions used specialized Locative (like Old Russian)
+        return specialized_locative_transform(model)
+    elif version >= 2.0 and target_case == Case.LOC:
+        # Newer versions use generalized Prepositional (like Modern Russian)
+        return prepositional_transform(model)
+```
 
-By examining these parallels, we gain insights into how CEREBRUM's case-based approach connects to linguistic structures that have evolved over millennia to express relationships between entities—exactly the kind of relationships that CEREBRUM models in computational contexts.
+## 11. Dialectal Variations in the Russian Case System
 
-## 12. References
+Regional dialects of Russian exhibit variations in case usage that can inspire flexibility in CEREBRUM implementations:
 
-1. Wade, Terence. A Comprehensive Russian Grammar. Wiley-Blackwell, 2010.
-2. Timberlake, Alan. A Reference Grammar of Russian. Cambridge University Press, 2004.
-3. Townsend, Charles E. Russian Word-Formation. Slavica Publishers, 1975.
-4. Jakobson, Roman. "Contribution to the General Theory of Case." In Roman Jakobson: Selected Writings II, 267-324. Mouton, 1971.
-5. Andrews, Edna. The Semantics of Suffixation: Agentive Substantival Suffixes in Modern Standard Russian. Mouton de Gruyter, 1996.
-6. Wierzbicka, Anna. Semantics, Culture, and Cognition: Universal Human Concepts in Culture-Specific Configurations. Oxford University Press, 1992.
-7. Janda, Laura A. and Charles E. Townsend. Czech and Russian as Paradigms for Case. Slavica Publishers, 2002. 
+### Northern vs. Southern Russian Dialectal Patterns
+
+| Dialect Group | Case Variation | CEREBRUM Implementation Variation |
+|---------------|----------------|----------------------------------|
+| **Northern Russian** | Retention of distinct nominative/accusative forms for feminine nouns | Strict separation of NOM and ACC transforms |
+| **Southern Russian** | Merger of genitive/dative in feminine singular | Optional optimization for GEN↔DAT transformation in certain contexts |
+| **Siberian Russian** | Fluid case boundaries with non-standard prepositional forms | Context-adaptive case selection based on runtime conditions |
+
+### Non-Standard Case Governance
+
+| Dialectal Pattern | Standard Russian Counterpart | CEREBRUM Implementation |
+|-------------------|----------------------------|--------------------------|
+| **Dative with preposition "по"** in Northern dialects | Prepositional case with "о" | Alternative routing patterns for information flows |
+| **Instrumental without preposition** for location in Southern dialects | Prepositional with "в"/"на" | Contextual inference of location without explicit locative marking |
+| **Nominative objects** in Northwestern dialects | Accusative objects | Direct pipeline without transformation for efficiency |
+
+Implementation example:
+```python
+class DialectAwareCaseBearing:
+    def __init__(self, dialect_profile="standard"):
+        self.dialect = dialect_profile
+        
+    def transform_to_case(self, target_case, context=None):
+        if self.dialect == "northern" and target_case == Case.ACC and self.gender == "feminine":
+            # Northern dialects maintain distinct ACC forms
+            return strict_accusative_transform(self)
+            
+        elif self.dialect == "southern" and target_case == Case.DAT and self.gender == "feminine":
+            # Southern dialects may use GEN form for DAT function
+            return genitive_based_dative_transform(self)
+            
+        elif self.dialect == "siberian" and context and context.get("flexible_boundaries", False):
+            # Siberian dialects allow for more fluid case boundaries
+            return adaptive_case_transform(self, target_case, context)
+            
+        else:
+            # Standard Russian transformation
+            return standard_transform(self, target_case)
+```
+
+## 12. Computational Applications of Russian Case Patterns
+
+The Russian case system offers several computational paradigms applicable to CEREBRUM:
+
+### Type-Based Case Selection
+
+Russian's case selection based on the semantic type of nouns (animate vs. inanimate) can inspire CEREBRUM's handling of different entity types:
+
+```python
+def select_appropriate_case(entity, action_type):
+    if action_type == "UPDATE":
+        # For animate entities (like Russian animate accusative = genitive)
+        if entity.is_agent:
+            return entity[Case.GEN].prepare_for_update()
+        # For inanimate entities (like Russian inanimate accusative = nominative)
+        else:
+            return entity[Case.NOM].prepare_for_update()
+            
+    elif action_type == "EXTRACT":
+        # Russian ablative function using genitive with preposition
+        return entity[Case.GEN, {"extraction_mode": "from_interior"}].prepare_for_extraction()
+```
+
+### Sub-Paradigm Selection for Model Types
+
+Like Russian's declension patterns varying by gender and word ending, CEREBRUM could select transformation patterns based on model characteristics:
+
+```python
+class RussianInspiredCaseEngine:
+    def select_transformation_pattern(self, model):
+        # Like the 1st declension (feminine/masculine in -a/-я)
+        if model.primary_function == "data_receiver":
+            return FirstDeclensionTransformer(model)
+            
+        # Like the 2nd declension (masculine with zero ending, neuter in -o/-e)
+        elif model.primary_function == "generator" or model.primary_function == "processor":
+            return SecondDeclensionTransformer(model)
+            
+        # Like the 3rd declension (feminine in soft sign)
+        elif model.primary_function == "hybrid":
+            return ThirdDeclensionTransformer(model)
+            
+        # Like pluralia tantum (nouns existing only in plural form)
+        elif model.is_distributed_system:
+            return CollectiveEntityTransformer(model)
+```
+
+### Case Governance Rule Engine
+
+Russian's complex rules for case selection with prepositions can inspire a rule engine for CEREBRUM transformations:
+
+```python
+def apply_case_governance_rules(model, context_marker, purpose):
+    # If directional (like "в + accusative")
+    if context_marker == "internal" and purpose == "directional":
+        return model[Case.ACC, {"direction": "into"}]
+        
+    # If locational (like "в + prepositional")
+    elif context_marker == "internal" and purpose == "locational":
+        return model[Case.LOC, {"position": "inside"}]
+        
+    # If source (like "из + genitive")
+    elif context_marker == "internal" and purpose == "source":
+        return model[Case.ABL, {"source_type": "interior"}]
+        
+    # If attachment (like "к + dative")
+    elif context_marker == "proximity" and purpose == "directional":
+        return model[Case.DAT, {"approach": True}]
+```
+
+## 13. Conclusion: Russian Case System's Value for CEREBRUM
+
+The Russian case system offers CEREBRUM several valuable insights:
+
+1. **Systematic Transformation Rules**: Russian's regular morphological patterns suggest efficient ways to handle model transformations.
+
+2. **Context-Dependent Functions**: The same case marker in Russian can serve different functions based on context, informing CEREBRUM's contextual adaptation.
+
+3. **Prepositional Governance**: Russian's complex rules for which prepositions govern which cases provide a model for parameterizing CEREBRUM case transformations.
+
+4. **Adaptive Evolution**: The historical development of Russian cases demonstrates how specialized functions can consolidate over time, providing insight for CEREBRUM's versioning and backward compatibility.
+
+5. **Dialect Flexibility**: Dialectal variations in Russian case usage suggest how CEREBRUM implementations might adapt to different computational environments while maintaining core functionality.
+
+The detailed alignment between Russian's grammatical case system and CEREBRUM's computational framework highlights the universality of relational patterns across natural and artificial systems, reinforcing CEREBRUM's linguistic foundation. 

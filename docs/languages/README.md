@@ -50,6 +50,10 @@ This directory contains case mapping analyses for the following languages:
 - [Amis](amis.md) - Formosan Austronesian language with five-voice system and dedicated benefactive focus
 - [Paiwan](paiwan.md) - Formosan Austronesian language with four-voice system and status-sensitive marking
 - [Serbian](serbian.md) - South Slavic language with 7 cases and animacy distinctions
+- [Portuguese](portuguese.md) - Romance language using prepositions and word order to express case relationships
+- [Norwegian](norwegian.md) - North Germanic language showing transition from morphological to positional case system
+- [Python](python.md) - Programming language with object-oriented and functional paradigms mapped to case relationships
+- [Rust](rust.md) - Systems programming language with ownership model relevant to case relationships
 
 ## Structure of Each Language Document
 

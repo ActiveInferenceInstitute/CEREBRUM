@@ -39,24 +39,27 @@ $F_N(f) \circ \eta_{C_1} = \eta_{C_2} \circ F_M(f)$, due to the consistent relat
 
 The free energy principle provides the theoretical basis for CEREBRUM's inference mechanisms.
 
-**Definition 9.2.1** (Variational Free Energy). For a model $M$ with internal state $s$ and observations $o$, the variational free energy is defined as:
+**Definition 9.2.1** (Variational Free Energy). For a model $M$ with internal states $\mathbf{s}$ and observations $\mathbf{o}$, the variational free energy is defined as:
 
-$$F(s, o) = D_{KL}[q(h|s) || p(h|o)] - \ln p(o)$$
+$$\mathcal{F}(\mathbf{s}, \mathbf{o}) = D_{KL}[q(\mathbf{h}|\mathbf{s}) \parallel p(\mathbf{h}|\mathbf{o})] - \ln p(\mathbf{o})$$
 
-where $q(h|s)$ is the recognition density over hidden states $h$ implied by internal state $s$, $p(h|o)$ is the true posterior, and $p(o)$ is the evidence.
+where:
+- $q(\mathbf{h}|\mathbf{s})$ is the recognition density over hidden states $\mathbf{h}$ parameterized by internal state $\mathbf{s}$
+- $p(\mathbf{h}|\mathbf{o})$ is the true posterior distribution
+- $p(\mathbf{o})$ is the model evidence or marginal likelihood
 
-**Theorem 9.2.1** (Free Energy Decomposition). The variational free energy can be decomposed into:
+**Theorem 9.2.1** (Free Energy Decomposition). The variational free energy can be decomposed into accuracy and complexity terms:
 
-$$F(s, o) = \underbrace{E_{q(h|s)}[-\ln p(o|h)]}_{\text{Accuracy}} + \underbrace{D_{KL}[q(h|s) || p(h)]}_{\text{Complexity}}$$
+$$\mathcal{F}(\mathbf{s}, \mathbf{o}) = \underbrace{\mathbb{E}_{q(\mathbf{h}|\mathbf{s})}[-\ln p(\mathbf{o}|\mathbf{h})]}_{\text{Accuracy (expected negative log-likelihood)}} + \underbrace{D_{KL}[q(\mathbf{h}|\mathbf{s}) \parallel p(\mathbf{h})]}_{\text{Complexity (divergence from prior)}}$$
 
 *Proof*: Starting with Definition 9.2.1, we apply Bayes' rule to the posterior:
 
 $$
 \begin{aligned}
-F(s, o) &= D_{KL}[q(h|s) || p(h|o)] - \ln p(o) \\
-&= \int q(h|s) \ln \frac{q(h|s)}{p(h|o)} dh - \ln p(o) \\
-&= \int q(h|s) \ln \frac{q(h|s)}{p(h) \cdot p(o|h) / p(o)} dh - \ln p(o) \\
-&= \int q(h|s) \ln \frac{q(h|s) \cdot p(o)}{p(h) \cdot p(o|h)} dh - \ln p(o)
+\mathcal{F}(\mathbf{s}, \mathbf{o}) &= D_{KL}[q(\mathbf{h}|\mathbf{s}) \parallel p(\mathbf{h}|\mathbf{o})] - \ln p(\mathbf{o}) \\
+&= \int q(\mathbf{h}|\mathbf{s}) \ln \frac{q(\mathbf{h}|\mathbf{s})}{p(\mathbf{h}|\mathbf{o})} d\mathbf{h} - \ln p(\mathbf{o}) \\
+&= \int q(\mathbf{h}|\mathbf{s}) \ln \frac{q(\mathbf{h}|\mathbf{s})}{p(\mathbf{h}) \cdot p(\mathbf{o}|\mathbf{h}) / p(\mathbf{o})} d\mathbf{h} - \ln p(\mathbf{o}) \\
+&= \int q(\mathbf{h}|\mathbf{s}) \ln \frac{q(\mathbf{h}|\mathbf{s}) \cdot p(\mathbf{o})}{p(\mathbf{h}) \cdot p(\mathbf{o}|\mathbf{h})} d\mathbf{h} - \ln p(\mathbf{o})
 \end{aligned}
 $$
 
@@ -64,47 +67,99 @@ Distributing the logarithm and separating terms:
 
 $$
 \begin{aligned}
-F(s, o) &= \int q(h|s) \ln \frac{q(h|s)}{p(h)} dh + \int q(h|s) \ln \frac{p(o)}{p(o|h)} dh - \ln p(o) \\
-&= D_{KL}[q(h|s) || p(h)] + \int q(h|s) \ln p(o) dh - \int q(h|s) \ln p(o|h) dh - \ln p(o)
+\mathcal{F}(\mathbf{s}, \mathbf{o}) &= \int q(\mathbf{h}|\mathbf{s}) \ln \frac{q(\mathbf{h}|\mathbf{s})}{p(\mathbf{h})} d\mathbf{h} + \int q(\mathbf{h}|\mathbf{s}) \ln \frac{p(\mathbf{o})}{p(\mathbf{o}|\mathbf{h})} d\mathbf{h} - \ln p(\mathbf{o}) \\
+&= D_{KL}[q(\mathbf{h}|\mathbf{s}) \parallel p(\mathbf{h})] + \int q(\mathbf{h}|\mathbf{s}) \ln p(\mathbf{o}) d\mathbf{h} - \int q(\mathbf{h}|\mathbf{s}) \ln p(\mathbf{o}|\mathbf{h}) d\mathbf{h} - \ln p(\mathbf{o})
 \end{aligned}
 $$
 
-Since $\int q(h|s) dh = 1$, we have $\int q(h|s) \ln p(o) dh = \ln p(o)$, giving:
+Since $\int q(\mathbf{h}|\mathbf{s}) d\mathbf{h} = 1$, we have $\int q(\mathbf{h}|\mathbf{s}) \ln p(\mathbf{o}) d\mathbf{h} = \ln p(\mathbf{o})$, giving:
 
-$$F(s, o) = D_{KL}[q(h|s) || p(h)] - \int q(h|s) \ln p(o|h) dh$$
+$$\mathcal{F}(\mathbf{s}, \mathbf{o}) = D_{KL}[q(\mathbf{h}|\mathbf{s}) \parallel p(\mathbf{h})] - \mathbb{E}_{q(\mathbf{h}|\mathbf{s})}[\ln p(\mathbf{o}|\mathbf{h})]$$
 
 The second term is the negative expected log likelihood, which measures the (in)accuracy of predictions. $\square$
+
+**Corollary 9.2.1** (Evidence Lower Bound). The negative free energy provides a lower bound on the log model evidence:
+
+$$\ln p(\mathbf{o}) \geq -\mathcal{F}(\mathbf{s}, \mathbf{o})$$
+
+*Proof*: Rearranging the definition of free energy:
+
+$$\mathcal{F}(\mathbf{s}, \mathbf{o}) + \ln p(\mathbf{o}) = D_{KL}[q(\mathbf{h}|\mathbf{s}) \parallel p(\mathbf{h}|\mathbf{o})]$$
+
+Since KL divergence is always non-negative:
+
+$$\mathcal{F}(\mathbf{s}, \mathbf{o}) + \ln p(\mathbf{o}) \geq 0$$
+
+Therefore:
+
+$$\ln p(\mathbf{o}) \geq -\mathcal{F}(\mathbf{s}, \mathbf{o})$$
+
+This establishes the negative free energy as the Evidence Lower Bound (ELBO). $\square$
 
 ### 9.2.2 Case-Specific Free Energy
 
 In CEREBRUM, free energy is case-dependent due to differences in precision weighting.
 
-**Definition 9.2.2** (Case-Specific Free Energy). For a model $M$ in case $C$ with precision parameters $\pi_C$, the case-specific free energy is:
+**Definition 9.2.2** (Case-Specific Free Energy). For a model $M$ in case $C$ with precision parameters $\boldsymbol{\pi}_C$, the case-specific free energy is:
 
-$$F_C(s, o) = E_{q(h|s)}[-\ln p(o|h; \pi_C)] + D_{KL}[q(h|s) || p(h)]$$
+$$\mathcal{F}_C(\mathbf{s}, \mathbf{o}) = \mathbb{E}_{q(\mathbf{h}|\mathbf{s})}[-\ln p(\mathbf{o}|\mathbf{h}; \boldsymbol{\pi}_C)] + D_{KL}[q(\mathbf{h}|\mathbf{s}) \parallel p(\mathbf{h})]$$
 
-where $p(o|h; \pi_C)$ is the likelihood function with case-specific precision weighting.
+where $p(\mathbf{o}|\mathbf{h}; \boldsymbol{\pi}_C)$ is the likelihood function with case-specific precision weighting.
 
 **Theorem 9.2.2** (Free Energy Transformation). For cases $C_1$ and $C_2$ with a transformation $f: C_1 \rightarrow C_2$, the free energies relate as:
 
-$$F_{C_2}(f(s), o) = F_{C_1}(s, o) + \Delta F_{f}(s, o)$$
+$$\mathcal{F}_{C_2}(f(\mathbf{s}), \mathbf{o}) = \mathcal{F}_{C_1}(\mathbf{s}, \mathbf{o}) + \Delta \mathcal{F}_{f}(\mathbf{s}, \mathbf{o})$$
 
-where $\Delta F_{f}(s, o)$ is the transformation impact on free energy.
+where $\Delta \mathcal{F}_{f}(\mathbf{s}, \mathbf{o})$ is the transformation impact on free energy.
 
-*Proof*: The transformation $f$ modifies both the internal state representation and the precision parameters. Let $\pi_{C_1}$ and $\pi_{C_2}$ be the precision parameters for cases $C_1$ and $C_2$ respectively. Then:
+*Proof*: The transformation $f$ modifies both the internal state representation and the precision parameters. Let $\boldsymbol{\pi}_{C_1}$ and $\boldsymbol{\pi}_{C_2}$ be the precision parameters for cases $C_1$ and $C_2$ respectively. Then:
 
 $$
 \begin{aligned}
-F_{C_2}(f(s), o) &= E_{q(h|f(s))}[-\ln p(o|h; \pi_{C_2})] + D_{KL}[q(h|f(s)) || p(h)] \\
-F_{C_1}(s, o) &= E_{q(h|s)}[-\ln p(o|h; \pi_{C_1})] + D_{KL}[q(h|s) || p(h)]
+\mathcal{F}_{C_2}(f(\mathbf{s}), \mathbf{o}) &= \mathbb{E}_{q(\mathbf{h}|f(\mathbf{s}))}[-\ln p(\mathbf{o}|\mathbf{h}; \boldsymbol{\pi}_{C_2})] + D_{KL}[q(\mathbf{h}|f(\mathbf{s})) \parallel p(\mathbf{h})] \\
+\mathcal{F}_{C_1}(\mathbf{s}, \mathbf{o}) &= \mathbb{E}_{q(\mathbf{h}|\mathbf{s})}[-\ln p(\mathbf{o}|\mathbf{h}; \boldsymbol{\pi}_{C_1})] + D_{KL}[q(\mathbf{h}|\mathbf{s}) \parallel p(\mathbf{h})]
 \end{aligned}
 $$
 
-The difference $\Delta F_{f}(s, o)$ arises from:
-1. Changes in the recognition density: $q(h|f(s))$ vs. $q(h|s)$
-2. Changes in precision weighting: $\pi_{C_2}$ vs. $\pi_{C_1}$
+The difference $\Delta \mathcal{F}_{f}(\mathbf{s}, \mathbf{o})$ arises from:
+1. Changes in the recognition density: $q(\mathbf{h}|f(\mathbf{s}))$ vs. $q(\mathbf{h}|\mathbf{s})$
+2. Changes in precision weighting: $\boldsymbol{\pi}_{C_2}$ vs. $\boldsymbol{\pi}_{C_1}$
 
 These contribute to the overall transformation impact. $\square$
+
+### 9.2.3 Expected Free Energy
+
+The active inference framework extends to future-directed policies through expected free energy.
+
+**Definition 9.2.3** (Expected Free Energy). For a policy $\pi$ and a case $C$, the expected free energy at future time $\tau$ is:
+
+$$\mathcal{G}_C(\pi, \tau) = \mathbb{E}_{q(\mathbf{o}_\tau, \mathbf{h}_\tau|\pi)}[\ln q(\mathbf{h}_\tau|\pi) - \ln p(\mathbf{h}_\tau, \mathbf{o}_\tau; \boldsymbol{\pi}_C)]$$
+
+where $q(\mathbf{o}_\tau, \mathbf{h}_\tau|\pi)$ is the predictive distribution under policy $\pi$.
+
+**Theorem 9.2.3** (Decomposition of Expected Free Energy). The expected free energy can be decomposed into:
+
+$$\mathcal{G}_C(\pi, \tau) = \underbrace{\mathbb{E}_{q(\mathbf{o}_\tau, \mathbf{h}_\tau|\pi)}[\ln q(\mathbf{h}_\tau|\mathbf{o}_\tau, \pi) - \ln p(\mathbf{h}_\tau|\mathbf{o}_\tau)]}_{\text{Expected posterior divergence}} + \underbrace{\mathbb{E}_{q(\mathbf{o}_\tau|\pi)}[D_{KL}[q(\mathbf{o}_\tau|\pi) \parallel p(\mathbf{o}_\tau)]]}_{\text{Expected information gain}}$$
+
+*Proof*: Expanding the joint probability and applying the product rule:
+
+$$
+\begin{aligned}
+\mathcal{G}_C(\pi, \tau) &= \mathbb{E}_{q(\mathbf{o}_\tau, \mathbf{h}_\tau|\pi)}[\ln q(\mathbf{h}_\tau|\pi) - \ln p(\mathbf{h}_\tau|\mathbf{o}_\tau) - \ln p(\mathbf{o}_\tau)] \\
+&= \mathbb{E}_{q(\mathbf{o}_\tau, \mathbf{h}_\tau|\pi)}[\ln q(\mathbf{h}_\tau|\pi) - \ln p(\mathbf{h}_\tau|\mathbf{o}_\tau)] - \mathbb{E}_{q(\mathbf{o}_\tau|\pi)}[\ln p(\mathbf{o}_\tau)]
+\end{aligned}
+$$
+
+The first term can be further decomposed by adding and subtracting $\ln q(\mathbf{h}_\tau|\mathbf{o}_\tau, \pi)$:
+
+$$
+\begin{aligned}
+\mathbb{E}_{q(\mathbf{o}_\tau, \mathbf{h}_\tau|\pi)}[\ln q(\mathbf{h}_\tau|\pi) - \ln p(\mathbf{h}_\tau|\mathbf{o}_\tau)] &= \mathbb{E}_{q(\mathbf{o}_\tau, \mathbf{h}_\tau|\pi)}[\ln q(\mathbf{h}_\tau|\pi) - \ln q(\mathbf{h}_\tau|\mathbf{o}_\tau, \pi) + \ln q(\mathbf{h}_\tau|\mathbf{o}_\tau, \pi) - \ln p(\mathbf{h}_\tau|\mathbf{o}_\tau)] \\
+&= \mathbb{E}_{q(\mathbf{o}_\tau|\pi)}[D_{KL}[q(\mathbf{h}_\tau|\pi) \parallel q(\mathbf{h}_\tau|\mathbf{o}_\tau, \pi)]] + \mathbb{E}_{q(\mathbf{o}_\tau, \mathbf{h}_\tau|\pi)}[\ln q(\mathbf{h}_\tau|\mathbf{o}_\tau, \pi) - \ln p(\mathbf{h}_\tau|\mathbf{o}_\tau)]
+\end{aligned}
+$$
+
+The first term is the expected information gain about hidden states, and the second term is the expected posterior divergence. $\square$
 
 ## 9.3 Precision and Uncertainty
 
@@ -112,7 +167,7 @@ These contribute to the overall transformation impact. $\square$
 
 Precision plays a central role in CEREBRUM's case representations.
 
-**Definition 9.3.1** (Precision Matrix). For a Gaussian likelihood model $p(o|h) = \mathcal{N}(g(h), \Sigma)$, the precision matrix is $\Pi = \Sigma^{-1}$, where $g(h)$ is the generative mapping from hidden states to observations.
+**Definition 9.3.1** (Precision Matrix). For a Gaussian likelihood model $p(\mathbf{o}|\mathbf{h}) = \mathcal{N}(g(\mathbf{h}), \mathbf{\Sigma})$, the precision matrix is $\mathbf{\Pi} = \mathbf{\Sigma}^{-1}$, where $g(\mathbf{h})$ is the generative mapping from hidden states to observations.
 
 **Theorem 9.3.1** (Precision and Free Energy). Increased precision on a specific observation dimension reduces free energy when predictions are accurate, but increases it when predictions are inaccurate.
 
@@ -132,13 +187,31 @@ Different cases allocate precision differently across observation dimensions.
 
 **Definition 9.3.2** (Case-Specific Precision Profile). A case $C$ defines a precision profile $P_C: D \rightarrow \mathbb{R}^+$ mapping each dimension $d \in D$ of the observation space to a precision weight.
 
-**Theorem 9.3.2** (Optimal Case Selection). Given observations $o$, the optimal case $C^*$ minimizes expected free energy:
+**Theorem 9.3.2** (Optimal Case Selection). Given observations $\mathbf{o}$, the optimal case $C^*$ minimizes expected free energy:
 
-$$C^* = \arg\min_C E_{p(o'|o)}[F_C(s, o')]$$
+$$C^* = \arg\min_C \mathbb{E}_{p(\mathbf{o}'|\mathbf{o})}[\mathcal{F}_C(\mathbf{s}, \mathbf{o}')]$$
 
-where $p(o'|o)$ is the predictive distribution over future observations.
+where $p(\mathbf{o}'|\mathbf{o})$ is the predictive distribution over future observations.
 
 *Proof*: This follows directly from the active inference principle of minimizing expected free energy. The case that assigns precision optimally for future observations will minimize the expected free energy. $\square$
+
+### 9.3.3 Information-Theoretic Measures of Case Relationships
+
+The relationships between different cases can be quantified using information theory.
+
+**Definition 9.3.3** (Case Mutual Information). The mutual information between two cases $C_1$ and $C_2$ with respect to a model $M$ is:
+
+$$I(C_1; C_2; M) = \mathbb{E}_{p(\mathbf{o})}[D_{KL}[p(\mathbf{h}|\mathbf{o}, C_1) \parallel p(\mathbf{h})] - D_{KL}[p(\mathbf{h}|\mathbf{o}, C_1) \parallel p(\mathbf{h}|\mathbf{o}, C_2)]]$$
+
+This measures how much information about hidden states is shared across cases.
+
+**Theorem 9.3.3** (Information Conservation in Case Transformations). For a transformation $f: C_1 \rightarrow C_2$ that preserves model semantics, the following inequality holds:
+
+$$I(X; Y|C_1) \geq I(f(X); f(Y)|C_2)$$
+
+where $I(X; Y|C)$ is the mutual information between variables $X$ and $Y$ conditioned on case $C$.
+
+*Proof*: This follows from the data processing inequality in information theory. The transformation $f$ cannot create new information beyond what was present in the original case representation. $\square$
 
 ## 9.4 Multiple Dispatch and Case Polymorphism
 
