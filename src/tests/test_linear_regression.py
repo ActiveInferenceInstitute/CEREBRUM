@@ -35,17 +35,17 @@ if missing_packages:
 
 # Import dependencies
 import numpy as np
-from models import Case, CaseDefinitions
-from utils.data_generator import DataGenerator
+from src.models import Case, CaseDefinitions
+from src.utils.data_generator import DataGenerator
 
 # Import all case test functions
-from tests.linear_regression_cases import test_dative_case, test_instrumental_case
-from tests.linear_regression_cases.vocative_case import test_vocative_case
-from tests.linear_regression_cases.genitive_case import test_genitive_case
-from tests.linear_regression_cases.locative_case import test_locative_case
-from tests.linear_regression_cases.nominative_case import test_nominative_case
-from tests.linear_regression_cases.accusative_case import test_accusative_case
-from tests.linear_regression_cases.ablative_case import test_ablative_case
+from src.tests.linear_regression_cases import test_dative_case, test_instrumental_case
+from src.tests.linear_regression_cases.vocative_case import test_vocative_case
+from src.tests.linear_regression_cases.genitive_case import test_genitive_case
+from src.tests.linear_regression_cases.locative_case import test_locative_case
+from src.tests.linear_regression_cases.nominative_case import test_nominative_case
+from src.tests.linear_regression_cases.accusative_case import test_accusative_case
+from src.tests.linear_regression_cases.ablative_case import test_ablative_case
 
 # Set up the output directory for visualizations
 OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output", "linear_regression")

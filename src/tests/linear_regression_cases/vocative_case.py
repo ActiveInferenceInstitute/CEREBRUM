@@ -13,10 +13,10 @@ from matplotlib.animation import FuncAnimation
 from scipy.stats import norm
 import pandas as pd
 
-from models.base import Case
-from models.case_definitions import CaseDefinitions
-from models.linear_regression import LinearRegressionModel
-from utils.visualization import plot_case_linguistic_context
+from src.models.base import Case
+from src.models.case_definitions import CaseDefinitions
+from src.models.linear_regression import LinearRegressionModel
+from src.utils.visualization import plot_case_linguistic_context
 
 # Setup logging
 logger = logging.getLogger("cerebrum-vocative-test")
