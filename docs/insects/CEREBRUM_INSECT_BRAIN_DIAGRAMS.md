@@ -12,8 +12,10 @@ flowchart TD
         subgraph "Input Region: Calyx"
             PN[Projection Neurons] --> KC1[Kenyon Cells - Class I]
             PN --> KC2[Kenyon Cells - Class II]
-            MBIN1[Modulatory Input - Octopaminergic] -.-> Calyx
+            MBIN1[Modulatory Input - Octopaminergic] -.-> Calyx[Calyx]
             MBIN2[Modulatory Input - Dopaminergic] -.-> Calyx
+            Calyx --> KC1
+            Calyx --> KC2
         end
         
         subgraph "Intrinsic Neurons: Kenyon Cells"
@@ -41,10 +43,12 @@ flowchart TD
     classDef primary fill:#f9f,stroke:#333,stroke-width:2px
     classDef secondary fill:#bbf,stroke:#333,stroke-width:1px
     classDef tertiary fill:#fbb,stroke:#333,stroke-width:1px
+    classDef calyx fill:#fff,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5
     
     class KC1,KC2,alpha,beta,gamma primary
     class PN,MBON1,MBON2,MBON3 secondary
     class MBIN1,MBIN2,MBIN3,MBIN4,MBIN5 tertiary
+    class Calyx calyx
 ```
 
 ## Central Complex [NOM]
@@ -59,8 +63,8 @@ flowchart TD
             FB2 --- FB3[FB Layer 3]
             FB3 --- FB4[FB Layer 4]
             FB4 --- FB5[FB Layer 5]
-            FB6[FB Layer 6] --- FB7[FB Layer 7]
-            FB5 --- FB6
+            FB5 --- FB6[FB Layer 6]
+            FB6 --- FB7[FB Layer 7]
             FB7 --- FB8[FB Layer 8]
             
             PFN[PB-FB-Noduli Neurons] --> FB2
@@ -75,6 +79,7 @@ flowchart TD
             
             EPG[E-PG Neurons] --> EBr1
             EIP[EIP Neurons] --> EBr2
+            EB_NO[EB-NO Neurons] -.-> EBr3
         end
         
         subgraph "Protocerebral Bridge (PB) [INS]"
@@ -90,8 +95,12 @@ flowchart TD
             NO3[Noduli Layer 3]
             
             PFN --> NO1
-            EB_NO[EB-NO Neurons] --> NO2
+            EB_NO --> NO2
         end
+        
+        EPG --> PEG
+        PEN -.-> FB3
+        NO2 -.-> FB4
     end
     
     Visual[Visual Input\n[DAT]] --> EPG
@@ -105,11 +114,15 @@ flowchart TD
     classDef loc fill:#9f9,stroke:#333,stroke-width:2px
     classDef ins fill:#99f,stroke:#333,stroke-width:2px
     classDef gen fill:#ff9,stroke:#333,stroke-width:1px
+    classDef dat fill:#9ff,stroke:#333,stroke-width:2px
+    classDef acc fill:#f9f,stroke:#333,stroke-width:2px
     
     class FB1,FB2,FB3,FB4,FB5,FB6,FB7,FB8,ExFB,CL1 nom
     class EBr1,EBr2,EBr3,EBr4,EPG,EIP,EB_NO loc
     class PBL,PBR,PEN,PEG,PFN ins
     class NO1,NO2,NO3 gen
+    class Visual dat
+    class HigherOrder acc
 ```
 
 ## Antennal Lobe [DAT]
@@ -131,7 +144,7 @@ flowchart TD
             GL1 --- GL2
             GL2 --- GL3
             GL3 --- GL4
-            GL4 -.- GLn
+            GL4 -..- GLn
         end
         
         subgraph "Local Processing"
@@ -175,11 +188,19 @@ flowchart TD
     classDef local fill:#ff9,stroke:#333,stroke-width:1px
     classDef output fill:#f9f,stroke:#333,stroke-width:1px
     classDef mod fill:#bbf,stroke:#333,stroke-width:1px
+    classDef phe fill:#f6c,stroke:#333,stroke-width:1px
+    classDef acc fill:#f9f,stroke:#333,stroke-width:2px
+    classDef nom fill:#f99,stroke:#333,stroke-width:2px
+    classDef ins fill:#99f,stroke:#333,stroke-width:2px
     
     class GL1,GL2,GL3,GL4,GLn dat
     class LN1,LN2,LN3,ORN1,ORN2,ORN3,ORN4,ORNn local
     class uPN1,uPN2,mPN1,mPN2,mPN3 output
     class SER,OCT,DA mod
+    class MB_Calyx acc
+    class LH nom
+    class VLPR phe
+    class SLP ins
 ```
 
 ## Optic Lobe [DAT]
@@ -258,12 +279,20 @@ flowchart TD
     classDef medulla fill:#bff,stroke:#333,stroke-width:2px
     classDef lobula fill:#bbf,stroke:#333,stroke-width:1px
     classDef plate fill:#9f9,stroke:#333,stroke-width:1px
+    classDef dat fill:#9ff,stroke:#333,stroke-width:2px
+    classDef loc fill:#9f9,stroke:#333,stroke-width:2px
+    classDef nom fill:#f99,stroke:#333,stroke-width:2px
+    classDef acc fill:#f9f,stroke:#333,stroke-width:2px
     
     class R1,R7,R8 retina
     class LA,L1,L2,L3,L4,L5 lamina
     class ME,Mi1,Tm1,Tm2,Tm3,Tm4,Tm5,Tm9,T4,T5 medulla
-    class LCa,LCb lobula
+    class LCa,LCb,VLPR lobula
     class LPa,LPb,HSN,HSE,HSS,VS1,VS2,VS3 plate
+    class Vision dat
+    class PVLP,BU,EB,AOTU loc
+    class CX nom
+    class MB acc
 ```
 
 ## Brain-Wide Integration and CEREBRUM Case Implementation
@@ -302,6 +331,7 @@ flowchart TD
         PB --> EB
         
         HeadDir[Head Direction Cells] --> EB
+        MechanicalFeatures -.-> HeadDir
     end
     
     subgraph "Action Selection [NOM]"
@@ -314,8 +344,10 @@ flowchart TD
         
         LAL[Lateral Accessory Lobe] --> DescNeurons
         LAL --> FB
+        FB --> LAL
         
         SER[Serotonergic Input] -.-> FB
+        GustatoryFeatures -.-> SMP
     end
     
     subgraph "Motor Control [GEN]"
@@ -333,7 +365,10 @@ flowchart TD
         CA[Corpora Allata] -.-> Hormones[Hormonal Signaling]
         Hormones -.-> V_Lobe
         Hormones -.-> FB
+        Hormones -.-> VNC
     end
+    
+    SMP -.-> PI
     
     classDef dat fill:#9ff,stroke:#333,stroke-width:2px,color:#000
     classDef acc fill:#f9f,stroke:#333,stroke-width:2px,color:#000
