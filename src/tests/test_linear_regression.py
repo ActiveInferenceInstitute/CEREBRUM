@@ -1387,9 +1387,9 @@ def test_nominative_case(linear_test_data, case_definitions):
     formula += f"{params['intercept']:.4f}"
     for i, coef in enumerate(params['coefficients']):
         if coef >= 0:
-            formula += f" + {coef:.4f} \cdot x_{{{i+1}}}"
+            formula += f" + {coef:.4f} \\cdot x_{{{i+1}}}"
         else:
-            formula += f" - {abs(coef):.4f} \cdot x_{{{i+1}}}"
+            formula += f" - {abs(coef):.4f} \\cdot x_{{{i+1}}}"
     formula += "$"
     
     ax.text(0.5, 0.6, formula, ha='center', va='center', fontsize=18, 
@@ -1697,6 +1697,10 @@ def test_accusative_case(linear_test_data, case_definitions):
             
             # Predictions from the model
             y_pred = evaluator_model.predict(X)
+            
+            # Ensure y_pred has the same shape as y
+            if len(y_pred) != len(y):
+                y_pred = np.resize(y_pred, y.shape)
             
             # Set up data points
             residuals = (y - y_pred) * phase_progress
