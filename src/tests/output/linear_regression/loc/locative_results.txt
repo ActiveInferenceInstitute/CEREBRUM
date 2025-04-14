@@ -6,17 +6,16 @@ Statistical role: Model position in parameter space
 Regression context: Model at a position in parameter/hypothesis space
 
 Parameter Space Analysis:
-- Optimal parameters: Slope=2.777778, Intercept=-2.333333
-- Fitted parameters: Slope=2.954023, Intercept=-2.014790
-- MSE at optimal: 1.149486
-- Parameter space size: 10x10 grid
-- Slope range: [1.00, 5.00]
-- Intercept range: [-5.00, 1.00]
+- Range explored: Slope [-2.0, 3.0], Intercept [-2.0, 3.0]
+- Optimal parameters: Slope = 3.000000, Intercept = -2.000000
+- True parameters: Slope = 2.954023, Intercept = -2.014790
+- Difference: Slope = 0.045977, Intercept = 0.014790
 
 Path Analysis:
-- Starting position: Slope=3.6667, Intercept=-3.0000
-- Path length: 20 steps
-- Distance traveled in parameter space: 1.1111
+- Starting point: Slope = -0.421053, Intercept = 3.000000
+- Number of steps: 15
+- Final position: Slope = 2.821296, Intercept = -2.000000
+- Euclidean distance to optimal: 0.178704
 
 Linguistic Formula Example:
 The optimal solution exists in the MODEL's parameter space.

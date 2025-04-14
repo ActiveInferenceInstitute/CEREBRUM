@@ -1,0 +1,30 @@
+GENITIVE CASE RESULTS
+====================
+
+Linguistic meaning: Possessive or relational function
+Statistical role: Model as prediction generator
+Regression context: Model generating predictions from inputs
+
+Model Parameters (what the model possesses):
+- Intercept: -2.014790
+- Slope: 2.954023
+- Model Formula: y = -2.014790 + 2.954023x
+
+Model Errors (what the model's predictions possess):
+- Mean Squared Error (MSE): 0.806585
+- Root Mean Squared Error (RMSE): 0.898101
+- Mean Absolute Error (MAE): 0.701043
+- Error Variance: 0.806585
+- Error Range: [-1.927418, 2.293053]
+
+Model Derivatives (model's sensitivity):
+- Derivative (dy/dx): 2.954023
+
+Additional Properties:
+- R-squared: 0.989560
+- Number of Data Points: 100
+- Prediction Range: [-16.621779, 12.367960]
+
+Linguistic Formula Example:
+The predictions of the MODEL were accurate.
+

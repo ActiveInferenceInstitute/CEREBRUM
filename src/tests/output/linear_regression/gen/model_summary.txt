@@ -1,7 +1,0 @@
---- Linear Regression Model Summary [GEN_model | GEN] ---
-Status: Trained
-
-MODEL PARAMETERS:
-  Intercept (β₀): -1.896800
-  Coefficient β1: 3.034981
------------------------------------------------------------

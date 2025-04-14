@@ -1,0 +1,22 @@
+DATIVE CASE RESULTS
+===================
+
+Linguistic meaning: Indirect object or recipient
+Statistical role: Model as data recipient
+Regression context: Model receiving or being given data
+
+Data Processing Summary:
+- Original data: 80 training points
+- Processed in 5 batches of ~16 points each
+- Mean of original y: -3.0836
+- Mean of processed y: 0.0000
+- Standard deviation change: 8.9645 → 9.9455
+
+Model Results (after receiving data):
+- R²: 0.9392
+- MSE: 3.8993
+- MAE: 1.7579
+
+Linguistic Formula Example:
+We give the data to the MODEL.
+
