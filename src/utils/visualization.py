@@ -163,4 +163,110 @@ def plot_case_linguistic_context(case: Case, save_path: str) -> None:
     plt.tight_layout()
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     logger.info(f"Saved linguistic context visualization for {case.value} case to {save_path}")
-    plt.close(fig) 
+    plt.close(fig)
+
+def visualize_causal_mechanism(causes, effects, relationships, save_path=None):
+    """
+    Create a visualization showing causal relationships between variables.
+    
+    Parameters:
+    -----------
+    causes : list
+        List of causal variables or factors
+    effects : list
+        List of effect variables or outcomes
+    relationships : list of tuples
+        Each tuple represents a relationship (cause_idx, effect_idx, strength, label)
+        where indices refer to positions in the causes and effects lists
+    save_path : str, optional
+        Path to save the visualization
+        
+    Returns:
+    --------
+    Figure
+        The matplotlib Figure object containing the visualization
+    """
+    fig, ax = plt.subplots(figsize=(12, 8))
+    
+    # Define positions for nodes
+    num_causes = len(causes)
+    num_effects = len(effects)
+    
+    # Position causes on the left side
+    cause_positions = {}
+    for i, cause in enumerate(causes):
+        y_pos = (i + 0.5) * (10 / (num_causes + 1))
+        cause_positions[i] = (2, y_pos)
+        
+    # Position effects on the right side
+    effect_positions = {}
+    for i, effect in enumerate(effects):
+        y_pos = (i + 0.5) * (10 / (num_effects + 1))
+        effect_positions[i] = (8, y_pos)
+    
+    # Draw causes (boxes)
+    for i, cause in enumerate(causes):
+        x, y = cause_positions[i]
+        rect = plt.Rectangle((x-1, y-0.4), 2, 0.8, facecolor='lightskyblue', edgecolor='black', alpha=0.7)
+        ax.add_patch(rect)
+        ax.text(x, y, cause, ha='center', va='center', fontweight='bold')
+    
+    # Draw effects (ellipses)
+    for i, effect in enumerate(effects):
+        x, y = effect_positions[i]
+        ellipse = plt.Ellipse((x, y), 2, 0.8, facecolor='lightgreen', edgecolor='black', alpha=0.7)
+        ax.add_patch(ellipse)
+        ax.text(x, y, effect, ha='center', va='center', fontweight='bold')
+    
+    # Draw arrows for relationships
+    for rel in relationships:
+        cause_idx, effect_idx, strength, label = rel
+        start_x, start_y = cause_positions[cause_idx]
+        end_x, end_y = effect_positions[effect_idx]
+        
+        # Calculate arrow properties based on strength
+        width = max(0.5, min(3, strength * 0.3))
+        alpha = max(0.3, min(0.9, strength * 0.1))
+        
+        # Draw the arrow
+        ax.arrow(start_x + 1, start_y, end_x - start_x - 2, end_y - start_y,
+                head_width=0.2, head_length=0.3, fc='black', ec='black',
+                linewidth=width, alpha=alpha, length_includes_head=True)
+        
+        # Add label at midpoint
+        mid_x = (start_x + end_x) / 2
+        mid_y = (start_y + end_y) / 2
+        
+        # Add slight offset based on position to avoid overlapping
+        offset_y = 0.2 if effect_idx % 2 == 0 else -0.2
+        
+        ax.text(mid_x, mid_y + offset_y, label, ha='center', va='center',
+               bbox=dict(facecolor='white', alpha=0.7, boxstyle='round,pad=0.2'))
+    
+    # Add title and axis settings
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 10)
+    ax.axis('off')
+    ax.set_title('Causal Mechanism Visualization', fontsize=14, fontweight='bold')
+    
+    # Add legend for interpretation
+    legend_text = (
+        "Cause-Effect Diagram\n"
+        "• Boxes: Causal variables\n"
+        "• Ellipses: Effect variables\n"
+        "• Arrows: Causal relationships\n"
+        "• Arrow width: Relationship strength"
+    )
+    
+    # Add the legend text in a box
+    ax.text(0.02, 0.02, legend_text, transform=ax.transAxes,
+           bbox=dict(facecolor='white', alpha=0.8, boxstyle='round,pad=0.5'),
+           va='bottom', ha='left', fontsize=10)
+    
+    plt.tight_layout()
+    
+    if save_path:
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        logger.info(f"Saved causal mechanism visualization to {save_path}")
+    
+    return fig 

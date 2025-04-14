@@ -12,6 +12,7 @@ from matplotlib.animation import FuncAnimation, PillowWriter
 import imageio
 from imageio import imread, imwrite, mimsave
 import shutil
+from PIL import Image
 
 # Setup logging
 logger = logging.getLogger("cerebrum-animation")
@@ -118,12 +119,20 @@ def save_animation(animation, output_path, fps=5, dpi=100, writer='pillow', **kw
         
         # Force a draw to ensure all frames are properly rendered
         plt.draw()
-        plt.pause(0.001)  # Small pause to ensure rendering completes
+        plt.pause(0.01)  # Slightly longer pause to ensure rendering completes
         
         # Get the figure from the animation correctly
-        # FuncAnimation doesn't have a fig attribute directly
-        fig = plt.gcf() if not hasattr(animation, '_fig') else animation._fig
-        
+        if hasattr(animation, '_fig'):
+            fig = animation._fig
+        elif hasattr(animation, 'fig'):
+            fig = animation.fig
+        else:
+            fig = plt.gcf()
+            
+        # Ensure the animation has fully initialized
+        if hasattr(animation, '_init_func') and animation._init_func is not None:
+            animation._init_func()
+            
         # Save frames directly as a fallback option
         frame_dir = os.path.join(os.path.dirname(output_path), "frames_" + os.path.basename(output_path).replace('.gif', ''))
         os.makedirs(frame_dir, exist_ok=True)
@@ -133,34 +142,91 @@ def save_animation(animation, output_path, fps=5, dpi=100, writer='pillow', **kw
         frames = []
         
         # Get total number of frames from the animation
-        total_frames = animation._frames if hasattr(animation, '_frames') else 30
+        if hasattr(animation, '_frames'):
+            total_frames = animation._frames
+        elif hasattr(animation, 'frames'):
+            total_frames = animation.frames
+        elif hasattr(animation, 'save_count'):
+            total_frames = animation.save_count
+        else:
+            total_frames = 30  # Default to 30 frames if we can't determine count
+            logger.warning(f"Could not determine frame count, using default of {total_frames}")
         
         # Force the animation to render each frame
         for i in range(total_frames):
-            # Clear the figure and render the frame
-            animation._func(i)
-            fig.canvas.draw()
-            
-            # Save individual frame
-            frame_path = os.path.join(frame_dir, f"frame_{i:04d}.png")
-            fig.savefig(frame_path, dpi=dpi)
-            
-            # Read the saved frame
-            if os.path.exists(frame_path) and os.path.getsize(frame_path) > 0:
-                img = imread(frame_path)
-                frames.append(img)
+            try:
+                # Clear the figure and render the frame - use different methods depending on animation type
+                if hasattr(animation, '_func'):
+                    # FuncAnimation
+                    animation._func(i)
+                elif hasattr(animation, 'func'):
+                    # Some animation classes may use 'func' instead
+                    animation.func(i)
+                else:
+                    logger.warning(f"Could not find animation function to render frame {i}, skipping")
+                    continue
+                    
+                fig.canvas.draw()
+                plt.pause(0.01)  # Ensure the frame is fully rendered
+                
+                # Save individual frame
+                frame_path = os.path.join(frame_dir, f"frame_{i:04d}.png")
+                fig.savefig(frame_path, dpi=dpi, bbox_inches='tight')
+                
+                # Read the saved frame
+                if os.path.exists(frame_path) and os.path.getsize(frame_path) > 0:
+                    try:
+                        img = imread(frame_path)
+                        if img is not None and img.size > 0:
+                            frames.append(img)
+                        else:
+                            logger.warning(f"Frame {i} appears to be empty, skipping")
+                    except Exception as e:
+                        logger.warning(f"Could not read frame {i}: {str(e)}")
+            except Exception as e:
+                logger.warning(f"Error rendering frame {i}: {str(e)}")
                 
         # If we captured frames directly, save them as GIF
         if frames:
-            logger.info(f"Saving {len(frames)} pre-rendered frames as GIF")
-            mimsave(output_path, frames, fps=fps, loop=0)
-            
-            # Verify the GIF was created with content
-            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
-                logger.info(f"Successfully created GIF from pre-rendered frames: {output_path} ({os.path.getsize(output_path)/1024:.1f} KB)")
-                return True
+            try:
+                logger.info(f"Saving {len(frames)} pre-rendered frames as GIF")
                 
-        # If direct frame capture failed, try using ffmpeg writer if available
+                # Check for inconsistent frame shapes
+                sizes = set((frame.shape[0], frame.shape[1]) for frame in frames)
+                if len(sizes) > 1:
+                    logger.warning(f"Found inconsistent frame sizes: {sizes}. Resizing all frames to match the first frame.")
+                    
+                    # Get the shape of the first frame
+                    target_shape = frames[0].shape[:2]
+                    
+                    # Resize all frames to match the first one
+                    processed_frames = []
+                    
+                    for i, frame in enumerate(frames):
+                        if frame.shape[:2] != target_shape:
+                            # Convert numpy array to PIL Image
+                            img = Image.fromarray(frame)
+                            # Resize to match target shape (width, height)
+                            img = img.resize((target_shape[1], target_shape[0]), Image.LANCZOS)
+                            # Convert back to numpy array
+                            processed_frames.append(np.array(img))
+                        else:
+                            processed_frames.append(frame)
+                            
+                    frames = processed_frames
+                
+                mimsave(output_path, frames, fps=fps, loop=0)
+                
+                # Verify the GIF was created with content
+                if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                    logger.info(f"Successfully created GIF from pre-rendered frames: {output_path} ({os.path.getsize(output_path)/1024:.1f} KB)")
+                    return True
+            except Exception as e:
+                logger.warning(f"Failed to save frames directly: {str(e)}")
+        else:
+            logger.warning("No valid frames were captured in pre-rendering phase")
+                
+        # If direct frame capture failed or resulted in no frames, try using ffmpeg writer if available
         if shutil.which('ffmpeg'):
             try:
                 logger.info(f"Attempting to save with ffmpeg")
@@ -283,6 +349,35 @@ def save_frames_as_gif(frames, output_path, fps=5, loop=0):
         
         # Create directory if it doesn't exist
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        
+        # Check for empty frames
+        if not frames:
+            logger.error("No frames to save")
+            return False
+            
+        # Check for inconsistent frame shapes
+        sizes = set((frame.shape[0], frame.shape[1]) for frame in frames)
+        if len(sizes) > 1:
+            logger.warning(f"Found inconsistent frame sizes: {sizes}. Resizing all frames to match the first frame.")
+            
+            # Get the shape of the first frame
+            target_shape = frames[0].shape[:2]
+            
+            # Resize all frames to match the first one
+            processed_frames = []
+            
+            for i, frame in enumerate(frames):
+                if frame.shape[:2] != target_shape:
+                    # Convert numpy array to PIL Image
+                    img = Image.fromarray(frame)
+                    # Resize to match target shape (width, height)
+                    img = img.resize((target_shape[1], target_shape[0]), Image.LANCZOS)
+                    # Convert back to numpy array
+                    processed_frames.append(np.array(img))
+                else:
+                    processed_frames.append(frame)
+                    
+            frames = processed_frames
         
         # Save frames as GIF with optimization off for more reliable results
         mimsave(output_path, frames, fps=fps, loop=loop, optimize=False)

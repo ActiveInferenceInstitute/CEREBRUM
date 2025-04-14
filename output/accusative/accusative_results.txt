@@ -1,0 +1,40 @@
+ACCUSATIVE CASE RESULTS
+======================
+
+Linguistic meaning: Direct object receiving action
+Statistical role: Model as evaluation subject
+Regression context: Model undergoing evaluation or testing
+
+Model Parameters:
+- Intercept: 0.999081
+- Slope: 1.985893
+- Model Formula: y = 0.999081 + 1.985893x
+
+Evaluation Metrics:
+- Mean Squared Error (MSE): 0.010994
+- Root Mean Squared Error (RMSE): 0.104852
+- Mean Absolute Error (MAE): 0.084704
+- R-squared: 0.971333
+
+Cross-Validation Results (5 folds):
+- Fold 1: MSE=0.010733, R²=0.969676
+- Fold 2: MSE=0.011046, R²=0.970887
+- Fold 3: MSE=0.016054, R²=0.960151
+- Fold 4: MSE=0.009669, R²=0.971887
+- Fold 5: MSE=0.008420, R²=0.977991
+- Average MSE: 0.011184 ± 0.002603
+- Average R²: 0.970118 ± 0.005749
+
+Residual Analysis:
+- Mean of residuals: 0.000000
+- Standard deviation: 0.104852
+- Range: [-0.288333, 0.258398]
+
+Linguistic Analysis (ACCUSATIVE Case):
+- The model is the OBJECT receiving the action of evaluation
+- Verbs acting on the model: Test, Evaluate, Validate, Assess
+- Subjects performing the action: Researchers, Analysts, Tests
+
+Linguistic Formula Example:
+We evaluate the MODEL on test data.
+
