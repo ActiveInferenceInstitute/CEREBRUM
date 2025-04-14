@@ -4,3 +4,5 @@ Statistical Role: Representational context
 Neural Network Context: The neural network as a representational space or feature context
 
 Training Metrics:
+  Final Loss: 0.000000
+  Initial Loss: 0.000000
