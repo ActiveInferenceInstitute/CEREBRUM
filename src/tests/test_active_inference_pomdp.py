@@ -62,7 +62,7 @@ class POMDPModel(ActiveInferenceModel):
             "n_states": n_states,
             "n_observations": n_obs
         }
-        
+            
         # Initialize base class
         super().__init__(name=model_id, parameters=parameters,
                          prior_means=prior_means, prior_precision=prior_precision)
@@ -249,73 +249,73 @@ class CaseDefinitions:
             "case": Case.INSTRUMENTAL.value,
             "linguistic_meaning": "By means of/Using",
             "statistical_role": "Computational method",
-            "pomdp_context": "The POMDP as a computational method for solving sequential decision problems",
-            "formula": "V(b) = max_a[R(b,a) + γ∑p(o|b,a)V(b')]",
-            "primary_methods": "solve(), compute_value_function()",
-            "visualization": "Computational diagrams, algorithm flowcharts",
-            "example": "The agent solves the problem BY USING POMDP methods"
+            "pomdp_context": "The POMDP as a computational method/tool for decision-making under uncertainty",
+            "formula": "POMDP = (S, A, T, R, O, Z, γ)",
+            "primary_methods": "compute_policy(), solve()",
+            "visualization": "Algorithm flowcharts, computational graphs",
+            "example": "We solve the problem USING a POMDP framework"
         }
     
     @staticmethod
     def locative() -> Dict[str, str]:
         """
-        LOCATIVE case: The model as location/context.
+        LOCATIVE case: The model as environment/place.
         
-        In linguistics: Location or time.
-        In POMDP: Model as decision context.
+        In linguistics: Location.
+        In POMDP: Model as space of possibilities.
         """
         return {
             "case": Case.LOCATIVE.value,
-            "linguistic_meaning": "In/At/Within",
-            "statistical_role": "Decision context",
-            "pomdp_context": "The POMDP as the context within which decisions are made under uncertainty",
-            "formula": "Context: {S, A, O, T, Z, R, γ}",
-            "primary_methods": "define_space(), set_parameters()",
-            "visualization": "State space diagrams, problem structure",
-            "example": "Optimal decisions exist WITHIN the POMDP framework"
+            "linguistic_meaning": "In/At/On location",
+            "statistical_role": "State space",
+            "pomdp_context": "The POMDP as an environment or state space in which processes occur",
+            "formula": "s ∈ S, a ∈ A, o ∈ O",
+            "primary_methods": "get_state_space(), get_possible_observations()",
+            "visualization": "State space diagrams, environment maps",
+            "example": "Different policies exist IN the POMDP's state space"
         }
     
     @staticmethod
     def ablative() -> Dict[str, str]:
         """
-        ABLATIVE case: The model as origin/cause.
+        ABLATIVE case: The model as origin/from which.
         
-        In linguistics: Movement from.
-        In POMDP: Model as source of uncertainty.
+        In linguistics: Direction from.
+        In POMDP: Model as reference point/comparison.
         """
         return {
             "case": Case.ABLATIVE.value,
-            "linguistic_meaning": "From/Out of/Because of",
-            "statistical_role": "Source of uncertainty",
-            "pomdp_context": "The POMDP as the origin of uncertainty and partial observability",
-            "formula": "H(s|o) = -∑p(s|o)log p(s|o)",
-            "primary_methods": "compute_entropy(), analyze_uncertainty()",
-            "visualization": "Uncertainty quantification, entropy maps",
-            "example": "Uncertainty COMES FROM the POMDP's partial observability"
+            "linguistic_meaning": "From/Away from",
+            "statistical_role": "Reference point",
+            "pomdp_context": "The POMDP as a baseline or source from which variations are measured",
+            "formula": "Δ = |π_new - π_POMDP|",
+            "primary_methods": "get_baseline(), compare_to()",
+            "visualization": "Difference plots, divergence measures",
+            "example": "The new algorithm deviates FROM the standard POMDP approach"
         }
     
     @staticmethod
     def vocative() -> Dict[str, str]:
         """
-        VOCATIVE case: The model as addressable entity.
+        VOCATIVE case: The model as addressee.
         
         In linguistics: Direct address.
-        In POMDP: Model as interactive interface.
+        In POMDP: Model as interactive agent.
         """
         return {
             "case": Case.VOCATIVE.value,
-            "linguistic_meaning": "Direct address/Invocation",
-            "statistical_role": "Interactive interface",
-            "pomdp_context": "The POMDP as an addressable entity with a query/response interface",
-            "formula": "API: query(POMDP, type) → response",
-            "primary_methods": "query(), respond()",
-            "visualization": "Interface diagrams, command flows",
-            "example": "HEY POMDP, what is the optimal action for this belief?"
+            "linguistic_meaning": "Direct address",
+            "statistical_role": "Interactive agent",
+            "pomdp_context": "The POMDP as an agent that can be directly queried or instructed",
+            "formula": "query(POMDP, q) → r",
+            "primary_methods": "receive_command(), respond_to_query()",
+            "visualization": "Query-response diagrams, interaction networks",
+            "example": "Hey POMDP, what action should I take next?"
         }
     
     @staticmethod
     def get_all_cases() -> Dict[Case, Dict[str, str]]:
-        """Returns a dictionary with information for all cases."""
+        """Get definitions for all grammatical cases implemented in the system."""
         return {
             Case.NOMINATIVE: CaseDefinitions.nominative(),
             Case.ACCUSATIVE: CaseDefinitions.accusative(),
@@ -324,7 +324,7 @@ class CaseDefinitions:
             Case.INSTRUMENTAL: CaseDefinitions.instrumental(),
             Case.LOCATIVE: CaseDefinitions.locative(),
             Case.ABLATIVE: CaseDefinitions.ablative(),
-            Case.VOCATIVE: CaseDefinitions.vocative(),
+            Case.VOCATIVE: CaseDefinitions.vocative()
         }
 
 # Data generator for POMDP test data
@@ -497,6 +497,65 @@ class Visualizer:
         
         return fig
 
+def generate_trajectory(
+    transition_matrix: np.ndarray, 
+    observation_matrix: np.ndarray, 
+    initial_state: int = 0,
+    n_steps: int = 20, 
+    random_seed: int = None
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Generate a synthetic trajectory for a POMDP system.
+    
+    Args:
+        transition_matrix: State transition matrix (states x states)
+        observation_matrix: Observation matrix (states x observations)
+        initial_state: Initial state index
+        n_steps: Number of steps in trajectory
+        random_seed: Random seed for reproducibility
+        
+    Returns:
+        Tuple of (states, actions, observations)
+    """
+    if random_seed is not None:
+        np.random.seed(random_seed)
+    
+    n_states = transition_matrix.shape[0]
+    n_actions = 2  # Simplified to 2 actions
+    n_observations = observation_matrix.shape[1]
+    
+    states = np.zeros(n_steps, dtype=int)
+    actions = np.zeros(n_steps, dtype=int)
+    observations = np.zeros(n_steps, dtype=int)
+    
+    # Set initial state
+    states[0] = initial_state
+    
+    # Generate trajectory
+    for t in range(n_steps - 1):
+        # Random action
+        actions[t] = np.random.choice(n_actions)
+        
+        # Generate observation from current state
+        observations[t] = np.random.choice(
+            n_observations, 
+            p=observation_matrix[states[t]]
+        )
+        
+        # Transition to next state
+        states[t + 1] = np.random.choice(
+            n_states,
+            p=transition_matrix[states[t]]
+        )
+    
+    # Final step observation
+    observations[-1] = np.random.choice(
+        n_observations,
+        p=observation_matrix[states[-1]]
+    )
+    
+    return states, actions, observations
+
 # Fixtures
 @pytest.fixture
 def case_definitions():
@@ -506,10 +565,6 @@ def case_definitions():
 @pytest.fixture
 def pomdp_test_data():
     """Fixture for POMDP test data."""
-    # Create POMDP test data
-    # # Create POMDP test data manually instead of using the fixture  # This causes an error when called directly
-    
-    # Manually create test data instead of using the fixture
     # Define the POMDP structure for testing
     n_states = 4  # Number of states in the environment
     n_actions = 3  # Number of actions the agent can take
@@ -533,7 +588,7 @@ def pomdp_test_data():
          [0.0, 0.05, 0.9, 0.05],
          [0.0, 0.0, 0.05, 0.95]]
     ])
-    
+
     # Create an observation matrix (states x observations)
     observation_matrix = np.array([
         [0.8, 0.2],  # State 0 - high prob of observing 0, low of 1
@@ -553,6 +608,20 @@ def pomdp_test_data():
     # Initial belief state (uniform distribution)
     initial_belief = np.ones(n_states) / n_states
     
+    # Generate a sample trajectory for testing
+    n_steps = 20
+    initial_state = 0
+    random_seed = 42
+    
+    # Generate synthetic trajectory data
+    states, actions, observations = generate_trajectory(
+        transition_matrix=transition_matrix[0],  # Use first action's transition matrix for simplicity
+        observation_matrix=observation_matrix,
+        initial_state=initial_state,
+        n_steps=n_steps,
+        random_seed=random_seed
+    )
+    
     # Create the test data
     test_data = {
         "transition_matrix": transition_matrix,
@@ -561,7 +630,10 @@ def pomdp_test_data():
         "initial_belief": initial_belief,
         "n_states": n_states,
         "n_actions": n_actions,
-        "n_observations": n_observations
+        "n_observations": n_observations,
+        "states": states,
+        "actions": actions,
+        "observations": observations
     }
     
     return test_data
@@ -747,7 +819,7 @@ def test_nominative_case(pomdp_test_data, case_definitions):
     axs[1].set_yticks(range(model.parameters["n_states"]))
     axs[1].legend()
     axs[1].grid(True, linestyle='--', alpha=0.6)
-    
+
     plt.tight_layout()
     fig.savefig(policy_path)
     plt.close(fig)
@@ -756,14 +828,14 @@ def test_nominative_case(pomdp_test_data, case_definitions):
     animation_path = os.path.join(case_dir, "belief_animation.gif")
     
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 10))
-    
+
     # Setup for belief state plot
     bars = ax1.bar(range(model.parameters["n_states"]), belief_history[0])
     ax1.set_ylim(0, 1)
     ax1.set_xlabel('State')
     ax1.set_ylabel('Probability')
     ax1.set_title('Current Belief State')
-    
+
     # Setup for state/observation plot
     line1, = ax2.plot([], [], 'b-', label='True State')
     line2, = ax2.plot([], [], 'ro', label='Observations')
@@ -773,7 +845,7 @@ def test_nominative_case(pomdp_test_data, case_definitions):
     ax2.set_ylabel('State/Observation')
     ax2.legend()
     ax2.grid(True, linestyle='--', alpha=0.6)
-    
+
     # Text to show step information
     step_text = ax1.text(0.02, 0.95, '', transform=ax1.transAxes)
     
@@ -783,7 +855,7 @@ def test_nominative_case(pomdp_test_data, case_definitions):
         line1.set_data([], [])
         line2.set_data([], [])
         step_text.set_text('')
-        return bars + [line1, line2, step_text]
+        return list(bars) + [line1, line2, step_text]
     
     def update(frame):
         # Update belief bars
@@ -813,7 +885,7 @@ def test_nominative_case(pomdp_test_data, case_definitions):
         
         step_text.set_text(f'Step: {frame}\n{action_text}\n{obs_text}')
         
-        return bars + [line1, line2, step_text]
+        return list(bars) + [line1, line2, step_text]
     
     anim = FuncAnimation(fig, update, frames=len(belief_history),
                           init_func=init, blit=True)
@@ -869,7 +941,7 @@ def test_nominative_case(pomdp_test_data, case_definitions):
     axs[1, 1].set_ylabel('Entropy (bits)')
     axs[1, 1].set_title('Belief Uncertainty')
     axs[1, 1].grid(True, linestyle='--', alpha=0.6)
-    
+
     plt.tight_layout()
     fig.savefig(decision_path)
     plt.close(fig)
@@ -968,7 +1040,7 @@ def test_accusative_case(pomdp_test_data, case_definitions):
         # Reset the model for this scenario
         model = POMDPModel(model_id=f"AccPOMDP_Scenario{scenario+1}", case=Case.ACCUSATIVE)
         model.current_state = np.random.choice(model.parameters["n_states"])  # Random initial state
-        
+
         # Prepare metrics for this scenario
         belief_accuracy = []  # Belief state accuracy
         decision_accuracy = []  # Decision accuracy
@@ -1048,7 +1120,7 @@ def test_accusative_case(pomdp_test_data, case_definitions):
         ax.set_title(title)
         ax.legend()
         ax.grid(True, linestyle='--', alpha=0.6)
-    
+
     # Plot each metric
     plot_metric(axs[0], "belief_accuracy", "Belief Accuracy Across Scenarios", "Accuracy", color='green')
     plot_metric(axs[1], "decision_accuracy", "Decision Accuracy Across Scenarios", "Accuracy", color='blue')
@@ -1160,7 +1232,7 @@ def test_accusative_case(pomdp_test_data, case_definitions):
         line4.set_data([], [])
         line5.set_data([], [])
         step_text.set_text('')
-        return bars + [line1, line2, line3, line4, line5, step_text]
+        return list(bars) + [line1, line2, line3, line4, line5, step_text]
     
     def update(frame):
         # Update belief bars
@@ -1205,7 +1277,7 @@ def test_accusative_case(pomdp_test_data, case_definitions):
         else:
             step_text.set_text(f'Step: {frame}\nInitial State')
         
-        return bars + [line1, line2, line3, line4, line5, step_text]
+        return list(bars) + [line1, line2, line3, line4, line5, step_text]
     
     anim = FuncAnimation(fig, update, frames=len(belief_history),
                          init_func=init, blit=True)
@@ -2409,7 +2481,7 @@ def test_instrumental_case(pomdp_test_data, case_definitions):
         action_bars.set_width([])
         action_bars.set_y([])
         step_text.set_text('')
-        return bars + [comp_line, update_line, state_line, action_bars, step_text]
+        return list(bars) + [comp_line, update_line, state_line, action_bars, step_text]
     
     def update(frame):
         # Update belief bars
@@ -2466,7 +2538,7 @@ def test_instrumental_case(pomdp_test_data, case_definitions):
                              f'State 1: {belief[1]:.2f}\n' +
                              f'Entropy: {entropy_val:.2f}')
         
-        return bars + [comp_line, update_line, state_line, action_bars, step_text]
+        return list(bars) + [comp_line, update_line, state_line, action_bars, step_text]
     
     anim = FuncAnimation(fig, update, frames=len(belief_history),
                          init_func=init, blit=True)

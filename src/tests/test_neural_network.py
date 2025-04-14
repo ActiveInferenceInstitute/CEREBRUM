@@ -1258,13 +1258,13 @@ def test_locative_case(nn_classification_data, case_definitions):
         name="LocModel",
         input_dim=X.shape[1],
         output_dim=y_one_hot.shape[1],
-        hidden_dims=[10, 5],
+        hidden_dims=[16, 8],  # Increased hidden layer size for richer representation
         activation='relu'
     )
     model.case = Case.LOCATIVE  # Explicitly set to LOCATIVE case
     
     # Log model details
-    logger.info(f"Created neural network model with architecture: input_dim={X.shape[1]}, hidden_dims=[10, 5], output_dim={y_one_hot.shape[1]}")
+    logger.info(f"Created neural network model with architecture: input_dim={X.shape[1]}, hidden_dims=[16, 8], output_dim={y_one_hot.shape[1]}")
     
     # Visualize the model structure 
     network_structure_path = os.path.join(case_dir, "network_structure.png")
@@ -1388,7 +1388,7 @@ def test_locative_case(nn_classification_data, case_definitions):
         f.write("### Example\n\n")
         f.write(f"{case_info['example']}\n\n")
         f.write("### Analysis Results\n\n")
-        f.write(f"* Model architecture: Input({X.shape[1]}) → Hidden(10) → Hidden(5) → Output({y_one_hot.shape[1]})\n")
+        f.write(f"* Model architecture: Input({X.shape[1]}) → Hidden(16) → Hidden(8) → Output({y_one_hot.shape[1]})\n")
         f.write(f"* Activation function: {model.activation}\n")
         f.write(f"* Initial loss: {model.loss_history[0]:.6f}\n")
         f.write(f"* Final loss: {model.loss_history[-1]:.6f}\n")
@@ -1600,13 +1600,13 @@ def test_vocative_case(nn_classification_data, case_definitions):
         name="VocModel",
         input_dim=X.shape[1],
         output_dim=y_one_hot.shape[1],
-        hidden_dims=[10, 5],
+        hidden_dims=[10],
         activation='relu'
     )
     model.case = Case.VOCATIVE  # Explicitly set to VOCATIVE case
     
     # Log model details
-    logger.info(f"Created neural network model with architecture: input_dim={X.shape[1]}, hidden_dims=[10, 5], output_dim={y_one_hot.shape[1]}")
+    logger.info(f"Created neural network model with architecture: input_dim={X.shape[1]}, hidden_dims=[10], output_dim={y_one_hot.shape[1]}")
     
     # Visualize the model structure 
     network_structure_path = os.path.join(case_dir, "network_structure.png")
