@@ -855,7 +855,7 @@ def test_nominative_case(pomdp_test_data, case_definitions):
         line1.set_data([], [])
         line2.set_data([], [])
         step_text.set_text('')
-        return list(bars) + [line1, line2, step_text]
+        return tuple(bars) + (line1, line2, step_text)
     
     def update(frame):
         # Update belief bars
@@ -885,7 +885,7 @@ def test_nominative_case(pomdp_test_data, case_definitions):
         
         step_text.set_text(f'Step: {frame}\n{action_text}\n{obs_text}')
         
-        return list(bars) + [line1, line2, step_text]
+        return tuple(bars) + (line1, line2, step_text)
     
     anim = FuncAnimation(fig, update, frames=len(belief_history),
                           init_func=init, blit=True)
@@ -1574,7 +1574,7 @@ def test_dative_case(pomdp_test_data, case_definitions):
         for bar in bars:
             bar.set_height(0)
         obs_text.set_text('')
-        return [obs_scatter, line1] + list(bars) + [obs_text]
+        return (obs_scatter, line1) + tuple(bars) + (obs_text,)
     
     def update(frame):
         # Update observation plot
@@ -1616,7 +1616,7 @@ def test_dative_case(pomdp_test_data, case_definitions):
             else:
                 bar.set_color('blue')
         
-        return [obs_scatter, line1] + list(bars) + [obs_text]
+        return (obs_scatter, line1) + tuple(bars) + (obs_text,)
     
     anim = FuncAnimation(fig, update, frames=len(belief_history),
                          init_func=init, blit=True)
@@ -2485,10 +2485,9 @@ def test_instrumental_case(pomdp_test_data, case_definitions):
         comp_line.set_data([], [])
         update_line.set_data([], [])
         state_line.set_data([], [])
-        # Initialize action bars 
-        # Just return the existing bars container - we'll recreate it in update()
+        # We need to avoid returning the action_bars container
         step_text.set_text('')
-        return list(bars) + [comp_line, update_line, state_line, step_text]
+        return tuple(bars) + (comp_line, update_line, state_line, step_text)
     
     def update(frame):
         # Update belief bars
@@ -2517,11 +2516,11 @@ def test_instrumental_case(pomdp_test_data, case_definitions):
         
         # For action bars, we need to clear the axis and recreate the bars
         if frame > 0:
-            # Clear existing bars
+            # Clear existing bars (except legend)
             for patch in axs[2].patches:
                 patch.remove()
             
-            # Create new bars for actions
+            # Create new bars for actions - don't store the container
             axs[2].barh(
                 range(frame),
                 [1.0] * frame,
@@ -2552,7 +2551,8 @@ def test_instrumental_case(pomdp_test_data, case_definitions):
                              f'State 1: {belief[1]:.2f}\n' +
                              f'Entropy: {entropy_val:.2f}')
         
-        return list(bars) + [comp_line, update_line, state_line, step_text]
+        # Change return to tuple from list since BarContainer isn't properly handled in lists
+        return tuple(bars) + (comp_line, update_line, state_line, step_text)
     
     anim = FuncAnimation(fig, update, frames=len(belief_history),
                          init_func=init, blit=True)

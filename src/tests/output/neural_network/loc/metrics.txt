@@ -1,0 +1,6 @@
+Case: LOC - In/At/Within
+Statistical Role: Representational context
+
+Neural Network Context: The neural network as a representational space or feature context
+
+Training Metrics:

@@ -1,0 +1,6 @@
+Case: GEN - Possessive/Source
+Statistical Role: Output source
+
+Neural Network Context: The neural network as a source of outputs and predictions
+
+Training Metrics:

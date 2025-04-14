@@ -1,0 +1,6 @@
+Case: ABL - From/Out of/Because of
+Statistical Role: Error source
+
+Neural Network Context: The neural network as the source of prediction errors and gradients
+
+Training Metrics:
