@@ -17,7 +17,106 @@ CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unifie
 - **Institution:** Active Inference Institute
 
 ## Overview
-CEREBRUM is a unified modeling framework that integrates case-based reasoning with Bayesian representations.
+CEREBRUM is a unified modeling framework that integrates case-based reasoning with Bayesian representations. It provides a comprehensive suite of tools for developing, testing, and deploying cognitive models that combine the strengths of case-based reasoning with probabilistic inference.
+
+Key features include:
+- Integration of symbolic case structures with Bayesian probabilistic representations
+- Flexible transformation engine for model adaptation and learning
+- Multiple language implementations with consistent APIs
+- Visualization tools for model inspection and analysis
+- Extensive example library demonstrating applications across domains
+
+## Project Architecture
+
+```mermaid
+graph TD
+    A[CEREBRUM Framework] --> B[Core Engine]
+    A --> C[Model Library]
+    A --> D[Transformation Engine]
+    A --> E[Visualization Tools]
+    
+    B --> B1[Active Inference Module]
+    B --> B2[Bayesian Representation]
+    B --> B3[Case Management]
+    
+    C --> C1[Predefined Models]
+    C --> C2[Custom Model Templates]
+    
+    D --> D1[Model Adaptation]
+    D --> D2[Case Transformation]
+    D --> D3[Learning Mechanisms]
+    
+    E --> E1[Interactive Visualizations]
+    E --> E2[Model Inspection Tools]
+    E --> E3[Diagnostic Reports]
+    
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style B fill:#bbf,stroke:#333
+    style C fill:#bbf,stroke:#333
+    style D fill:#bbf,stroke:#333
+    style E fill:#bbf,stroke:#333
+```
+
+## Repository Structure
+The CEREBRUM repository is organized into the following structure:
+
+| Directory/File | Description |
+|----------------|-------------|
+| `/src` | Source code for the CEREBRUM framework |
+| `/src/core` | Core engine components including active inference module, neural networks, and model base classes |
+| `/src/models` | Implementation of various model types and case definitions |
+| `/src/utils` | Utility functions and helper classes |
+| `/src/visualization` | Visualization tools and components |
+| `/src/transformations` | Model transformation and adaptation algorithms |
+| `/src/cases` | Case definition and management functionalities |
+| `/src/examples` | Example implementations and demonstrations |
+| `/docs` | Documentation including specifications, guides, and discussions |
+| `/docs/examples` | Detailed documentation for example models |
+| `/docs/languages` | Language-specific implementation guidelines |
+| `/paper` | Academic paper source files and generation tools |
+| `/paper/components` | Paper section components and figures |
+| `/paper/output` | Generated paper outputs in various formats |
+| `/tools` | Development and maintenance tools |
+| `/output` | Default location for generated outputs and results |
+
+## Implementation Workflow
+
+```mermaid
+flowchart LR
+    A[Define Case Structure] --> B[Create Bayesian Model]
+    B --> C[Configure Transformations]
+    C --> D[Train/Adapt Model]
+    D --> E[Evaluate Results]
+    E -->|Iterate| A
+    
+    style A fill:#bbf,stroke:#333
+    style B fill:#bbf,stroke:#333
+    style C fill:#bbf,stroke:#333
+    style D fill:#bbf,stroke:#333
+    style E fill:#bbf,stroke:#333
+```
+
+## Getting Started
+
+CEREBRUM can be used in multiple ways depending on your needs:
+
+1. **Explore existing models**: Check out the `/src/examples` directory
+2. **Create your own models**: Follow the guides in `/docs/getting_started.md`
+3. **Extend the framework**: See `/docs/contributing_technical.md` for development setup
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/ActiveInferenceInstitute/CEREBRUM.git
+cd CEREBRUM
+
+# Install dependencies
+pip install -r requirements.txt
+
+# For development
+pip install -r requirements_dev.txt
+```
 
 ## PDF Documentation
 The full documentation for CEREBRUM is available as a PDF file in the `paper/output/` directory, which is generated from the Markdown source files.
@@ -43,6 +142,31 @@ This script will:
 4. Create the final PDF file at `paper/output/assembled_paper.pdf`
 
 For more detailed information about the paper building process, please see `paper/README.md`.
+
+## Use Cases
+
+CEREBRUM has been applied to a variety of domains:
+
+```mermaid
+mindmap
+  root((CEREBRUM))
+    Cognitive Science
+      Mental Models
+      Decision Making
+      Learning Processes
+    Artificial Intelligence
+      Agent Modeling
+      Reinforcement Learning
+      Multi-agent Systems
+    Control Systems
+      HVAC Controls
+      Robotics
+      Adaptive Systems
+    Natural Language
+      Text Understanding
+      Semantic Processing
+      Dialog Systems
+```
 
 ## Citation
 If you use CEREBRUM in your research, please cite:
@@ -77,5 +201,23 @@ We welcome contributions from researchers, developers, and enthusiasts across mu
 
 ### Contribution Scale
 From micro-contributions (1-3 hours) to large projects (40+ hours), we value contributions of all sizes.
+
+### Development Process
+
+```mermaid
+graph LR
+    A[Fork Repository] --> B[Setup Dev Environment]
+    B --> C[Create Feature Branch]
+    C --> D[Implement Changes]
+    D --> E[Run Tests]
+    E -->|Pass| F[Submit PR]
+    E -->|Fail| D
+    F --> G[Code Review]
+    G -->|Approved| H[Merge]
+    G -->|Changes Requested| D
+    
+    style A fill:#bbf,stroke:#333
+    style H fill:#9f9,stroke:#333
+```
 
 For detailed contribution guidelines, process information, and more specific ideas, please see our [CONTRIBUTING.md](CONTRIBUTING.md) document. 
