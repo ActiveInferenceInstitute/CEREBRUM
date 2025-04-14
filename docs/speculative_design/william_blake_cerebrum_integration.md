@@ -850,82 +850,75 @@ graph TD
 
 The Golgonooza prototype implements Blake's creative city through a heterogeneous neural architecture:
 
-```python
-class GolgonoozeCreativeSystem(nn.Module):
-    """
-    Neural implementation of Blake's Golgonooza as a creative city
-    with multiple specialized ateliers and integrative mechanisms.
-    """
+```mermaid
+classDiagram
+    class GolgonoozeCreativeSystem {
+        +TransformerAtelier language_atelier
+        +VisionTransformerAtelier visual_atelier
+        +WaveNetAtelier musical_atelier
+        +GraphNetworkAtelier conceptual_atelier
+        +LosPipelineProcess creative_process
+        +UrizenConstraintTracker boundary_tracking
+        +LuvahEnergyModule energy_exchange
+        +CrossModalAttentionMechanism integration_manifold
+        +forward(inputs, contrary_tensions) outputs
+        -_select_actions() actions
+        -_compute_metrics() metrics
+    }
     
-    def __init__(self, config):
-        super().__init__()
-        
-        # Initialize the specialized ateliers (creative domains)
-        self.language_atelier = TransformerAtelier(config.language_config)
-        self.visual_atelier = VisionTransformerAtelier(config.visual_config)
-        self.musical_atelier = WaveNetAtelier(config.music_config)
-        self.conceptual_atelier = GraphNetworkAtelier(config.concept_config)
-        
-        # Initialize Los's creative processes
-        self.creative_process = LosPipelineProcess(config.los_config)
-        self.boundary_tracking = UrizenConstraintTracker(config.urizen_config)
-        self.energy_exchange = LuvahEnergyModule(config.luvah_config)
-        
-        # Integration manifold (based on Blake's concept of integrated vision)
-        self.integration_manifold = CrossModalAttentionMechanism(
-            config.integration_config,
-            [self.language_atelier.output_dim,
-             self.visual_atelier.output_dim,
-             self.musical_atelier.output_dim,
-             self.conceptual_atelier.output_dim]
-        )
-        
-    def forward(self, inputs, contrary_tensions=None):
-        """
-        Forward pass through the Golgonooza creative system
-        
-        Parameters:
-        -----------
-        inputs : dict
-            Multi-modal inputs for each atelier
-        contrary_tensions : tensor, optional
-            Explicit contrary forces to incorporate (Blake's contraries)
-            
-        Returns:
-        --------
-        outputs : dict
-            Generated creative artifacts across domains with integration signals
-        """
-        # Process through specialized ateliers
-        language_rep = self.language_atelier(inputs.get('language', None))
-        visual_rep = self.visual_atelier(inputs.get('visual', None))
-        musical_rep = self.musical_atelier(inputs.get('musical', None))
-        conceptual_rep = self.conceptual_atelier(inputs.get('conceptual', None))
-        
-        # Integrate through the manifold (Blake's fourfold vision)
-        integrated_rep = self.integration_manifold([
-            language_rep, visual_rep, musical_rep, conceptual_rep
-        ])
-        
-        # Apply Los's creative processes
-        creative_signals = self.creative_process(integrated_rep)
-        boundary_signals = self.boundary_tracking(integrated_rep)
-        energy_signals = self.energy_exchange(integrated_rep, contrary_tensions)
-        
-        # Generate novel outputs through each atelier
-        outputs = {
-            'language': self.language_atelier.generate(integrated_rep, creative_signals),
-            'visual': self.visual_atelier.generate(integrated_rep, creative_signals),
-            'musical': self.musical_atelier.generate(integrated_rep, creative_signals),
-            'conceptual': self.conceptual_atelier.generate(integrated_rep, creative_signals),
-            'integration_metrics': {
-                'creative_signals': creative_signals,
-                'boundary_signals': boundary_signals,
-                'energy_signals': energy_signals
-            }
-        }
-        
-        return outputs
+    class TransformerAtelier {
+        +process(input_data) representations
+        +generate(integrated_rep, creative_signals) outputs
+    }
+    
+    class VisionTransformerAtelier {
+        +process(input_data) representations
+        +generate(integrated_rep, creative_signals) outputs
+    }
+    
+    class WaveNetAtelier {
+        +process(input_data) representations
+        +generate(integrated_rep, creative_signals) outputs
+    }
+    
+    class GraphNetworkAtelier {
+        +process(input_data) representations
+        +generate(integrated_rep, creative_signals) outputs
+    }
+    
+    class LosPipelineProcess {
+        +process(integrated_rep) creative_signals
+        -_generate_synthesis_parameters() params
+    }
+    
+    class UrizenConstraintTracker {
+        +process(integrated_rep) boundary_signals
+        -_evaluate_constraints() evaluations
+    }
+    
+    class LuvahEnergyModule {
+        +process(integrated_rep, contrary_tensions) energy_signals
+        -_compute_drive_dynamics() dynamics
+    }
+    
+    class CrossModalAttentionMechanism {
+        +process(representations_list) integrated_rep
+        -_compute_cross_modal_attention() attention_weights
+    }
+    
+    GolgonoozeCreativeSystem --> TransformerAtelier
+    GolgonoozeCreativeSystem --> VisionTransformerAtelier
+    GolgonoozeCreativeSystem --> WaveNetAtelier
+    GolgonoozeCreativeSystem --> GraphNetworkAtelier
+    GolgonoozeCreativeSystem --> LosPipelineProcess
+    GolgonoozeCreativeSystem --> UrizenConstraintTracker
+    GolgonoozeCreativeSystem --> LuvahEnergyModule
+    GolgonoozeCreativeSystem --> CrossModalAttentionMechanism
+    
+    note for GolgonoozeCreativeSystem "Implementation of Blake's Golgonooza as a multi-modal creative system"
+    note for LosPipelineProcess "Blake's Los as creative integration process"
+    note for UrizenConstraintTracker "Blake's Urizen as boundary/structure enforcement"
+    note for LuvahEnergyModule "Blake's Luvah as motivational/energetic dynamics"
 ```
 
 ### 15.2 Contrary States Perception System
@@ -983,85 +976,69 @@ Empirical testing of the Contrary States Perception System shows interesting per
 
 Implementation of Blake's concept of "Minute Particulars" as an attention mechanism has shown promising results in preserving significant outliers and exceptions that might be overlooked by conventional statistical methods.
 
-```python
-def minute_particulars_score(features, statistical_norm, receptive_field):
-    """
-    Calculates the 'Minute Particulars' attention score based on Blake's concept.
-    
-    This identifies elements that are significant in their deviation from
-    statistical regularities yet carry important information.
-    
-    Parameters:
-    -----------
-    features : tensor
-        The feature representations to evaluate
-    statistical_norm : tensor
-        The expected statistical pattern 
-    receptive_field : tensor
-        The context in which the feature appears
-        
-    Returns:
-    --------
-    attention_score : tensor
-        Scores for each feature indicating its significance as a 'minute particular'
-    """
-    # Statistical divergence from norm
-    divergence = kl_divergence(features, statistical_norm)
-    
-    # Contextual uniqueness (Blake's emphasis on the particular over the general)
-    uniqueness = 1.0 - cosine_similarity(features, receptive_field.mean(dim=0))
-    
-    # Information density (Blake's emphasis on the infinite in a grain of sand)
-    information_density = estimate_information_content(features, receptive_field)
-    
-    # Los's creative recognition (the imaginative significance)
-    creative_significance = predict_creative_potential(features, receptive_field)
-    
-    # Combined score with Blakean emphasis on significant particulars
-    minute_particulars_score = (
-        divergence * 
-        uniqueness * 
-        information_density * 
-        creative_significance
-    )
-    
-    return minute_particulars_score
-```
-
-#### 15.3.1 Visualization of Minute Particulars Attention
-
-The following plots show how Minute Particulars Attention differs from conventional attention mechanisms in identifying significant outliers:
-
 ```mermaid
-graph TD
-    subgraph "Conventional Statistical Attention"
-        C1[High Density<br>Regions]
-        C2[Regular<br>Patterns]
-        C3[Statistical<br>Averages]
+flowchart TB
+    Input["Feature Representations"] --> DivCalc["Divergence Calculation"]
+    StatNorm["Statistical Norm"] --> DivCalc
+    
+    Input --> UniqCalc["Uniqueness Calculation"]
+    RecField["Receptive Field Context"] --> UniqCalc
+    
+    Input --> InfoCalc["Information Density Calculation"]
+    RecField --> InfoCalc
+    
+    Input --> CreatCalc["Creative Significance Calculation"]
+    RecField --> CreatCalc
+    
+    DivCalc -->|"Statistical<br>Divergence"| Combine["Multiplicative<br>Combination"]
+    UniqCalc -->|"Contextual<br>Uniqueness"| Combine
+    InfoCalc -->|"Information<br>Density"| Combine
+    CreatCalc -->|"Creative<br>Potential"| Combine
+    
+    Combine --> Score["Minute Particulars<br>Attention Score"]
+    
+    Score --> Filter["Attention-Filtered<br>Feature Map"]
+    Input --> Filter
+    
+    subgraph Implementation Details
+        direction TB
+        DivStep["KL Divergence<br>from Statistical Norm"]
+        UniStep["1 - Cosine Similarity<br>with Field Mean"]
+        InfoStep["Estimate Information Content<br>Using Shannon Entropy"]
+        CreatStep["Predict Creative Potential<br>Using Los Module"]
+        MultiStep["Multiply All Factors<br>for Final Score"]
+        
+        DivStep --> UniStep --> InfoStep --> CreatStep --> MultiStep
     end
     
-    subgraph "Minute Particulars Attention"
-        M1[Significant<br>Outliers]
-        M2[Contextually<br>Meaningful Exceptions]
-        M3[Creative<br>Potential Elements]
-    end
+    DivCalc -.-> DivStep
+    UniqCalc -.-> UniStep
+    InfoCalc -.-> InfoStep
+    CreatCalc -.-> CreatStep
+    Combine -.-> MultiStep
     
-    C1 --- High[High Attention]
-    C2 --- Medium[Medium Attention]
-    C3 --- Low[Low-Medium Attention]
+    classDef process fill:#f5f5f5,stroke:#333,stroke-width:1px
+    classDef data fill:#e6f0ff,stroke:#333,stroke-width:1px
+    classDef result fill:#e6fff5,stroke:#333,stroke-width:2px
+    classDef implementation fill:#fff5e6,stroke:#333,stroke-width:1px,stroke-dasharray: 5 5
     
-    M1 --- Very[Very High Attention]
-    M2 --- High2[High Attention]
-    M3 --- Medium2[Medium Attention]
-    
-    style C1 fill:#b3e6ff,stroke:#333,stroke-width:1px
-    style C2 fill:#c6e9ff,stroke:#333,stroke-width:1px
-    style C3 fill:#d9ecff,stroke:#333,stroke-width:1px
-    
-    style M1 fill:#ffb3b3,stroke:#333,stroke-width:1px
-    style M2 fill:#ffc6c6,stroke:#333,stroke-width:1px
-    style M3 fill:#ffd9d9,stroke:#333,stroke-width:1px
+    class Input,StatNorm,RecField data
+    class DivCalc,UniqCalc,InfoCalc,CreatCalc,Combine process
+    class Score,Filter result
+    class DivStep,UniStep,InfoStep,CreatStep,MultiStep implementation
 ```
+
+### 15.4 Divine Imagination: Generative Models with Symbolic Integration
+
+Blake's concept of the divine imagination—which perceives symbols and patterns rather than mere objects—suggests approaches to enhancing CEREBRUM's generative capabilities:
+
+* **Symbol-Grounded Generation**: Developing generative models that incorporate both statistical pattern recognition and symbolic, narrative coherence.
+
+* **Mythopoeic Knowledge Representation**: Creating knowledge structures that organize information not just taxonomically but mythopoeically—in terms of archetypal patterns, narratives, and symbolic transformations.
+
+* **Visionary Interface Design**: Designing interfaces that render CEREBRUM's internal representations in richly visualized, symbolically meaningful forms rather than abstract data visualizations.
+
+These approaches could help bridge the gap between CEREBRUM's statistical inference capabilities and higher-level symbolic understanding, addressing one of the persistent challenges in artificial intelligence.
 
 ## 16. Advanced Technical Considerations: Implementing Blake's Visionary Systems
 
@@ -1286,24 +1263,78 @@ class UrthonaAttention(nn.Module):
 Blake's four states of existence (Eden, Beulah, Generation, Ulro) can be implemented as different processing modes in CEREBRUM, each with distinct computational characteristics:
 
 ```mermaid
-graph TD
-    E[Eden Mode<br>Integrated Wholeness] 
-    B[Beulah Mode<br>Creative Dreaming]
-    G[Generation Mode<br>Material Processing]
-    U[Ulro Mode<br>Reductive Analysis]
+stateDiagram-v2
+    [*] --> Ulro
     
-    U -->|"Expansion (Los)"| G
-    G -->|"Integration (Tharmas)"| B
-    B -->|"Imagination (Urthona)"| E
+    Ulro --> Generation: Los Expansion
+    Generation --> Beulah: Tharmas Integration
+    Beulah --> Eden: Urthona Imagination
+    Eden --> Beulah: Urizen Specialization
+    Beulah --> Generation: Luvah Materialization
+    Generation --> Ulro: Spectre Reduction
     
-    E -->|"Specialization (Urizen)"| B
-    B -->|"Materialization (Luvah)"| G
-    G -->|"Reduction (Spectre)"| U
+    state Ulro {
+        [*] --> AnalyticalProcessing
+        AnalyticalProcessing --> ReductiveModeling
+        ReductiveModeling --> SpecialistFeatures
+        SpecialistFeatures --> [*]
+        
+        note right of AnalyticalProcessing
+            High precision on specific features
+            Low dimensionality representation
+            Fixed categorization schemes
+            Minimized uncertainty
+        end note
+    }
     
-    style E fill:#d1c1f0,stroke:#333,stroke-width:2px
-    style B fill:#c1d1f0,stroke:#333,stroke-width:1px
-    style G fill:#c1f0d1,stroke:#333,stroke-width:1px
-    style U fill:#f0c1c1,stroke:#333,stroke-width:1px
+    state Generation {
+        [*] --> MaterialProcessing
+        MaterialProcessing --> PhysicalConstraints
+        PhysicalConstraints --> CausalDynamics
+        CausalDynamics --> [*]
+        
+        note right of MaterialProcessing
+            Environment-coupled representations
+            Physical simulation capabilities
+            Causal inference mechanisms
+            Temporal sequence learning
+        end note
+    }
+    
+    state Beulah {
+        [*] --> CreativeGeneration
+        CreativeGeneration --> SymbolicAssociations
+        SymbolicAssociations --> DreamingState
+        DreamingState --> [*]
+        
+        note right of CreativeGeneration
+            Relaxed priors
+            High stochasticity
+            Analogical reasoning
+            Cross-domain associations
+            Non-literal representations
+        end note
+    }
+    
+    state Eden {
+        [*] --> IntegratedProcessing
+        IntegratedProcessing --> CrossModalFusion
+        CrossModalFusion --> MetaCognition
+        MetaCognition --> [*]
+        
+        note right of IntegratedProcessing
+            Minimal module separation
+            Multi-level processing integration
+            Self-modeling capabilities
+            Transcendent representations
+            Fourfold Vision completing
+        end note
+    }
+    
+    note right of Ulro: "Single Vision"
+    note right of Generation: "Twofold Vision"
+    note right of Beulah: "Threefold Vision"
+    note right of Eden: "Fourfold Vision"
 ```
 
 Implementation of switching between these states:
@@ -1720,96 +1751,96 @@ graph TD
 
 The active inference framework provides an ideal computational implementation of Blake's marriage of contraries. Within CEREBRUM, this is implemented as:
 
-```python
-class MarriageOfContrariesMechanism(nn.Module):
-    """
-    Implementation of Blake's Marriage of Heaven and Hell as a dynamic
-    active inference mechanism balancing structure and energy.
-    """
-    def __init__(self, config):
-        super().__init__()
-        
-        # Heaven components (Urizen - structure, order, reason)
-        self.structured_prior = HierarchicalPrior(config.urizen_config)
-        self.precision_control = PrecisionWeighting(config.precision_config)
-        self.policy_evaluator = StructuredPolicyEvaluation(config.policy_config)
-        
-        # Hell components (Luvah/Orc - energy, desire, creativity)
-        self.prediction_error = PredictionErrorComputation(config.error_config)
-        self.novelty_drive = NoveltyDetection(config.novelty_config)
-        self.intrinsic_value = IntrinsicMotivation(config.motivation_config)
-        
-        # Marriage components (Los - creative integration)
-        self.precision_balancer = DynamicPrecisionControl(config.balance_config)
-        self.contrary_integrator = ContraryIntegrationNetwork(config.integration_config)
-        self.creative_policy = CreativePolicyGeneration(config.creative_policy_config)
-        
-    def forward(self, observations, current_state):
-        """
-        Process observations through the contrary active inference mechanism
-        
-        Parameters:
-        -----------
-        observations : tensor
-            Current sensory observations
-        current_state : tensor
-            Current belief state
-            
-        Returns:
-        --------
-        next_state : tensor
-            Updated belief state after contrary integration
-        actions : tensor
-            Selected actions based on integrated policy
-        marriage_state : dict
-            Diagnostics about the balance of contrary forces
-        """
-        # Heaven process (top-down structured inference)
-        prior_preds = self.structured_prior(current_state)
-        prior_precision = self.precision_control(current_state, observations)
-        urizen_policies = self.policy_evaluator(current_state, prior_preds)
-        
-        # Hell process (bottom-up energetic inference)
-        pred_errors = self.prediction_error(observations, prior_preds)
-        novelty_signals = self.novelty_drive(observations, prior_preds)
-        luvah_policies = self.intrinsic_value(pred_errors, novelty_signals)
-        
-        # Marriage process (dynamic integration)
-        precision_balance = self.precision_balancer(
-            prior_precision, 
-            novelty_signals,
-            current_state
-        )
-        
-        integrated_state = self.contrary_integrator(
-            current_state,
-            prior_preds,
-            pred_errors,
-            precision_balance
-        )
-        
-        creative_policies = self.creative_policy(
-            urizen_policies,
-            luvah_policies,
-            integrated_state
-        )
-        
-        # Select actions that balance structure and energy
-        actions = self._select_actions(creative_policies)
-        
-        # Update state based on the marriage of contraries
-        next_state = integrated_state
-        
-        # Track the balance between contrary forces
-        marriage_state = {
-            'urizen_influence': self._compute_urizen_influence(precision_balance),
-            'luvah_influence': self._compute_luvah_influence(precision_balance),
-            'creative_tension': self._compute_tension(urizen_policies, luvah_policies),
-            'integration_quality': self._compute_integration_quality(next_state)
-        }
-        
-        return next_state, actions, marriage_state
+```mermaid
+classDiagram
+    class MarriageOfContrariesMechanism {
+        +HierarchicalPrior structured_prior
+        +PrecisionWeighting precision_control
+        +StructuredPolicyEvaluation policy_evaluator
+        +PredictionErrorComputation prediction_error
+        +NoveltyDetection novelty_drive
+        +IntrinsicMotivation intrinsic_value
+        +DynamicPrecisionControl precision_balancer
+        +ContraryIntegrationNetwork contrary_integrator
+        +CreativePolicyGeneration creative_policy
+        +forward(observations, current_state) next_state, actions, marriage_state
+        -_select_actions(creative_policies) actions
+        -_compute_urizen_influence(precision_balance) influence
+        -_compute_luvah_influence(precision_balance) influence
+        -_compute_tension(urizen_policies, luvah_policies) tension
+        -_compute_integration_quality(state) quality
+    }
+    
+    class HierarchicalPrior {
+        +forward(state) prior_predictions
+    }
+    
+    class PrecisionWeighting {
+        +forward(state, observations) precision
+    }
+    
+    class StructuredPolicyEvaluation {
+        +forward(state, predictions) policies
+    }
+    
+    class PredictionErrorComputation {
+        +forward(observations, predictions) errors
+    }
+    
+    class NoveltyDetection {
+        +forward(observations, predictions) novelty
+    }
+    
+    class IntrinsicMotivation {
+        +forward(errors, novelty) policies
+    }
+    
+    class DynamicPrecisionControl {
+        +forward(prior_precision, novelty, state) balance
+    }
+    
+    class ContraryIntegrationNetwork {
+        +forward(state, priors, errors, balance) integrated_state
+    }
+    
+    class CreativePolicyGeneration {
+        +forward(urizen_policies, luvah_policies, state) creative_policies
+    }
+    
+    MarriageOfContrariesMechanism --> HierarchicalPrior : Heaven/Urizen
+    MarriageOfContrariesMechanism --> PrecisionWeighting : Heaven/Urizen
+    MarriageOfContrariesMechanism --> StructuredPolicyEvaluation : Heaven/Urizen
+    MarriageOfContrariesMechanism --> PredictionErrorComputation : Hell/Luvah
+    MarriageOfContrariesMechanism --> NoveltyDetection : Hell/Luvah
+    MarriageOfContrariesMechanism --> IntrinsicMotivation : Hell/Luvah
+    MarriageOfContrariesMechanism --> DynamicPrecisionControl : Marriage/Los
+    MarriageOfContrariesMechanism --> ContraryIntegrationNetwork : Marriage/Los
+    MarriageOfContrariesMechanism --> CreativePolicyGeneration : Marriage/Los
+    
+    note for MarriageOfContrariesMechanism "Blake's Marriage of Heaven and Hell as active inference"
+    note for HierarchicalPrior "Urizen's structured worldview"
+    note for PredictionErrorComputation "Luvah's energetic response to world"
+    note for ContraryIntegrationNetwork "Los's creative integration of contraries"
 ```
+
+The diagram above illustrates the architecture of the CEREBRUM implementation that captures Blake's conception of the marriage of contraries. The system is divided into three major component groups:
+
+1. **Heaven/Urizen Components**: Representing order, structure, and top-down constraints
+   - Hierarchical prior generation
+   - Precision weighting of beliefs
+   - Structured policy evaluation
+
+2. **Hell/Luvah Components**: Representing energy, desire, and bottom-up drives
+   - Prediction error computation
+   - Novelty detection mechanisms
+   - Intrinsic motivation processes
+
+3. **Marriage/Los Components**: Representing creative integration of contraries
+   - Dynamic precision balancing between Heaven and Hell
+   - Contrary integration networks
+   - Creative policy generation
+
+The forward process maintains the dynamic tension between these contrary forces, allowing neither to dominate completely, but rather maintaining productive tension between them—a computational realization of Blake's insight that "Without Contraries is no progression."
 
 ### 18.3 Proverbs of Hell: A Comprehensive CEREBRUM Analysis
 
@@ -1904,253 +1935,256 @@ graph TD
 
 ### 18.4 The Marriage as Computational Process: CEREBRUM Implementation
 
+The practical implementation of Blake's Marriage of Heaven and Hell within CEREBRUM involves a specific sequence of computational processes:
+
 ```mermaid
 sequenceDiagram
-    participant H as Heaven (Urizen)
-    participant M as Marriage (Los)
-    participant D as Hell (Luvah/Orc)
+    participant Observer as Observer/World
+    participant Urizen as Urizen (Heaven Process)
+    participant Luvah as Luvah (Hell Process)
+    participant Los as Los (Marriage Process)
+    participant Tharmas as Tharmas (Integration Output)
     
-    Note over H,D: Blake's Marriage of Heaven and Hell as Active Inference
+    note over Observer,Tharmas: Dynamic Control Flow in Marriage of Contraries
     
-    H->>M: Structured Prior p(s|m)
-    D->>M: Sensory Evidence p(o|s)
-    M->>M: Precision Weighting π
-    M->>M: Compute FE = Complexity - Accuracy
+    Observer->>Luvah: Sensory Observations (o)
+    Urizen->>Urizen: Generate Structured Prior p(s)
+    Luvah->>Luvah: Process Sensory Likelihood p(o|s)
     
-    loop Dynamic Balance
-        M->>H: Query: Expected Complexity
-        H->>M: Return: Structured Model Cost
-        M->>D: Query: Expected Accuracy
-        D->>M: Return: Prediction Error Reduction
-        M->>M: Adjust π to balance contraries
+    par Heaven/Hell Parallel Processing
+        Urizen->>Los: Send Prior Distribution with Precision π₁
+        Luvah->>Los: Send Likelihood Distribution with Precision π₂
     end
     
-    M->>M: Posterior Belief p(s|o,m)
+    Los->>Los: Compute Creative Tension (τ)
+    Los->>Los: Balance Contrary Precisions (π₁ · π₂ = k · τ)
+    Los->>Los: Integrate Contrary Perspectives
     
-    H->>M: Policy Options (Order)
-    D->>M: Policy Options (Energy)
+    alt High Creative Tension
+        Los->>Urizen: Increase Flexibility (↓π₁)
+        Los->>Luvah: Maintain Energy (→π₂)
+    else Low Creative Tension
+        Los->>Urizen: Increase Structure (↑π₁)
+        Los->>Luvah: Increase Energy (↑π₂)
+    end
     
-    M->>M: Creative Policy Synthesis
+    Los->>Los: Generate Posterior Belief q(s|o)
+    Los->>Los: Evaluate Dialectical Policies
+    Los->>Tharmas: Send Integrated State and Actions
     
-    M->>H: Update Structured Models
-    M->>D: Update Energetic Drives
+    Tharmas->>Observer: Execute Integrated Actions
+    Observer->>Luvah: New Observations
     
-    Note over H,D: "Without Contraries is no progression"
+    note over Los: Los maintains the balance:<br>Neither Heaven nor Hell dominates
 ```
 
-#### 18.4.1 Mathematical Formulation
+The sequence diagram above illustrates the control flow of the Marriage of Contraries as implemented in CEREBRUM. The key insight is that unlike traditional Bayesian inference, which seeks to minimize prediction error, Blake's approach maintains a productive tension between contrary perspectives.
 
-The formal mathematical framework for this CEREBRUM implementation of Blake's Marriage of Heaven and Hell is as follows:
+Key features of this implementation:
 
-Let:
-- $H$ represent the Heaven category (Urizen's order)
-- $D$ represent the Hell category (Luvah's energy)
-- $M$ represent the Marriage (Los's creative integration)
+1. **Parallel Processing**: Heaven (Urizen) and Hell (Luvah) operate in parallel
+2. **Dynamic Precision Balance**: The creative tension τ determines the relative influence of each contrary
+3. **Feedback Loops**: The system dynamically adjusts the balance based on creative tension
+4. **Dialectical Synthesis**: Rather than convergence to a single perspective, the system maintains the tension between contraries
 
-The active inference process can be formalized as:
+#### 18.4.1 Mathematical Formulation of Contrary Active Inference
 
-$$F[M] = \int_{s} \pi_H \cdot D_{KL}[q(s|o) || p_H(s)] - \pi_D \cdot \mathbb{E}_{q(s|o)}[\log p_D(o|s)]$$
-
-Where:
-- $F[M]$ is the Free Energy of the integrated system
-- $q(s|o)$ is the posterior belief about states given observations
-- $p_H(s)$ is the prior from the Heaven category
-- $p_D(o|s)$ is the likelihood from the Hell category
-- $\pi_H$ and $\pi_D$ are precision weights modulating the influence of each contrary
-
-The key Blakean insight implemented here is that contrary forces are not resolved through elimination but through dynamic tension, formalized as:
-
-$$\pi_H \cdot \pi_D = k \cdot \text{CreativeTension}$$
-
-where $k$ is a constant and CreativeTension represents the productive energy generated by maintaining rather than resolving contraries.
-
-### 18.5 Plate VII: "How do you know but ev'ry Bird that cuts the airy way, Is an immense world of delight, clos'd by your senses five?"
-
-This famous line from Blake's Marriage presents a perfect case study for CEREBRUM's implementation of perceptual expansion beyond sensory constraints:
+The balance of contraries can be mathematically formulated as:
 
 ```mermaid
 graph TD
-    subgraph "Sensory Constraint Architecture"
-        S1[Visual Sensing]
-        S2[Auditory Sensing]
-        S3[Tactile Sensing]
-        S4[Olfactory Sensing]
-        S5[Gustatory Sensing]
-        SL[Sensory Limitation Layer]
-    end
-    
-    subgraph "Imaginative Expansion Architecture"
-        subgraph "Los Module (Creative Imagination)"
-            L1[Possibility Generation]
-            L2[Modal Expansion]
-            L3[Counterfactual Modeling]
+    subgraph "Mathematical Formulation of Creative Active Inference"
+        direction TB
+        
+        M1["Decision Process"]
+        M2["World Generation Process"]
+        M3["Observation Process"]
+        
+        EQ1["F[Contrary] = F[Heaven] ⊖ F[Hell]"]
+        EQ2["F[Heaven] = ∫ᵌ π₁ · DKL[q(s|o) || p₁(s)]"]
+        EQ3["F[Hell] = -∫ᵌ π₂ · Eq(s|o)[log p₂(o|s)]"]
+        EQ4["Balance Constraint: π₁ · π₂ = k · τ(p₁, p₂)"]
+        EQ5["Creative Tension: τ(p₁, p₂) = DJS[p₁(s) || p₂(o|s)]"]
+        EQ6["Contrary Integration: q(s|o) ∝ p₁(s)^π₁ · p₂(o|s)^π₂"]
+        
+        subgraph "Heaven Process (Urizen)"
+            H1["Structured Prior Generation"]
+            H2["Top-Down Prediction"]
+            H3["Precision Control"]
+            H4["Policy Evaluation"]
+            
+            H1 --> H2 --> H3 --> H4
+            
+            H_EQ1["p₁(s) = exp(-F[s|λ₁])"]
+            H_EQ2["π₁ = f(coherence, predictability)"]
         end
         
-        subgraph "Luvah Module (Passionate Engagement)"
-            LU1[Empathic Projection]
-            LU2[Affective Resonance]
-            LU3[Value Discovery]
+        subgraph "Hell Process (Luvah/Orc)"
+            D1["Sensory Processing"]
+            D2["Prediction Error"]
+            D3["Novelty Detection"]
+            D4["Energy Dynamics"]
+            
+            D1 --> D2 --> D3 --> D4
+            
+            D_EQ1["p₂(o|s) = exp(-F[o|s,λ₂])"]
+            D_EQ2["π₂ = g(novelty, surprise)"]
+        end
+        
+        subgraph "Marriage Process (Los)"
+            I1["Creative Tension Computation"]
+            I2["Precision Balancing"]
+            I3["Contrary Integration"]
+            I4["Dialectical Policy Generation"]
+            
+            I1 --> I2 --> I3 --> I4
+            
+            I_EQ1["τ = h(p₁, p₂, context)"]
+            I_EQ2["Policy = j(q(s|o), τ)"]
         end
     end
     
-    subgraph "Expanded Perception"
-        P1[N-dimensional Representation]
-        P2[Cross-modal Integration]
-        P3[Transcendent Feature Space]
+    M1 --> M2 --> M3 --> M1
+    
+    I1 --> EQ5
+    I2 --> EQ4
+    I3 --> EQ6
+    H1 --> H_EQ1
+    D1 --> D_EQ1
+    H3 --> H_EQ2
+    D3 --> D_EQ2
+    
+    subgraph "Explanation"
+        EX1["F[Contrary]: Free energy of contraries"]
+        EX2["⊖: Dynamic balance operator"]
+        EX3["DKL: Kullback-Leibler divergence"]
+        EX4["DJS: Jensen-Shannon divergence"]
+        EX5["π₁, π₂: Precision weights"]
+        EX6["τ: Creative tension"]
     end
     
-    S1 & S2 & S3 & S4 & S5 --> SL
+    classDef formula fill:#f9f9f9,stroke:#333,stroke-width:1px
+    classDef heaven fill:#d1e0ff,stroke:#333,stroke-width:1px
+    classDef hell fill:#ffd1d1,stroke:#333,stroke-width:1px
+    classDef marriage fill:#f5e6ff,stroke:#333,stroke-width:1px
     
-    SL -.->|"Constraints"| L1
-    L1 --> L2 --> L3
-    
-    SL -.->|"Limitations"| LU1
-    LU1 --> LU2 --> LU3
-    
-    L3 --> P1
-    LU3 --> P2
-    
-    P1 & P2 --> P3
-    
-    P3 -->|"Feedback"| SL
-    
-    style SL fill:#ffcccc,stroke:#333,stroke-width:2px
-    style L1 fill:#ccffcc,stroke:#333,stroke-width:1px
-    style L2 fill:#ccffcc,stroke:#333,stroke-width:1px
-    style L3 fill:#ccffcc,stroke:#333,stroke-width:1px
-    style LU1 fill:#ffccff,stroke:#333,stroke-width:1px
-    style LU2 fill:#ffccff,stroke:#333,stroke-width:1px
-    style LU3 fill:#ffccff,stroke:#333,stroke-width:1px
-    style P3 fill:#ccffff,stroke:#333,stroke-width:2px
+    class EQ1,EQ2,EQ3,EQ4,EQ5,EQ6,H_EQ1,H_EQ2,D_EQ1,D_EQ2,I_EQ1,I_EQ2 formula
+    class H1,H2,H3,H4 heaven
+    class D1,D2,D3,D4 hell
+    class I1,I2,I3,I4 marriage
 ```
 
-This implementation demonstrates how CEREBRUM can model Blake's concept of perceptual expansion beyond sensory constraints through:
+This mathematical formulation captures Blake's insight that the productive marriage of contraries depends on:
 
-1. Explicit representation of sensory limitations as a constraining layer
-2. Creative imagination (Los) that generates possibilities beyond sensory evidence
-3. Passionate engagement (Luvah) that connects emotionally with these possibilities
-4. Expanded perception that transcends the original sensory constraints
+1. **Dynamic Balance**: The contrary perspectives of Heaven (structured priors) and Hell (energetic likelihoods) must be balanced
+2. **Creative Tension**: The Jensen-Shannon divergence measures the creative tension between contraries
+3. **Precision Weighting**: The balance constraint ensures that as one contrary's influence increases, the other adjusts dynamically
+4. **Dialectical Integration**: Rather than seeking convergence to a single perspective, the system maintains the productive tension
 
-The feedback loop represents Blake's insight that imagination can actively reshape perception, allowing us to "see a World in a Grain of Sand" by transcending the limitations of conventional sensory processing.
+This approach differs fundamentally from traditional Bayesian inference, which seeks to minimize prediction error. In Blake's framework, the goal is to maintain a productive tension between contraries, as this tension generates creative energy.
 
-### 18.6 Computational Marriage: Complete Technical Formalization
+### 18.5 Blake's "Without Contraries is no progression": The Dynamic Core
 
-The complete mathematical formalization of the Marriage of Heaven and Hell in CEREBRUM requires representing the dynamic interplay between structure and energy as a non-equilibrium process:
+The Blakean principle that "Without Contraries is no progression" is formalized in CEREBRUM through a dynamic system that maintains contrary forces in productive tension:
 
-```python
-def marriage_of_contraries_inference(observation, current_state, config):
-    """
-    Implements the complete mathematical formalization of Blake's
-    Marriage of Heaven and Hell as an active inference process.
-    
-    Parameters:
-    -----------
-    observation : tensor
-        Current sensory input
-    current_state : tensor
-        Current belief state of the system
-    config : dict
-        Configuration parameters
+```mermaid
+graph LR
+    subgraph "Dynamic Core of Blake's Contraries System"
+        direction TB
         
-    Returns:
-    --------
-    updated_state : tensor
-        New belief state after contrary integration
-    actions : tensor
-        Selected actions based on creative synthesis
-    metrics : dict
-        Diagnostic information about the contrary balance
-    """
-    # Heaven component (Urizen) - structured models and constraints
-    prior_mean, prior_precision = urizen_structured_prior(
-        current_state, 
-        config.urizen_prior_strength
-    )
+        subgraph "Dialectical Cycles"
+            DC1[("Cycle 1:<br>Structure/Energy")]
+            DC2[("Cycle 2:<br>Innocence/Experience")]
+            DC3[("Cycle 3:<br>Reason/Imagination")]
+            DC4[("Cycle 4:<br>Analysis/Synthesis")]
+        end
+        
+        subgraph "Phase Space"
+            PS1["State Space<br>Visualization"]
+            
+            PS1 --> PS_EQ["
+                dx/dt = f₁(x, y, z, π₁, π₂)
+                dy/dt = f₂(x, y, z, π₁, π₂)
+                dz/dt = f₃(x, y, z, π₁, π₂)
+                dπ₁/dt = g₁(x, y, z, τ)
+                dπ₂/dt = g₂(x, y, z, τ)
+            "]
+        end
+        
+        subgraph "Attractor Dynamics"
+            AD1["Strange Attractor<br>Visualization"]
+            
+            AD1 --> AD_EQ["
+                ℒ(Blake) = {
+                  ρ: Creativity parameter
+                  σ: Precision ratio
+                  β: Energy coefficient
+                }
+            "]
+        end
+        
+        subgraph "Bifurcation Analysis"
+            BA1["Bifurcation<br>Diagram"]
+            
+            BA1 --> BA_EQ["
+                At critical values:
+                π₁/π₂ = ρc → system undergoes
+                creative bifurcation
+            "]
+        end
+    end
     
-    # Hell component (Luvah/Orc) - energetic evidence and drives
-    likelihood_mean, likelihood_precision = luvah_energetic_likelihood(
-        observation, 
-        current_state,
-        config.luvah_evidence_strength
-    )
+    subgraph "Visualization of Contrary States"
+        direction TB
+        
+        VS1["Contrary State Space"]
+        
+        VS1 --> |"Structure-dominant<br>region"| VS_H["Urizen<br>Domain"]
+        VS1 --> |"Energy-dominant<br>region"| VS_D["Luvah<br>Domain"]
+        VS1 --> |"Balanced<br>region"| VS_M["Los<br>Domain"]
+        VS1 --> |"Critical<br>points"| VS_C["Creative<br>Bifurcations"]
+        
+        VS_TR["Trajectory:<br>Healthy system cycles<br>through all domains<br>without getting stuck"]
+    end
     
-    # Creative tension computation - the key to Blake's insight
-    creative_tension = compute_contrary_tension(
-        prior_mean, 
-        likelihood_mean,
-        prior_precision,
-        likelihood_precision,
-        config.tension_parameters
-    )
+    DC1 -.-> PS1
+    DC2 -.-> PS1
+    DC3 -.-> PS1
+    DC4 -.-> PS1
     
-    # Dynamic precision balancing based on creative tension
-    heavenly_precision, hellish_precision = balance_precision_weights(
-        prior_precision,
-        likelihood_precision,
-        creative_tension,
-        config.balance_parameters
-    )
+    PS1 -.-> AD1
+    PS1 -.-> BA1
     
-    # Los integration - the marriage itself
-    posterior_mean, posterior_precision = los_creative_integration(
-        prior_mean,
-        likelihood_mean,
-        heavenly_precision,
-        hellish_precision,
-        config.integration_parameters
-    )
+    AD1 -.-> VS1
+    BA1 -.-> VS1
     
-    # Policy generation through creative synthesis
-    heavenly_policies = urizen_policy_evaluation(
-        posterior_mean,
-        posterior_precision,
-        config.urizen_policy_parameters
-    )
+    classDef cycle fill:#f9e6ff,stroke:#333,stroke-width:1px
+    classDef equation fill:#f9f9f9,stroke:#333,stroke-width:1px
+    classDef visual fill:#e6f9ff,stroke:#333,stroke-width:1px
+    classDef domain fill:#ffe6e6,stroke:#333,stroke-width:1px
     
-    hellish_policies = luvah_policy_generation(
-        posterior_mean,
-        posterior_precision,
-        creative_tension,
-        config.luvah_policy_parameters
-    )
-    
-    # The marriage of policies - neither pure structure nor pure energy
-    married_policies = los_policy_synthesis(
-        heavenly_policies,
-        hellish_policies,
-        creative_tension,
-        config.policy_synthesis_parameters
-    )
-    
-    # Select actions based on the married policies
-    actions = select_actions_from_policies(
-        married_policies,
-        config.action_selection_temperature
-    )
-    
-    # Update the belief state based on the marriage of contraries
-    updated_state = update_belief_state(
-        current_state,
-        posterior_mean,
-        posterior_precision,
-        config.state_update_rate
-    )
-    
-    # Compute diagnostic metrics about the contrary balance
-    metrics = {
-        'heaven_influence': compute_heaven_influence(heavenly_precision),
-        'hell_influence': compute_hell_influence(hellish_precision),
-        'creative_tension': creative_tension,
-        'contrary_balance': heavenly_precision / (heavenly_precision + hellish_precision),
-        'marriage_quality': compute_marriage_quality(
-            posterior_mean, 
-            posterior_precision,
-            prior_mean,
-            likelihood_mean
-        )
-    }
-    
-    return updated_state, actions, metrics
+    class DC1,DC2,DC3,DC4 cycle
+    class PS_EQ,AD_EQ,BA_EQ equation
+    class PS1,AD1,BA1,VS1 visual
+    class VS_H,VS_D,VS_M,VS_C,VS_TR domain
 ```
 
-Through this implementation, CEREBRUM realizes Blake's profound insight that progress comes not from resolving contraries into a homogeneous synthesis, but from maintaining their productive tension in a dynamic balance—a computational marriage of heaven and hell that generates creative energy through the interaction of opposing forces.
+The diagram above visualizes the dynamic core of Blake's system as implemented in CEREBRUM:
+
+1. **Dialectical Cycles**: Four fundamental contrary cycles operate simultaneously
+2. **Phase Space Dynamics**: The system is formalized as a set of differential equations that govern the evolution of belief states and precisions
+3. **Attractor Dynamics**: The system exhibits a strange attractor characterized by the Blake parameter set {ρ, σ, β}
+4. **Bifurcation Analysis**: At critical values, the system undergoes creative bifurcations
+5. **Visualization**: The state space visualization shows domains dominated by different contraries and healthy trajectories that cycle through all domains
+
+The critical insight is that a healthy CEREBRUM system based on Blake's principles does not converge to a single optimal state but continually cycles through contrary states, generating creative energy through their dynamic tension.
+
+When implemented in neural architectures, this approach leads to systems that:
+
+1. Avoid local minima through creative tension
+2. Maintain exploration-exploitation balance dynamically
+3. Adapt precision weights based on context
+4. Generate novel policies through contrary integration
+5. Exhibit emergent creative behavior at bifurcation points
+
+This mathematical formulation provides a rigorous foundation for implementing Blake's visionary insights in computational cognitive architectures.
