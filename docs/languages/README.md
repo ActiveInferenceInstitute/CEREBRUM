@@ -54,6 +54,14 @@ This directory contains case mapping analyses for the following languages:
 - [Norwegian](norwegian.md) - North Germanic language showing transition from morphological to positional case system
 - [Python](python.md) - Programming language with object-oriented and functional paradigms mapped to case relationships
 - [Rust](rust.md) - Systems programming language with ownership model relevant to case relationships
+- [Nahuatl](nahuatl.md) - Uto-Aztecan language with agglutinative morphology and noun incorporation
+- [Thai](thai.md) - Tai-Kadai language using word order and particles instead of morphological case
+- [Tibetan](tibetan.md) - Sino-Tibetan language with ergative-absolutive alignment and agglutinative features
+- [Russian-English](russian-english.md) - Comparative analysis of case systems between Russian and English
+- [SQL](sql.md) - Query language with relational algebra concepts mapped to case relationships
+- [Finnish-Figures](finnish-figures.md) - Extended analysis of Finnish case system with visual representations
+- [Sami-Figures](sami-figures.md) - Uralic language with extensive case system and visual documentation
+- [Hungarian-Markov](hungarian-markov.md) - Computational model of Hungarian case transformations
 
 ## Structure of Each Language Document
 
