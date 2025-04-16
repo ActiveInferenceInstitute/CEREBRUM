@@ -77,180 +77,175 @@ GOEBL-CEREBRUM implements specialized case structures for error representation:
 ## GOEBL System Architecture
 
 ```mermaid
-graph TD
-    subgraph "Error Detection Layer"
-    A1[Runtime Exception Monitor]
-    A2[Anomaly Detection System]
-    A3[Boundary Violation Detector]
-    A4[Performance Degradation Tracker]
-    A5[Pattern Deviation Analyzer]
+graph LR
+    subgraph DET ["Error Detection Layer"]
+        direction LR
+        A1[Runtime Exception<br>Monitor]
+        A2[Anomaly Detection<br>System]
+        A3[Boundary Violation<br>Detector]
+        A4[Performance Degradation<br>Tracker]
+        A5[Pattern Deviation<br>Analyzer]
     end
     
-    subgraph "Error Preservation Layer"
-    B1[Glitch State Recorder]
-    B2[Context Capture System]
-    B3[Error Reproduction Engine]
-    B4[Failure Case Database]
-    B5[Error Snapshot Manager]
+    subgraph PRE ["Error Preservation Layer"]
+        direction LR
+        B1[Glitch State<br>Recorder]
+        B2[Context Capture<br>System]
+        B3[Error Reproduction<br>Engine]
+        B4[Failure Case<br>Database]
+        B5[Error Snapshot<br>Manager]
     end
     
-    subgraph "Error Analysis Layer"
-    C1[Taxonomic Classifier]
-    C2[Pattern Recognition Engine]
-    C3[Causal Analysis System]
-    C4[Boundary Mapping Engine]
-    C5[Cross-Context Comparator]
+    subgraph ANA ["Error Analysis Layer"]
+        direction LR
+        C1[Taxonomic<br>Classifier]
+        C2[Pattern Recognition<br>Engine]
+        C3[Causal Analysis<br>System]
+        C4[Boundary Mapping<br>Engine]
+        C5[Cross-Context<br>Comparator]
     end
     
-    subgraph "Learning Integration Layer"
-    D1[Error-Derived Rule Generator]
-    D2[Boundary Adaptation System]
-    D3[Failure-Based Case Builder]
-    D4[Negative Knowledge Repository]
-    D5[Recovery Strategy Synthesizer]
+    subgraph INT ["Learning Integration Layer"]
+        direction LR
+        D1[Error-Derived<br>Rule Generator]
+        D2[Boundary Adaptation<br>System]
+        D3[Failure-Based<br>Case Builder]
+        D4[Negative Knowledge<br>Repository]
+        D5[Recovery Strategy<br>Synthesizer]
     end
     
-    A1 --> B1
-    A2 --> B2
-    A3 --> B3
-    A4 --> B4
-    A5 --> B5
-    
-    B1 --> C1
-    B2 --> C2
-    B3 --> C3
-    B4 --> C4
-    B5 --> C5
-    
-    C1 --> D1
-    C2 --> D2
-    C3 --> D3
-    C4 --> D4
-    C5 --> D5
+    DET -- "Detected Errors" --> PRE
+    PRE -- "Preserved Errors" --> ANA
+    ANA -- "Analysis Results" --> INT
+    INT -- "Learned Knowledge &<br>Adaptation Strategies" --> SystemAdaptation(System Adaptation /<br>Knowledge Repository)
+
+    %% Detailed Links (Optional for clarity, can clutter)
+    %% A1 --> B1; A2 --> B2; A3 --> B3; A4 --> B4; A5 --> B5;
+    %% B1 --> C1; B2 --> C2; B3 --> C3; B4 --> C4; B5 --> C5;
+    %% C1 --> D1; C2 --> D2; C3 --> D3; C4 --> D4; C5 --> D5;
 ```
 
 ## Error-Based Learning Process
 
 ```mermaid
 flowchart TD
-    A[System Operation] --> B[Error Detection]
-    B --> C[Error Classification]
-    C --> D[Context Preservation]
-    D --> E[Pattern Analysis]
-    E --> F[Boundary Mapping]
-    F --> G[Knowledge Integration]
-    G --> H{Modify System?}
-    H -->|Yes| I[Adaptation Design]
-    I --> J[Controlled Implementation]
-    J --> K[Verification Testing]
-    K --> A
-    H -->|No| L[Error Case Storage]
-    L --> M[Case-Based Reasoning]
-    M --> A
+    A[System Operation] --> B{Error Detected?};
+    B -- No --> A;
+    B -- Yes --> C[Error Classification];
+    C --> D[Context Preservation];
+    D --> E[Pattern Analysis];
+    E --> F[Boundary Mapping];
+    F --> G[Knowledge Integration];
+    G --> H{Modify System?};
+    H -- Yes --> I[Adaptation Design];
+    I --> J[Controlled Implementation];
+    J --> K[Verification Testing];
+    K -- Success --> A;
+    K -- Failure --> C; %% Or back to B depending on error type
+    H -- No --> L[Store Error Case<br>in Knowledge Repository];
+    L --> M[Inform Case-Based Reasoning];
+    M --> A;
 ```
 
 ## Glitch Induction Methodologies
 
 ```mermaid
 graph TD
-    subgraph "Boundary Testing Methods"
-    A1[Parameter Range Exploration]
-    A2[Resource Limitation Testing]
-    A3[Timing Constraint Manipulation]
-    A4[Scale Extremity Testing]
-    A5[Input Complexity Escalation]
+    subgraph BTM ["Boundary Testing Methods"]
+        A1[Parameter Range Exploration]
+        A2[Resource Limitation Testing]
+        A3[Timing Constraint Manipulation]
+        A4[Scale Extremity Testing]
+        A5[Input Complexity Escalation]
     end
     
-    subgraph "Structural Disruption Methods"
-    B1[Component Isolation]
-    B2[Dependency Manipulation]
-    B3[Interface Degradation]
-    B4[Communication Channel Noise]
-    B5[State Transition Interruption]
+    subgraph SDM ["Structural Disruption Methods"]
+        B1[Component Isolation]
+        B2[Dependency Manipulation]
+        B3[Interface Degradation]
+        B4[Communication Channel Noise]
+        B5[State Transition Interruption]
     end
     
-    subgraph "Procedural Manipulation Methods"
-    C1[Sequence Alteration]
-    C2[Step Omission Testing]
-    C3[Concurrency Forcing]
-    C4[Process Interruption]
-    C5[Timeout Manipulation]
+    subgraph PMM ["Procedural Manipulation Methods"]
+        C1[Sequence Alteration]
+        C2[Step Omission Testing]
+        C3[Concurrency Forcing]
+        C4[Process Interruption]
+        C5[Timeout Manipulation]
     end
     
-    subgraph "Knowledge Disruption Methods"
-    D1[Ontology Perturbation]
-    D2[Rule Contradiction Introduction]
-    D3[Context Blending]
-    D4[Ambiguity Injection]
-    D5[Category Boundary Blurring]
+    subgraph KDM ["Knowledge Disruption Methods"]
+        D1[Ontology Perturbation]
+        D2[Rule Contradiction Introduction]
+        D3[Context Blending]
+        D4[Ambiguity Injection]
+        D5[Category Boundary Blurring]
     end
     
-    A1 --> E[Controlled Error Generation]
-    A2 --> E
-    A3 --> E
-    A4 --> E
-    A5 --> E
+    BTM --> E((Controlled<br>Error Generation));
+    SDM --> E;
+    PMM --> E;
+    KDM --> E;
     
-    B1 --> E
-    B2 --> E
-    B3 --> E
-    B4 --> E
-    B5 --> E
-    
-    C1 --> E
-    C2 --> E
-    C3 --> E
-    C4 --> E
-    C5 --> E
-    
-    D1 --> E
-    D2 --> E
-    D3 --> E
-    D4 --> E
-    D5 --> E
-    
-    E --> F[Error Analysis & Learning]
+    E --> F[Error Analysis & Learning];
+    F --> G((Feedback Loop<br>to System / KR)); %% Indicates the learning feeds back
 ```
 
 ## Error Type Ontology
 
 ```mermaid
 graph TD
-    A[Error Domain] --> B[Functional Errors]
-    A --> C[Structural Errors]
-    A --> D[Epistemic Errors]
-    A --> E[Procedural Errors]
-    A --> F[Interpretive Errors]
+    A[Error Domain] --> B[Functional Errors];
+    A --> C[Structural Errors];
+    A --> D[Epistemic Errors];
+    A --> E[Procedural Errors];
+    A --> F[Interpretive Errors];
     
-    B --> B1[Algorithmic Failures]
-    B --> B2[Resource Exhaustion]
-    B --> B3[Timing Errors]
-    B --> B4[Boundary Violations]
-    B --> B5[Precision Failures]
+    subgraph Functional
+        direction LR
+        B --> B1[Algorithmic Failures]
+        B --> B2[Resource Exhaustion]
+        B --> B3[Timing Errors]
+        B --> B4[Boundary Violations]
+        B --> B5[Precision Failures]
+    end
+
+    subgraph Structural
+        direction LR
+        C --> C1[Dependency Conflicts]
+        C --> C2[Component Incompatibilities]
+        C --> C3[Interface Misalignments]
+        C --> C4[Architectural Inconsistencies]
+        C --> C5[Scalability Failures]
+    end
     
-    C --> C1[Dependency Conflicts]
-    C --> C2[Component Incompatibilities]
-    C --> C3[Interface Misalignments]
-    C --> C4[Architectural Inconsistencies]
-    C --> C5[Scalability Failures]
-    
-    D --> D1[Category Errors]
-    D --> D2[Ontological Misclassifications]
-    D --> D3[Inferential Gaps]
-    D --> D4[Representational Inadequacies]
-    D --> D5[Conceptual Contradictions]
-    
-    E --> E1[Sequence Violations]
-    E --> E2[Missing Steps]
-    E --> E3[Redundant Operations]
-    E --> E4[Process Deadlocks]
-    E --> E5[Race Conditions]
-    
-    F --> F1[Contextual Misinterpretations]
-    F --> F2[Ambiguity Resolutions]
-    F --> F3[Polysemy Confusions]
-    F --> F4[Semantic Drift]
-    F --> F5[Frame Shifts]
+    subgraph Epistemic
+        direction LR
+        D --> D1[Category Errors]
+        D --> D2[Ontological Misclassifications]
+        D --> D3[Inferential Gaps]
+        D --> D4[Representational Inadequacies]
+        D --> D5[Conceptual Contradictions]
+    end
+
+    subgraph Procedural
+        direction LR
+        E --> E1[Sequence Violations]
+        E --> E2[Missing Steps]
+        E --> E3[Redundant Operations]
+        E --> E4[Process Deadlocks]
+        E --> E5[Race Conditions]
+    end
+
+    subgraph Interpretive
+        direction LR
+        F --> F1[Contextual Misinterpretations]
+        F --> F2[Ambiguity Resolutions]
+        F --> F3[Polysemy Confusions]
+        F --> F4[Semantic Drift]
+        F --> F5[Frame Shifts]
+    end
 ```
 
 ## Error Recovery Strategies Matrix
@@ -274,66 +269,47 @@ graph TD
 
 ```mermaid
 graph TD
-    subgraph "Via Negativa Reasoning"
-    A1[Boundary Testing]
-    A2[Falsification Attempts]
-    A3[Constraint Identification]
-    A4[Impossibility Mapping]
-    A5[Failure-Mode Analysis]
+    subgraph VNR ["Via Negativa Reasoning"]
+        A1[Boundary Testing]
+        A2[Falsification Attempts]
+        A3[Constraint Identification]
+        A4[Impossibility Mapping]
+        A5[Failure-Mode Analysis]
     end
     
-    subgraph "Error Pattern Recognition"
-    B1[Recurrence Detection]
-    B2[Cluster Analysis]
-    B3[Temporal Pattern Identification]
-    B4[Context Correlation]
-    B5[Error Morphology Analysis]
+    subgraph EPR ["Error Pattern Recognition"]
+        B1[Recurrence Detection]
+        B2[Cluster Analysis]
+        B3[Temporal Pattern ID]
+        B4[Context Correlation]
+        B5[Error Morphology Analysis]
     end
     
-    subgraph "Negative Knowledge Building"
-    C1[Non-Viable Solution Documentation]
-    C2[Constraint Library Development]
-    C3[Failure Condition Modeling]
-    C4[Error Prediction Framework]
-    C5[Boundary Condition Catalog]
+    subgraph NKB ["Negative Knowledge Building"]
+        C1[Non-Viable Solution Docs]
+        C2[Constraint Library Dev]
+        C3[Failure Condition Modeling]
+        C4[Error Prediction Framework]
+        C5[Boundary Condition Catalog]
     end
     
-    subgraph "Error-Guided Search"
-    D1[Gradient of Failure Navigation]
-    D2[Error-Minimization Pathfinding]
-    D3[Boundary-Following Exploration]
-    D4[Error-Signal Orientation]
-    D5[Failure-Pattern Avoidance]
+    subgraph EGS ["Error-Guided Search"]
+        D1[Gradient of Failure Nav]
+        D2[Error-Minimization Pathfinding]
+        D3[Boundary-Following Exploration]
+        D4[Error-Signal Orientation]
+        D5[Failure-Pattern Avoidance]
     end
     
-    A1 --> E[Enhanced Solution Space Navigation]
-    A2 --> E
-    A3 --> E
-    A4 --> E
-    A5 --> E
+    VNR --> E[Enhanced Solution<br>Space Navigation];
+    EPR --> F[Pattern-Based<br>Prediction];
+    NKB --> G[Constraint-Aware<br>Design];
+    EGS --> H[Error-Informed<br>Optimization];
     
-    B1 --> F[Pattern-Based Prediction]
-    B2 --> F
-    B3 --> F
-    B4 --> F
-    B5 --> F
-    
-    C1 --> G[Constraint-Aware Design]
-    C2 --> G
-    C3 --> G
-    C4 --> G
-    C5 --> G
-    
-    D1 --> H[Error-Informed Optimization]
-    D2 --> H
-    D3 --> H
-    D4 --> H
-    D5 --> H
-    
-    E --> I[GOEBL Reasoning System]
-    F --> I
-    G --> I
-    H --> I
+    E --> I((GOEBL Reasoning System));
+    F --> I;
+    G --> I;
+    H --> I;
 ```
 
 ## Error Class Inheritance Hierarchy
@@ -341,51 +317,71 @@ graph TD
 ```mermaid
 classDiagram
     class Error {
-        +errorID
-        +timestamp
-        +context
-        +severity
-        +detect()
-        +preserve()
-        +analyze()
-        +learn()
+        +errorID: string
+        +timestamp: datetime
+        +context: object
+        +severity: SeverityLevel
+        +detect(): boolean
+        +preserve(): ErrorRecord
+        +analyze(): AnalysisReport
+        +learn(): KnowledgeUpdate
     }
     
     class FunctionalError {
-        +operationalContext
-        +expectedBehavior
-        +actualBehavior
-        +compareActualToExpected()
+        +operationalContext: string
+        +expectedBehavior: string
+        +actualBehavior: string
+        +compareActualToExpected(): Difference
     }
-    
+    class AlgorithmicError {}
+    class ResourceError {}
+    class TimingError {}
+    class BoundaryError {}
+
     class StructuralError {
-        +systemArchitecture
-        +componentRelationships
-        +failurePoint
-        +mapStructuralImpact()
+        +systemArchitecture: Diagram
+        +componentRelationships: map
+        +failurePoint: string
+        +mapStructuralImpact(): ImpactAssessment
     }
-    
+    class DependencyError {}
+    class ComponentError {}
+    class InterfaceError {}
+    class ArchitecturalError {}
+
     class EpistemicError {
-        +knowledgeDomain
-        +representationSystem
-        +errorType
-        +refineOntology()
+        +knowledgeDomain: string
+        +representationSystem: Ontology
+        +errorType: EpistemicErrorType
+        +refineOntology(): OntologyUpdate
     }
-    
+    class CategoryError {}
+    class OntologicalError {}
+    class InferentialError {}
+    class RepresentationalError {}
+
     class ProceduralError {
-        +process
-        +expectedSequence
-        +actualSequence
-        +analyzeSequenceDeviation()
+        +process: ProcessModel
+        +expectedSequence: list
+        +actualSequence: list
+        +analyzeSequenceDeviation(): DeviationReport
     }
+    class SequenceError {}
+    class OmissionError {}
+    class RedundancyError {}
+    class DeadlockError {}
     
     class InterpretiveError {
-        +interpretationContext
-        +ambiguityPattern
-        +resolutionAttempt
-        +refineContextRecognition()
+        +interpretationContext: ContextModel
+        +ambiguityPattern: string
+        +resolutionAttempt: string
+        +refineContextRecognition(): ContextModelUpdate
     }
-    
+    class ContextualError {}
+    class AmbiguityError {}
+    class PolysemyError {}
+    class SemanticDriftError {}
+
     Error <|-- FunctionalError
     Error <|-- StructuralError
     Error <|-- EpistemicError
@@ -445,20 +441,29 @@ sequenceDiagram
     participant KR as Knowledge Repository
     participant AD as Adaptation Designer
     
-    S->>ED: Operation with Error
-    ED->>ED: Detect Anomaly
-    ED->>EP: Error Context
-    EP->>EP: Preserve Error State
-    EP->>EA: Error Package
-    EA->>EA: Classify Error
-    EA->>EA: Analyze Patterns
-    EA->>LG: Analysis Results
-    LG->>LG: Generate Learning
-    LG->>KR: New Knowledge
-    LG->>AD: Adaptation Recommendations
-    AD->>AD: Design Adaptation
-    AD->>S: System Modification
-    KR->>S: Updated Error Knowledge
+    S->>+ED: Execute Operation
+    alt Operation Successful
+        ED-->>S: Result
+    else Operation Fails / Anomaly Detected
+        ED->>ED: Detect Anomaly / Error
+        ED->>+EP: Error Context / Details
+        EP->>EP: Preserve Error State & Context
+        EP->>+EA: Preserved Error Package
+        EP-->>-ED: Ack / Error ID
+        EA->>EA: Classify Error Type
+        EA->>EA: Analyze Failure Patterns
+        EA->>+LG: Error Analysis Results
+        EA-->>-EP: Ack / Analysis ID
+        LG->>LG: Generate Learning Insights
+        LG->>+KR: Store New Knowledge / Update Models
+        LG->>+AD: Adaptation Recommendations
+        LG-->>-EA: Ack / Learning ID
+        KR-->>-LG: Ack
+        AD->>AD: Design System Adaptation
+        AD->>S: Apply System Modification / Update Rules
+        AD-->>-LG: Ack / Adaptation ID
+        KR->>S: Provide Updated Error Knowledge / Models
+    end
 ```
 
 ## Glitch Induction Experiment Types
@@ -480,73 +485,84 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
-    participant U as User
-    participant NLP as NLP System
-    participant GOEBL as GOEBL Module
-    participant EM as Error Monitor
-    participant EA as Error Analyzer
-    participant LG as Learning Generator
-    participant KR as Knowledge Repository
-    participant AM as Adaptation Module
+    participant User
+    participant NLP_System as NLP System
+    participant GOEBL_Mod as GOEBL Module
+    participant ErrMon as Error Monitor (within GOEBL)
+    participant ErrAna as Error Analyzer (within GOEBL)
+    participant LearnGen as Learning Generator (within GOEBL)
+    participant KnowRepo as Knowledge Repository
+    participant AdaptMod as Adaptation Module
     
-    U->>NLP: Ambiguous Query
-    NLP->>NLP: Processing Attempt
-    NLP->>GOEBL: Processing Error
-    GOEBL->>EM: Error Detection
-    EM->>EM: Error Classification
-    EM->>EA: Error Context Package
-    EA->>EA: Pattern Analysis
-    EA->>EA: Context Analysis
-    EA->>LG: Error Understanding
-    LG->>LG: Generate Learning
-    LG->>KR: Update Knowledge
-    LG->>AM: Adaptation Design
-    AM->>NLP: System Modification
-    NLP->>U: Improved Response
-    KR->>NLP: Updated Error Models
+    User->>+NLP_System: Sends Ambiguous Query
+    NLP_System->>NLP_System: Attempts Processing
+    alt Processing Successful
+        NLP_System-->>User: Response
+    else Processing Error Occurs
+        NLP_System->>+GOEBL_Mod: Signal Processing Error
+        GOEBL_Mod->>+ErrMon: Error Details
+        ErrMon->>ErrMon: Detect & Classify Error
+        ErrMon->>+ErrAna: Error Context Package
+        ErrMon-->>-GOEBL_Mod: Ack / Error ID
+        ErrAna->>ErrAna: Analyze Error Pattern & Context
+        ErrAna->>+LearnGen: Error Understanding Report
+        ErrAna-->>-ErrMon: Ack / Analysis ID
+        LearnGen->>LearnGen: Generate Learning / Insights
+        LearnGen->>+KnowRepo: Update Error Models & Knowledge
+        LearnGen->>+AdaptMod: Adaptation Recommendations
+        LearnGen-->>-ErrAna: Ack / Learning ID
+        KnowRepo-->>-LearnGen: Ack
+        AdaptMod->>AdaptMod: Design Adaptation (e.g., new rule)
+        AdaptMod->>NLP_System: Apply System Modification
+        AdaptMod-->>-LearnGen: Ack / Adaptation ID
+        KnowRepo->>NLP_System: Provide Updated Error Models
+        NLP_System-->>-GOEBL_Mod: Error Handled / Ack
+        Note over NLP_System, User: NLP system may retry or<br/>provide informed response
+        NLP_System-->>User: Improved or Clarifying Response
+    end
 ```
 
 ## Error-Knowledge Transformation Model
 
 ```mermaid
 graph TD
-    subgraph "Error Types"
-    A1[Functional Error]
-    A2[Structural Error]
-    A3[Epistemic Error]
-    A4[Procedural Error]
-    A5[Interpretive Error]
+    subgraph Errors ["Error Types Encountered"]
+        A1[Functional Error]
+        A2[Structural Error]
+        A3[Epistemic Error]
+        A4[Procedural Error]
+        A5[Interpretive Error]
     end
     
-    subgraph "Knowledge Transformation"
-    B1[Boundary Knowledge]
-    B2[Structural Knowledge]
-    B3[Representational Knowledge]
-    B4[Process Knowledge]
-    B5[Contextual Knowledge]
+    subgraph Transformation ["Knowledge Transformation<br>(via Error Analysis)"]
+        B1[Boundary Knowledge<br>(System Limits)]
+        B2[Structural Knowledge<br>(Component Interactions)]
+        B3[Representational Knowledge<br>(Ontology/Model Gaps)]
+        B4[Process Knowledge<br>(Workflow Constraints)]
+        B5[Contextual Knowledge<br>(Interpretation Boundaries)]
     end
     
-    subgraph "System Enhancement"
-    C1[Functional Robustness]
-    C2[Architectural Resilience]
-    C3[Epistemic Flexibility]
-    C4[Procedural Adaptability]
-    C5[Interpretive Nuance]
+    subgraph Enhancements ["System Enhancements"]
+        C1[Functional Robustness]
+        C2[Architectural Resilience]
+        C3[Epistemic Flexibility]
+        C4[Procedural Adaptability]
+        C5[Interpretive Nuance]
     end
     
-    A1 --> B1
-    A2 --> B2
-    A3 --> B3
-    A4 --> B4
-    A5 --> B5
+    A1 -- Analyzed --> B1
+    A2 -- Analyzed --> B2
+    A3 -- Analyzed --> B3
+    A4 -- Analyzed --> B4
+    A5 -- Analyzed --> B5
     
-    B1 --> C1
-    B2 --> C2
-    B3 --> C3
-    B4 --> C4
-    B5 --> C5
+    B1 -- Leads to --> C1
+    B2 -- Leads to --> C2
+    B3 -- Leads to --> C3
+    B4 -- Leads to --> C4
+    B5 -- Leads to --> C5
     
-    C1 --> D[Enhanced System Intelligence]
+    C1 --> D((Enhanced System<br>Intelligence & Adaptability))
     C2 --> D
     C3 --> D
     C4 --> D
@@ -572,55 +588,47 @@ graph TD
 
 ```mermaid
 graph TD
-    subgraph "Application Domains"
-    A1[Natural Language Processing]
-    A2[Robotic Systems]
-    A3[Knowledge Representation]
-    A4[Decision Support Systems]
-    A5[Adaptive Interfaces]
+    subgraph Domains ["Application Domains"]
+        A1[Natural Language<br>Processing]
+        A2[Robotic<br>Systems]
+        A3[Knowledge<br>Representation]
+        A4[Decision Support<br>Systems]
+        A5[Adaptive<br>Interfaces]
     end
     
-    subgraph "Error Types"
-    B1[Semantic Ambiguity]
-    B2[Mechanical Failure]
-    B3[Ontological Mismatch]
-    B4[Decision Boundary Error]
-    B5[Interaction Breakdown]
+    subgraph Errors ["Common Error Types<br>in Domain"]
+        B1[Semantic Ambiguity<br>Context Errors]
+        B2[Mechanical Failure<br>Sensor Noise]
+        B3[Ontological Mismatch<br>Inferential Gaps]
+        B4[Decision Boundary Error<br>Bias Detection]
+        B5[Interaction Breakdown<br>Usability Glitches]
     end
     
-    subgraph "Learning Types"
-    C1[Semantic Boundary Mapping]
-    C2[Operational Limit Knowledge]
-    C3[Representational Constraints]
-    C4[Decision Space Mapping]
-    C5[Interaction Pattern Knowledge]
+    subgraph Learning ["GOEBL Learning Outcomes"]
+        C1[Semantic Boundary Mapping<br>Context Modeling]
+        C2[Operational Limit Knowledge<br>Fault Pattern Recognition]
+        C3[Representational Constraints<br>Ontology Refinement]
+        C4[Decision Space Mapping<br>Bias Mitigation Rules]
+        C5[Interaction Pattern Knowledge<br>Usability Heuristics]
     end
     
-    subgraph "System Enhancements"
-    D1[Context-Aware Processing]
-    D2[Adaptive Movement Strategies]
-    D3[Flexible Knowledge Models]
-    D4[Boundary-Aware Decisions]
-    D5[Resilient Interface Design]
+    subgraph Enhancements ["Resulting System Enhancements"]
+        D1[Context-Aware Processing<br>Robust Interpretation]
+        D2[Adaptive Movement Strategies<br>Fault Tolerance]
+        D3[Flexible Knowledge Models<br>Improved Reasoning]
+        D4[Boundary-Aware Decisions<br>Fairer Outcomes]
+        D5[Resilient Interface Design<br>Better User Experience]
     end
     
-    A1 --> B1
-    A2 --> B2
-    A3 --> B3
-    A4 --> B4
-    A5 --> B5
-    
-    B1 --> C1
-    B2 --> C2
-    B3 --> C3
-    B4 --> C4
-    B5 --> C5
-    
-    C1 --> D1
-    C2 --> D2
-    C3 --> D3
-    C4 --> D4
-    C5 --> D5
+    A1 ==> B1; A2 ==> B2; A3 ==> B3; A4 ==> B4; A5 ==> B5;
+    B1 -- GOEBL --> C1; B2 -- GOEBL --> C2; B3 -- GOEBL --> C3; B4 -- GOEBL --> C4; B5 -- GOEBL --> C5;
+    C1 ==> D1; C2 ==> D2; C3 ==> D3; C4 ==> D4; C5 ==> D5;
+
+    style Domains fill:#f9f,stroke:#333,stroke-width:2px
+    style Errors fill:#ccf,stroke:#333,stroke-width:2px
+    style Learning fill:#cfc,stroke:#333,stroke-width:2px
+    style Enhancements fill:#ffc,stroke:#333,stroke-width:2px
+
 ```
 
 ## Error-Based Learning Performance Metrics
