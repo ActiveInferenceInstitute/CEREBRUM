@@ -4,18 +4,7 @@
 
 ----
 
-### 🛠️ Tools & Operators
-- 💻 Cursor.com v0.48.9: The Dative Edge of Development
-- 🤖 LLMs: Our Lead Investigators
-  - ✨ Claude-3.7-sonnet
-  - 🔮 Gemini-2.5-pro-exp
-
 ### 📝 Case-cading Improvements: Building CEREBRUM & Beyond
-- ⛓️ **Linking the Evidence:** Integrating Case-Based Logic (Nominative Agents, Accusative Objects, etc.).
-- 🎨 **Visualizing the Network:** Mermaid-ifying Model Relationships & Transformations.
-- 📄 **Filing the Reports:** Locative Case Studies in PDF format.
-- 🏗️ **The Right Tools for the Job:** LaTeX as the Instrumental Case for Documentation.
-- 📝 **Clear Briefings:** Markdown - The Case for Concise Communication.
 - 📁 **Case File Examples:** Linear Regression, POMDPs, Neural Networks in Action.
 
 ### 🕵️‍♂️ Operative Briefing: Inside CEREBRUM
