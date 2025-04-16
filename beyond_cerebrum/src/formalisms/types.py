@@ -1,83 +1,61 @@
 """
-Core linguistic type definitions for FORMICA.
+Core linguistic type definitions for the FORMICA framework.
 
-This module defines the base types for fundamental linguistic units
-and potentially composite types using type constructors.
+Based on Section 2.2 of the specification, this module defines:
+- Base types for fundamental linguistic units.
+- Mechanisms for creating composite types.
+- Potential integration points for dependent types.
 """
 
-from typing import NewType, TypeVar, Generic, List, Dict, Any
+from typing import TypeVar, Generic, List, Dict, Any, NewType
 
-# --- Base Linguistic Unit Types ---
-
+# --- Base Linguistic Unit Types (Examples) ---
+# Using NewType for nominal typing to distinguish related string/int concepts
 Phoneme = NewType('Phoneme', str)
 Morpheme = NewType('Morpheme', str)
-LexicalItem = NewType('LexicalItem', Dict[str, Any]) # Placeholder, likely a class later
-SyntacticConstituent = NewType('SyntacticConstituent', Any) # Placeholder, complex structure needed
-SemanticConcept = NewType('SemanticConcept', Any) # Placeholder, graph or logical form
-PragmaticContext = NewType('PragmaticContext', Dict[str, Any]) # Placeholder
-DiscourseUnit = NewType('DiscourseUnit', Any) # Placeholder
+LexicalItem = NewType('LexicalItem', Dict[str, Any]) # e.g., {'lemma': 'run', 'pos': 'VERB', ...}
+SyntacticLabel = NewType('SyntacticLabel', str) # e.g., 'NP', 'VP', 'S'
+SemanticConcept = NewType('SemanticConcept', str) # Placeholder, could be complex object/URI
+PragmaticFeature = NewType('PragmaticFeature', str) # e.g., 'SpeakerIntention', 'ContextualSalience'
+DiscourseRelation = NewType('DiscourseRelation', str) # e.g., 'Elaboration', 'Contrast'
 
 # --- Type Variables for Generics ---
-
 T = TypeVar('T')
+ConstituentType = TypeVar('ConstituentType')
+NodeType = TypeVar('NodeType')
+EdgeType = TypeVar('EdgeType')
 
-# --- Potential Composite Type Examples (Illustrative) ---
+# --- Composite Type Placeholders (to be refined in structures.py) ---
+# These are illustrative; concrete structure implementations are in structures.py
+class LinguisticSequence(Generic[T]):
+    """Generic sequence of linguistic units (e.g., Phoneme sequence)."""
+    def __init__(self, elements: List[T]):
+        self.elements = elements
+    def __repr__(self): 
+        return f"Sequence({self.elements})"
 
-class LinguisticStructure(Generic[T]):
-    """Generic base class for complex linguistic structures."""
-    content: T
-    metadata: Dict[str, Any] = {}
-
-class SyntacticTree(LinguisticStructure[SyntacticConstituent]):
-    """Represents a syntactic tree structure."""
-    # Specific tree attributes and methods would go here
+class LinguisticTree(Generic[ConstituentType]):
+    """Generic tree structure (e.g., Syntax Tree)."""
+    # Actual implementation in structures.py might use nodes, children etc.
     pass
 
-class SemanticGraph(LinguisticStructure[SemanticConcept]):
-    """Represents a semantic graph structure."""
-    # Specific graph attributes and methods would go here
+class LinguisticGraph(Generic[NodeType, EdgeType]):
+    """Generic graph structure (e.g., Semantic Network)."""
+    # Actual implementation in structures.py might use nodes, edges, adjacency lists etc.
     pass
 
-# --- Dependent Type Placeholders (Conceptual) ---
-# Python's type system doesn't directly support dependent types like Idris or Agda.
-# We might simulate them using runtime checks or more complex structures.
+# --- Potential Dependent Type / Constraint Sketch ---
+# This is highly conceptual and requires a more advanced type system 
+# or runtime checks for full implementation in standard Python.
 
-# Example: A verb type that 'depends' on its argument structure (runtime check)
-class Verb(LexicalItem):
-    def __init__(self, lemma: str, arg_structure: List[type], **kwargs):
-        super().__init__(lemma=lemma, arg_structure=arg_structure, pos='VERB', **kwargs)
-        self.lemma = lemma
-        self.arg_structure = arg_structure
+# Example: A Verb type whose 'arguments' structure depends on the verb's subcategory.
+# class VerbLexicalItem(LexicalItem):
+#     # Requires specific argument types based on 'subcat_frame'
+#     subcat_frame: str 
+#     arguments: Dict[str, Type] # How to enforce this dependency?
 
-    def check_args(self, args: List[Any]) -> bool:
-        """Runtime check for argument types."""
-        if len(args) != len(self.arg_structure):
-            return False
-        # Simplified check, real check needs richer type info
-        # return all(isinstance(arg, expected_type) for arg, expected_type in zip(args, self.arg_structure))
-        return True # Placeholder
+# --- Higher-Order Types (Functions) ---
+# Example: A function type from Pragmatic Context to Semantic Interpretation
+# InterpretationFunction = Callable[[PragmaticContext], SemanticConcept]
 
-# TODO: Explore libraries like 'typing_extensions' or custom metaclasses for richer types.
-# TODO: Define interfaces or abstract base classes for different linguistic levels.
-
-# Example Base Types (Illustrative)
-SyntacticLabel = NewType("SyntacticLabel", str)
-
-# Example Type Variables
-NodeType = TypeVar("NodeType")
-EdgeType = TypeVar("EdgeType")
-ConstituentType = TypeVar("ConstituentType")
-
-# Example Composite Types (Illustrative)
-class Tree(Generic[ConstituentType]):
-    # Basic tree structure placeholder
-    label: SyntacticLabel
-    children: list["Tree[ConstituentType] | ConstituentType"]
-
-class DependencyGraph(Generic[NodeType, EdgeType]):
-    # Basic graph structure placeholder
-    nodes: list[NodeType]
-    edges: list[tuple[NodeType, NodeType, EdgeType]]
-
-# TODO: Define a comprehensive set of base and composite types
-# TODO: Explore integration with libraries like Pydantic for validation 
+print("FORMICA core types module initialized.") 

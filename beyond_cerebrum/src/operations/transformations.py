@@ -1,8 +1,9 @@
 """
-Structural transformation functions within FORMICA.
+Structural transformation functions within the FORMICA framework.
 
-This module defines operations that change the *type* or *shape*
-of linguistic representations (e.g., parsing, generation, enrichment).
+This module implements operations that change the type or shape of 
+linguistic representations (Section 2.3 of spec), such as mapping 
+between syntax and semantics, or performing morphological analysis.
 """
 
 from typing import TypeVar, Any, Dict
@@ -102,3 +103,19 @@ def pragmatic_enrichment(structure: InputStruct, context: PragmaticContext) -> I
 # TODO: Define transformations for other linguistic levels (Morphology, Phonology).
 # TODO: Implement the core logic for each transformation.
 # TODO: Consider how these transformations interact with backend models. 
+
+# Placeholder for transformation functions
+def syntax_to_semantics(syntax_tree):
+    """Transforms a syntactic representation into a semantic one."""
+    print(f"Transforming syntax tree {syntax_tree} to semantics")
+    # Implementation depends on the specific syntactic and semantic formalisms used.
+    # Might involve applying semantic composition rules based on syntactic structure.
+    raise NotImplementedError
+
+def morphological_decompose(word_form):
+    """Decomposes a word form into its constituent morphemes."""
+    print(f"Decomposing {word_form} into morphemes")
+    # Requires a morphological analyzer and lexicon.
+    raise NotImplementedError
+
+# Add other structural transformations like pragmatic enrichment, etc. 

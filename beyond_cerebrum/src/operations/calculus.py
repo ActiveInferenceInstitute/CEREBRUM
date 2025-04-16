@@ -1,134 +1,105 @@
 """
-Core calculus operations for manipulating linguistic structures in FORMICA.
+Core calculus functions for manipulating linguistic structures in FORMICA.
 
-This module defines the fundamental building blocks based on the formalisms
-(e.g., type theory, category theory) chosen for FORMICA.
+This module implements primitive operations as defined in Section 2.3 
+of the specification, serving as the building blocks for more complex
+linguistic transformations and inferences.
 """
 
-from typing import TypeVar, Generic, Optional, Any, Callable
+from typing import TypeVar, Generic, Callable, Any, Optional
+# Import necessary structures and types (adjust paths as needed)
+from ..formalisms.structures import FeatureStructure, Graph, Tree # Example
+from ..formalisms.types import LinguisticSequence # Example
 
-# Import structures (adjust path if needed)
-from ..formalisms.structures import AbstractStructure, FeatureStructure, Tree, Graph
-from ..formalisms.categories import Morphism # If using category theory
+# Type variables for generic operations
+S = TypeVar('S') # Represents a generic structure type
+F = TypeVar('F') # Represents a feature or element type
 
-# Generic Type Variables
-StructureType = TypeVar('StructureType', bound=AbstractStructure)
-ArgType = TypeVar('ArgType')
-ResultType = TypeVar('ResultType')
+# --- Primitive Operations (Placeholders) ---
 
-# --- Core Calculus Operations --- 
+def unify(struct1: S, struct2: S) -> Optional[S]:
+    """Attempts to unify two linguistic structures.
 
-def unify(struct1: FeatureStructure, struct2: FeatureStructure) -> Optional[FeatureStructure]:
+    The exact behavior depends heavily on the type of structure (S).
+    For FeatureStructures, this performs attribute-value unification.
+    For Trees/Graphs, it might involve structural matching or merging.
+    Returns the unified structure or None if unification fails.
     """
-    Unifies two feature structures.
-    Leverages the unification method defined on the FeatureStructure class.
+    print(f"Attempting to unify {struct1} and {struct2}")
+    # Example: Dispatch based on type
+    if isinstance(struct1, FeatureStructure) and isinstance(struct2, FeatureStructure):
+        # Assumes FeatureStructure has a unify method
+        return struct1.unify(struct2) 
+    # Add cases for other structure types (Trees, Graphs, Sequences, etc.)
+    elif type(struct1) == type(struct2):
+        # Placeholder for other types - perhaps requires specific methods?
+        print(f"Unification logic for type {type(struct1)} not yet implemented.")
+        # Simple equality check as a basic fallback?
+        if struct1 == struct2:
+             return struct1
+    
+    # Default: unification fails or is not defined for these types
+    return None
 
-    Args:
-        struct1: The first feature structure.
-        struct2: The second feature structure.
+def project(structure: S, feature: F) -> Any:
+    """Projects or extracts a specific feature/component from a structure.
 
-    Returns:
-        The unified feature structure, or None if unification fails.
+    Examples:
+        - Extracting a feature value from a FeatureStructure.
+        - Getting a subtree from a Tree based on a label or path.
+        - Finding a node in a Graph by ID or property.
+        - Selecting an element from a sequence by index.
     """
-    # Basic implementation relies on the method in structures.py
-    # More complex logic might be needed here depending on the FeatureStructure implementation
-    return struct1.unify(struct2)
+    print(f"Projecting feature {feature} from structure {structure}")
+    # Implementation depends on structure type S and feature type F
+    if isinstance(structure, dict) and feature in structure: # Simple dict projection
+        return structure[feature]
+    elif hasattr(structure, 'get'): # Duck typing for dict-like objects
+         try:
+             return structure.get(feature)
+         except TypeError: # Handle cases where .get exists but is not suitable
+             pass
+    elif hasattr(structure, str(feature)): # Attribute access
+         return getattr(structure, str(feature))
 
-def project(structure: StructureType, feature_path: str) -> Any:
+    # Add specific logic for Trees, Graphs, Sequences etc.
+    raise NotImplementedError(f"Projection logic for {type(structure)} and {type(feature)} not defined.")
+
+def compose(morphism1: Callable, morphism2: Callable) -> Callable:
+    """Composes two linguistic operations (morphisms).
+
+    Represents the sequential application of transformations or inferences.
+    Assumes morphisms are functions.
     """
-    Projects a specific feature or value from a linguistic structure.
-    The exact implementation depends heavily on the structure type.
+    print(f"Composing {morphism1.__name__} and {morphism2.__name__}")
+    # Standard function composition
+    def composed_morphism(*args, **kwargs):
+        # Apply morphism2 first, then morphism1 to the result
+        intermediate_result = morphism2(*args, **kwargs)
+        return morphism1(intermediate_result)
+    
+    # Try to give the composed function a meaningful name
+    composed_morphism.__name__ = f"{morphism1.__name__}_o_{morphism2.__name__}"
+    return composed_morphism
 
-    Args:
-        structure: The linguistic structure (e.g., Tree, Graph, FeatureStructure).
-        feature_path: A path or query specifying the feature to extract 
-                      (e.g., 'head.pos', 'nodes[\'concept1\'].type').
+def apply(func: Callable[[Any], Any], argument: Any) -> Any:
+    """Applies a linguistic function (operation) to an argument (structure).
 
-    Returns:
-        The extracted value or feature.
-
-    Raises:
-        KeyError: If the feature path is invalid for the structure.
-        NotImplementedError: If projection is not defined for the structure type.
+    This is essentially function application, but made explicit as a 
+    core calculus operation.
     """
-    if isinstance(structure, FeatureStructure):
-        # Basic dictionary-like access, assumes simple paths
-        try:
-            # Rudimentary path handling - needs a proper parser for complex paths
-            keys = feature_path.split('.')
-            value = structure
-            for key in keys:
-                value = value[key]
-            return value
-        except (KeyError, TypeError) as e:
-            raise KeyError(f"Invalid feature path '{feature_path}' for FeatureStructure: {e}")
-    elif isinstance(structure, Tree):
-        # Basic projection for Trees (e.g., get root content)
-        # Needs a proper path language (e.g., XPath-like)
-        if feature_path == 'root.content':
-            return structure.root.content
-        # Add more basic cases or raise error
-        raise NotImplementedError(f"Basic Tree projection only supports 'root.content', not '{feature_path}'")
-    elif isinstance(structure, Graph):
-        # Basic projection for Graphs (e.g., get node content by id)
-        # Needs a proper path/query language
-        if feature_path.startswith('nodes[') and feature_path.endswith('].content'):
-            node_id = None # Initialize in case of exception before assignment
-            try:
-                # Extract the ID, handling potential surrounding quotes
-                node_id_str = feature_path[len('nodes['):-len('].content')]
-                node_id = node_id_str.strip(''"') # Strip both single and double quotes
-                return structure.nodes[node_id].content
-            except KeyError:
-                 # Reraise with a more informative message including the extracted ID if available
-                 if node_id:
-                     raise KeyError(f"Node ID '{node_id}' not found in graph for path '{feature_path}'")
-                 else:
-                     raise KeyError(f"Could not extract valid Node ID from path '{feature_path}'")
-        # Clarify the supported format in the error message
-        raise NotImplementedError(f"Graph projection supports 'nodes["id"].content' format, not '{feature_path}'")
-    elif hasattr(structure, 'project'): # Check for a custom method
-        # Allow structures to define their own projection method
-        return structure.project(feature_path)
-    else:
-        raise NotImplementedError(f"Projection not implemented for type {type(structure).__name__}")
-
-def compose(morphism1: Morphism, morphism2: Morphism) -> Morphism:
-    """
-    Composes two morphisms (if using Category Theory).
-    NOTE: Category Theory is currently conceptual in FORMICA.
-
-    Args:
-        morphism1: The first morphism (applied second).
-        morphism2: The second morphism (applied first).
-
-    Returns:
-        The composed morphism.
-
-    Raises:
-        ValueError: If the morphisms are not compatible for composition.
-        NotImplementedError: This operation is not implemented as CT is conceptual.
-    """
-    # As Category Theory is conceptual, we don't provide a concrete implementation.
-    # A real implementation would require concrete Morphism classes and categories.
-    raise NotImplementedError("Category theory composition logic not implemented (conceptual).")
-
-def apply(func: Callable[[ArgType], ResultType], argument: ArgType) -> ResultType:
-    """
-    Applies a function (potentially representing a linguistic rule or transformation)
-    to an argument (a linguistic structure or value).
-
-    Args:
-        func: The function to apply.
-        argument: The argument to the function.
-
-    Returns:
-        The result of applying the function.
-    """
-    # Simple application, but could be extended with type checking, context passing, etc.
+    print(f"Applying function {func.__name__} to argument {argument}")
     return func(argument)
 
-# TODO: Define more sophisticated calculus operations.
-# TODO: Implement robust error handling.
-# TODO: Integrate with the type system for static checks where possible.
-# TODO: Consider operations specific to probabilistic reasoning. 
+# --- Potential Additional Primitives ---
+
+# def merge(struct1: S, struct2: S) -> S:
+#     """Merges two structures (potentially less strict than unification)."""
+#     raise NotImplementedError
+
+# def match(pattern: P, structure: S) -> bool:
+#     """Checks if a structure matches a given pattern."""
+#     raise NotImplementedError
+
+
+print("FORMICA core calculus module initialized.") 
