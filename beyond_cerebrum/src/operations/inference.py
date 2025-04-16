@@ -1,8 +1,9 @@
 """
-Probabilistic inference operations within FORMICA.
+Linguistic inference operations within the FORMICA framework.
 
-This module defines operations that derive new information or modify
-belief states based on linguistic input, often leveraging Bayesian methods.
+This module focuses on operations that derive new information or modify 
+belief states based on linguistic input, integrating Bayesian methods
+where appropriate (Specification Section 2.3 & 2.4).
 """
 
 from typing import TypeVar, Generic, Any, Dict, Optional
@@ -17,6 +18,15 @@ BeliefState = TypeVar('BeliefState') # Represents the agent's belief state
 Observation = TypeVar('Observation', bound=AbstractStructure) # Linguistic input
 Query = TypeVar('Query') # Question about the belief state
 Answer = TypeVar('Answer') # Answer to the query
+
+# Type variables
+BeliefStateType = TypeVar('BeliefStateType')
+ObservationType = TypeVar('ObservationType')
+StructureType = TypeVar('StructureType')
+ContextType = TypeVar('ContextType')
+MeaningType = TypeVar('MeaningType')
+ReferenceType = TypeVar('ReferenceType')
+DiscourseModelType = TypeVar('DiscourseModelType')
 
 # --- Probabilistic Data Structures (Placeholders) ---
 
@@ -218,6 +228,70 @@ def resolve_reference_bayesian(referring_expression: str,
         
     posterior_entity_dist = ProbDistribution(posterior_unnormalized)
     return posterior_entity_dist
+
+# --- Core Inference Operations (Placeholders) ---
+
+def infer_meaning(structure: StructureType, context: ContextType) -> MeaningType:
+    """Infers the meaning of a linguistic structure given context.
+
+    This is a high-level operation that likely combines:
+    - Semantic composition based on structure.
+    - Pragmatic enrichment based on context.
+    - Potentially probabilistic reasoning over ambiguous interpretations.
+    """
+    print(f"Inferring meaning for {structure} in context {context}")
+    # Placeholder: requires defined semantic/pragmatic representations
+    # May involve calls to transformations.py or calculus.py
+    # Might return a probability distribution over meanings P(Meaning | Structure, Context)
+    raise NotImplementedError("Meaning inference logic not implemented.")
+
+def update_belief(current_belief: BeliefStateType, observation: ObservationType) -> BeliefStateType:
+    """Updates a belief state based on a new linguistic observation.
+
+    This is central to the Bayesian aspect. Could represent:
+    - Updating a probabilistic grammar.
+    - Updating a model of speaker intentions.
+    - Updating a world model based on communicated information.
+    """
+    print(f"Updating belief {current_belief} based on observation {observation}")
+    # Requires a defined BeliefStateType and a probabilistic update rule (e.g., Bayes' theorem)
+    # Example using a hypothetical Bayesian library:
+    # posterior = bbn.update(prior=current_belief, likelihood=calculate_likelihood(observation), evidence=observation)
+    # return posterior
+    raise NotImplementedError("Belief update logic (Bayesian or otherwise) not implemented.")
+
+def resolve_reference(discourse_model: DiscourseModelType, referring_expression: ReferenceType) -> Any:
+    """Resolves a referring expression (e.g., pronoun, definite description) 
+       within the current discourse model.
+    """
+    print(f"Resolving reference {referring_expression} in model {discourse_model}")
+    # Requires a representation for the discourse model (tracking entities, salience)
+    # Might involve searching the model for potential referents and scoring them
+    # Could return the identified entity or a distribution over potential entities
+    raise NotImplementedError("Reference resolution logic not implemented.")
+
+# --- Supporting Functions (Placeholders) ---
+
+def calculate_likelihood(observation: ObservationType) -> Any:
+    """Calculates the likelihood of an observation given some model/parameters.
+       (Helper for Bayesian updates).
+    """ 
+    # Implementation depends heavily on the specific probabilistic model being used.
+    raise NotImplementedError("Likelihood calculation not implemented.")
+
+# --- Potential Advanced Inference --- 
+
+# def learn_structure(data: List[ObservationType]) -> Any:
+#     """Learns linguistic structures (e.g., grammar rules, semantic relations)
+#        from data, potentially using Bayesian structure learning.
+#     """
+#     raise NotImplementedError
+
+# def infer_speaker_intention(utterance: Any, context: ContextType) -> Any:
+#     """Infers the probable intention behind a speaker's utterance."""
+#     raise NotImplementedError
+
+print("FORMICA inference operations module initialized.")
 
 # TODO: Implement more sophisticated ProbDistribution class (e.g., handle continuous variables, efficient updates).
 # TODO: Define concrete likelihood models for specific linguistic phenomena.

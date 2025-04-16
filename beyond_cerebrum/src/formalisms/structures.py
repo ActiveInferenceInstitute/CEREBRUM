@@ -25,7 +25,9 @@ class TreeNode(Generic[NodeData]):
         self.children = children if children is not None else []
 
     def __repr__(self):
-        return f"TreeNode(data={self.data!r})"
+        # Indicate if node is a leaf or has children
+        child_info = f", children={len(self.children)}" if self.children else ", leaf"
+        return f"TreeNode(data={self.data!r}{child_info})"
 
     def add_child(self, child_node: 'TreeNode[NodeData]'):
         self.children.append(child_node)
@@ -36,11 +38,27 @@ class TreeNode(Generic[NodeData]):
 class Tree(Generic[NodeData]):
     """Represents a generic tree with a root node."""
     def __init__(self, root: TreeNode[NodeData]):
+        if not isinstance(root, TreeNode):
+             raise TypeError("Tree root must be a TreeNode instance.")
         self.root = root
 
     def __repr__(self):
-        # Basic representation, could be enhanced for better visualization
+        # Improved representation showing root node details
         return f"Tree(root={self.root!r})"
+
+    def traverse_depth_first(self) -> List[NodeData]:
+        """Performs a depth-first traversal (pre-order) and returns node data."""
+        visited_data = []
+        stack = [self.root]
+        
+        while stack:
+            node = stack.pop()
+            if node:
+                visited_data.append(node.data)
+                # Add children to stack in reverse order for correct pre-order visit
+                stack.extend(reversed(node.children))
+                
+        return visited_data
 
 # --- Graph Structure --- 
 
@@ -69,15 +87,17 @@ class Graph(Generic[NodeData, EdgeData]):
     """Represents a generic graph using adjacency list representation."""
     def __init__(self):
         self.nodes: Dict[Any, GraphNode[NodeData]] = {}
-        self.adj: Dict[Any, List[GraphEdge[EdgeData]]] = {}
+        # Changed adj list to store edges outgoing from the key node
+        self.adj: Dict[Any, List[GraphEdge[EdgeData]]] = {} 
 
     def add_node(self, node_id: Any, data: NodeData):
-        if node_id not in self.nodes:
-            self.nodes[node_id] = GraphNode(node_id, data)
-            self.adj[node_id] = []
-        else:
-            # Handle duplicate node ID? Update data? Raise error?
-            print(f"Warning: Node {node_id} already exists.")
+        if node_id in self.nodes:
+            # Update existing node data? Raise error? For now, warn and ignore.
+            print(f"Warning: Node {node_id} already exists. Data not updated.")
+            return # Don't overwrite existing node or adjacency list
+        
+        self.nodes[node_id] = GraphNode(node_id, data)
+        self.adj[node_id] = [] # Initialize adjacency list
 
     def add_edge(self, u_id: Any, v_id: Any, data: EdgeData, directed: bool = False):
         if u_id not in self.nodes:
@@ -86,21 +106,54 @@ class Graph(Generic[NodeData, EdgeData]):
              raise ValueError(f"Target node {v_id} not in graph")
 
         edge = GraphEdge(u_id, v_id, data, directed)
+        # Ensure the adjacency list exists before appending
+        if u_id not in self.adj: self.adj[u_id] = []
         self.adj[u_id].append(edge)
+
         if not directed:
-            # Add edge in the other direction for undirected graphs
+            # Add edge in the other direction for undirected graphs, avoiding duplicates
+            # Check if reverse edge already exists implicitly via the forward edge
             reverse_edge = GraphEdge(v_id, u_id, data, directed=False)
-            if v_id not in self.adj: self.adj[v_id] = [] # Ensure target has adj list
-            self.adj[v_id].append(reverse_edge)
+            # Ensure the adjacency list exists for the target node
+            if v_id not in self.adj: self.adj[v_id] = []
+            # Avoid adding duplicate edges for undirected graphs
+            if not any(e.u == v_id and e.v == u_id for e in self.adj[v_id]):
+                 self.adj[v_id].append(reverse_edge)
 
     def get_node(self, node_id: Any) -> Optional[GraphNode[NodeData]]:
         return self.nodes.get(node_id)
 
-    def get_neighbors(self, node_id: Any) -> List[GraphEdge[EdgeData]]:
+    def get_neighbors(self, node_id: Any) -> List[GraphNode[NodeData]]:
+        """Returns neighbor nodes (not edges) for a given node ID."""
+        neighbor_nodes = []
+        if node_id in self.adj:
+            for edge in self.adj[node_id]:
+                neighbor_id = edge.v if edge.u == node_id else edge.u
+                if neighbor_id != node_id: # Avoid self-loops if represented symmetrically
+                    neighbor_node = self.get_node(neighbor_id)
+                    if neighbor_node: # Check if neighbor node exists
+                        neighbor_nodes.append(neighbor_node)
+        # Remove duplicates if graph is undirected and edges are stored symmetrically
+        # Using dict keys for efficient uniqueness check based on node id
+        return list({node.id: node for node in neighbor_nodes}.values())
+
+    def get_outgoing_edges(self, node_id: Any) -> List[GraphEdge[EdgeData]]:
+        """Returns the list of outgoing edges from a node."""
         return self.adj.get(node_id, [])
 
     def __repr__(self):
-        return f"Graph(nodes={len(self.nodes)}, edges={sum(len(edges) for edges in self.adj.values()) // 2})" # Approx edge count for undirected
+        # Calculate number of unique edges (especially for undirected graphs)
+        edge_count = 0
+        seen_edges = set()
+        for u_id, edges in self.adj.items():
+            for edge in edges:
+                # For undirected, store edge as sorted tuple to count (u,v) and (v,u) once
+                edge_key = tuple(sorted((edge.u, edge.v))) if not edge.directed else (edge.u, edge.v)
+                if edge_key not in seen_edges:
+                    edge_count += 1
+                    seen_edges.add(edge_key)
+                    
+        return f"Graph(nodes={len(self.nodes)}, edges={edge_count})"
 
 # Example Usage: Semantic Graph might use SemanticConcept as NodeData and Relation as EdgeData
 # semantic_graph = Graph[SemanticConcept, str]()
