@@ -87,7 +87,7 @@ The metaphorical case enables a model to map structures and relationships from o
 
 In the metaphorical case, a model acts as a transformation bridge between disparate domains, establishing systematic mappings between conceptual structures. This case would be particularly valuable for transfer learning systems and creative problem-solving algorithms that need to apply learned patterns in novel contexts.
 
-The metaphorical case would introduce unique cross-domain mapping functions as formalized in Equation 18 (see Supplement 1). The key innovation is the structured alignment of latent representations across domains, enabling principled knowledge transfer that preserves relational invariants while adapting to target domain constraints.
+The metaphorical case would introduce unique cross-domain mapping functions, requiring formalisms that capture the structured alignment of latent representations across domains. The key innovation is enabling principled knowledge transfer that preserves relational invariants while adapting to target domain constraints.
 
 ### 2.5.1 Unique Properties of the Metaphorical Case
 
@@ -149,7 +149,7 @@ The explicative case enables a model to translate its internal representations a
 
 In the explicative case, a model assumes the role of an interpreter that renders its own or another model's operations accessible to observation and analysis. This case is particularly valuable for regulatory compliance, building user trust, model debugging, and educational applications where understanding model behavior is crucial.
 
-The explicative case introduces unique abstraction and explanation functions as would be formalized in Equation 19 (see Supplement 1). The key innovation is the development of targeted explanatory mappings that selectively expose relevant aspects of model operations while maintaining an appropriate level of abstraction for the intended audience.
+The explicative case introduces unique abstraction and explanation functions, requiring formalisms to represent these mappings. The key innovation is the development of targeted explanatory mappings that selectively expose relevant aspects of model operations while maintaining an appropriate level of abstraction for the intended audience.
 
 ### 2.9.1 Unique Properties of the Explicative Case
 
@@ -176,7 +176,7 @@ The diagnostic case enables a model to systematically identify, localize, and ch
 
 In the diagnostic case, a model assumes the role of an evaluator that actively probes model behavior under various conditions to detect inconsistencies, vulnerabilities, or performance degradations. This case is particularly valuable for AI safety, model robustness testing, and quality assurance in high-stakes applications.
 
-The diagnostic case would introduce specialized anomaly detection functions as would be formalized in Equation 20 (see Supplement 1). The key innovation is the development of targeted testing strategies that efficiently expose potential model weaknesses through systematic exploration of model behavior.
+The diagnostic case would introduce specialized anomaly detection functions, requiring formalisms for this purpose. The key innovation is the development of targeted testing strategies that efficiently expose potential model weaknesses through systematic exploration of model behavior.
 
 ### 2.10.1 Unique Properties of the Diagnostic Case
 
@@ -203,7 +203,7 @@ The orchestrative case enables coordinated operation of model ensembles through 
 
 In the orchestrative case, a model assumes the role of a coordinator that manages interactions between multiple model components, allocating computational resources and routing information to optimize overall system performance. This case is particularly valuable for distributed AI systems, edge computing, and complex multi-component cognitive architectures.
 
-The orchestrative case would introduce specialized coordination functions as would be formalized in Equation 21 (see Supplement 1). The key innovation is dynamic task decomposition and resource allocation that adapts to both the current context and system capabilities.
+The orchestrative case would introduce specialized coordination functions, requiring formalisms to represent these scheduling and resource allocation policies. The key innovation is dynamic task decomposition and resource allocation that adapts to both the current context and system capabilities.
 
 ### 2.11.1 Unique Properties of the Orchestrative Case
 
@@ -230,7 +230,7 @@ The generative case enables a model to create novel yet coherent instances withi
 
 In the generative case, a model assumes the role of a creator that produces new content, designs, or hypotheses that satisfy both learned distributional constraints and explicit design requirements. This case is particularly valuable for creative applications, synthetic data generation, hypothesis formation, and design ideation.
 
-The generative case would introduce specialized sampling and constraint satisfaction functions as would be formalized in Equation 22 (see Supplement 1). The key innovation is the ability to navigate latent spaces in ways that balance novelty against coherence while respecting explicit constraints.
+The generative case would introduce specialized sampling and constraint satisfaction functions, requiring mathematical formalisms for these operations. The key innovation is the ability to navigate latent spaces in ways that balance novelty against coherence while respecting explicit constraints.
 
 ### 2.12.1 Unique Properties of the Generative Case
 

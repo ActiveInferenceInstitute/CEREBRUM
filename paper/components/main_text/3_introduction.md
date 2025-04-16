@@ -25,12 +25,12 @@ Core cases include:
 - Locative (location)
 - Ablative (origin)
 
-Each serves distinct functional roles within sentence structures, with implementation varying across languages. Nominative-accusative systems distinguish subjects from objects, while ergative-absolutive systems group intransitive subjects with direct objects, as illustrated in Figure 9.
+Each serves distinct functional roles within sentence structures, with implementation varying across languages. Nominative-accusative systems distinguish subjects from objects, while ergative-absolutive systems group intransitive subjects with direct objects, as illustrated in ![Figure 9: Morphosyntactic Alignments in Model Relationships.](../figures/Figure_9.png){#fig:fig9}.
 
 While English has largely lost morphological case marking, underlying case relationships persist through word order and prepositions. In "The cat chased the mouse," nominative case appears through position (subject before verb) rather than morphology. In "I gave him the book," dative case manifests through implied preposition and word order. These examples demonstrate that case relationships—encompassing semantics, semiosis, and pragmatics—remain fundamental to language structure regardless of explicit morphological marking.
 
 ## Intelligence Case Management Systems
-Intelligence case management systems organize investigative workflows and analytical processes in operational contexts. These systems structure information collection, analysis, evaluation, and dissemination while tracking provenance and relationships between intelligence products, as depicted in Figure 6. Modern implementations increasingly manage complex model ecosystems where analytical tools, data sources, and products interact within organizational workflows. However, current frameworks lack formal mathematical foundations for representing model relationships, leading to ad hoc integration approaches that become unwieldy at scale. As artificial intelligence components proliferate in these systems, a more rigorous basis for model interaction becomes essential for maintaining operational coherence and analytical integrity, a gap specifically addressed by CEREBRUM.
+Intelligence case management systems organize investigative workflows and analytical processes in operational contexts. These systems structure information collection, analysis, evaluation, and dissemination while tracking provenance and relationships between intelligence products, as depicted in ![Figure 6: Intelligence Production Workflow with Case-Bearing Models.](../figures/Figure_6.png){#fig:fig6}. Modern implementations increasingly manage complex model ecosystems where analytical tools, data sources, and products interact within organizational workflows. However, current frameworks lack formal mathematical foundations for representing model relationships, leading to ad hoc integration approaches that become unwieldy at scale. As artificial intelligence components proliferate in these systems, a more rigorous basis for model interaction becomes essential for maintaining operational coherence and analytical integrity, a gap specifically addressed by CEREBRUM.
 
 ## Towards Languages for Generative Modeling
 The Active Inference community has explored numerous adjectival modifications of the base framework, including:
@@ -49,7 +49,7 @@ This approach emphasizes declensional aspects of generative models as noun-like 
 ## Conceptual Foundations: The Intersection of Four Domains
 CEREBRUM integrates four key domains to create a unified framework for model management, as illustrated in Figure 1:
 
-![Conceptual Foundations of CEREBRUM.](Figure_1.png){#fig:fig1}
+![Figure 1: Foundation Domains of CEREBRUM.](../figures/Figure_1.png){#fig:fig1}
 
 1. **Cognitive Systems Modeling**: Provides the entities that take on case relationships
 2. **Active Inference**: Supplies the predictive processing mechanics driving case transformations

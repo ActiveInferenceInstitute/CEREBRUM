@@ -1,5 +1,7 @@
 # Supplement 12: Writing a Research Paper
 
+This supplement serves as a detailed example application, demonstrating how the CEREBRUM framework can be applied to analyze and structure the complex cognitive process of writing a research paper.
+
 This supplement provides comprehensive guidelines for applying CEREBRUM methodologies to the research paper writing process, detailing how linguistic case frameworks can enhance scientific communication and knowledge representation.
 
 ## 12.1 Introduction

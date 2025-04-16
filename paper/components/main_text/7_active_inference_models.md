@@ -1,14 +1,14 @@
 ## Active Inference Integration
 CEREBRUM integrates with active inference principles by framing case transformations as predictive processes operating within a free energy minimization framework. Case transitions are formalized as parameterized Bayesian inference operations that minimize variational free energy across model interfaces. This conceptual alignment is illustrated in Figure 13, which depicts case transitions driven by hierarchical prediction error minimization through precision-weighted message passing. The specific message passing rules governing these transformations under active inference are detailed in Figure 14 and formally defined in Supplement 11.
 
-![Active Inference Integration Framework.](Figure_13.png){#fig:fig13}
+![Figure 13: Active Inference Integration Framework.](../figures/Figure_13.png){#fig:fig13}
 
-![Case-Specific Message Passing in Active Inference.](Figure_14.png){#fig:fig14}
+![Figure 14: Case-Specific Message Passing in Active Inference.](../figures/Figure_14.png){#fig:fig14}
 
 ## Formal Case Calculus
 The interactions and transformations between case-bearing models in CEREBRUM adhere to a formal calculus derived from grammatical case systems. This calculus defines the permissible transitions and combinatorial rules for models based on their assigned cases, as formally presented in Figure 15 and mathematically elaborated in Supplement 9. Case transformations follow category-theoretic principles where morphisms preserve semantic integrity while modifying interface properties and precision parameters.
 
-![Model Case Calculus Framework.](Figure_15.png){#fig:fig15}
+![Figure 15: Model Case Calculus Framework.](../figures/Figure_15.png){#fig:fig15}
 
 ## Cross-Domain Integration Benefits
 CEREBRUM's strength lies in its synthesis of concepts from four foundational domains: Linguistic Case Systems, Cognitive Systems Modeling, Active Inference, and Intelligence Production. The benefits derived from this integration are summarized in Table 4.

@@ -24,31 +24,23 @@ Case transformations are driven by free energy minimization, seeking the case th
 
 $$c^* = \arg\min_c F(m, c)$$
 
-### 1.2 Implementation Example
+### 1.2 Extended Free Energy Formulations
 
-```python
-def calculate_free_energy(model, case):
-    """Calculate variational free energy for a model in a specific case."""
-    # Get case-specific parameter distributions
-    q_theta = model.get_posterior_distribution(case)
-    p_theta = model.get_prior_distribution(case)
-    
-    # Calculate KL divergence between posterior and prior
-    kl_divergence = calculate_kl_divergence(q_theta, p_theta)
-    
-    # Calculate expected log likelihood
-    expected_log_likelihood = calculate_expected_log_likelihood(model, case)
-    
-    # Calculate free energy
-    free_energy = kl_divergence - expected_log_likelihood
-    
-    return free_energy
+For practical implementation, the free energy can be decomposed into complexity and accuracy terms:
 
-def find_optimal_case(model, available_cases):
-    """Find the optimal case for a model using free energy minimization."""
-    energies = {case: calculate_free_energy(model, case) for case in available_cases}
-    return min(energies.items(), key=lambda x: x[1])[0]
-```
+$$F(m, c) = \underbrace{D_{KL}[q(\theta|c) || p(\theta|c)]}_{\text{complexity}} - \underbrace{\mathbb{E}_q[\ln p(o|\theta, c)]}_{\text{accuracy}}$$
+
+The Expected Free Energy (EFE) for future timesteps $\tau$ is defined as:
+
+$$G(m, c, \tau) = \mathbb{E}_{q(o_\tau, \theta|c)}[\ln q(\theta|c) - \ln p(o_\tau, \theta|c)]$$
+
+$$G(m, c, \tau) = \underbrace{\mathbb{E}_{q(o_\tau, \theta|c)}[\ln q(\theta|c) - \ln p(\theta|c, o_\tau)]}_{\text{epistemic value}} - \underbrace{\mathbb{E}_{q(o_\tau|c)}[\ln p(o_\tau)]}_{\text{pragmatic value}}$$
+
+The multi-step expected free energy for a sequence of case transformations is:
+
+$$G(m, \mathbf{c}) = \sum_{\tau=t}^{T} G(m, c_\tau, \tau)$$
+
+Where $\mathbf{c} = \{c_t, c_{t+1}, \ldots, c_T\}$ is a sequence of case transformations.
 
 ## 2. Precision-Weighted Message Passing
 
@@ -65,64 +57,42 @@ Where:
 - $\alpha$ is a temperature parameter
 - $F$ is the free energy
 
-### 2.2 Message Passing Implementation
+### 2.2 Mathematical Framework for Message Passing
 
-```python
-class MessageBus:
-    def __init__(self):
-        self.message_queue = []
-        self.handlers = {}
-        
-    def send_message(self, source_model, target_model, content):
-        """Send a precision-weighted message between models."""
-        # Calculate precision of the source model in its current case
-        source_precision = calculate_precision(source_model)
-        
-        # Create message with precision weighting
-        message = {
-            'source': source_model.id,
-            'target': target_model.id,
-            'content': content,
-            'precision': source_precision,
-            'timestamp': current_time()
-        }
-        
-        # Add to queue
-        self.message_queue.append(message)
-        
-        # Process immediately if handler exists
-        if target_model.id in self.handlers:
-            self.handlers[target_model.id](message)
-            
-        return message
-    
-    def register_handler(self, model_id, handler_function):
-        """Register a message handler for a model."""
-        self.handlers[model_id] = handler_function
-        
-    def process_queue(self):
-        """Process all messages in the queue."""
-        for message in self.message_queue:
-            if message['target'] in self.handlers:
-                self.handlers[message['target']](message)
-        
-        # Clear processed messages
-        self.message_queue = []
+Messages between models can be formalized as probability distributions. For a message from model $m_i$ to model $m_j$:
 
-def calculate_precision(model):
-    """Calculate precision for a model based on its current case."""
-    # Get current case
-    current_case = model.current_case
-    
-    # Calculate free energy
-    free_energy = calculate_free_energy(model, current_case)
-    
-    # Calculate precision using exponential transformation
-    alpha = 1.0  # Temperature parameter
-    precision = math.exp(-alpha * free_energy)
-    
-    return precision
-```
+$$\mu_{i \rightarrow j} = \mathcal{N}(\mu_{ij}, \pi_i^{-1})$$
+
+Where:
+- $\mu_{ij}$ is the mean of the message
+- $\pi_i^{-1}$ is the inverse precision (variance) of the sending model
+
+The receiving model integrates messages using precision-weighted averaging:
+
+$$\hat{\mu}_j = \frac{\sum_i \pi_i \mu_{ij}}{\sum_i \pi_i}$$
+
+$$\hat{\pi}_j = \sum_i \pi_i$$
+
+The message update dynamics follow the gradient of free energy:
+
+$$\frac{d\mu_{i \rightarrow j}}{dt} = -\kappa \frac{\partial F}{\partial \mu_{i \rightarrow j}}$$
+
+$$\frac{d\pi_i}{dt} = -\kappa \frac{\partial F}{\partial \pi_i}$$
+
+Where $\kappa$ is a rate constant.
+
+### 2.3 Message Types and Routing Table
+
+| Message Type | Source Case | Target Case | Content Type | Priority |
+|--------------|-------------|-------------|--------------|----------|
+| Prediction | NOM | DAT/ACC | State predictions | High |
+| Observation | DAT | NOM/ACC | Sensory data | High |
+| Parameter | GEN | ACC | Model parameters | Medium |
+| Control | NOM | INS | Action commands | High |
+| Context | LOC | ALL | Contextual states | Medium |
+| Error | ACC | NOM/GEN | Prediction errors | High |
+| Evaluation | ABL | ALL | Performance metrics | Low |
+| Request | VOC | Specific | Query/command | Variable |
 
 ## 3. Case-Specific Prediction and Update Equations
 
@@ -171,92 +141,58 @@ Where:
 - $\lambda$ is the input weighting
 - $I$ is the incoming data
 
-### 3.3 Implementation Example
+### 3.3 Extended Prediction and Update Equations by Case
 
-```python
-class ActiveInferenceModel:
-    def __init__(self):
-        self.parameters = {}
-        self.state = {}
-        self.current_case = None
-        
-    def predict(self, inputs=None):
-        """Generate predictions based on current case."""
-        if self.current_case.abbreviation == 'NOM':
-            return self._predict_nominative()
-        elif self.current_case.abbreviation == 'GEN':
-            return self._predict_genitive()
-        # Other cases...
-    
-    def update(self, prediction, observation):
-        """Update model based on current case."""
-        if self.current_case.abbreviation == 'ACC':
-            return self._update_accusative(prediction, observation)
-        elif self.current_case.abbreviation == 'DAT':
-            return self._update_dative(observation)
-        # Other cases...
-    
-    def _predict_nominative(self):
-        """Generate predictions as an active agent."""
-        # Get parameters prioritized for nominative case
-        theta_nom = self._get_case_parameters('NOM')
-        
-        # Generate predictions using the generative model
-        predictions = self._generative_function(self.state, theta_nom)
-        
-        return predictions
-    
-    def _predict_genitive(self):
-        """Generate outputs as a source/producer."""
-        # Get parameters prioritized for genitive case
-        theta_gen = self._get_case_parameters('GEN')
-        
-        # Generate outputs using the output function
-        outputs = self._output_function(self.state, theta_gen)
-        
-        return outputs
-    
-    def _update_accusative(self, prediction, observation):
-        """Update parameters as the object of optimization."""
-        # Calculate prediction error
-        prediction_error = self._calculate_error(prediction, observation)
-        
-        # Calculate free energy gradient
-        gradient = self._calculate_gradient(prediction_error)
-        
-        # Update parameters with gradient descent
-        learning_rate = 0.01
-        for param_name, grad_value in gradient.items():
-            if param_name in self.parameters:
-                self.parameters[param_name] -= learning_rate * grad_value
-        
-        return {
-            'error': prediction_error,
-            'gradient_magnitude': sum(abs(g) for g in gradient.values()),
-            'updated_parameters': self.parameters
-        }
-    
-    def _update_dative(self, observation):
-        """Update state based on incoming data."""
-        # Calculate state update
-        state_update = self._calculate_state_update(observation)
-        
-        # Apply update
-        input_weight = 0.8
-        for state_var, update_value in state_update.items():
-            if state_var in self.state:
-                self.state[state_var] += update_value
-        
-        # Directly incorporate input
-        for input_var, input_value in observation.items():
-            if input_var in self.state:
-                self.state[input_var] = (1-input_weight) * self.state[input_var] + input_weight * input_value
-        
-        return {
-            'updated_state': self.state,
-            'input_influence': input_weight
-        }
-```
+For instrumental case [INS], action selection follows active inference principles:
+
+$$a^* = \arg\min_a G(s, a)$$
+
+Where:
+- $a^*$ is the optimal action
+- $G(s, a)$ is the expected free energy after taking action $a$ in state $s$
+
+The expected free energy for action selection is:
+
+$$G(s, a) = \underbrace{\mathbb{E}_{q(s'|s,a)}[D_{KL}[q(s'|s,a) || p(s'|s,a)]]}_{\text{epistemic value}} + \underbrace{\mathbb{E}_{q(s'|s,a)}[C(s')]}_{\text{pragmatic value}}$$
+
+Where:
+- $s'$ is the next state
+- $C(s')$ is the cost function
+
+For locative case [LOC], context integration follows:
+
+$$p(s|c) = \frac{p(c|s)p(s)}{\int p(c|s')p(s')ds'}$$
+
+$$\Delta s_{LOC} = \gamma (s_{context} - s) + \omega \nabla_s \log p(s|c)$$
+
+Where:
+- $p(s|c)$ is the posterior probability of state given context
+- $\gamma$ is the context integration rate
+- $\omega$ is the gradient weighting
+- $\nabla_s \log p(s|c)$ is the score function
+
+For ablative case [ABL], source attribution involves:
+
+$$p(s_{source}|o) = \frac{p(o|s_{source})p(s_{source})}{\sum_{s'} p(o|s')p(s')}$$
+
+$$I(s_{source}; o) = \sum_{s,o} p(s_{source}, o) \log \frac{p(s_{source}, o)}{p(s_{source})p(o)}$$
+
+Where:
+- $p(s_{source}|o)$ is the posterior probability of source given observation
+- $I(s_{source}; o)$ is the mutual information between source and observation
+
+### 3.4 Transformation Operators and Their Properties
+
+| Case | Primary Operation | Parameter Focus | Update Priority | Information Flow Direction |
+|------|------------------|-----------------|-----------------|----------------------------|
+| NOM | Prediction | Generative parameters | Medium | Top-down |
+| ACC | Learning | All parameters | High | Bottom-up |
+| GEN | Generation | Output parameters | Medium | Inside-out |
+| DAT | Reception | Input mappings | High | Outside-in |
+| INS | Action | Policy parameters | Medium | Inside-out |
+| LOC | Contextualization | Context parameters | Low | Outside-in |
+| ABL | Attribution | Source parameters | Low | Bottom-up |
+| VOC | Communication | Interface parameters | Variable | Bidirectional |
 
 ## 4. Markov Blanket Formulation
 
@@ -285,60 +221,38 @@ Different cases establish different Markov blanket configurations:
 - **Ablative [ABL]**: Source-oriented blanket configuration
 - **Vocative [VOC]**: Addressable configuration with direct connections
 
-### 4.3 Implementation Example
+### 4.3 Mathematical Description of Markov Blankets
 
-```python
-class MarkovBlanket:
-    def __init__(self, central_model):
-        self.central_model = central_model
-        self.parents = set()
-        self.children = set()
-        self.co_parents = set()
-        
-    def update_blanket_for_case(self, case):
-        """Update the Markov blanket configuration based on the model's case."""
-        if case.abbreviation == 'NOM':
-            # Nominative case: more children, fewer parents
-            self._expand_children()
-            self._contract_parents()
-        elif case.abbreviation == 'ACC':
-            # Accusative case: more parents, fewer children
-            self._expand_parents()
-            self._contract_children()
-        elif case.abbreviation == 'DAT':
-            # Dative case: maximize parents
-            self._maximize_parents()
-        elif case.abbreviation == 'GEN':
-            # Genitive case: maximize children
-            self._maximize_children()
-        # Other cases...
-        
-        # Update co-parents based on new children
-        self._update_co_parents()
-        
-    def _expand_children(self):
-        """Expand the set of child models."""
-        # Implementation would add appropriate models to children set
-        pass
-        
-    def _contract_parents(self):
-        """Reduce the set of parent models."""
-        # Implementation would remove less relevant models from parents set
-        pass
-        
-    def _update_co_parents(self):
-        """Update the set of co-parent models."""
-        # Find all models that send messages to any of this model's children
-        registry = ModelRegistry.get_instance()
-        
-        self.co_parents = set()
-        for child in self.children:
-            parents = registry.get_parents(child)
-            self.co_parents.update(parents)
-            
-        # Remove the central model itself from co-parents
-        self.co_parents.discard(self.central_model)
-```
+For a system of random variables $X = \{X_1, X_2, ..., X_n\}$, the Markov blanket $MB(X_i)$ of variable $X_i$ is the minimal subset of $X$ such that:
+
+$$p(X_i | X \setminus X_i) = p(X_i | MB(X_i))$$
+
+For a model $m$ with internal states $\mu$, the partition of states into internal $\mu$ and external $\eta$ states creates a Markov blanket $b$ consisting of sensory $s$ and active $a$ states:
+
+$$\begin{pmatrix} \dot{\mu} \\ \dot{b} \\ \dot{\eta} \end{pmatrix} = \begin{pmatrix} f_{\mu}(\mu, b) \\ f_{b}(\mu, b, \eta) \\ f_{\eta}(b, \eta) \end{pmatrix} + \begin{pmatrix} \omega_{\mu} \\ \omega_{b} \\ \omega_{\eta} \end{pmatrix}$$
+
+Where:
+- $f_{\mu}, f_{b}, f_{\eta}$ are flow functions
+- $\omega_{\mu}, \omega_{b}, \omega_{\eta}$ are random fluctuations
+
+The conditional independence structure implies:
+
+$$p(\mu, \eta | b) = p(\mu | b) p(\eta | b)$$
+
+### 4.4 Case-Specific Blanket Structure Matrix
+
+The connectivity matrix $C$ for different case configurations:
+
+| Case | Parents | Children | Co-parents | Self-connections | External Connections |
+|------|---------|----------|------------|------------------|----------------------|
+| NOM | Low | High | Medium | High | Medium |
+| ACC | High | Low | Low | Medium | High |
+| GEN | Low | High | High | Medium | Medium |
+| DAT | High | Low | Medium | Low | High |
+| INS | Medium | Medium | High | Low | High |
+| LOC | Medium | High | Low | High | Low |
+| ABL | High | Medium | Low | Medium | Medium |
+| VOC | Medium | Medium | Medium | Low | High |
 
 ## 5. Active Inference Workflow Integration
 
@@ -353,107 +267,41 @@ An intelligence workflow can be formulated as an active inference process:
 3. It updates its internal model based on prediction errors
 4. It selects actions (case transformations) to minimize expected free energy
 
-### 5.2 Implementation Example
+### 5.2 Mathematical Framework for Workflow Optimization
 
-```python
-class ActiveInferenceWorkflow:
-    def __init__(self, name):
-        self.name = name
-        self.stages = []
-        self.current_stage = None
-        self.generative_model = WorkflowGenerativeModel()
-        
-    def add_stage(self, stage_config):
-        """Add a stage to the workflow."""
-        self.stages.append(stage_config)
-        
-    def execute(self, initial_input):
-        """Execute the workflow using active inference principles."""
-        current_input = initial_input
-        results = {}
-        
-        for stage in self.stages:
-            self.current_stage = stage
-            
-            # Models for this stage
-            models = stage['models']
-            
-            # Transform models to appropriate cases for this stage
-            self._optimize_model_cases(models, stage)
-            
-            # Generate predictions for this stage
-            predictions = self._predict_stage_output(models, current_input)
-            
-            # Process stage and get actual output
-            stage_output = self._process_stage(models, current_input)
-            
-            # Update models based on prediction errors
-            self._update_models(models, predictions, stage_output)
-            
-            # Store results
-            results[stage['name']] = stage_output
-            
-            # Use this stage's output as input to next stage
-            current_input = stage_output
-            
-        return results
-    
-    def _optimize_model_cases(self, models, stage):
-        """Optimize the case assignments for models in this stage."""
-        for model in models:
-            # Calculate free energy for each possible case
-            case_energies = {}
-            for case in model.supported_cases:
-                # Temporarily transform to this case
-                original_case = model.current_case
-                model.transform_case(case.abbreviation)
-                
-                # Calculate free energy for this stage context
-                energy = self._calculate_contextual_free_energy(model, stage)
-                case_energies[case] = energy
-                
-                # Return to original case
-                model.transform_case(original_case.abbreviation)
-            
-            # Find optimal case (minimum free energy)
-            optimal_case = min(case_energies.items(), key=lambda x: x[1])[0]
-            
-            # Transform to optimal case
-            model.transform_case(optimal_case.abbreviation)
-    
-    def _calculate_contextual_free_energy(self, model, stage):
-        """Calculate free energy considering workflow context."""
-        # Base free energy of the model
-        base_energy = calculate_free_energy(model, model.current_case)
-        
-        # Contextual factor based on stage requirements
-        context_factor = self._calculate_stage_compatibility(model, stage)
-        
-        # Combined energy
-        return base_energy * context_factor
-    
-    def _calculate_stage_compatibility(self, model, stage):
-        """Calculate compatibility factor between model case and stage."""
-        # Different stages have different preferred cases
-        stage_name = stage['name']
-        case_abbr = model.current_case.abbreviation
-        
-        compatibility_map = {
-            'data_collection': {'INS': 0.8, 'DAT': 0.9, 'NOM': 1.2},
-            'analysis': {'NOM': 0.8, 'LOC': 0.9, 'INS': 1.1},
-            'reporting': {'GEN': 0.7, 'NOM': 1.3, 'ABL': 1.2},
-            'evaluation': {'ACC': 0.7, 'INS': 1.2, 'LOC': 1.1},
-        }
-        
-        # Default compatibility factor
-        default_factor = 1.0
-        
-        # Get compatibility factor for this stage and case
-        if stage_name in compatibility_map and case_abbr in compatibility_map[stage_name]:
-            return compatibility_map[stage_name][case_abbr]
-        
-        return default_factor
-```
+The workflow optimization problem can be formulated as:
+
+$$W^* = \arg\min_W \sum_{t=1}^T F(W_t, D_t)$$
+
+Where:
+- $W^*$ is the optimal workflow configuration
+- $W_t$ is the workflow at stage $t$
+- $D_t$ is the data available at stage $t$
+- $F$ is the free energy function
+
+The expected information gain for a workflow stage is:
+
+$$EIG(W_t) = \mathbb{E}_{p(D_t|W_t)}[D_{KL}[p(\theta|D_t, W_t) || p(\theta|W_t)]]$$
+
+The optimal sequence of case transformations for the workflow is:
+
+$$C^* = \arg\min_C \sum_{t=1}^T \sum_{m \in M_t} G(m, c_m^t, t)$$
+
+Where:
+- $C^*$ is the optimal case assignment sequence
+- $c_m^t$ is the case of model $m$ at stage $t$
+- $M_t$ is the set of models active at stage $t$
+- $G$ is the expected free energy
+
+### 5.3 Workflow Stage Optimization Matrix
+
+| Workflow Stage | Optimal Cases | Case Compatibility Weights | Stage-Specific Free Energy Components |
+|----------------|---------------|----------------------------|--------------------------------------|
+| Data Collection | DAT, INS, LOC | $\{$DAT: 0.9, INS: 0.8, LOC: 0.7, NOM: 1.2, ACC: 1.3, GEN: 1.5$\}$ | Data fidelity, sampling efficiency |
+| Analysis | NOM, ACC, LOC | $\{$NOM: 0.8, ACC: 0.9, LOC: 0.9, INS: 1.1, DAT: 1.3, GEN: 1.4$\}$ | Model fit, hypothesis space coverage |
+| Reporting | GEN, ABL, NOM | $\{$GEN: 0.7, ABL: 0.8, NOM: 1.3, ACC: 1.4, LOC: 1.5, DAT: 1.8$\}$ | Information transfer, distortion minimization |
+| Evaluation | ACC, INS, LOC | $\{$ACC: 0.7, INS: 1.2, LOC: 1.1, NOM: 1.4, GEN: 1.5, DAT: 1.6$\}$ | Prediction error, generalization metrics |
+| Dissemination | VOC, GEN, ABL | $\{$VOC: 0.6, GEN: 0.8, ABL: 0.9, NOM: 1.2, LOC: 1.3, DAT: 1.6$\}$ | Audience models, information relevance |
 
 ## 6. Free Energy Landscape of Case Transformations
 
@@ -468,49 +316,127 @@ The free energy landscape has several important properties:
 - **Basins of attraction**: Contextual regions where particular cases are optimal
 - **Global minimum**: Most stable case for a given model and context
 
-### 6.2 Visualizing the Landscape
+### 6.2 Mathematical Characterization of the Landscape
 
-```python
-def generate_free_energy_landscape(model, context_parameters, case_grid):
-    """Generate a free energy landscape for visualization."""
-    # Initialize landscape grid
-    landscape = np.zeros(case_grid.shape)
-    
-    # Calculate free energy at each point in the grid
-    for i in range(case_grid.shape[0]):
-        for j in range(case_grid.shape[1]):
-            # Get case parameters at this grid point
-            case_params = case_grid[i, j]
-            
-            # Create temporary case with these parameters
-            temp_case = create_parameterized_case(case_params)
-            
-            # Calculate free energy
-            free_energy = calculate_contextual_free_energy(model, temp_case, context_parameters)
-            
-            # Store in landscape
-            landscape[i, j] = free_energy
-    
-    return landscape
+The free energy landscape can be characterized by the Hessian matrix:
 
-def plot_free_energy_landscape(landscape, case_grid, standard_cases):
-    """Plot the free energy landscape with standard cases marked."""
-    plt.figure(figsize=(10, 8))
-    
-    # Create contour plot of landscape
-    contour = plt.contourf(case_grid[0], case_grid[1], landscape, 20, cmap='viridis')
-    plt.colorbar(contour, label='Free Energy')
-    
-    # Mark standard cases
-    for case_name, case_coords in standard_cases.items():
-        plt.plot(case_coords[0], case_coords[1], 'o', markersize=10, label=case_name)
-    
-    plt.legend()
-    plt.xlabel('Parameter Access Dimension')
-    plt.ylabel('Interface Dimension')
-    plt.title('Free Energy Landscape of Case Transformations')
-    
-    plt.show()
-```
+$$H_{ij} = \frac{\partial^2 F}{\partial c_i \partial c_j}$$
 
-This implementation provides a concrete foundation for how CEREBRUM integrates with Active Inference principles, enabling mathematically principled case transformations and model interactions. 
+Where $c_i$ and $c_j$ are coordinates in case-parameter space.
+
+The transition probability between cases follows Arrhenius dynamics:
+
+$$p(c_i \rightarrow c_j) \propto \exp\left(-\frac{\Delta F_{ij}}{k_B T}\right)$$
+
+Where:
+- $\Delta F_{ij}$ is the free energy barrier between cases $c_i$ and $c_j$
+- $k_B$ is the Boltzmann constant
+- $T$ is the temperature parameter
+
+The landscape curvature at case $c$ is given by the eigenvalues of the Hessian:
+
+$$\{\lambda_1, \lambda_2, ..., \lambda_n\} = \text{eig}(H(c))$$
+
+Positive eigenvalues indicate stable directions, while negative eigenvalues indicate unstable directions.
+
+### 6.3 Case Transformation Cost Matrix
+
+The free energy cost of transforming from one case to another:
+
+| From\\To | NOM | ACC | GEN | DAT | INS | LOC | ABL | VOC |
+|----------|-----|-----|-----|-----|-----|-----|-----|-----|
+| NOM | 0.0 | 1.2 | 0.9 | 1.5 | 0.8 | 1.1 | 1.3 | 0.7 |
+| ACC | 1.3 | 0.0 | 1.5 | 0.9 | 1.0 | 1.4 | 0.8 | 1.2 |
+| GEN | 0.8 | 1.4 | 0.0 | 1.6 | 1.1 | 0.9 | 0.7 | 1.0 |
+| DAT | 1.4 | 0.7 | 1.7 | 0.0 | 1.2 | 1.5 | 1.1 | 0.9 |
+| INS | 0.9 | 1.1 | 1.2 | 1.3 | 0.0 | 0.8 | 1.0 | 0.7 |
+| LOC | 1.0 | 1.3 | 0.8 | 1.4 | 0.9 | 0.0 | 0.7 | 1.1 |
+| ABL | 1.4 | 0.9 | 0.7 | 1.2 | 1.1 | 0.8 | 0.0 | 1.3 |
+| VOC | 0.8 | 1.1 | 1.0 | 0.9 | 0.7 | 1.2 | 1.4 | 0.0 |
+
+## 7. Information Geometry of Case Space
+
+The space of cases can be formulated as a Riemannian manifold with an information-geometric structure.
+
+### 7.1 Fisher Information Metric
+
+The Fisher information metric defines the distance between cases:
+
+$$g_{ij}(c) = \mathbb{E}_{p(o|\theta,c)}\left[\frac{\partial \log p(o|\theta,c)}{\partial c_i}\frac{\partial \log p(o|\theta,c)}{\partial c_j}\right]$$
+
+The geodesic distance between cases $c_1$ and $c_2$ is:
+
+$$d(c_1, c_2) = \min_{\gamma} \int_0^1 \sqrt{\sum_{i,j} g_{ij}(\gamma(t)) \frac{d\gamma^i}{dt}\frac{d\gamma^j}{dt}} dt$$
+
+Where $\gamma(t)$ is a path from $c_1$ to $c_2$ with $\gamma(0) = c_1$ and $\gamma(1) = c_2$.
+
+### 7.2 Case Parameter Manifold
+
+Cases can be represented as points in a parameter manifold, with coordinates:
+
+| Case Parameter | Description | Range | Primary Influence |
+|----------------|-------------|-------|-------------------|
+| Interface Weight | Determines input/output behavior | [0, 1] | Message passing dynamics |
+| Parameter Access | Controls which parameters are modifiable | [0, 1] | Update equations |
+| Precision Factor | Influences message weighting | [0.1, 10] | Message influence |
+| Update Priority | Determines update sequence | [0, 1] | Processing order |
+| Context Sensitivity | Controls context integration | [0, 1] | State updates |
+| Action Threshold | Threshold for taking actions | [0, 1] | Action selection |
+| Error Gain | Amplification of prediction errors | [0.1, 10] | Learning rate |
+| Autonomy Factor | Independence from other models | [0, 1] | Self-organization |
+
+### 7.3 Information Flow Tensors
+
+The information flow between models can be characterized by a tensor field:
+
+$$\Phi_{ij}^{kl} = \frac{\partial^2 F}{\partial \mu_i^k \partial \mu_j^l}$$
+
+Where:
+- $\mu_i^k$ is the $k$-th component of model $i$'s state
+- $\mu_j^l$ is the $l$-th component of model $j$'s state
+
+This tensor field describes how information propagates through the network of models in different case configurations.
+
+## 8. Cognitive Implications and Theoretical Connections
+
+The active inference formulation of CEREBRUM connects to several theoretical frameworks in cognitive science and artificial intelligence.
+
+### 8.1 Connections to Predictive Coding
+
+Case transformations in active inference correspond to different roles in predictive coding hierarchies:
+
+$$\varepsilon_{\mu} = \mu - f(v)$$
+$$\varepsilon_{v} = v - g(\mu)$$
+
+Where:
+- $\varepsilon_{\mu}$ and $\varepsilon_{v}$ are prediction errors
+- $\mu$ and $v$ are state variables at adjacent levels
+- $f$ and $g$ are mapping functions between levels
+
+### 8.2 Hierarchical Message Passing and Belief Propagation
+
+Message passing in CEREBRUM can be related to belief propagation in factor graphs:
+
+$$\mu_{x \rightarrow f}(x) = \prod_{h \in n(x) \setminus f} \mu_{h \rightarrow x}(x)$$
+$$\mu_{f \rightarrow x}(x) = \sum_{x_1,...,x_n \setminus x} f(x, x_1,...,x_n) \prod_{y \in n(f) \setminus x} \mu_{y \rightarrow f}(y)$$
+
+Where:
+- $\mu_{x \rightarrow f}$ is a message from variable $x$ to factor $f$
+- $\mu_{f \rightarrow x}$ is a message from factor $f$ to variable $x$
+- $n(x)$ is the neighborhood of $x$
+- $n(f)$ is the neighborhood of $f$
+
+### 8.3 Theoretical Mapping to Cognitive Functions
+
+| Case | Cognitive Function | Neural Correlate | AI Parallel |
+|------|-------------------|------------------|-------------|
+| NOM | Executive control | Prefrontal cortex | Planning module |
+| ACC | Learning | Basal ganglia | Parameter optimization |
+| GEN | Production | Motor cortex | Generative models |
+| DAT | Reception | Sensory cortex | Input processing |
+| INS | Tool use | Parietal cortex | Action selection |
+| LOC | Contextualization | Hippocampus | Context models |
+| ABL | Source tracking | Superior temporal sulcus | Attribution systems |
+| VOC | Communication | Language areas | Interface modules |
+
+This comprehensive framework provides a rigorous mathematical foundation for CEREBRUM's integration with Active Inference principles, enabling principled case transformations and model interactions. 
