@@ -1,289 +1,312 @@
-# Korean Case System and CEREBRUM Mapping
+# Korean Language and CEREBRUM Mapping
 
-Korean (한국어, Hangugeo), often considered a language isolate (though sometimes linked to Altaic or Japonic languages), utilizes a system of particles or postpositions (조사, josa) similar to Japanese, rather than inflectional cases. This document examines how Korean particles correspond to CEREBRUM's computational case framework and how its system offers insights into topic/subject marking and honorifics.
+Korean, a language isolate (or possibly part of the Koreanic family), features an agglutinative case system marked by postpositional particles. This document explores how Korean's case system and grammatical structures relate to CEREBRUM's computational case framework.
 
-## 1. Overview of Korean Particle System
+## 1. Overview of Korean Language Structure
 
-Korean marks grammatical relationships using particles that attach to the end of nouns, pronouns, and other phrases. Key characteristics include:
+Korean is characterized by:
 
-- **Agglutinative Morphology**: Particles attach to stems without changing the stem form.
-- **Subject/Topic Distinction**: Separate particles for grammatical subject (-i/-ga) and topic/contrastive subject (-eun/-neun).
-- **Honorifics**: Particles and verb endings change based on social context and politeness levels.
-- **Case Stacking**: Multiple particles can sometimes attach to a single noun phrase.
+- **Agglutinative morphology** where grammatical functions are marked by particles attached to nouns
+- **SOV word order** (Subject-Object-Verb) as the canonical structure
+- **Topic-prominent discourse**, with distinct topic and subject markers
+- **Extensive honorific system** affecting nouns, verbs, and particles
+- **Vowel harmony** historically, with some modern remnants
+- **Absence of grammatical gender**
 
-Korean's particle system, especially its clear subject/topic distinction, provides CEREBRUM with models for differentiating focus, context, and core grammatical roles.
+Korean's clear case particle system and honorifics provide valuable insights for CEREBRUM's implementation.
 
-## 2. Korean Particle Inventory (Selection)
+## 2. Korean Case System
 
-### Case Particles (격조사, Gyeok-josa)
+Korean marks grammatical roles using postpositional particles attached to nominals:
 
-| Korean Particle | Romanization | Primary Function | Notes |
-|-----------------|--------------|------------------|-------|
-| **-이/-가** | -i/-ga | Subject marker | -i after consonant, -ga after vowel |
-| **-을/-를** | -eul/-reul | Object marker | -eul after consonant, -reul after vowel |
-| **-의** | -ui | Possessive marker (Genitive) | Pronounced [-e] |
-| **-에게/-한테** | -ege/-hante | Dative marker (recipient, animate) | -hante more colloquial |
-| **-께** | -kke | Dative marker (recipient, honorific) | Used for respected individuals |
-| **-에서** | -eseo | Locative (location of action); Ablative (source) | Disambiguated by context/verb |
-| **-(으)로** | -(eu)ro | Instrumental (means); Direction | -euro after consonant, -ro after vowel |
-| **-와/-과** | -wa/-gwa | Comitative ("and", "with") | -gwa after consonant, -wa after vowel |
-| **-보다** | -boda | Comparative marker ("than") | Often follows Nominative |
+| Case | Marker | Function | Example | Translation |
+|------|--------|----------|---------|-------------|
+| **Nominative** | -이/가 (-i/ga) | Marks the subject | **고양이가** 잔다 | "The cat sleeps" |
+| **Accusative** | -을/를 (-eul/reul) | Marks the direct object | **고양이를** 본다 | "See the cat" |
+| **Genitive** | -의 (-ui) | Marks possession | **고양이의** 밥 | "The cat's food" |
+| **Dative/Locative** | -에게 (-ege), -한테 (-hante), -께 (-kke); -에 (-e) | Marks recipient, location, time | **고양이에게** 밥을 준다 | "Give food to the cat" |
+| **Instrumental** | -(으)로 (-euro) | Marks instrument, means, direction | **손으로** 먹는다 | "Eat with hands" |
+| **Ablative** | -에서 (-eseo) | Marks origin, source, location of action | **집에서** 온다 | "Come from home" |
+| **Comitative** | -와/과 (-wa/gwa), -랑 (-rang), -하고 (-hago) | Marks accompaniment, coordination | **고양이와** 개 | "Cat and dog" |
+| **Vocative** | -아/야 (-a/ya) | Marks direct address | **고양이야!** | "Hey, cat!" |
 
-### Topic/Focus Particles (보조사, Bojo-josa - also called Special Particles)
+### Topic vs. Subject Marking
 
-| Korean Particle | Romanization | Primary Function | Notes |
-|-----------------|--------------|------------------|-------|
-| **-은/-는** | -eun/-neun | Topic marker; Contrast marker | -eun after consonant, -neun after vowel |
-| **-도** | -do | Additive ("also", "too") | Replaces subject/object particles |
-| **-만** | -man | Limitation ("only") | Often follows other particles |
-| **-까지** | -kkaji | Extent ("until", "up to", "even") | |
-| **-부터** | -buteo | Starting point ("from") | Often temporal or sequential |
+Korean distinguishes between the subject marker (-이/가) and the topic marker (-은/는, -eun/neun), which highlights information known or contrasted:
 
-*(Note: This is not an exhaustive list)*
+- **Subject Marking**: 누가 왔어요? (Who came?) - **철수가** 왔어요. (Cheolsu came.) - Focus on who did the action.
+- **Topic Marking**: **철수는** 학생이에요. (As for Cheolsu, he is a student.) - Establishing Cheolsu as the topic.
 
 ## 3. Mapping CEREBRUM Cases to Korean Particles
 
-### Direct Correspondences
+| CEREBRUM Case | Korean Equivalent | Correspondence Strength | Notes |
+|---------------|-------------------|-------------------------|-------|
+| **Nominative [NOM]** | -이/가 (-i/ga) | Strong | Dedicated subject marker |
+| **Accusative [ACC]** | -을/를 (-eul/reul) | Strong | Dedicated object marker |
+| **Dative [DAT]** | -에게/-한테/-께 (-ege/-hante/-kke) | Strong | Marks recipients, beneficiaries |
+| **Genitive [GEN]** | -의 (-ui) | Strong | Clear possessive marker |
+| **Instrumental [INS]** | -(으)로 (-euro) | Strong | Marks instruments, means |
+| **Ablative [ABL]** | -에서 (-eseo) | Strong | Marks source, origin |
+| **Locative [LOC]** | -에 (-e), -에서 (-eseo) | Strong | Marks static location (-e) or location of action (-eseo) |
+| **Vocative [VOC]** | -아/야 (-a/ya) | Strong | Clear vocative marker |
 
-| CEREBRUM Case | Korean Particle(s) | Correspondence Strength | Notes |
-|---------------|--------------------|-------------------------|-------|
-| **Nominative [NOM]** | -이/-가 (-i/-ga) | Strong | Marks the grammatical subject |
-| **Accusative [ACC]** | -을/-를 (-eul/-reul) | Strong | Marks the direct object |
-| **Dative [DAT]** | -에게/-한테 (-ege/-hante), -께 (-kke) | Strong | Marks the recipient; honorific distinction |
-| **Genitive [GEN]** | -의 (-ui) | Strong | Marks possession/relation |
-| **Instrumental [INS]** | -(으)로 (-(eu)ro) | Strong | Marks means/instrument |
-| **Ablative [ABL]** | -에서 (-eseo), -부터 (-buteo) | Moderate | -eseo marks source location; -buteo marks starting point |
-| **Locative [LOC]** | -에 (-e), -에서 (-eseo) | Moderate | -e marks static location/time; -eseo marks location of action |
-| **Vocative [VOC]** | -아/-야 (-a/-ya) | Moderate | Used for direct address, less formal |
+## 4. Special Features of Korean Relevant to CEREBRUM
 
-### Topic vs. Subject Distinction
+### Topic Marking
 
-Korean's distinction between the subject marker (-i/-ga) and the topic marker (-eun/-neun) is crucial and offers insights for CEREBRUM's context management:
+Korean's distinct topic marker (-은/는) suggests a mechanism for foregrounding specific entities or contexts in CEREBRUM:
 
-- **Subject (-i/-ga)**: Marks the grammatical subject, often introducing new information or identifying the specific actor.
-  - *Maps conceptually to CEREBRUM NOM, focusing on the agent role.*
-- **Topic (-eun/-neun)**: Marks the topic of the sentence (what is being talked about), often indicating known information or contrast.
-  - *Maps conceptually to a CEREBRUM mechanism for setting discourse context or focus, potentially interacting with LOC or a dedicated Topic role.*
+| Korean Pattern | Function | CEREBRUM Implementation |
+|----------------|----------|-------------------------|
+| Noun + -은/는 | Topic establishment/contrast | `context.set_topic(entity, contrastive=True/False)` |
 
-**Example:**
-- *haksaeng-i kongbuhanda* (student-SUBJ studies) - "A/The student studies." (Focus on the student)
-- *haksaeng-eun kongbuhanda* (student-TOP studies) - "As for the student, he/she studies." (Topic is the student)
-
-## 4. Technical Implementation: Subject vs. Topic Roles
-
-Korean's system suggests implementing distinct markers or states for grammatical subject versus discourse topic:
-
+Example:
 ```python
-class KoreanRoleManager:
-    """
-    Manages model roles inspired by Korean subject/topic marking.
-    """
-    
+class KoreanTopicSystem:
     def __init__(self):
-        self.grammatical_subject = None
-        self.discourse_topic = None
+        self.current_topic = None
         
-    def set_subject(self, model):
-        """ Mark a model as the grammatical subject (like Korean -i/-ga). """
-        # Conceptually maps to CEREBRUM NOM
-        self.grammatical_subject = model.transform_to_case(Case.NOM)
-        print(f"Set Subject (-i/-ga): {self.grammatical_subject}")
-        return self.grammatical_subject
+    def set_topic(self, entity, contrastive=False):
+        """Set the topic, optionally marking it as contrastive."""
+        self.current_topic = {
+            "entity": entity,
+            "contrastive": contrastive
+        }
+        print(f"Topic set: {entity} (Contrastive: {contrastive})")
+        return self
         
-    def set_topic(self, model):
-        """ Mark a model as the discourse topic (like Korean -eun/-neun). """
-        # This might involve a specific state or context marker in CEREBRUM,
-        # potentially interacting with LOC or a dedicated TOPIC case/state.
-        self.discourse_topic = model # Keep original case, mark as topic
-        self.discourse_topic.properties["discourse_role"] = "topic"
-        print(f"Set Topic (-eun/-neun): {self.discourse_topic}")
+    def comment_on_topic(self, comment_function):
+        """Apply a comment to the current topic."""
+        if self.current_topic is None:
+            raise ValueError("No topic set")
+        topic_info = self.current_topic
         
-        # If setting a topic, it often implies the grammatical subject is known
-        # or different, so we might clear the explicit subject marker here.
-        self.grammatical_subject = None 
-        return self.discourse_topic
-        
-    def get_actor(self):
-        """ Determine the primary actor based on subject/topic marking. """
-        # If both are set, the topic usually takes precedence in discourse flow,
-        # but the grammatical subject is the core agent.
-        if self.grammatical_subject:
-            return self.grammatical_subject
-        elif self.discourse_topic and self.discourse_topic.case == Case.NOM:
-            # Topic can sometimes implicitly be the subject
-            return self.discourse_topic
-        else:
-            # Need context or default rules (like Korean zero pronouns)
-            print("Warning: Actor ambiguous, relying on context...")
-            return None # Or retrieve from wider context
-            
-    def get_context_frame(self):
-        """ Get the current contextual frame (topic). """
-        return self.discourse_topic
+        print(f"Applying comment to topic: {topic_info['entity']}")
+        return comment_function(topic_info["entity"])
 
-# Example Usage
-student_model = AgentModel("student")
-book_model = ContentModel("book")
-role_manager = KoreanRoleManager()
+# Usage
+topic_manager = KoreanTopicSystem()
+data_model = Model("DataModel")
+prediction_model = Model("PredictionModel")
 
-# Scenario 1: Focus on student as actor
-actor1 = role_manager.set_subject(student_model) # haksaeng-i
-context1 = role_manager.get_context_frame()
-print(f"Actor: {actor1}, Context: {context1}")
+# "데이터 모델은 빠르다." (As for the data model, it is fast.)
+topic_manager.set_topic(data_model).comment_on_topic(lambda model: model.check_speed())
 
-# Scenario 2: Set student as topic
-role_manager.set_topic(student_model) # haksaeng-eun
-actor2 = role_manager.get_actor()
-context2 = role_manager.get_context_frame()
-print(f"Actor: {actor2}, Context: {context2}") # Actor might be None or inferred
-
-# Scenario 3: Topic is book, student is subject reading it
-role_manager.set_topic(book_model) # chaek-eun
-actor3 = role_manager.set_subject(student_model) # haksaeng-i
-context3 = role_manager.get_context_frame()
-print(f"Actor: {actor3}, Context: {context3}")
+# "예측 모델은 느리다." (As for the prediction model [contrast], it is slow.)
+topic_manager.set_topic(prediction_model, contrastive=True).comment_on_topic(lambda model: model.check_speed())
 ```
 
-## 5. Korean Honorifics and CEREBRUM Politeness Levels
+### Honorific System
 
-Korean grammar incorporates politeness and honorifics extensively, affecting particles (e.g., -ege vs. -kke for Dative), verb endings, and noun choices. This suggests a CEREBRUM mechanism for managing interaction styles:
+Korean's complex honorific system, involving different vocabulary, particles, and verb endings based on speaker-listener-referent relationships, suggests adaptive interfaces in CEREBRUM:
 
+| Honorific Type | Function | CEREBRUM Implementation |
+|----------------|----------|-------------------------|
+| Subject Honorification (-시-) | Shows respect to subject | `action.set_subject_honorific(True)` |
+| Addressee Honorification (speech levels) | Adjusts formality to listener | `interface.set_speech_level("formal/polite/casual")` |
+| Referent Honorification (special nouns/verbs) | Uses special terms for respected referents | `vocabulary.use_honorific_term(term, referent)` |
+
+Example:
 ```python
-class PolitenessLevel(Enum):
-    PLAIN = "plain" # (e.g., 반말 - banmal)
-    POLITE = "polite" # (e.g., 해요체 - haeyo-che)
-    FORMAL = "formal" # (e.g., 하십시오체 - hasipsio-che)
-    HONORIFIC = "honorific" # Addressee/Referent elevation
-
-class HonorificManager:
-    """
-    Manages politeness levels affecting transformations and interactions.
-    """
-    
-    def __init__(self, default_level=PolitenessLevel.POLITE):
-        self.level = default_level
+class KoreanHonorificSystem:
+    def __init__(self):
+        self.speech_levels = ["casual", "polite", "formal"]
+        self.current_level = "polite"
         
-    def set_level(self, level: PolitenessLevel):
-        self.level = level
-        
-    def get_dative_interface(self, model):
-        """ Returns the appropriate Dative interface based on politeness. """
-        base_dative = model.transform_to_case(Case.DAT)
-        
-        if self.level == PolitenessLevel.HONORIFIC:
-            # Use honorific form (like Korean -kke)
-            base_dative.properties["honorific_marker"] = "-kke"
-            print(f"Using Honorific Dative (-kke) for {model}")
+    def set_speech_level(self, level):
+        if level in self.speech_levels:
+            self.current_level = level
         else:
-            # Use standard form (like Korean -ege/-hante)
-            base_dative.properties["honorific_marker"] = "-ege"
-            print(f"Using Standard Dative (-ege) for {model}")
+            raise ValueError("Invalid speech level")
             
-        return base_dative
+    def format_message(self, message, subject_honorific=False, recipient_honorific=False):
+        formatted = message
         
-    def format_interaction(self, interaction_template):
-        """ Formats an interaction string based on politeness level. """
-        # Simplified example of changing output based on level
-        if self.level == PolitenessLevel.FORMAL:
-            return interaction_template.format(verb_ending="-seumnida.")
-        elif self.level == PolitenessLevel.POLITE:
-            return interaction_template.format(verb_ending="-eyo.")
-        else:
-            return interaction_template.format(verb_ending=".")
-
-# Example Usage
-teacher_model = AgentModel("teacher")
-student_model = AgentModel("student")
-
-honorific_mgr = HonorificManager()
-
-# Interaction with teacher (use honorifics)
-honorific_mgr.set_level(PolitenessLevel.HONORIFIC)
-teacher_dat = honorific_mgr.get_dative_interface(teacher_model)
-message_to_teacher = honorific_mgr.format_interaction(
-    f"Sent data to {teacher_dat}{{verb_ending}}"
-)
-print(message_to_teacher)
-
-# Interaction with student (use polite)
-honorific_mgr.set_level(PolitenessLevel.POLITE)
-student_dat = honorific_mgr.get_dative_interface(student_model)
-message_to_student = honorific_mgr.format_interaction(
-    f"Sent data to {student_dat}{{verb_ending}}"
-)
-print(message_to_student)
+        # Apply verb endings based on speech level
+        if self.current_level == "formal":
+            formatted += "-습니다/ㅂ니다" # Formal ending
+        elif self.current_level == "polite":
+            formatted += "-아요/어요" # Polite ending
+        else: # casual
+            formatted += "-아/어" # Casual ending
+            
+        # Apply subject honorific marker (-시-)
+        if subject_honorific:
+            # Simplified - would involve complex conjugation logic
+            formatted = formatted.replace("verb", "verb-시-")
+            
+        # Apply honorific particles (e.g., -께서 for subject)
+        if recipient_honorific:
+            # Simplified example
+            formatted = formatted.replace("에게", "께") # Dative honorific
+            
+        return formatted
 ```
 
-## 6. Example Sentences with Particle Mappings
+## 5. Example Sentences with Case Mappings
 
 ### Korean Examples with CEREBRUM Parallels
 
-| Korean Sentence (Romanized) | Translation | Particle Usage | CEREBRUM Parallel |
-|-----------------------------|-------------|----------------|-------------------|
-| **Haksaeng-i** gongbuhanda. | "The student studies." | Haksaeng-i = Subject (-i/-ga) | student[NOM] studies |
-| **Haksaeng-eun** gongbuhanda. | "As for the student, he studies." | Haksaeng-eun = Topic (-eun/-neun) | student (Topic) studies |
-| Nae-ga **chaek-eul** ilkneunda. | "I read the book." | chaek-eul = Object (-eul/-reul) | I[NOM] read book[ACC] |
-| **Seonsaengnim-kke** seonmul-eul deuryeotda. | "I gave a gift to the teacher." | Seonsaengnim-kke = Dative (Honorific) | I[NOM] gave gift[ACC] to teacher[DAT, honorific=True] |
-| **Chingu-hante** pyeonji-reul bonaetda. | "I sent a letter to the friend." | Chingu-hante = Dative (Colloquial) | I[NOM] sent letter[ACC] to friend[DAT] |
-| **Na-ui** chaek ida. | "It is my book." | Na-ui = Genitive (-ui) | book is of I[GEN] |
-| **Yeonpil-lo** sseotda. | "I wrote with a pencil." | Yeonpil-lo = Instrumental (-(eu)ro) | I[NOM] wrote with pencil[INS] |
-| **Jib-eseo** nawatda. | "I came from home." | Jib-eseo = Ablative (-eseo) | I[NOM] came from home[ABL] |
-| **Hakgyo-e** ganda. | "I go to school." | Hakgyo-e = Locative/Directional (-e) | I[NOM] go to school[LOC/DAT] |
-| **Hakgyo-eseo** gongbuhanda. | "I study at school." | Hakgyo-eseo = Locative (Action) | I[NOM] study at school[LOC] |
+| Korean Sentence | Morpheme Analysis | Translation | Functional Case | CEREBRUM Parallel |
+|-----------------|-------------------|-------------|----------------|-------------------|
+| **모델이** 작동한다 | **모델**-이 = model-NOM + 작동한다 = works | "The model works." | Nominative -이/가 | Model[NOM].work() |
+| 연구원이 **모델을** 개선한다 | 연구원-이 = researcher-NOM + **모델**-을 = model-ACC + 개선한다 = improves | "The researcher improves the model." | Accusative -을/를 | Researcher[NOM].improve(model[ACC]) |
+| 시스템이 **모델에게** 데이터를 보낸다 | 시스템-이 = system-NOM + **모델**-에게 = model-DAT + 데이터-를 = data-ACC + 보낸다 = sends | "The system sends data to the model." | Dative -에게 | System[NOM].send(data[ACC], model[DAT]) |
+| **모델의** 결과가 정확하다 | **모델**-의 = model-GEN + 결과-가 = result-NOM + 정확하다 = is accurate | "The model's results are accurate." | Genitive -의 | Model[GEN].results.are_accurate() |
+| **모델로** 데이터를 분석한다 | **모델**-로 = model-INS + 데이터-를 = data-ACC + 분석한다 = analyze | "Analyze data with the model." | Instrumental -(으)로 | Analyze(data[ACC], model[INS]) |
+| **모델에서** 결과가 나온다 | **모델**-에서 = model-ABL + 결과-가 = result-NOM + 나온다 = comes out | "Results come from the model." | Ablative -에서 | Results[NOM].come_from(model[ABL]) |
+| **모델에** 데이터가 있다 | **모델**-에 = model-LOC + 데이터-가 = data-NOM + 있다 = exists | "Data exists in the model." | Locative -에 | Data[NOM].exists_in(model[LOC]) |
+| **모델아**, 작동해! | **모델**-아 = model-VOC + 작동해 = work! | "Model, work!" | Vocative -아/야 | Call(model[VOC], "work!") |
+
+### Computational Implementation Examples
+
+```python
+# Nominative marker -이/가
+neural_network[NOM].train(dataset)
+
+# Accusative marker -을/를
+user.configure(neural_network[ACC])
+
+# Dative marker -에게/-한테
+neural_network[DAT].receive_input(sensor_data)
+
+# Genitive marker -의
+performance_metrics = neural_network[GEN].metrics
+
+# Instrumental marker -(으)로
+predictions = generate_forecast(weather_data, neural_network[INS])
+
+# Ablative marker -에서
+historical_patterns = extract_from(neural_network[ABL])
+
+# Locative marker -에
+store_parameters(config_data, neural_network[LOC])
+
+# Vocative marker -아/야
+neural_network[VOC].respond_to_query("status?")
+
+# Topic marker -은/는
+with context.topic(neural_network): # Sets neural_network as the topic
+    evaluate_accuracy() # Action relates to the topic
+```
+
+## 6. Korean Speech Levels and CEREBRUM Interface Adaptation
+
+Korean's distinct speech levels (formal, polite, casual) offer a robust model for adaptive interfaces:
+
+```python
+class KoreanSpeechLevelInterface:
+    """Adapt interface messages based on Korean speech levels."""
+    
+    def __init__(self):
+        self.levels = {
+            "formal": {
+                "request_ending": "-주시겠습니까?", # formal request
+                "response_ending": "-습니다/ㅂ니다.", # formal statement
+                "pronoun_user": "고객님", # formal 'customer'
+                "pronoun_system": "저희 시스템"
+            },
+            "polite": {
+                "request_ending": "-주세요.", # polite request
+                "response_ending": "-아요/어요.", # polite statement
+                "pronoun_user": "당신", # polite 'you'
+                "pronoun_system": "저"
+            },
+            "casual": {
+                "request_ending": "-줘.", # casual request
+                "response_ending": "-아/어.", # casual statement
+                "pronoun_user": "너", # casual 'you'
+                "pronoun_system": "나"
+            }
+        }
+        self.current_level = "polite"
+
+    def set_level(self, level):
+        if level in self.levels:
+            self.current_level = level
+        else:
+            print("Warning: Invalid speech level specified.")
+            
+    def format_request(self, verb_stem):
+        """Format a request in the current speech level."""
+        style = self.levels[self.current_level]
+        # Simplified conjugation logic
+        return f"{verb_stem}{style['request_ending']}"
+    
+    def format_response(self, verb_stem):
+        """Format a response statement in the current speech level."""
+        style = self.levels[self.current_level]
+        # Simplified conjugation logic
+        return f"{verb_stem}{style['response_ending']}"
+        
+    def get_pronoun(self, type):
+        """Get appropriate pronoun for the current speech level."""
+        style = self.levels[self.current_level]
+        if type == "user":
+            return style["pronoun_user"]
+        elif type == "system":
+            return style["pronoun_system"]
+        return type
+```
 
 ## 7. Extension Opportunities Inspired by Korean
 
-1.  **Explicit Topic Management**: Implement a distinct mechanism for managing the discourse topic (-eun/-neun) separate from the grammatical subject (-i/-ga), influencing context and focus.
-2.  **Honorific/Politeness System**: Integrate politeness levels that modify transformations (e.g., selecting honorific Dative -kke) and interaction styles.
-3.  **Contextual Location Marking**: Differentiate between static location (-e) and location of action (-eseo) within the CEREBRUM LOC case or related mechanisms.
-4.  **Particle Stacking Model**: Allow for sequences of functional markers (similar to stacked particles like -eseo-neun) to represent complex relationships.
-5.  **Zero Pronoun Handling**: Develop robust context-based resolution for omitted arguments, mirroring Korean's frequent pronoun dropping.
+### Integrated Topic/Subject System
 
-## 8. Deeper Integration with CEREBRUM Concepts
+Korean's distinction between topic and subject markers could inspire a system where CEREBRUM entities can be marked for both their grammatical role (subject) and discourse role (topic/focus):
 
-Korean grammar, sharing features with Japanese but with unique aspects, provides further valuable perspectives for CEREBRUM:
+```python
+class TopicSubjectMarking:
+    def mark_entity(self, entity, grammatical_role, discourse_role=None):
+        """Mark an entity with both grammatical and discourse roles."""
+        entity.grammatical_role = grammatical_role # e.g., NOM, ACC
+        entity.discourse_role = discourse_role # e.g., TOPIC, FOCUS, CONTRAST
+        return entity
+    
+    def process_sentence(self, components):
+        """Process sentence components considering both role types."""
+        # Prioritize based on discourse role or grammatical role
+        topic = next((e for e in components if e.discourse_role == "TOPIC"), None)
+        subject = next((e for e in components if e.grammatical_role == "NOM"), None)
+        # ... processing logic ...
+```
 
-**a. Declinability via External Markers (Particles):**
-Like Japanese, Korean uses external **particles** (josa: `-i/-ga`, `-eul/-reul`, `-ege`, `-eseo`, etc.) attached to invariant nouns/stems to mark grammatical roles. This reinforces the alternative model of **declinability** where functional roles are assigned via associated markers rather than internal model state changes. CEREBRUM can implement cases either through internal state transformation (inflection/agglutination model) or via external relational markers (particle model), or potentially a hybrid.
+### Granular Locative Cases
 
-**b. Information Structure (Topic `-eun/-neun` vs. Subject `-i/-ga`):**
-The explicit, grammatically distinct marking of **topic** (`-eun/-neun`) versus **subject** (`-i/-ga`) is even more central in Korean than in Japanese. This provides a strong model for CEREBRUM's information flow and context management:
-- **Active Inference:** The topic (`-eun/-neun`) robustly sets the context or prior expectation. Processing a topic-marked model means activating its context with high precision. The subject (`-i/-ga`), often marking new or specific information, drives the primary action or update within that context. A key prediction for the system is identifying which participant holds which role.
-- **Discourse Management:** The `-eun/-neun` marker clearly signals what the current processing scope or statement is about, essential for maintaining coherence in complex model interactions.
+Korean distinguishes between static location (-에) and location of action (-에서). CEREBRUM's Locative case could be parameterized:
 
-**c. Category Theory and Particles as Morphisms:**
-Similar to Japanese, Korean particles signal the **type of morphism** connecting models.
-- **Objects:** CEREBRUM models.
-- **Morphisms:** Relationships signaled by particles. `-ege` signals a morphism to a recipient ([DAT]), `-eseo` signals a morphism from a location ([ABL]) or within a location ([LOC]), `-(eu)ro` signals an instrumental morphism ([INS]). The particle defines the functional nature of the link established by the verb/action.
+```python
+# Static location (like Korean -에)
+context = model[LOC, {"type": "static"}].get_context()
 
-**d. Morphosyntactic Alignment:**
-Korean follows **Nominative-Accusative alignment** (`-i/-ga` subject vs. `-eul/-reul` object), fitting CEREBRUM's baseline (Figure 9, `CEREBRUM.md`). The topic marker adds a layer of pragmatic structuring.
+# Location of action (like Korean -에서)
+result = model[LOC, {"type": "dynamic"}].perform_action()
+```
 
-**e. Locative Distinction (`-e` vs. `-eseo`):**
-Korean clearly distinguishes static location/time/direction (`-e`) from the location where an action occurs (`-eseo`). This provides a direct linguistic basis for refining CEREBRUM's [LOC] case, potentially splitting it into `[LOC-STATIC]` and `[LOC-ACTION]` or adding a parameter to distinguish these functions.
+### Honorific Parameterization
 
-**f. Honorifics and Social Context:**
-The grammatical encoding of politeness and honorifics (e.g., `-ege` vs. `-kke` for Dative) is highly developed. This suggests CEREBRUM could incorporate **social context** or **formality level** as a parameter influencing case transformations or interaction protocols. An interaction with a high-priority or sensitive model might trigger the use of "honorific" case forms or communication protocols, managed by a system like the `HonorificManager` (Section 5).
+CEREBRUM operations could include parameters for honorific level adjustments:
 
-**g. Speculative Cases (`cerebrum_beyond_cases.md`):**
-Korean particles also suggest potential emergent CEREBRUM functions:
-- **`-buteo` (from, starting point):** A specific type of **Ablative [ABL-START]**.
-- **`-kkaji` (until, up to, even):** Maps to **Terminative [TERM]** or **Inclusive** markers.
-- **`-man` (only):** An **Exclusive** or **Limitative** function/marker.
-- **`-do` (also, too):** An **Additive [ADD]** or **Inclusive** marker.
-- **`-wa/-gwa` (and, with):** **Comitative [COM]** or **Conjunctive**.
+```python
+# Request with honorifics towards the recipient
+model[DAT].send_request(query, honorific_level="high")
 
-Korean offers a compelling particle-based system emphasizing the topic/subject distinction and incorporating social context through honorifics. It reinforces the idea of external relational marking and provides specific linguistic distinctions (e.g., locative types) that can inform the design of more nuanced CEREBRUM cases or parameters.
+# Action where the agent is honored
+model[NOM].perform_honored_action(task, subject_honorific=True)
+```
 
-## 9. Conclusion (Renumbered from 8)
+## 8. Conclusion
 
-Korean's particle system, similar to Japanese, offers CEREBRUM valuable insights into marking grammatical functions without inflection. Its most salient contribution is the clear grammatical distinction between subject (-i/-ga) and topic (-eun/-neun), providing a linguistic model for separating core agency (NOM) from discourse context/focus (potentially LOC or a dedicated Topic state).
+Korean provides valuable insights for CEREBRUM through:
 
-Furthermore, the pervasive honorific system in Korean grammar suggests integrating politeness or formality levels into CEREBRUM interactions, affecting how models are addressed (e.g., Dative variants) and how communication is framed.
+1.  **Clear Case Marking**: Its agglutinative particles offer a straightforward model for explicit case representation.
+2.  **Topic vs. Subject Distinction**: Highlights the need to manage both grammatical roles and discourse prominence.
+3.  **Elaborate Honorifics**: Provides a rich framework for context-sensitive interface adaptation based on social relationships.
+4.  **Locative Nuance**: Shows how core cases like Locative can be refined with parameters (static vs. dynamic location).
 
-By incorporating these Korean-inspired features, CEREBRUM can enhance its ability to manage discourse context, differentiate actor focus, and adapt interaction styles based on social or operational parameters.
+The Korean system reinforces the idea that grammatical relationships can be clearly marked using particles, aligning well with CEREBRUM's case-bearing entity concept. Its handling of topic and honorifics suggests pathways for making CEREBRUM models more context-aware and socially intelligent.
 
-## 10. References (Renumbered from 9)
+## 9. References
 
 1.  Sohn, Ho-Min. The Korean Language. Cambridge University Press, 1999.
 2.  Lee, Iksop, and S. Robert Ramsey. The Korean Language. State University of New York Press, 2000.

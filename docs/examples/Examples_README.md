@@ -4,23 +4,24 @@ This directory contains practical examples, guides, and templates for applying t
 
 ## Overview of Examples
 
-| File | Type | Description |
-|------|------|-------------|
-| [01_NLP_Pipeline_Playbook.md](01_NLP_Pipeline_Playbook.md) | Playbook | Demonstrates how to apply CEREBRUM to natural language processing pipelines, showing how NLP components like tokenizers, embedders, and classifiers can be treated as case-bearing entities |
-| [02_ML_Model_Composition_Guide.md](02_ML_Model_Composition_Guide.md) | Guide | Provides guidelines for composing machine learning models using CEREBRUM, with patterns for pipeline, ensemble, and hierarchical compositions |
-| [03_CEREBRUM_Interpretability_Procedure.md](03_CEREBRUM_Interpretability_Procedure.md) | Procedure | Outlines a step-by-step procedure for enhancing model interpretability using case-based model decomposition and analysis |
-| [04_CEREBRUM_Agent_Design_Playbook.md](04_CEREBRUM_Agent_Design_Playbook.md) | Playbook | Details how to design AI agents with CEREBRUM, treating agent components as case-bearing entities with explicit workflows |
-| [05_CEREBRUM_Documentation_Template.md](05_CEREBRUM_Documentation_Template.md) | Template | Provides a comprehensive template for documenting CEREBRUM-based projects, covering all aspects from model ecosystems to deployment considerations |
+| File | Type | Description | Technical Focus |
+|------|------|-------------|-----------------|
+| [01_NLP_Pipeline_Playbook.md](01_NLP_Pipeline_Playbook.md) | Playbook | Demonstrates how to apply CEREBRUM to natural language processing pipelines, showing how NLP components like tokenizers, embedders, and classifiers can be treated as case-bearing entities | Pipeline orchestration, component interfaces, data flow management |
+| [02_ML_Model_Composition_Guide.md](02_ML_Model_Composition_Guide.md) | Guide | Provides guidelines for composing machine learning models using CEREBRUM, with patterns for pipeline, ensemble, and hierarchical compositions | Composition patterns (ensembling, stacking), model interaction, performance optimization |
+| [03_CEREBRUM_Interpretability_Procedure.md](03_CEREBRUM_Interpretability_Procedure.md) | Procedure | Outlines a step-by-step procedure for enhancing model interpretability using case-based model decomposition and analysis | Interpretability techniques (e.g., SHAP, LIME integration), case-based explanation generation |
+| [04_CEREBRUM_Agent_Design_Playbook.md](04_CEREBRUM_Agent_Design_Playbook.md) | Playbook | Details how to design AI agents with CEREBRUM, treating agent components as case-bearing entities with explicit workflows | Agent architectures (e.g., ReAct), state management, tool integration, decision logic |
+| [05_CEREBRUM_Documentation_Template.md](05_CEREBRUM_Documentation_Template.md) | Template | Provides a comprehensive template for documenting CEREBRUM-based projects, covering all aspects from model ecosystems to deployment considerations | Structuring technical documentation, defining model specifications, deployment plans |
 
 ## Using These Examples
 
-These examples are designed to demonstrate the practical application of CEREBRUM's case-based approach to different AI and machine learning contexts. Each example includes:
+These examples are designed to demonstrate the practical application of CEREBRUM's case-based approach to different AI and machine learning contexts. They illustrate how to structure complex systems, manage data flows, and reason about component interactions using the case grammar. Each example includes:
 
-1. **Conceptual Overview**: How CEREBRUM's case system applies to the specific domain
-2. **Component Mappings**: How domain-specific elements map to linguistic cases
-3. **Workflow Definitions**: How case transformations enable structured workflows
-4. **Implementation Patterns**: Practical code examples showing CEREBRUM in action
-5. **Best Practices**: Guidelines for effective use of the framework
+1. **Conceptual Overview**: How CEREBRUM's case system provides a semantic framework for the specific domain (e.g., NLP, Agent Design).
+2. **Component Mappings**: Concrete examples of mapping domain-specific elements (e.g., models, data stores, APIs) to linguistic cases, defining their roles and relationships.
+3. **Workflow Definitions**: Step-by-step descriptions of how case transformations model system processes, data pipelines, or agent decision loops.
+4. **Implementation Patterns**: Pseudo-code or descriptive examples of how CEREBRUM concepts translate into code structure, API design, or configuration, often referencing specific libraries or architectural patterns (e.g., microservices, dataflow graphs).
+5. **Technical Considerations**: Discussion of relevant technical aspects like performance optimization, error handling, scalability, and integration with existing tools or platforms.
+6. **Best Practices**: Guidelines for applying the CEREBRUM framework effectively within the specific technical context.
 
 ## Case Roles in CEREBRUM
 
