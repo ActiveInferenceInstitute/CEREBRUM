@@ -9,57 +9,36 @@ from .types import (
     Phoneme,
     Morpheme,
     LexicalItem,
-    SyntacticConstituent,
+    SyntacticLabel,
     SemanticConcept,
-    PragmaticContext,
-    DiscourseUnit,
-    LinguisticStructure,
-    SyntacticTree as SyntacticTreeType, # Avoid name clash with structure class
-    SemanticGraph as SemanticGraphType, # Avoid name clash with structure class
-    Verb
+    PragmaticFeature,
+    DiscourseRelation,
+    LinguisticSequence,
 )
 from .structures import (
-    AbstractStructure,
     TreeNode,
     Tree,
-    SyntacticTree,
     GraphNode,
     GraphEdge,
     Graph,
-    SemanticGraph,
-    FeatureStructure,
 )
-from .categories import (
-    Morphism,
-    Category,
-    Functor
-) 
 
 __all__ = [
     # Types
     'Phoneme',
     'Morpheme',
     'LexicalItem',
-    'SyntacticConstituent',
+    'SyntacticLabel',
     'SemanticConcept',
-    'PragmaticContext',
-    'DiscourseUnit',
-    'LinguisticStructure',
-    'SyntacticTreeType',
-    'SemanticGraphType',
-    'Verb',
+    'PragmaticFeature',
+    'DiscourseRelation',
+    'LinguisticSequence',
     # Structures
-    'AbstractStructure',
     'TreeNode',
     'Tree',
-    'SyntacticTree',
     'GraphNode',
     'GraphEdge',
     'Graph',
-    'SemanticGraph',
-    'FeatureStructure',
-    # Categories (Conceptual)
-    'Morphism',
-    'Category',
-    'Functor',
 ] 
+
+# This file makes the directory a Python package 
