@@ -13,7 +13,7 @@ CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unifie
 - **Version:** 1.0
 - **Date:** April 7, 2025
 - **DOI:** [10.5281/zenodo.15170908](https://doi.org/10.5281/zenodo.15170908)
-- **Zenodo Record:** [https://zenodo.org/records/15216751](https://zenodo.org/records/15216751)
+- **Zenodo Record:** [https://zenodo.org/records/15231156](https://zenodo.org/records/15231156)
 - **Institution:** Active Inference Institute
 
 ## Overview

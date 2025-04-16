@@ -9,7 +9,7 @@ email: "daniel@activeinference.institute"
 orcid: "0000-0001-6232-9096"
 license: "CC BY-NC-ND 4.0"
 doi: "10.5281/zenodo.15170907"
-url: "https://zenodo.org/records/15173983"
+url: "https://zenodo.org/records/15231156"
 abstract-title: "Abstract"
 abstract: "This paper introduces the Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling (CEREBRUM). CEREBRUM integrates linguistic case systems with cognitive scientific principles to systematically describe, design, and deploy generative models in an expressive fashion. By treating models as case-bearing entities similar to declinable nouns in morphologically rich languages, CEREBRUM enables models to play multiple contextual roles through principled transformations. This approach establishes a formal linguistic-type calculus for cognitive model use, relationships, and transformations. The framework employs structures from category theory and techniques related to the Free Energy Principle to formalize model relationships across contexts. CEREBRUM addresses growing complexity in computational and cognitive modeling systems by providing structured representations of model ecosystems that align with lexical ergonomics, scientific principles, and operational processes."
 ---
