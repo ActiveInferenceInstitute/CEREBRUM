@@ -8,19 +8,24 @@ between syntax and semantics, or performing morphological analysis.
 
 from typing import TypeVar, Any, Dict
 
-# Import structures and types (adjust paths if needed)
-from ..formalisms.structures import SyntacticTree, SemanticGraph, AbstractStructure, TreeNode, SyntacticTreeNode
-from ..formalisms.types import PragmaticContext, SyntacticConstituent
+# Import structures and types (adjust paths as needed)
+# Use generic Tree/Graph for now, specific types can be defined later
+from ..formalisms.structures import Tree, Graph, TreeNode 
+# Import existing types or use basic types as placeholders
+from ..formalisms.types import SyntacticLabel, SemanticConcept, PragmaticFeature 
+# Define type alias for context for clarity, can be refined later
+PragmaticContext = Dict[str, Any] 
 
-# Generic Type Variables
-InputStruct = TypeVar('InputStruct', bound=AbstractStructure)
-OutputStruct = TypeVar('OutputStruct', bound=AbstractStructure)
+# Generic Type Variables (Remove bounds for now)
+InputStruct = TypeVar('InputStruct') 
+OutputStruct = TypeVar('OutputStruct')
 
 # --- Transformation Functions --- 
 
-def parse_syntax_to_semantics(tree: SyntacticTree, context: PragmaticContext) -> SemanticGraph:
+def parse_syntax_to_semantics(tree: Tree[SyntacticLabel], context: PragmaticContext) -> Graph[SemanticConcept, str]:
     """
-    Transforms a syntactic tree into a semantic graph, potentially using context.
+    Transforms a syntactic tree (Tree[SyntacticLabel]) into a semantic graph 
+    (Graph[SemanticConcept, str]), potentially using context.
 
     Args:
         tree: The input syntactic tree.
@@ -36,18 +41,19 @@ def parse_syntax_to_semantics(tree: SyntacticTree, context: PragmaticContext) ->
     # mapping syntactic constituents and relations to semantic concepts and roles.
     # It might involve rule-based systems, compositional semantics calculations,
     # or calls to a backend model.
-    print(f"Placeholder: Transforming Syntax Tree (root: {tree.root.content if tree.root else 'None'}) to Semantic Graph.")
+    print(f"Placeholder: Transforming Syntax Tree (root data: {tree.root.data if tree.root else 'None'}) to Semantic Graph.")
     print(f"Context: {context}")
     # Dummy graph creation - return an empty graph
-    graph = SemanticGraph() 
+    graph = Graph[SemanticConcept, str]() # Use generic Graph with specific types
     print("Returning dummy empty SemanticGraph.")
     # Populate graph based on tree and context (complex logic here)
     #raise NotImplementedError("Syntax-to-Semantics transformation not implemented.")
     return graph
 
-def generate_syntax_from_semantics(graph: SemanticGraph, target_language_params: Dict[str, Any]) -> SyntacticTree:
+def generate_syntax_from_semantics(graph: Graph[SemanticConcept, str], target_language_params: Dict[str, Any]) -> Tree[SyntacticLabel]:
     """
-    Generates a syntactic tree from a semantic graph based on target language parameters.
+    Generates a syntactic tree (Tree[SyntacticLabel]) from a semantic graph 
+    (Graph[SemanticConcept, str]) based on target language parameters.
 
     Args:
         graph: The input semantic graph.
@@ -66,10 +72,9 @@ def generate_syntax_from_semantics(graph: SemanticGraph, target_language_params:
     print(f"Placeholder: Generating Syntactic Tree from Semantic Graph (nodes: {len(graph.nodes)})." )
     print(f"Target Language Params: {target_language_params}")
     # Dummy tree creation - return a minimal tree
-    # Need a placeholder SyntacticConstituent type for the node content
-    dummy_constituent = SyntacticConstituent("ROOT_PLACEHOLDER") 
-    root_node = SyntacticTreeNode(content=dummy_constituent, children=[]) 
-    tree = SyntacticTree(root=root_node)
+    dummy_label = SyntacticLabel("ROOT_PLACEHOLDER") 
+    root_node = TreeNode[SyntacticLabel](data=dummy_label, children=[]) 
+    tree = Tree[SyntacticLabel](root=root_node) # Use generic Tree
     print("Returning dummy minimal SyntacticTree.")
     # Populate tree based on graph and params (complex logic here)
     #raise NotImplementedError("Semantics-to-Syntax generation not implemented.")
@@ -81,7 +86,7 @@ def pragmatic_enrichment(structure: InputStruct, context: PragmaticContext) -> I
     This might involve resolving references, adding implicatures, etc.
 
     Args:
-        structure: The linguistic structure to enrich (e.g., SemanticGraph, SyntacticTree).
+        structure: The linguistic structure to enrich (e.g., Graph, Tree).
         context: The pragmatic context.
 
     Returns:

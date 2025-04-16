@@ -7,7 +7,7 @@ linguistic information, based on the types defined in `types.py`.
 (Specification Section 2.2)
 """
 
-from typing import TypeVar, Generic, List, Dict, Optional, Any
+from typing import TypeVar, Generic, List, Dict, Optional, Any, Type
 from .types import SyntacticLabel, SemanticConcept # Example imports, adjust as needed
 
 # --- Type Variables --- 
@@ -15,6 +15,86 @@ NodeType = TypeVar('NodeType')
 EdgeType = TypeVar('EdgeType')
 NodeData = TypeVar('NodeData')
 EdgeData = TypeVar('EdgeData')
+K = TypeVar('K') # Key type for feature structures
+V = TypeVar('V') # Value type for feature structures
+
+# --- Feature Structure ---
+
+class FeatureStructure(Dict[K, V]):
+    """
+    Represents a feature structure (attribute-value matrix).
+
+    Inherits from dict for basic functionality but provides a dedicated
+    recursive unification method.
+    """
+    def __repr__(self):
+        # Provide a more specific representation
+        return f"FS({super().__repr__()})"
+
+    def unify(self, other: 'FeatureStructure[K, V]') -> Optional['FeatureStructure[K, V]']:
+        """
+        Attempts to unify this feature structure with another.
+
+        Performs recursive unification. Returns a new unified FeatureStructure
+        or None if unification fails due to conflicting values. Handles nested
+        FeatureStructures.
+
+        Args:
+            other: The other FeatureStructure to unify with.
+
+        Returns:
+            A new unified FeatureStructure if successful, otherwise None.
+        """
+        if not isinstance(other, FeatureStructure):
+            # Cannot unify FeatureStructure with a non-FeatureStructure dict/value directly
+            # using this method. The top-level calculus.unify handles basic type checks.
+            return None
+
+        # Start with a copy of the first structure
+        unified_data = self.copy() # Get underlying dict data
+        unified_fs = FeatureStructure(unified_data) # Create new FS
+
+        for key, value2 in other.items():
+            if key not in unified_fs:
+                # Key only exists in other, add it
+                unified_fs[key] = value2
+            else:
+                # Key exists in both, attempt to unify values
+                value1 = unified_fs[key]
+
+                # Decide how to unify based on types
+                # 1. Both are FeatureStructures
+                if isinstance(value1, FeatureStructure) and isinstance(value2, FeatureStructure):
+                    unified_value = value1.unify(value2)
+                # 2. Both are PLAIN dicts
+                elif type(value1) is dict and type(value2) is dict:
+                    # Wrap plain dicts to use FS unify logic
+                    temp_fs1 = FeatureStructure(value1) # Wrap plain dicts to use FS unify
+                    temp_fs2 = FeatureStructure(value2)
+                    unified_sub_fs = temp_fs1.unify(temp_fs2)
+                    # Unwrap back to dict if successful
+                    unified_value = dict(unified_sub_fs) if unified_sub_fs is not None else None
+                # 3. Same type AND equal (handles primitives, lists, etc.)
+                elif type(value1) is type(value2) and value1 == value2:
+                    unified_value = value1 # Success, no change needed
+                # 4. Everything else is a conflict
+                else:
+                    # This covers:
+                    # - FS vs dict
+                    # - FS vs primitive
+                    # - dict vs primitive
+                    # - Mismatched primitives (e.g., int vs str)
+                    # - Primitives with different values
+                    # print(f"Unification conflict at key '{key}': {value1!r} vs {value2!r}")
+                    unified_value = None # Conflict!
+
+                if unified_value is None:
+                    # Unification failed at this key
+                    return None
+                else:
+                    unified_fs[key] = unified_value
+
+        return unified_fs
 
 # --- Tree Structure --- 
 

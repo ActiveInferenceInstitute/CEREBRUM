@@ -10,23 +10,32 @@ from typing import TypeVar, Generic, Any, Dict, Optional
 import numpy as np # Example for numerical operations
 
 # Import structures and types (adjust paths if needed)
-from ..formalisms.structures import AbstractStructure, SemanticGraph
-from ..formalisms.types import PragmaticContext, SemanticConcept
+# Use generic types like Tree, Graph. Define specific aliases if needed.
+from ..formalisms.structures import Tree, Graph 
+from ..formalisms.types import SemanticConcept # PragmaticContext not defined here
+# Define type alias for context for clarity, can be refined later
+PragmaticContext = Dict[str, Any]
+
+# Define type aliases for clarity in function signatures
+# Placeholder: A more specific type might be needed later
+SyntaxStructure = Any # Could be Tree[SyntacticLabel] or other representation
+MeaningGraph = Graph[SemanticConcept, str] # Example semantic graph type
 
 # Generic Type Variables
 BeliefState = TypeVar('BeliefState') # Represents the agent's belief state
-Observation = TypeVar('Observation', bound=AbstractStructure) # Linguistic input
+# Observation = TypeVar('Observation', bound=AbstractStructure) # Remove bound
+Observation = TypeVar('Observation') # Linguistic input (can be any structure)
 Query = TypeVar('Query') # Question about the belief state
 Answer = TypeVar('Answer') # Answer to the query
 
-# Type variables
+# Type variables (some might be redundant with above, kept for now)
 BeliefStateType = TypeVar('BeliefStateType')
 ObservationType = TypeVar('ObservationType')
 StructureType = TypeVar('StructureType')
-ContextType = TypeVar('ContextType')
-MeaningType = TypeVar('MeaningType')
-ReferenceType = TypeVar('ReferenceType')
-DiscourseModelType = TypeVar('DiscourseModelType')
+ContextType = TypeVar('ContextType') # Often PragmaticContext
+MeaningType = TypeVar('MeaningType') # Often MeaningGraph
+ReferenceType = TypeVar('ReferenceType') # e.g., str
+DiscourseModelType = TypeVar('DiscourseModelType') # e.g., a custom class or dict
 
 # --- Probabilistic Data Structures (Placeholders) ---
 
@@ -42,7 +51,8 @@ class ProbDistribution(Generic[BeliefState]):
             for state in self._dist:
                 self._dist[state] /= total_prob
         else:
-            # Handle uniform distribution over states or raise error
+            # Handle uniform distribution over states or raise error?
+            # For now, leave as potentially empty or all zero
             pass 
 
     def get_prob(self, state: BeliefState) -> float:
@@ -52,19 +62,32 @@ class ProbDistribution(Generic[BeliefState]):
         """Sample a state according to the distribution."""
         states = list(self._dist.keys())
         probs = list(self._dist.values())
-        if not states:
-             raise ValueError("Cannot sample from empty distribution")
+        if not states or sum(probs) == 0: # Check for empty or all-zero dist
+             raise ValueError("Cannot sample from empty or zero-probability distribution")
+        # Ensure probabilities sum to 1 for numpy.random.choice
+        if not np.isclose(sum(probs), 1.0):
+            # Attempt normalization if possible
+            total = sum(probs)
+            if total > 0:
+                probs = [p / total for p in probs]
+            else: # Cannot normalize if sum is zero
+                raise ValueError("Cannot sample - probabilities do not sum to a positive value.")
+                
         return np.random.choice(states, p=probs)
     
     def get_map_state(self) -> Optional[BeliefState]:
         """Return the state with the maximum a posteriori probability."""
         if not self._dist:
             return None
-        return max(self._dist, key=self._dist.get)
+        # Filter out states with zero probability before finding max
+        valid_states = {k: v for k, v in self._dist.items() if v > 0}
+        if not valid_states:
+            return None # Or handle case where all probabilities are zero
+        return max(valid_states, key=valid_states.get)
 
     def __repr__(self):
         # Limit the printed representation for clarity
-        items_repr = [f"{k}: {v:.2f}" for k, v in list(self._dist.items())[:5]]
+        items_repr = [f"{k!r}: {v:.3f}" for k, v in list(self._dist.items())[:5]]
         if len(self._dist) > 5:
             items_repr.append("...")
         return f"ProbDist({{{', '.join(items_repr)}}})"
@@ -137,13 +160,13 @@ def update_belief(current_belief: ProbDistribution[BeliefState],
     posterior_belief = ProbDistribution(posterior_unnormalized)
     return posterior_belief
 
-def infer_meaning(syntax_structure: AbstractStructure,
-                  context: PragmaticContext,
-                  prior_meaning_dist: ProbDistribution[SemanticGraph],
-                  syntax_semantic_model: Any, # P(Syntax | Meaning, Context)
-                  ) -> ProbDistribution[SemanticGraph]:
+def infer_meaning_bayesian(syntax_structure: SyntaxStructure, # Use defined alias
+                         context: PragmaticContext,
+                         prior_meaning_dist: ProbDistribution[MeaningGraph], # Use alias
+                         syntax_semantic_model: Any, # P(Syntax | Meaning, Context)
+                         ) -> ProbDistribution[MeaningGraph]: # Use alias
     """
-    Infers the probability distribution over possible meanings (SemanticGraphs)
+    Infers the probability distribution over possible meanings (MeaningGraph)
     given a syntactic structure and context (Bayesian interpretation).
     Requires a syntax-semantic model with 'get_likelihood(syntax, meaning, context)' method.
 
@@ -164,10 +187,10 @@ def infer_meaning(syntax_structure: AbstractStructure,
          raise TypeError("Syntax-Semantic model must have a 'get_likelihood' method accepting syntax, meaning, and context.")
 
     # This is essentially a specific application of update_belief
-    # Here, BeliefState = SemanticGraph, Observation = syntax_structure
+    # Here, BeliefState = MeaningGraph, Observation = syntax_structure
     # The likelihood model incorporates context implicitly or explicitly
     
-    posterior_unnormalized: Dict[SemanticGraph, float] = {}
+    posterior_unnormalized: Dict[MeaningGraph, float] = {}
 
     for meaning_graph, prior_prob in prior_meaning_dist._dist.items():
         # Calculate likelihood P(Syntax | Meaning, Context)
@@ -177,7 +200,7 @@ def infer_meaning(syntax_structure: AbstractStructure,
             likelihood = syntax_semantic_model.get_likelihood(syntax_structure, meaning_graph, context)
             likelihood = max(0.0, likelihood)
         except Exception as e:
-            print(f"Error calculating likelihood for meaning {meaning_graph}: {e}")
+            print(f"Error calculating likelihood for meaning {meaning_graph!r}: {e}")
             likelihood = 0.0
 
         posterior_unnormalized[meaning_graph] = likelihood * prior_prob
@@ -229,7 +252,7 @@ def resolve_reference_bayesian(referring_expression: str,
     posterior_entity_dist = ProbDistribution(posterior_unnormalized)
     return posterior_entity_dist
 
-# --- Core Inference Operations (Placeholders) ---
+# --- Core Inference Operations (Placeholders - keep for now) ---
 
 def infer_meaning(structure: StructureType, context: ContextType) -> MeaningType:
     """Infers the meaning of a linguistic structure given context.

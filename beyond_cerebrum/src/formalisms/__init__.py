@@ -21,6 +21,7 @@ from .structures import (
     GraphNode,
     GraphEdge,
     Graph,
+    FeatureStructure,
 )
 
 __all__ = [
@@ -39,6 +40,7 @@ __all__ = [
     'GraphNode',
     'GraphEdge',
     'Graph',
+    'FeatureStructure',
 ] 
 
 # This file makes the directory a Python package 

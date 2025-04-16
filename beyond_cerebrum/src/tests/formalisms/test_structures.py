@@ -4,12 +4,13 @@ Tests for the composite linguistic structures defined in
 """
 
 import pytest
-from typing import List
+from typing import List, Any
 
 # Adjust the import path based on your project structure and how you run pytest
 # This assumes you run pytest from the CEREBRUM project root
 from beyond_cerebrum.src.formalisms.structures import (
-    TreeNode, Tree, GraphNode, GraphEdge, Graph
+    TreeNode, Tree, GraphNode, GraphEdge, Graph,
+    FeatureStructure
 )
 from beyond_cerebrum.src.formalisms.types import (
     SyntacticLabel, SemanticConcept
@@ -268,3 +269,98 @@ def test_graph_repr_directed(simple_graph_directed):
 def test_graph_repr_empty():
     graph = Graph()
     assert repr(graph) == 'Graph(nodes=0, edges=0)' 
+
+# --- FeatureStructure Tests ---
+
+@pytest.fixture
+def fs1() -> FeatureStructure[str, Any]:
+    return FeatureStructure({'category': 'N', 'number': 'sg', 'agr': FeatureStructure({'person': 3})})
+
+@pytest.fixture
+def fs2() -> FeatureStructure[str, Any]:
+    return FeatureStructure({'number': 'sg', 'case': 'nom', 'agr': FeatureStructure({'gender': 'm'})})
+
+@pytest.fixture
+def fs_conflict() -> FeatureStructure[str, Any]:
+    return FeatureStructure({'number': 'pl'})
+
+@pytest.fixture
+def fs_nested_conflict() -> FeatureStructure[str, Any]:
+    return FeatureStructure({'agr': FeatureStructure({'person': 1})})
+
+@pytest.fixture
+def fs_type_conflict() -> FeatureStructure[str, Any]:
+     # 'agr' value is a dict, not FeatureStructure
+    return FeatureStructure({'category': 'N', 'number': 'sg', 'agr': {'person': 3}}) 
+
+def test_fs_init():
+    fs = FeatureStructure({'a': 1, 'b': 'two'})
+    assert fs['a'] == 1
+    assert fs['b'] == 'two'
+    assert isinstance(fs, dict)
+    assert isinstance(fs, FeatureStructure)
+
+def test_fs_repr():
+    fs = FeatureStructure({'a': 1})
+    assert repr(fs) == "FS({'a': 1})"
+    nested_fs = FeatureStructure({'outer': fs})
+    assert repr(nested_fs) == "FS({'outer': FS({'a': 1})})"
+
+def test_fs_unify_simple_success(fs1):
+    fs_other = FeatureStructure({'number': 'sg', 'new_feat': True})
+    expected = FeatureStructure({'category': 'N', 'number': 'sg', 'new_feat': True, 'agr': FeatureStructure({'person': 3})})
+    result = fs1.unify(fs_other)
+    assert result == expected
+    assert isinstance(result, FeatureStructure)
+    # Ensure original is not modified
+    assert 'new_feat' not in fs1
+
+def test_fs_unify_nested_success(fs1, fs2):
+    expected = FeatureStructure({
+        'category': 'N', 
+        'number': 'sg', 
+        'case': 'nom', 
+        'agr': FeatureStructure({'person': 3, 'gender': 'm'})
+    })
+    result = fs1.unify(fs2)
+    assert result == expected
+    assert isinstance(result, FeatureStructure)
+    assert isinstance(result['agr'], FeatureStructure)
+    
+    result_comm = fs2.unify(fs1)
+    assert result_comm == expected
+    assert isinstance(result_comm, FeatureStructure)
+    assert isinstance(result_comm['agr'], FeatureStructure)
+
+def test_fs_unify_simple_conflict(fs1, fs_conflict):
+    result = fs1.unify(fs_conflict)
+    assert result is None
+
+def test_fs_unify_nested_conflict(fs1, fs_nested_conflict):
+    result = fs1.unify(fs_nested_conflict)
+    assert result is None
+
+def test_fs_unify_with_plain_dict_fails(fs1):
+    # The FS.unify method expects another FS
+    plain_dict = {'number': 'sg'}
+    # FS.unify should return None if other is not FS
+    assert fs1.unify(plain_dict) is None # type: ignore 
+
+def test_fs_unify_type_conflict_value_vs_fs(fs1, fs_type_conflict):
+    # fs1 has agr: FS({...}), fs_type_conflict has agr: dict{...}
+    # The internal logic should handle dict vs FS unification
+    result = fs1.unify(fs_type_conflict)
+    # Expected behavior: unification fails because FeatureStructure is not equal to dict
+    # Let's refine this expectation based on implementation: the current FeatureStructure.unify
+    # wraps plain dicts before recursing, so it should unify if the contents allow.
+    # Let's test the case where contents *don't* allow.
+    fs_type_conflict_val = FeatureStructure({'agr': 1}) # agr is primitive vs FS
+    result_val_conflict = fs1.unify(fs_type_conflict_val)
+    assert result_val_conflict is None
+
+    # Test case where dict and FS contents *can* unify
+    fs_agr_dict = FeatureStructure({'agr': {'person': 3, 'gender': 'f'}})
+    fs_agr_fs = FeatureStructure({'agr': FeatureStructure({'person': 3, 'number': 9})})
+    # With stricter type checking, unifying a dict value with an FS value should fail.
+    result = fs_agr_dict.unify(fs_agr_fs)
+    assert result is None 
