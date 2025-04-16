@@ -24,22 +24,26 @@ This directory contains case mapping analyses for the following computer languag
 - [Haskell](haskell.md) - Pure functional programming language with strong static typing
 - [Lisp](lisp.md) - Homoiconic functional language with macro system
 - [Prolog](prolog.md) - Logic programming paradigm with unification and pattern matching
+- [Clojure](clojure.md) - Dynamic, functional Lisp dialect on the JVM/CLR/JS
 - [C#](csharp.md) - Multi-paradigm language with strong OOP focus and modern features
 - [Go](go.md) - Concurrent systems language with simplified object-oriented features
 - [Swift](swift.md) - Multi-paradigm language with protocol-oriented programming
 - [Kotlin](kotlin.md) - JVM language with improved safety and conciseness over Java
 - [TypeScript](typescript.md) - JavaScript with static type checking
+- [Visual Basic (.NET)](visual_basic.md) - Event-driven, object-oriented language on the .NET platform
 - [Erlang](erlang.md) - Functional language designed for concurrency and fault tolerance
+- [Elixir](elixir.md) - Functional language built on the Erlang VM for scalable applications
 - [Ruby](ruby.md) - Dynamic, object-oriented language with elegant syntax
-- [Scala](scala.md) - Hybrid functional/object-oriented JVM language
 - [PHP](php.md) - Server-side scripting language for web development
+- [Objective-C](objective_c.md) - C superset with Smalltalk-style messaging (Apple platforms)
+- [Perl](perl.md) - Flexible scripting language with strong text processing capabilities
 - [COBOL](cobol.md) - Business-oriented language with English-like syntax
 - [Fortran](fortran.md) - Scientific computing language with array processing focus
 - [Assembly](assembly.md) - Low-level programming representing machine code instructions
 - [Julia](julia.md) - High-level language for scientific computing with dynamic typing
 - [R](r.md) - Statistical computing and graphics language
+- [Lua](lua.md) - Lightweight, embeddable scripting language
 - [Dart](dart.md) - Client-optimized language for multi-platform applications
-- [Elixir](elixir.md) - Functional language built on the Erlang VM for scalable applications
 
 ## Structure of Each Language Document
 
