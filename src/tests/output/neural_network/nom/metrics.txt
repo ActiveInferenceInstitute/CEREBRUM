@@ -4,7 +4,7 @@ Statistical Role: Active predictor
 Neural Network Context: The neural network as an active agent generating predictions from inputs
 
 Training Metrics:
-  Final Loss: 0.009761
-  Initial Loss: 0.710910
-  Improvement: 98.63%
+  Final Loss: 0.001705
+  Initial Loss: 1.886919
+  Improvement: 99.91%
   Epochs: 1400

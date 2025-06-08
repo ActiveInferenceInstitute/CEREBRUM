@@ -33,17 +33,17 @@ We solve the problem USING a POMDP framework
 
 * Computational metrics:
   - Problem 1 (Uniform Prior):
-    * Average decision time: 2.2980
-    * Average belief update magnitude: 0.1899
-    * Average error improvement: 0.2057
+    * Average decision time: 2.3231
+    * Average belief update magnitude: 0.2391
+    * Average error improvement: 0.3841
   - Problem 2 (Wrong Prior):
-    * Average decision time: 2.3104
-    * Average belief update magnitude: 0.2313
-    * Average error improvement: 0.2472
+    * Average decision time: 2.3530
+    * Average belief update magnitude: 0.2690
+    * Average error improvement: 0.2357
   - Problem 3 (Noisy Observations):
-    * Average decision time: 2.9332
-    * Average belief update magnitude: 0.0288
-    * Average error improvement: 0.0044
+    * Average decision time: 2.9357
+    * Average belief update magnitude: 0.0284
+    * Average error improvement: 0.0463
 
 ### POMDP as Computational Method
 

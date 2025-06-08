@@ -69,6 +69,7 @@ class NeuralNetworkModel(Model):
         self.trained = False
         
         # Case-specific parameter access patterns
+        self._case_configurations = {}
         self._setup_case_configurations()
         
         # Additional tracking
@@ -146,11 +147,15 @@ class NeuralNetworkModel(Model):
         # Record the transformation in history
         logging.info(f"Neural network model '{self.name}' transformed to {self._case.value} case")
         
-        # Each case has specific parameter accessibility and behavior focus
-        config = self._case_configurations[self._case]
-        
-        logging.info(f"Parameter focus: {config['param_focus']}")
-        logging.info(f"Interface mode: {config['interface_mode']}")
+        # Check if configurations are set up yet (they might not be during initialization)
+        if hasattr(self, '_case_configurations') and self._case in self._case_configurations:
+            # Each case has specific parameter accessibility and behavior focus
+            config = self._case_configurations[self._case]
+            
+            logging.info(f"Parameter focus: {config['param_focus']}")
+            logging.info(f"Interface mode: {config['interface_mode']}")
+        else:
+            logging.debug("Case configurations not yet initialized")
     
     def _activation_function(self, x: np.ndarray) -> np.ndarray:
         """Apply the specified activation function."""

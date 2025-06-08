@@ -31,8 +31,8 @@ The POMDP DECIDES which action to take next
   - Actions: ['left', 'right']
 * Performance metrics:
   - Decision accuracy: 0.7000
-  - Average belief confidence: 0.7775
-  - Average belief entropy: 0.7265 bits
+  - Average belief confidence: 0.7715
+  - Average belief entropy: 0.7377 bits
 
 ### Decision Process Analysis
 

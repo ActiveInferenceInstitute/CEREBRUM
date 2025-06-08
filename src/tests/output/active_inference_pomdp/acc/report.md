@@ -31,9 +31,9 @@ The programmer EVALUATES the POMDP's performance
   - Observations: 2
   - Actions: ['left', 'right']
 * Evaluation metrics (mean ± std):
-  - Belief accuracy: 0.6726 ± 0.0873
-  - Decision accuracy: 0.7733 ± 0.1236
-  - Belief entropy: 0.7018 ± 0.0297 bits
+  - Belief accuracy: 0.7077 ± 0.0295
+  - Decision accuracy: 0.8533 ± 0.0267
+  - Belief entropy: 0.7327 ± 0.0273 bits
 
 ### Evaluation Process Analysis
 

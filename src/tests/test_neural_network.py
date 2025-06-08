@@ -1,26 +1,24 @@
 import os
-import numpy as np
-import matplotlib
-# Set matplotlib backend to a non-interactive one for test environment
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from matplotlib.gridspec import GridSpec
-import pytest
 import logging
-import math
-import time
-from typing import Dict, List, Any, Optional, Tuple, Union
+import numpy as np
+import pytest
+import matplotlib.pyplot as plt
+from matplotlib import animation
+from unittest.mock import MagicMock
+from typing import Dict, List, Tuple
 
-from src.core.model import Case
+from src.models.base import Case
 from src.core.neural_network import NeuralNetworkModel
-from src.visualization.case_visualization import CASE_COLORS
+from src.utils.visualization import plot_case_linguistic_context
+from src.tests.pomdp.visualizers import Visualizer
+from sklearn.decomposition import PCA
+from sklearn.model_selection import train_test_split
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# Configure logging for tests
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Set the output directory for visualizations
+# Define a constant for the output directory
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output", "neural_network")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -1435,8 +1433,8 @@ def test_locative_case(nn_classification_data, case_definitions):
                     scatter = ax.scatter(hidden_activations_2d[:, 0], hidden_activations_2d[:, 1], 
                                       c=y if y.ndim == 1 else np.argmax(y, axis=1), 
                                       cmap='viridis', alpha=0.7)
-                    ax.set_xlabel('PCA Component 1')
-                    ax.set_ylabel('PCA Component 2')
+                    ax.set_xlabel('Principal Component 1')
+                    ax.set_ylabel('Principal Component 2')
                     plt.colorbar(scatter, ax=ax, label='Class')
                 else:
                     # Handle unexpected dimensions
@@ -2737,15 +2735,12 @@ def test_instrumental_case(nn_regression_data, case_definitions):
         temp_model = NeuralNetworkModel(
             name=f"Temp_LR{lr}",
             input_dim=X.shape[1],
-            output_dim=y.shape[1],
+            output_dim=y.shape[1] if y.ndim > 1 else 1,
             hidden_dims=[4],  # Smaller for quicker training
             activation=model.activation
         )
-        
-        # Train for fewer epochs to just show curve shape
-        temp_model.train(X, y, epochs=50, learning_rate=lr, batch_size=32, verbose=False)
-        
-        axs[1, 0].plot(temp_model.loss_history, label=f'LR={lr}')
+        temp_model.train(X, y, epochs=50, learning_rate=lr)
+        axs[1, 0].plot(temp_model.loss_history, label=f'LR = {lr}')
     
     axs[1, 0].set_title("Learning Curves for Different Learning Rates")
     axs[1, 0].set_xlabel("Epoch")

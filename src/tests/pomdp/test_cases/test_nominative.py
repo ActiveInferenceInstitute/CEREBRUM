@@ -1,11 +1,15 @@
+import pytest
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from typing import Dict, Any, List, Tuple
 
-from src.core.model import Case
 from src.core.active_inference import ActiveInferenceModel
+from src.models.base import Case
+from src.models.pomdp import NominativePOMDP
+from src.tests.pomdp.utils.test_utils import PomdpTestEnvironment
+from src.tests.pomdp.utils.test_models import create_simple_pomdp
 
 from src.tests.pomdp.utils import get_case_dir, create_animation, generate_report
 from src.tests.pomdp.visualizers import Visualizer, plot_case_linguistic_context

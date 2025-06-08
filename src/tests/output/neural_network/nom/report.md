@@ -26,9 +26,9 @@ The NEURAL NETWORK PREDICTS the output values
 
 * Model architecture: Input(1) → Hidden(10) → Hidden(5) → Output(1)
 * Activation function: relu
-* Initial loss: 0.710910
-* Final loss: 0.009761
-* Improvement: 98.63%
+* Initial loss: 1.886919
+* Final loss: 0.001705
+* Improvement: 99.91%
 
 ### Visualizations
 
