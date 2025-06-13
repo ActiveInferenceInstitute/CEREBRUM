@@ -1,3 +1,0 @@
-Animation could not be generated as a GIF. Please see the 'dialogue_frames' directory for static images.
-
-To view the animation sequence, open the numbered frame images in order.

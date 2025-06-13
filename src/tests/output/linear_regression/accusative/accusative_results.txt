@@ -6,29 +6,29 @@ Statistical role: Model as evaluation subject
 Regression context: Model undergoing evaluation or testing
 
 Model Parameters:
-- Intercept: 4.977458
-- Slope: 1.966485
-- Model Formula: y = 4.977458 + 1.966485x
+- Intercept: 0.992709
+- Slope: 2.471150
+- Model Formula: y = 0.992709 + 2.471150x
 
 Evaluation Metrics:
-- Mean Squared Error (MSE): 1.851910
-- Root Mean Squared Error (RMSE): 1.360849
-- Mean Absolute Error (MAE): 1.095961
-- R-squared: 0.944684
+- Mean Squared Error (MSE): 0.201646
+- Root Mean Squared Error (RMSE): 0.449050
+- Mean Absolute Error (MAE): 0.350521
+- R-squared: 0.996263
 
 Cross-Validation Results (5 folds):
-- Fold 1: MSE=1.791685, R²=0.917576
-- Fold 2: MSE=1.180591, R²=0.955014
-- Fold 3: MSE=4.266694, R²=0.861336
-- Fold 4: MSE=0.868496, R²=0.984073
-- Fold 5: MSE=1.592924, R²=0.946200
-- Average MSE: 1.940078 ± 1.206714
-- Average R²: 0.932840 ± 0.041571
+- Fold 1: MSE=0.163425, R²=0.997285
+- Fold 2: MSE=0.174667, R²=0.997279
+- Fold 3: MSE=0.278810, R²=0.991515
+- Fold 4: MSE=0.184667, R²=0.996826
+- Fold 5: MSE=0.243975, R²=0.995070
+- Average MSE: 0.209109 ± 0.044597
+- Average R²: 0.995595 ± 0.002197
 
 Residual Analysis:
-- Mean of residuals: -0.000000
-- Standard deviation: 1.360849
-- Range: [-3.751019, 2.519952]
+- Mean of residuals: 0.000000
+- Standard deviation: 0.449050
+- Range: [-0.963709, 1.146526]
 
 Linguistic Analysis (ACCUSATIVE Case):
 - The model is the OBJECT receiving the action of evaluation

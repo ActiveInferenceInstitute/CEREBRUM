@@ -1,0 +1,122 @@
+repos:
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^(paper/|docs/.*\.md$)
+      - id: end-of-file-fixer
+        exclude: ^(paper/|docs/.*\.md$)
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: check-json
+      - id: pretty-format-json
+        args: ['--autofix', '--no-sort-keys']
+        exclude: ^(package\.json|package-lock\.json)$
+
+  # Python code formatting
+  - repo: https://github.com/psf/black
+    rev: 23.7.0
+    hooks:
+      - id: black
+        language_version: python3
+        files: ^src/.*\.py$
+
+  # Import sorting
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        args: ["--profile", "black", "--line-length", "88"]
+        files: ^src/.*\.py$
+
+  # Linting
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
+    hooks:
+      - id: flake8
+        args: [
+          "--max-line-length=88",
+          "--extend-ignore=E203,W503",
+          "--exclude=src/tests/output/*,output/*,venv/*",
+          "--max-complexity=10"
+        ]
+        files: ^src/.*\.py$
+
+  # Type checking
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.5.1
+    hooks:
+      - id: mypy
+        args: [
+          "--ignore-missing-imports",
+          "--strict-optional",
+          "--no-strict-optional"
+        ]
+        files: ^src/.*\.py$
+        exclude: ^src/tests/.*$
+
+  # Security scanning
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        args: ["-c", "pyproject.toml"]
+        files: ^src/.*\.py$
+        exclude: ^src/tests/.*$
+
+  # Documentation checks
+  - repo: https://github.com/pycqa/doc8
+    rev: v1.1.1
+    hooks:
+      - id: doc8
+        args: ['--max-line-length=88']
+        files: ^docs/.*\.rst$
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.35.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix']
+        files: ^(README\.md|CONTRIBUTING\.md|docs/.*\.md)$
+        exclude: ^(paper/|docs/dialogs/|docs/speculative_design/)
+
+  # Check for secrets
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: ^(\.secrets\.baseline|package-lock\.json)$
+
+  # Python dependency checks
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.3.2
+    hooks:
+      - id: python-safety-dependencies-check
+        files: requirements.*\.txt$
+
+  # Jupyter notebook cleaning (if we add notebooks)
+  - repo: https://github.com/nbQA-dev/nbQA
+    rev: 1.7.0
+    hooks:
+      - id: nbqa-black
+        files: \.ipynb$
+      - id: nbqa-isort
+        files: \.ipynb$
+        args: ["--profile=black"]
+
+ci:
+  autofix_commit_msg: |
+    [pre-commit.ci] auto fixes from pre-commit.com hooks
+
+    for more information, see https://pre-commit.ci
+  autofix_prs: true
+  autoupdate_branch: ''
+  autoupdate_commit_msg: '[pre-commit.ci] pre-commit autoupdate'
+  autoupdate_schedule: weekly
+  skip: [python-safety-dependencies-check, detect-secrets]
+  submodules: false 

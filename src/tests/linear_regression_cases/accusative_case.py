@@ -19,6 +19,10 @@ from src.models.case_definitions import CaseDefinitions
 from src.models.linear_regression import LinearRegressionModel
 from src.utils.animation import save_animation
 from src.utils.visualization import plot_case_linguistic_context
+from src.utils.array_utils import (
+    validate_regression_data, get_xy_values, create_residual_lines_data,
+    safe_metrics_calculation, ensure_1d, ensure_2d
+)
 
 # Prevent interactive display
 plt.ioff()
@@ -49,8 +53,9 @@ def test_accusative_case(linear_test_data, output_dir):
     linguistics_path = os.path.join(case_dir, "linguistic_context.png")
     plot_case_linguistic_context(Case.ACCUSATIVE, linguistics_path)
     
-    # Get data
+    # Get data and validate
     X, y = linear_test_data
+    X, y = validate_regression_data(X, y)
     
     # Create and fit a model (initially in NOMINATIVE case)
     model = LinearRegressionModel(model_id=f"{Case.ACCUSATIVE.value}_model", case=Case.NOMINATIVE)
@@ -71,11 +76,12 @@ def test_accusative_case(linear_test_data, output_dir):
     # Generate predictions
     y_pred = model.predict(X)
     
-    # Calculate metrics
-    mse = float(mean_squared_error(y, y_pred))
-    rmse = float(np.sqrt(mse))
-    mae = float(mean_absolute_error(y, y_pred))
-    r2 = float(r2_score(y, y_pred))
+    # Calculate metrics using safe utility
+    metrics = safe_metrics_calculation(y, y_pred)
+    mse = metrics['mse']
+    rmse = metrics['rmse'] 
+    mae = metrics['mae']
+    r2 = metrics['r2']
     
     # Create visualization
     fig, ax = plt.subplots(figsize=(10, 8))
@@ -88,21 +94,9 @@ def test_accusative_case(linear_test_data, output_dir):
     y_range = model.predict(x_range)
     ax.plot(x_range, y_range, 'r-', linewidth=2, label=f'Model: y = {float(intercept):.4f} + {float(slope):.4f}x')
     
-    # Add residual lines
-    for i in range(len(X)):
-        # Check if arrays are 2D or 1D and index accordingly
-        if len(X.shape) > 1:
-            x_val = X[i, 0]
-        else:
-            x_val = X[i]
-            
-        if len(y.shape) > 1:
-            y_true = y[i, 0]
-            y_predicted = y_pred[i, 0]
-        else:
-            y_true = y[i]
-            y_predicted = y_pred[i]
-            
+    # Add residual lines using safe utility
+    residual_data = create_residual_lines_data(X, y, y_pred)
+    for x_val, y_true, y_predicted in residual_data:
         ax.plot([x_val, x_val], [y_true, y_predicted], 'k--', alpha=0.3)
     
     # Style the plot
@@ -116,10 +110,10 @@ def test_accusative_case(linear_test_data, output_dir):
     metrics_text = (
         "ACCUSATIVE CASE: MODEL RECEIVING EVALUATION\n\n"
         f"Evaluation Metrics:\n"
-        f"MSE: {float(mse):.4f}\n"
-        f"RMSE: {float(rmse):.4f}\n"
-        f"MAE: {float(mae):.4f}\n"
-        f"R²: {float(r2):.4f}\n\n"
+        f"MSE: {mse:.4f}\n"
+        f"RMSE: {rmse:.4f}\n"
+        f"MAE: {mae:.4f}\n"
+        f"R²: {r2:.4f}\n\n"
         f"In the ACCUSATIVE case, the model is the direct object receiving the action of evaluation."
     )
     

@@ -49,12 +49,30 @@ def test_data_dir(project_root) -> Path:
     data_dir.mkdir(parents=True, exist_ok=True)
     return data_dir
 
+@pytest.fixture(scope="function")
+def output_dir(tmp_path) -> str:
+    """Return a temporary output directory for test visualizations."""
+    output_path = tmp_path / "test_output"
+    output_path.mkdir(exist_ok=True)
+    return str(output_path)
+
 @pytest.fixture(scope="session")
 def linear_test_data():
     """Generates a simple dataset for linear regression tests."""
-    np.random.seed(42)
-    X = np.random.rand(100, 1) * 10
-    y = 2.5 * X + np.random.randn(100, 1) * 2
+    from src.utils.data_generator import DataGenerator
+    from src.utils.array_utils import validate_regression_data
+    
+    # Generate test data using the data generator
+    X, y = DataGenerator.linear_data(
+        n_samples=100, 
+        slope=2.5, 
+        intercept=1.0, 
+        noise_level=0.5,
+        random_seed=42
+    )
+    
+    # Validate and return
+    X, y = validate_regression_data(X, y)
     return X, y
 
 # Define case definitions as a fixture
