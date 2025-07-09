@@ -86,7 +86,7 @@ The "taste of focus" that Young describes as intrinsically rewarding corresponds
 
 The mathematical formulation in CEREBRUM terms:
 
-$$\text{Clarity}(experience) = f_{INS}(raw\_data) \circ g_{GEN}(subtle\_signals) \circ h_{DAT}(full\_reception)$$
+$$\text{Clarity}(experience) = f_{INS}(\text{raw data}) \circ g_{GEN}(\text{subtle signals}) \circ h_{DAT}(\text{full reception})$$
 
 Where each case transformation contributes specialized processing capabilities that collectively produce Young's "unmixing taste"—the spontaneous separation of tangled mental-emotional content.
 
@@ -113,9 +113,9 @@ Young's Five Ways framework reveals a sophisticated case transformation architec
 
 ```mermaid
 graph LR
-    A[Experience[DAT]<br/>Receiving subjective arisings] 
-    B[Awareness[NOM]<br/>Active tracking and noting]
-    C[Integration[GEN]<br/>Generating insight from patterns]
+    A["Experience (DAT)<br/>Receiving subjective arisings"] 
+    B["Awareness (NOM)<br/>Active tracking and noting"]
+    C["Integration (GEN)<br/>Generating insight from patterns"]
     
     A -->|See In/Hear In/Feel In| B
     B -->|Sustained attention| C
@@ -130,9 +130,9 @@ The practitioner begins in Dative case, receiving whatever mental content arises
 
 ```mermaid
 graph LR
-    A[Environment[LOC]<br/>Present-moment context]
-    B[Awareness[INS]<br/>Tool for reality connection]
-    C[Oneness[GEN]<br/>Generating unity experience]
+    A["Environment (LOC)<br/>Present-moment context"]
+    B["Awareness (INS)<br/>Tool for reality connection"]
+    C["Oneness (GEN)<br/>Generating unity experience"]
     
     A -->|See Out/Hear Out/Feel Out| B
     B -->|Power of Now| C
@@ -147,9 +147,9 @@ Environmental context (Locative) is engaged through awareness functioning as an 
 
 ```mermaid
 graph LR
-    A[Absence[ABL]<br/>Rest states derived from activity]
-    B[Concentration[NOM]<br/>Active focusing on rest]
-    C[Tranquility[GEN]<br/>Generating serenity states]
+    A["Absence (ABL)<br/>Rest states derived from activity"]
+    B["Concentration (NOM)<br/>Active focusing on rest"]
+    C["Tranquility (GEN)<br/>Generating serenity states"]
     
     A -->|See Rest/Hear Rest/Feel Rest| B
     B -->|Do Nothing technique| C
@@ -164,9 +164,9 @@ Rest states are derived (Ablative) from the absence of activity, engaged through
 
 ```mermaid
 graph LR
-    A[Awareness[INS]<br/>Tool for flow detection]
-    B[Experience[ACC]<br/>Object of transformation]
-    C[Energy[GEN]<br/>Generating spirit flow]
+    A["Awareness (INS)<br/>Tool for flow detection"]
+    B["Experience (ACC)<br/>Object of transformation"]
+    C["Energy (GEN)<br/>Generating spirit flow"]
     
     A -->|Flow tracking instrument| B
     B -->|Dissolution process| C
@@ -181,9 +181,9 @@ Awareness functions as an instrument for detecting flow patterns, with experienc
 
 ```mermaid
 graph LR
-    A[Self[NOM]<br/>Active agent of goodness]
-    B[Ideals[VOC]<br/>Addressable goodness entities]
-    C[Integration[GEN]<br/>Generating positive self-version]
+    A["Self (NOM)<br/>Active agent of goodness"]
+    B["Ideals (VOC)<br/>Addressable goodness entities"]
+    C["Integration (GEN)<br/>Generating positive self-version"]
     
     A -->|Positive cultivation| B
     B -->|Icon engagement| C
@@ -329,7 +329,7 @@ The lab's research with low-intensity transcranial focused ultrasound (tFUS) tar
 
 The SEMA Lab's development of precision-weighted neurofeedback systems implements CEREBRUM's active inference principles in contemplative technology:
 
-$$\text{feedback}(t) = \beta(\text{case}, \text{brain\_state}) \cdot \text{neural\_signal}(t)$$
+$$\text{feedback}(t) = \beta(\text{case}, \text{brain state}) \cdot \text{neural signal}(t)$$
 
 Where $\beta$ represents the precision weighting for specific contemplative case configurations, enabling real-time optimization of meditative states through computational feedback.
 
@@ -349,7 +349,7 @@ Contemplative training systematically refines the brain's prior probability dist
 
 Young's emphasis on precise sensory awareness optimizes the brain's likelihood functions:
 
-$$p(\text{experience}|\text{attention\_state}, \text{external\_reality})$$
+$$p(\text{experience}|\text{attention state}, \text{external reality})$$
 
 Systematic attention training improves the accuracy of the brain's sensory models, reducing prediction error and enhancing the correspondence between internal models and external reality.
 
@@ -357,7 +357,7 @@ Systematic attention training improves the accuracy of the brain's sensory model
 
 Young's noting technique implements optimal evidence accumulation for Bayesian inference:
 
-$$p(\text{mental\_state}|\text{evidence}) \propto p(\text{evidence}|\text{mental\_state}) \cdot p(\text{mental\_state})$$
+$$p(\text{mental state}|\text{evidence}) \propto p(\text{evidence}|\text{mental state}) \cdot p(\text{mental state})$$
 
 Systematic noting provides precise evidence about mental states, enabling optimal posterior estimation and contemplative insight.
 
@@ -422,14 +422,14 @@ Young's systematic framework suggests a comprehensive CEREBRUM architecture for 
 ```mermaid
 graph TD
     subgraph "Contemplative CEREBRUM Architecture"
-        A[Attention Model[NOM]<br/>Active Focus Management]
-        B[Experience Model[DAT]<br/>Receiving Sensory Data] 
-        C[Analysis Model[INS]<br/>Parsing Experience Components]
-        D[Integration Model[GEN]<br/>Generating Insights]
-        E[Context Model[LOC]<br/>Environmental Awareness]
-        F[Optimization Model[ACC]<br/>Learning and Adaptation]
-        G[Interface Model[VOC]<br/>Human-AI Communication]
-        H[Derivation Model[ABL]<br/>Causal Understanding]
+        A["Attention Model (NOM)<br/>Active Focus Management"]
+        B["Experience Model (DAT)<br/>Receiving Sensory Data"] 
+        C["Analysis Model (INS)<br/>Parsing Experience Components"]
+        D["Integration Model (GEN)<br/>Generating Insights"]
+        E["Context Model (LOC)<br/>Environmental Awareness"]
+        F["Optimization Model (ACC)<br/>Learning and Adaptation"]
+        G["Interface Model (VOC)<br/>Human-AI Communication"]
+        H["Derivation Model (ABL)<br/>Causal Understanding"]
     end
     
     B -->|Experience flow| A
@@ -542,7 +542,7 @@ Young's application of systematic mindfulness to addiction recovery[18] demonstr
 
 Craving deconstruction implements Instrumental case [INS] analysis where systematic attention functions as a tool for parsing complex addictive experiences:
 
-$$\text{Craving}_{complex} \xrightarrow{mindful\_analysis[INS]} \{\text{components}_i\}$$
+$$\text{Craving}_{\text{complex}} \xrightarrow{\text{mindful analysis}[INS]} \{\text{components}_i\}$$
 
 Where complex craving states are systematically parsed into component elements that can be individually addressed.
 
