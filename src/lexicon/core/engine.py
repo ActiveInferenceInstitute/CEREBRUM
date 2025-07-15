@@ -229,11 +229,15 @@ class LexiconEngine:
             
             entities = []
             for ent in doc.ents:
+                # Use the new case determination method
+                case_info = self._determine_grammatical_case(ent.text)
+                
                 entities.append({
                     "text": ent.text,
                     "type": ent.label_,
-                    "case": self._determine_grammatical_case(ent.text),
-                    "confidence": 0.9,
+                    "case": case_info["type"],
+                    "confidence": case_info["confidence"],
+                    "case_rationale": case_info["rationale"],
                     "metadata": {
                         "source": "spacy_ner",
                         "start_char": ent.start_char,
@@ -619,7 +623,9 @@ class LexiconEngine:
                 "id": entity.get("id", str(uuid.uuid4())),
                 "label": entity.get("text", ""),
                 "type": "entity",
-                "category": entity.get("category", "unknown"),
+                "category": entity.get("type", "unknown"),
+                "case": entity.get("case", "locative"),
+                "case_rationale": entity.get("case_rationale", ""),
                 "confidence": entity.get("confidence", 1.0),
                 "data": entity
             }
@@ -653,7 +659,22 @@ class LexiconEngine:
                         "source": entity_id,
                         "target": claim_id,
                         "type": "mentions",
+                        "case": entity.get("case", "locative"),
                         "weight": 1.0
+                    }
+                    graph["edges"].append(edge)
+        
+        # Add case-based relationship detection
+        for i, node1 in enumerate(graph["nodes"]):
+            for node2 in graph["nodes"][i+1:]:
+                relationship = self._detect_node_relationship(node1, node2)
+                if relationship:
+                    edge = {
+                        "id": f"{node1['id']}_{node2['id']}",
+                        "source": node1["id"],
+                        "target": node2["id"],
+                        "type": relationship.get("type", "related"),
+                        "weight": relationship.get("confidence", 0.5)
                     }
                     graph["edges"].append(edge)
         
@@ -1022,79 +1043,103 @@ class LexiconEngine:
 
     def _create_case_determination_method(self):
         """
-        Create a method to determine grammatical case.
+        Create a method to determine grammatical case with advanced linguistic analysis.
         
         Returns:
             callable: Method to determine grammatical case
         """
         def determine_case(text):
             """
-            Determine the grammatical case of a given text.
-            
-            This is a simple heuristic method and should be replaced with 
-            a more sophisticated linguistic analysis.
+            Determine the grammatical case of a given text using advanced linguistic techniques.
             
             Args:
                 text (str): Text to determine case for
             
             Returns:
-                str: Grammatical case (nominative, accusative, dative, etc.)
+                dict: Case information with type, confidence, and rationale
             """
-            # Simple heuristics for case determination
-            text = text.lower().strip()
+            try:
+                import spacy
+                
+                # Load a transformer-based model with dependency parsing
+                nlp = spacy.load("en_core_web_trf")
+                doc = nlp(text)
+                
+                # Default case information
+                case_info = {
+                    "type": "locative",
+                    "confidence": 0.5,
+                    "rationale": "Default fallback"
+                }
+                
+                # Analyze dependency parse
+                for token in doc:
+                    # Nominative (subject) detection
+                    if token.dep_ in ["nsubj", "nsubjpass"]:
+                        case_info = {
+                            "type": "nominative",
+                            "confidence": 0.9,
+                            "rationale": f"Subject of the sentence: {token.text}"
+                        }
+                        break
+                    
+                    # Accusative (direct object) detection
+                    elif token.dep_ in ["dobj", "pobj"]:
+                        case_info = {
+                            "type": "accusative",
+                            "confidence": 0.85,
+                            "rationale": f"Direct object: {token.text}"
+                        }
+                        break
+                    
+                    # Dative (indirect object) detection
+                    elif token.dep_ == "iobj":
+                        case_info = {
+                            "type": "dative",
+                            "confidence": 0.8,
+                            "rationale": f"Indirect object: {token.text}"
+                        }
+                        break
+                
+                # Additional case refinement
+                if case_info["type"] == "locative":
+                    # Check for prepositional phrases
+                    for token in doc:
+                        if token.dep_ == "prep":
+                            prep_case = {
+                                "in": "locative",
+                                "on": "locative",
+                                "at": "locative",
+                                "to": "dative",
+                                "for": "benefactive",
+                                "from": "ablative",
+                                "with": "instrumental"
+                            }.get(token.text.lower(), "locative")
+                            
+                            case_info = {
+                                "type": prep_case,
+                                "confidence": 0.7,
+                                "rationale": f"Prepositional case: {token.text}"
+                            }
+                            break
+                
+                return case_info
             
-            # Nominative (subject) cases
-            nominative_indicators = [
-                'i', 'we', 'he', 'she', 'it', 'they', 
-                'who', 'which', 'that', 
-                'dr.', 'mr.', 'ms.', 'mrs.'
-            ]
-            
-            # Accusative (direct object) cases
-            accusative_indicators = [
-                'me', 'us', 'him', 'her', 'it', 'them', 
-                'whom'
-            ]
-            
-            # Dative (indirect object) cases
-            dative_indicators = [
-                'to me', 'to us', 'to him', 'to her', 'to them',
-                'for me', 'for us', 'for him', 'for her', 'for them'
-            ]
-            
-            # Genitive (possession) cases
-            genitive_indicators = [
-                "'s", "s'", "of the", "of a", "of an"
-            ]
-            
-            # Ablative (source/origin) cases
-            ablative_indicators = [
-                'from', 'by', 'with', 'through'
-            ]
-            
-            # Check for specific cases
-            for indicator in nominative_indicators:
-                if text == indicator or text.startswith(indicator + ' '):
-                    return 'nominative'
-            
-            for indicator in accusative_indicators:
-                if text == indicator or text.startswith(indicator + ' '):
-                    return 'accusative'
-            
-            for indicator in dative_indicators:
-                if indicator in text:
-                    return 'dative'
-            
-            for indicator in genitive_indicators:
-                if indicator in text:
-                    return 'genitive'
-            
-            for indicator in ablative_indicators:
-                if text.startswith(indicator + ' '):
-                    return 'ablative'
-            
-            # Locative (location) as default fallback
-            return 'locative'
+            except ImportError:
+                # Fallback to simple heuristic if spaCy is not available
+                text = text.lower().strip()
+                
+                # Simple case detection
+                nominative_indicators = ['i', 'we', 'he', 'she', 'it', 'they']
+                accusative_indicators = ['me', 'us', 'him', 'her', 'it', 'them']
+                
+                if any(text.startswith(ind + ' ') or text == ind for ind in nominative_indicators):
+                    return {"type": "nominative", "confidence": 0.6, "rationale": "Simple pronoun match"}
+                
+                if any(text.startswith(ind + ' ') or text == ind for ind in accusative_indicators):
+                    return {"type": "accusative", "confidence": 0.6, "rationale": "Simple pronoun match"}
+                
+                return {"type": "locative", "confidence": 0.5, "rationale": "Default fallback"}
         
         return determine_case 
 
