@@ -11,8 +11,8 @@ CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unifie
 ## Publication Information
 - **Author:** Daniel Ari Friedman
 - **Version:** 1.4
-- **Date:** April 7, 2025
-- **DOI:** [10.5281/zenodo.15170908](https://doi.org/10.5281/zenodo.15170908)
+- **Date:** April 16, 2025
+- **DOI:** [10.5281/zenodo.15170907](https://doi.org/10.5281/zenodo.15170907)
 - **Zenodo Record:** [https://zenodo.org/records/15231156](https://zenodo.org/records/15231156)
 - **Institution:** Active Inference Institute
 
@@ -28,34 +28,7 @@ Key features include:
 
 ## Project Architecture
 
-```mermaid
-graph TD
-    A[CEREBRUM Framework] --> B[Core Engine]
-    A --> C[Model Library]
-    A --> D[Transformation Engine]
-    A --> E[Visualization Tools]
-    
-    B --> B1[Active Inference Module]
-    B --> B2[Bayesian Representation]
-    B --> B3[Case Management]
-    
-    C --> C1[Predefined Models]
-    C --> C2[Custom Model Templates]
-    
-    D --> D1[Model Adaptation]
-    D --> D2[Case Transformation]
-    D --> D3[Learning Mechanisms]
-    
-    E --> E1[Interactive Visualizations]
-    E --> E2[Model Inspection Tools]
-    E --> E3[Diagnostic Reports]
-    
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style B fill:#bbf,stroke:#333
-    style C fill:#bbf,stroke:#333
-    style D fill:#bbf,stroke:#333
-    style E fill:#bbf,stroke:#333
-```
+![CEREBRUM Project Architecture](docs/diagrams/project_architecture.png)
 
 ## Repository Structure
 The CEREBRUM repository is organized into the following structure:
@@ -81,20 +54,7 @@ The CEREBRUM repository is organized into the following structure:
 
 ## Implementation Workflow
 
-```mermaid
-flowchart LR
-    A[Define Case Structure] --> B[Create Bayesian Model]
-    B --> C[Configure Transformations]
-    C --> D[Train/Adapt Model]
-    D --> E[Evaluate Results]
-    E -->|Iterate| A
-    
-    style A fill:#bbf,stroke:#333
-    style B fill:#bbf,stroke:#333
-    style C fill:#bbf,stroke:#333
-    style D fill:#bbf,stroke:#333
-    style E fill:#bbf,stroke:#333
-```
+![CEREBRUM Implementation Workflow](docs/diagrams/implementation_workflow.png)
 
 ## Getting Started
 
@@ -145,28 +105,7 @@ For more detailed information about the paper building process, please see `pape
 
 ## Use Cases
 
-CEREBRUM has been applied to a variety of domains:
-
-```mermaid
-mindmap
-  root((CEREBRUM))
-    Cognitive Science
-      Mental Models
-      Decision Making
-      Learning Processes
-    Artificial Intelligence
-      Agent Modeling
-      Reinforcement Learning
-      Multi-agent Systems
-    Control Systems
-      HVAC Controls
-      Robotics
-      Adaptive Systems
-    Natural Language
-      Text Understanding
-      Semantic Processing
-      Dialog Systems
-```
+![CEREBRUM Use Cases](docs/diagrams/use_cases_mindmap.png)
 
 ## Citation
 If you use CEREBRUM in your research, please cite:
@@ -177,14 +116,15 @@ If you use CEREBRUM in your research, please cite:
   year = {2025},
   month = {April},
   version = {1.4},
-  doi = {10.5281/zenodo.15170908},
+  doi = {10.5281/zenodo.15170907},
+  url = {https://doi.org/10.5281/zenodo.15170907},
   publisher = {Active Inference Institute},
   url = {https://github.com/ActiveInferenceInstitute/CEREBRUM}
 }
 ```
 
 ## License
-CC BY-NC-ND 4.0
+[CC BY-NC-ND 4.0](../LICENSE)
 
 ## Acknowledgements
 This work builds upon the efforts and insights of many participants within the Active Inference Institute. Special thanks are extended to Dave Douglass for his contributions related to computational linguistics, archiving, Active Inference principles, upper ontologies, and translations, which have significantly informed aspects of this project.
@@ -198,26 +138,5 @@ We welcome contributions from researchers, developers, and enthusiasts across mu
 - **📚 Documentation**: Educational content, API docs, use cases, tutorials
 - **🧩 Examples**: Model examples, domain applications, interactive demonstrations
 - **🌍 Community**: Organizing events, content creation, mentoring, user support
-
-### Contribution Scale
-From micro-contributions (1-3 hours) to large projects (40+ hours), we value contributions of all sizes.
-
-### Development Process
-
-```mermaid
-graph LR
-    A[Fork Repository] --> B[Setup Dev Environment]
-    B --> C[Create Feature Branch]
-    C --> D[Implement Changes]
-    D --> E[Run Tests]
-    E -->|Pass| F[Submit PR]
-    E -->|Fail| D
-    F --> G[Code Review]
-    G -->|Approved| H[Merge]
-    G -->|Changes Requested| D
-    
-    style A fill:#bbf,stroke:#333
-    style H fill:#9f9,stroke:#333
-```
 
 For detailed contribution guidelines, process information, and more specific ideas, please see our [CONTRIBUTING.md](CONTRIBUTING.md) document. 

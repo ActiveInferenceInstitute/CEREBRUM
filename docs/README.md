@@ -13,6 +13,7 @@ This documentation is organized as follows:
 - **[Core Specification](cerebrum_core_spec.md)**: Defines the core components, interfaces, and behaviors required for a compliant implementation
 - **[How It Works](how_it_works.md)**: Overview of CEREBRUM's core mechanics and architecture
 - **[Getting Started](getting_started.md)**: A beginner's guide to help new developers start using CEREBRUM
+- **[LEXICON Usage Guide](../src/lexicon/docs/lexicon_usage_guide.md)**: Comprehensive guide for CEREBRUM's linguistic analysis engine
 - **[Language Implementations](language_implementations.md)**: Guidelines for implementing CEREBRUM in different programming languages
 - **[Model Examples](model_examples.md)**: Examples of CEREBRUM models in various domains
 - **[Active Inference Integration](active_inference_integration.md)**: Details on how CEREBRUM integrates with Active Inference principles
