@@ -582,6 +582,19 @@ class EnhancedCaseAnalyzer:
         """Aggregate evidence from multiple sources into case scores."""
         case_scores = defaultdict(float)
         
+        # If no evidence, return default case distribution
+        if not evidence:
+            return {
+                "nominative": 0.3,
+                "accusative": 0.3,
+                "locative": 0.2,
+                "instrumental": 0.1,
+                "genitive": 0.05,
+                "dative": 0.03,
+                "ablative": 0.02,
+                "vocative": 0.0
+            }
+        
         for ev in evidence:
             # Apply base weight
             base_weight = self.case_base_weights.get(ev.case, 0.5)
@@ -609,6 +622,10 @@ class EnhancedCaseAnalyzer:
         """Apply corrections to reduce known biases."""
         corrected_scores = case_scores.copy()
         
+        # If no scores, return the input unchanged
+        if not corrected_scores:
+            return corrected_scores
+        
         # Locative bias correction
         if "locative" in corrected_scores and corrected_scores["locative"] > 0.6:
             # Check if this is a genuine locative case
@@ -626,7 +643,7 @@ class EnhancedCaseAnalyzer:
                 # Redistribute to other cases
                 remaining_cases = [c for c in corrected_scores if c != "locative"]
                 if remaining_cases:
-                    boost_per_case = (reduction * case_scores["locative"]) / len(remaining_cases)
+                    boost_per_case = (reduction * case_scores.get("locative", 0)) / len(remaining_cases)
                     for case in remaining_cases:
                         corrected_scores[case] += boost_per_case
         

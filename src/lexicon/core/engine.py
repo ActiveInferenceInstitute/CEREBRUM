@@ -17,6 +17,7 @@ import uuid
 import traceback
 import numpy as np
 from dotenv import load_dotenv
+import re
 
 # Import LEXICON components
 from .config import LexiconConfig, get_default_config
@@ -601,14 +602,15 @@ class LexiconEngine:
         try:
             return json.loads(response)
         except json.JSONDecodeError:
+            # Fallback to manual repair
+            response = re.sub(r',(\s*[}\]])', r'\1', response)  # Fix trailing commas
+            response = response.replace("'", '"')  # Fix single quotes
             try:
-                import json_repair
-                return json_repair.loads(response)
-            except (ImportError, Exception):
-                self.logger.warning("json_repair not available or failed")
-                # Fallback to manual repair
-                response = re.sub(r',(\s*[}\]])', r'\1', response)  # Fix trailing commas
-                response = response.replace("'", '"')  # Fix single quotes
+                return json.loads(response)
+            except json.JSONDecodeError:
+                # More repairs: add missing closing braces if needed
+                if '{' in response and response.count('{') > response.count('}'):
+                    response += '}' * (response.count('{') - response.count('}'))
                 try:
                     return json.loads(response)
                 except json.JSONDecodeError:
@@ -841,7 +843,7 @@ class LexiconEngine:
             if metadata is None:
                 metadata = {}
             
-            # Initialize result structure
+            # Initialize result structure with all keys
             result = {
                 "status": "success",
                 "session_id": metadata.get("session_id", str(uuid.uuid4())),
@@ -856,7 +858,10 @@ class LexiconEngine:
                 "graph": {
                     "nodes": [],
                     "edges": []
-                }
+                },
+                "entities": [],  # Add this
+                "claims": [],    # Add this
+                "relations": []  # Add this
             }
             
             # Detect entities with timing and logging
@@ -891,14 +896,31 @@ class LexiconEngine:
             claims_duration = time.time() - claims_start
             self.logger.info(f"Detected {len(claims)} claims in {claims_duration:.2f}s", extra={"claims_detected": len(claims), "duration": claims_duration})
             
-            # Build graph
+            # After detection
+            result["entities"] = entities
+            result["claims"] = claims
+            
+            # Build knowledge graph
             self.logger.info("Building knowledge graph")
             graph_start = time.time()
             graph = self._build_knowledge_graph(entities, claims, text)
             graph_duration = time.time() - graph_start
             self.logger.info(f"Built graph with {len(graph['nodes'])} nodes and {len(graph['edges'])} edges in {graph_duration:.2f}s", extra={"nodes": len(graph["nodes"]), "edges": len(graph["edges"]), "duration": graph_duration})
             
-            # Validate
+            # Extract relations from graph edges
+            relations = []
+            for edge in graph.get("edges", []):
+                relations.append({
+                    "source_entity": edge.get("source"),
+                    "target_entity": edge.get("target"),
+                    "relation_type": edge.get("type"),
+                    "confidence": edge.get("confidence", 0.5)
+                })
+            
+            result["relations"] = relations
+            result["graph"] = graph
+            
+            # Validate - now safe since keys exist
             if not result["entities"] or not result["claims"] or not result["graph"]["nodes"]:
                 self.logger.warning("Empty results detected", extra={"warning": "empty_output"})
             
