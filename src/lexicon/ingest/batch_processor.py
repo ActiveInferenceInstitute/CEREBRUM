@@ -100,6 +100,23 @@ def process_single_file_in_batch(input_file: Path, output_dir: Path,
     return result
 
 
+def generate_health_summary(batch_results: Dict[str, Any]) -> Dict[str, Any]:
+    """Generate health summary for batch processing."""
+    total_files = len(batch_results)
+    successful = sum(1 for r in batch_results.values() if r['status'] == 'success')
+    errors = total_files - successful
+    avg_entities = sum(r['stats']['entities'] for r in batch_results.values() if 'stats' in r) / max(successful, 1)
+    avg_claims = sum(r['stats']['claims'] for r in batch_results.values() if 'stats' in r) / max(successful, 1)
+    warnings = [r.get('warning', []) for r in batch_results.values() if 'warning' in r]
+    return {
+        'success_rate': successful / total_files * 100,
+        'errors': errors,
+        'avg_entities': avg_entities,
+        'avg_claims': avg_claims,
+        'warnings': warnings
+    }
+
+
 def process_all_inputs(base_dir: Path, model: str = "anthropic/claude-3.5-sonnet", 
                       log_level: str = "INFO") -> Dict[str, Any]:
     """

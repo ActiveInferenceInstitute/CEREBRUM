@@ -82,9 +82,29 @@ def setup_logging(
     logger.setLevel(getattr(logging, config.log_level))
     logger.handlers = []  # Remove any existing handlers
     
-    # Create console handler
+    # Create console handler with colored output if possible
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(getattr(logging, config.log_level))
+    
+    try:
+        from colorlog import ColoredFormatter
+        console_formatter = ColoredFormatter(
+            "%(log_color)s%(asctime)s - %(name)s - %(levelname)s - %(message)s%(reset)s",
+            datefmt=None,
+            reset=True,
+            log_colors={
+                'DEBUG': 'cyan',
+                'INFO': 'green',
+                'WARNING': 'yellow',
+                'ERROR': 'red',
+                'CRITICAL': 'red,bg_white',
+            }
+        )
+    except ImportError:
+        console_formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+    console_handler.setFormatter(console_formatter)
     
     # Create file handler if log_file is provided or use default
     if log_file is None:
@@ -97,24 +117,9 @@ def setup_logging(
     file_handler = logging.FileHandler(log_path)
     file_handler.setLevel(getattr(logging, config.log_level))
     
-    # Create formatters
-    if config.enable_detailed_logging:
-        # Use JSON formatter for structured logging
-        json_formatter = StructuredLogFormatter()
-        file_handler.setFormatter(json_formatter)
-        
-        # Use simpler format for console
-        console_formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        )
-        console_handler.setFormatter(console_formatter)
-    else:
-        # Use simple formatter for both
-        simple_formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-        )
-        file_handler.setFormatter(simple_formatter)
-        console_handler.setFormatter(simple_formatter)
+    # Always use JSON formatter for file logging
+    json_formatter = StructuredLogFormatter()
+    file_handler.setFormatter(json_formatter)
     
     # Add handlers
     logger.addHandler(console_handler)

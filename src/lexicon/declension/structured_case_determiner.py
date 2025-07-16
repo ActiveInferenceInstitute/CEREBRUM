@@ -276,8 +276,21 @@ IMPORTANT GUIDELINES:
         except Exception as e:
             self.logger.debug(f"JSON Strategy 5 failed: {e}")
         
+        # New Strategy 6: Use json_repair library if available
+        try:
+            import json_repair
+            repaired_json = json_repair.loads(response)
+            assignments = self._process_parsed_json(repaired_json, entities)
+            if assignments:
+                return assignments
+        except ImportError:
+            self.logger.debug("json_repair not available, skipping strategy 6")
+        except Exception as e:
+            self.logger.debug(f"JSON repair strategy failed: {e}")
+        
         # Final fallback: Create assignments for all entities
         self.logger.error("All JSON parsing strategies failed, using fallback assignments")
+        self.logger.debug(f"Problematic response: {response}")  # Log the full response for debugging
         return [self._create_fallback_assignment(entity) for entity in entities]
     
     def _extract_json_strategy_1(self, response: str) -> Optional[str]:

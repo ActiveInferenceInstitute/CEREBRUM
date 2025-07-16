@@ -542,27 +542,12 @@ class LexiconEngine:
         
         response = self._call_llm(prompt)
         
-        entities = []
         try:
-            # Handle empty or malformed responses
-            if not response or not response.strip():
-                self.logger.warning("Empty response from LLM for relational entity detection")
-                return entities
-            
-            # Try to extract JSON from response (handle code blocks)
-            json_text = response.strip()
-            if "```json" in json_text:
-                # Extract JSON from code blocks
-                import re
-                json_match = re.search(r'```json\s*(.*?)\s*```', json_text, re.DOTALL)
-                if json_match:
-                    json_text = json_match.group(1)
-                else:
-                    self.logger.warning("Found ```json markers but couldn't extract JSON content")
-                    return entities
-            
-            relational_data = json.loads(json_text)
-            extracted_entities = relational_data.get('entities', [])
+            # Enhanced parsing with fallbacks
+            extracted_entities = self._robust_json_parse(response)
+            if not extracted_entities:
+                self.logger.warning("Failed to parse relational entities, using fallback")
+                return []
             
             # Extract entity texts for structured case determination
             if extracted_entities:
@@ -578,66 +563,56 @@ class LexiconEngine:
                         # Build final entities with structured case assignments
                         for entity_data in extracted_entities:
                             entity_text = entity_data.get("text", "")
+                            assignment = assignment_map.get(entity_text)
                             
-                            if entity_text in assignment_map:
-                                assignment = assignment_map[entity_text]
-                                
-                                entity = {
-                                    "id": str(uuid.uuid4()),
-                                    "text": entity_text,
-                                    "type": entity_data.get("type", "unknown"),
+                            if assignment:
+                                entity_data.update({
                                     "case": assignment.case,
                                     "confidence": assignment.confidence,
                                     "case_rationale": assignment.rationale,
                                     "linguistic_features": assignment.linguistic_features,
                                     "context_analysis": assignment.context_analysis,
-                                    "alternative_cases": assignment.alternative_cases,
-                                    "relationships": entity_data.get("relationships", []),
-                                    "metadata": {
-                                        "detection_strategy": "relational",
-                                        "structured_analysis": True
-                                    }
-                                }
-                                entities.append(entity)
+                                    "alternative_cases": assignment.alternative_cases
+                                })
                             else:
-                                # Fallback for entities without case assignment
-                                entity = {
-                                    "id": str(uuid.uuid4()),
-                                    "text": entity_text,
-                                    "type": entity_data.get("type", "unknown"),
+                                entity_data.update({
                                     "case": "locative",
-                                    "confidence": 0.6,
-                                    "case_rationale": "Fallback assignment for relational entity",
-                                    "relationships": entity_data.get("relationships", []),
-                                    "metadata": {
-                                        "detection_strategy": "relational",
-                                        "structured_analysis": False
-                                    }
-                                }
-                                entities.append(entity)
+                                    "confidence": 0.5,
+                                    "case_rationale": "Fallback assignment"
+                                })
+                        
+                        return extracted_entities
                     except Exception as e:
-                        self.logger.warning(f"Structured case determination failed for relational entities: {e}")
-                        # Fallback to simple assignments
+                        self.logger.warning(f"Structured case determination failed: {e}", exc_info=True)
+                        # Fallback to simple case
                         for entity_data in extracted_entities:
-                            entity = {
-                                "id": str(uuid.uuid4()),
-                                "text": entity_data.get("text", ""),
-                                "type": entity_data.get("type", "unknown"),
-                                "case": "locative",
-                                "confidence": 0.5,
-                                "case_rationale": "Fallback assignment",
-                                "relationships": entity_data.get("relationships", []),
-                                "metadata": {
-                                    "detection_strategy": "relational",
-                                    "structured_analysis": False
-                                }
-                            }
-                            entities.append(entity)
-        
-        except json.JSONDecodeError as e:
-            self.logger.error(f"Failed to parse relational entities: {e}")
-        
-        return entities
+                            entity_data["case"] = "locative"
+                            entity_data["confidence"] = 0.5
+                        return extracted_entities
+            
+            return []
+        except Exception as e:
+            self.logger.error(f"Failed to parse relational entities: {e}", exc_info=True)
+            self.logger.debug(f"Problematic response: {response}")
+            return []
+
+    def _robust_json_parse(self, response: str) -> List[Dict]:
+        """Robust JSON parsing with multiple strategies."""
+        try:
+            return json.loads(response)
+        except json.JSONDecodeError:
+            try:
+                import json_repair
+                return json_repair.loads(response)
+            except (ImportError, Exception):
+                self.logger.warning("json_repair not available or failed")
+                # Fallback to manual repair
+                response = re.sub(r',(\s*[}\]])', r'\1', response)  # Fix trailing commas
+                response = response.replace("'", '"')  # Fix single quotes
+                try:
+                    return json.loads(response)
+                except json.JSONDecodeError:
+                    return []
     
     def _detect_explicit_claims(self, text):
         """
@@ -860,7 +835,7 @@ class LexiconEngine:
             Processing result
         """
         try:
-            self.logger.info(f"Processing text with {len(text)} characters")
+            self.logger.info(f"Processing text with {len(text)} characters", extra={"text_length": len(text)})
             
             # Initialize metadata if not provided
             if metadata is None:
@@ -884,8 +859,9 @@ class LexiconEngine:
                 }
             }
             
-            # Detect entities
+            # Detect entities with timing and logging
             self.logger.info("Detecting entities")
+            entities_start = time.time()
             entities = []
             for strategy in self.entity_detection_strategies:
                 self.logger.debug(f"Applying entity detection strategy: {strategy.__name__}")
@@ -894,11 +870,14 @@ class LexiconEngine:
                     if detected:
                         entities.extend(detected)
                 except Exception as e:
-                    self.logger.error(f"Entity detection strategy {strategy.__name__} failed: {e}")
+                    self.logger.error(f"Entity detection strategy {strategy.__name__} failed: {e}", exc_info=True)
                     continue
+            entities_duration = time.time() - entities_start
+            self.logger.info(f"Detected {len(entities)} entities in {entities_duration:.2f}s", extra={"entities_detected": len(entities), "duration": entities_duration})
             
-            # Detect claims
+            # Detect claims with timing and logging
             self.logger.info("Detecting claims")
+            claims_start = time.time()
             claims = []
             for strategy in self.claim_detection_strategies:
                 self.logger.debug(f"Applying claim detection strategy: {strategy.__name__}")
@@ -907,12 +886,21 @@ class LexiconEngine:
                     if detected:
                         claims.extend(detected)
                 except Exception as e:
-                    self.logger.error(f"Claim detection strategy {strategy.__name__} failed: {e}")
+                    self.logger.error(f"Claim detection strategy {strategy.__name__} failed: {e}", exc_info=True)
                     continue
+            claims_duration = time.time() - claims_start
+            self.logger.info(f"Detected {len(claims)} claims in {claims_duration:.2f}s", extra={"claims_detected": len(claims), "duration": claims_duration})
             
-            # Build knowledge graph
+            # Build graph
             self.logger.info("Building knowledge graph")
+            graph_start = time.time()
             graph = self._build_knowledge_graph(entities, claims, text)
+            graph_duration = time.time() - graph_start
+            self.logger.info(f"Built graph with {len(graph['nodes'])} nodes and {len(graph['edges'])} edges in {graph_duration:.2f}s", extra={"nodes": len(graph["nodes"]), "edges": len(graph["edges"]), "duration": graph_duration})
+            
+            # Validate
+            if not result["entities"] or not result["claims"] or not result["graph"]["nodes"]:
+                self.logger.warning("Empty results detected", extra={"warning": "empty_output"})
             
             # Update result
             result["entities"] = entities
