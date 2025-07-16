@@ -1,0 +1,97 @@
+Claims Analysis
+===============
+
+
+Positive Claims:
+1. Within hours, we had emergency coordinators accessing live video feeds...
+   - Case: none
+   - Confidence: 1.0
+
+2. Whatever you just did, we need this in every disaster response toolkit.
+   - Case: none
+   - Confidence: 1.0
+
+3. The technical challenge was fascinating though.
+   - Case: none
+   - Confidence: 1.0
+
+4. AeroSwift Dynamics just closed their Series B funding round with Andreessen Horowitz.
+   - Case: none
+   - Confidence: 0.95
+
+5. AeroSwift Dynamics’ solution is already battle-tested and validated by credible authorities.
+   - Case: none
+   - Confidence: 0.85
+
+6. The improvised drone network covered a 50-square-mile disaster zone.
+   - Case: none
+   - Confidence: 0.75
+
+7. Janet Morrison, the Red Cross emergency coordinator, told them, 'Whatever you just did, we need this in every disaster response toolkit.'
+   - Case: none
+   - Confidence: 0.75
+
+8. Commercial drone technology has the potential to outperform legacy aerospace systems in both speed and cost.
+   - Case: none
+   - Confidence: 0.75
+
+9. Search and rescue teams from Harris County Sheriff's Department reduced their response times by 73%.
+   - Case: none
+   - Confidence: 0.7
+
+10. Edge computing, 5G, LiDAR, and thermal imaging can be seamlessly integrated into compact drone platforms.
+   - Case: none
+   - Confidence: 0.7
+
+
+Negative Claims:
+1. The frustration was real.
+   - Case: none
+   - Confidence: 1.0
+
+2. We watched first responders struggle with outdated communication infrastructure.
+   - Case: none
+   - Confidence: 1.0
+
+3. Traditional aerospace development cycles involve six-month hardware iterations.
+   - Case: none
+   - Confidence: 0.85
+
+4. Regulatory approval processes in traditional aerospace take years.
+   - Case: none
+   - Confidence: 0.85
+
+5. Costs in traditional aerospace make innovation prohibitively expensive for smaller applications.
+   - Case: none
+   - Confidence: 0.8
+
+6. During Hurricane Harvey, cell towers were down and roads were flooded.
+   - Case: none
+   - Confidence: 0.8
+
+7. Traditional quadcopter architectures cannot handle the required flight endurance for the described mission profile.
+   - Case: none
+   - Confidence: 0.8
+
+8. Traditional aerospace development processes are outdated and broken.
+   - Case: none
+   - Confidence: 0.8
+
+9. Government and military procurement cycles are ill-suited for today’s urgent needs.
+   - Case: none
+   - Confidence: 0.7
+
+10. Large defense contractors like Boeing suppress innovation by enforcing rigid, slow processes.
+   - Case: none
+   - Confidence: 0.65
+
+
+Neutral Claims:
+1. Hurricane Harvey occurred in 2017.
+   - Case: none
+   - Confidence: 0.99
+
+2. We jerry-rigged a mesh network using modified DJI Phantom drones with custom payload modules.
+   - Case: none
+   - Confidence: 0.9
+

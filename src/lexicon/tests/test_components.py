@@ -208,7 +208,7 @@ class TestLexiconComponents(unittest.TestCase):
         try:
             engine = LexiconEngine(self.config)
             self.assertIsNotNone(engine)
-            self.assertIsNotNone(engine.openrouter)
+            self.assertIsNotNone(engine.llm_client)
             
             # Save test results
             with open(self.output_dir / "engine_initialization_test.txt", "w") as f:

@@ -5,6 +5,7 @@ Provides animation functions for LEXICON knowledge graphs.
 """
 
 import logging
+import shutil
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Tuple, Union
 
@@ -16,69 +17,61 @@ logger = logging.getLogger(__name__)
 
 def create_graph_animation(graph_data: Dict[str, Any], output_dir: Path) -> List[Path]:
     """
-    Create animations of the graph construction.
+    Create animated visualizations of the knowledge graph.
     
     Args:
-        graph_data: Graph data containing nodes and edges
-        output_dir: Output directory
+        graph_data: Graph data dictionary
+        output_dir: Output directory for animations
         
     Returns:
-        List of paths to generated animation files
+        List of created animation file paths
     """
-    animation_files = []
-    
+    # Check if visualization dependencies are available
     try:
-        # Check for required visualization libraries
         import matplotlib.pyplot as plt
         import networkx as nx
         import numpy as np
         import imageio
-        from matplotlib.animation import FuncAnimation
-        
-        # Ensure output_dir is a Path object
-        if not isinstance(output_dir, Path):
-            output_dir = Path(output_dir)
-            
-        # Ensure the output directory exists
-        output_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Create graph construction animation
-        construction_path = output_dir / "graph_construction.gif"
-        success = _create_graph_construction_animation(graph_data, construction_path)
-        if success and construction_path.exists():
-            animation_files.append(construction_path)
-            logger.info(f"Created graph construction animation: {construction_path}")
-        
-        # Create case evolution animation
-        case_path = output_dir / "case_evolution.gif"
-        success = _create_case_evolution_animation(graph_data, case_path)
-        if success and case_path.exists():
-            animation_files.append(case_path)
-            logger.info(f"Created case evolution animation: {case_path}")
-        
-        # Create polarity animation
-        polarity_path = output_dir / "polarity_animation.gif"
-        success = _create_polarity_animation(graph_data, polarity_path)
-        if success and polarity_path.exists():
-            animation_files.append(polarity_path)
-            logger.info(f"Created polarity animation: {polarity_path}")
-        
-        if not animation_files:
-            logger.warning("No animations were created - check if graph data is suitable for animation")
-        else:
-            logger.info(f"Created {len(animation_files)} animations in {output_dir}")
-        
-        return animation_files
-        
     except ImportError as e:
-        logger.warning(f"Could not create animations due to missing dependencies: {e}")
-        logger.warning("Install matplotlib, networkx, numpy, and imageio for animations")
+        logger.warning(f"Animation dependencies not available: {e}")
         return []
+    
+    # Create visualizations directory
+    vis_dir = output_dir / "visualizations"
+    vis_dir.mkdir(parents=True, exist_ok=True)
+    
+    created_files = []
+    
+    # Create graph construction animation
+    construction_path = vis_dir / "graph_construction.gif"
+    try:
+        if _create_graph_construction_animation(graph_data, construction_path):
+            created_files.append(construction_path)
     except Exception as e:
-        logger.error(f"Error creating animations: {e}")
-        import traceback
-        logger.debug(traceback.format_exc())
-        return []
+        logger.error(f"Failed to create graph construction animation: {e}")
+    
+    # Create case evolution animation
+    case_path = vis_dir / "case_evolution.gif"
+    try:
+        if _create_case_evolution_animation(graph_data, case_path):
+            created_files.append(case_path)
+    except Exception as e:
+        logger.error(f"Failed to create case evolution animation: {e}")
+    
+    # Create polarity animation
+    polarity_path = vis_dir / "polarity_animation.gif"
+    try:
+        if _create_polarity_animation(graph_data, polarity_path):
+            created_files.append(polarity_path)
+    except Exception as e:
+        logger.error(f"Failed to create polarity animation: {e}")
+    
+    if created_files:
+        logger.info(f"Created {len(created_files)} animated visualizations")
+    else:
+        logger.warning("No animated visualizations were created")
+    
+    return created_files
 
 def _create_graph_construction_animation(graph_data: Dict[str, Any], output_path: Path) -> bool:
     """
@@ -310,9 +303,22 @@ def _create_case_evolution_animation(graph_data: Dict[str, Any], output_path: Pa
             logger.warning("No case data to animate")
             return False
         
-        # Create frames directory
+        # Create frames directory with proper cleanup
         frames_dir = output_path.parent / "case_frames"
-        frames_dir.mkdir(exist_ok=True)
+        
+        # Clean up existing frames directory if it exists
+        if frames_dir.exists():
+            try:
+                shutil.rmtree(frames_dir)
+            except Exception as e:
+                logger.warning(f"Could not remove existing frames directory: {e}")
+        
+        # Create fresh frames directory
+        try:
+            frames_dir.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            logger.error(f"Could not create frames directory: {e}")
+            return False
         
         # Create frames showing cases being highlighted
         frames = []
@@ -328,41 +334,49 @@ def _create_case_evolution_animation(graph_data: Dict[str, Any], output_path: Pa
                 
             # Create frame highlighting this case
             frame_path = frames_dir / f"case_{i:04d}.png"
-            _create_case_frame(sorted_cases, case, frame_path)
-            
-            if frame_path.exists():
-                frames.append(frame_path)
+            try:
+                _create_case_frame(sorted_cases, case, frame_path)
+                
+                if frame_path.exists():
+                    frames.append(frame_path)
+            except Exception as e:
+                logger.warning(f"Failed to create case frame for {case}: {e}")
         
         # Create summary frame
         summary_path = frames_dir / "case_summary.png"
-        _create_case_frame(sorted_cases, None, summary_path)
-        
-        if summary_path.exists():
-            # Add summary frame at beginning and end
-            frames = [summary_path] + frames + [summary_path]
+        try:
+            _create_case_frame(sorted_cases, None, summary_path)
+            
+            if summary_path.exists():
+                # Add summary frame at beginning and end
+                frames = [summary_path] + frames + [summary_path]
+        except Exception as e:
+            logger.warning(f"Failed to create case summary frame: {e}")
         
         # Combine frames into GIF
         if not frames:
             logger.warning("No frames were created for case animation")
             return False
         
-        with imageio.get_writer(output_path, mode='I', duration=1.0) as writer:
-            for frame_path in frames:
-                image = imageio.imread(frame_path)
-                writer.append_data(image)
+        try:
+            with imageio.get_writer(output_path, mode='I', duration=1.0) as writer:
+                for frame_path in frames:
+                    if frame_path.exists():
+                        image = imageio.imread(frame_path)
+                        writer.append_data(image)
+            
+            logger.info(f"Created case evolution animation with {len(frames)} frames")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to create GIF animation: {e}")
+            return False
         
-        # Clean up frames
-        for frame in frames:
-            if frame.exists() and frame != summary_path:  # Keep summary frame
-                frame.unlink()
-        
-        if frames_dir.exists():
-            frames_dir.rmdir()
-        
-        return True
-    
+    except ImportError as e:
+        logger.warning(f"Animation dependencies not available: {e}")
+        return False
     except Exception as e:
-        logger.error(f"Failed to create case evolution animation: {e}")
+        logger.error(f"Error creating case evolution animation: {e}")
         return False
 
 def _create_case_frame(cases: List[Tuple[str, int]], highlight_case: Optional[str], output_path: Path) -> None:
@@ -461,28 +475,47 @@ def _create_polarity_animation(graph_data: Dict[str, Any], output_path: Path) ->
             logger.warning("No polarity data to animate")
             return False
         
-        # Create frames directory
+        # Create frames directory with proper cleanup
         frames_dir = output_path.parent / "polarity_frames"
-        frames_dir.mkdir(exist_ok=True)
+        
+        # Clean up existing frames directory if it exists
+        if frames_dir.exists():
+            try:
+                shutil.rmtree(frames_dir)
+            except Exception as e:
+                logger.warning(f"Could not remove existing polarity frames directory: {e}")
+        
+        # Create fresh frames directory
+        try:
+            frames_dir.mkdir(parents=True, exist_ok=True)
+        except Exception as e:
+            logger.error(f"Could not create polarity frames directory: {e}")
+            return False
         
         # Create frames showing polarities being added
         frames = []
         
         # First, create summary frame
         summary_path = frames_dir / "polarity_summary.png"
-        _create_polarity_frame(polarities, None, summary_path)
-        
-        if summary_path.exists():
-            frames.append(summary_path)
+        try:
+            _create_polarity_frame(polarities, None, summary_path)
+            
+            if summary_path.exists():
+                frames.append(summary_path)
+        except Exception as e:
+            logger.warning(f"Failed to create polarity summary frame: {e}")
         
         # Create a frame for each polarity
         for i, polarity in enumerate(polarities.keys()):
             # Create frame highlighting this polarity
             frame_path = frames_dir / f"polarity_{i:04d}.png"
-            _create_polarity_frame(polarities, polarity, frame_path)
-            
-            if frame_path.exists():
-                frames.append(frame_path)
+            try:
+                _create_polarity_frame(polarities, polarity, frame_path)
+                
+                if frame_path.exists():
+                    frames.append(frame_path)
+            except Exception as e:
+                logger.warning(f"Failed to create polarity frame for {polarity}: {e}")
         
         # Add summary frame at end
         if summary_path.exists():
@@ -493,23 +526,25 @@ def _create_polarity_animation(graph_data: Dict[str, Any], output_path: Path) ->
             logger.warning("No frames were created for polarity animation")
             return False
         
-        with imageio.get_writer(output_path, mode='I', duration=1.0) as writer:
-            for frame_path in frames:
-                image = imageio.imread(frame_path)
-                writer.append_data(image)
+        try:
+            with imageio.get_writer(output_path, mode='I', duration=1.5) as writer:
+                for frame_path in frames:
+                    if frame_path.exists():
+                        image = imageio.imread(frame_path)
+                        writer.append_data(image)
+            
+            logger.info(f"Created polarity animation with {len(frames)} frames")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to create polarity GIF animation: {e}")
+            return False
         
-        # Clean up frames
-        for frame in frames:
-            if frame.exists() and frame != summary_path:  # Keep summary frame
-                frame.unlink()
-        
-        if frames_dir.exists():
-            frames_dir.rmdir()
-        
-        return True
-    
+    except ImportError as e:
+        logger.warning(f"Animation dependencies not available: {e}")
+        return False
     except Exception as e:
-        logger.error(f"Failed to create polarity animation: {e}")
+        logger.error(f"Error creating polarity animation: {e}")
         return False
 
 def _create_polarity_frame(polarities: Dict[str, List[Dict]], highlight_polarity: Optional[str], output_path: Path) -> None:

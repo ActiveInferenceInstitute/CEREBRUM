@@ -107,6 +107,11 @@ class LexiconEngine:
         Args:
             config: Configuration object, or None to use defaults
         """
+        # Configure environment first to handle protobuf issues
+        from .environment import configure_protobuf_environment, configure_transformers_environment
+        configure_protobuf_environment()
+        configure_transformers_environment()
+        
         # Initialize configuration
         self.config = config or get_default_config()
         
@@ -212,7 +217,7 @@ class LexiconEngine:
     
     def _detect_named_entities(self, text):
         """
-        Detect named entities using advanced NLP techniques.
+        Detect named entities using advanced NLP techniques and structured case determination.
         
         Args:
             text (str): Input text
@@ -223,42 +228,146 @@ class LexiconEngine:
         try:
             import spacy
             
-            # Load a more advanced NER model
-            nlp = spacy.load("en_core_web_trf")  # Transformer-based model
-            doc = nlp(text)
+            # Load spaCy model (try transformer first, fallback to smaller model)
+            nlp = None
+            for model_name in ["en_core_web_trf", "en_core_web_sm"]:
+                try:
+                    nlp = spacy.load(model_name)
+                    break
+                except IOError:
+                    continue
             
+            if nlp is None:
+                self.logger.warning("No spaCy model available, falling back to structured LLM detection")
+                return self._llm_entity_detection_with_structured_cases(text)
+            
+            doc = nlp(text)
             entities = []
+            
+            # Extract entities using spaCy
+            entity_texts = []
+            entity_metadata = {}
+            
             for ent in doc.ents:
-                # Use the new case determination method
-                case_info = self._determine_grammatical_case(ent.text)
+                # Get surrounding context for better case determination
+                start_context = text[max(0, ent.start_char - 100):ent.start_char]
+                end_context = text[ent.end_char:min(len(text), ent.end_char + 100)]
+                context = f"{start_context} {ent.text} {end_context}".strip()
                 
-                entities.append({
-                    "text": ent.text,
+                entity_texts.append(ent.text)
+                entity_metadata[ent.text] = {
                     "type": ent.label_,
-                    "case": case_info["type"],
-                    "confidence": case_info["confidence"],
-                    "case_rationale": case_info["rationale"],
-                    "metadata": {
-                        "source": "spacy_ner",
-                        "start_char": ent.start_char,
-                        "end_char": ent.end_char
-                    }
-                })
+                    "start_char": ent.start_char,
+                    "end_char": ent.end_char,
+                    "context": context,
+                    "source": "spacy_ner"
+                }
+            
+            # Use structured case determiner for batch case assignment
+            if entity_texts:
+                try:
+                    from ..declension.structured_case_determiner import StructuredCaseDeterminer
+                    case_determiner = StructuredCaseDeterminer(self.llm_client, self.config)
+                    case_assignments = case_determiner.determine_cases_batch(entity_texts, text)
+                    
+                    # Build final entity list with structured case assignments
+                    for assignment in case_assignments:
+                        metadata = entity_metadata.get(assignment.entity_text, {})
+                        
+                        entities.append({
+                            "text": assignment.entity_text,
+                            "type": metadata.get("type", "ENTITY"),
+                            "case": assignment.case,
+                            "confidence": assignment.confidence,
+                            "case_rationale": assignment.rationale,
+                            "linguistic_features": assignment.linguistic_features,
+                            "context_analysis": assignment.context_analysis,
+                            "alternative_cases": assignment.alternative_cases,
+                            "metadata": {
+                                **metadata,
+                                "structured_analysis": True
+                            }
+                        })
+                except Exception as e:
+                    self.logger.warning(f"Structured case determination failed: {e}, using fallback")
+                    # Fallback to original method
+                    for ent in doc.ents:
+                        context = entity_metadata[ent.text]["context"]
+                        case_info = self._determine_grammatical_case(ent.text, context)
+                        
+                        entities.append({
+                            "text": ent.text,
+                            "type": ent.label_,
+                            "case": case_info["type"],
+                            "confidence": case_info["confidence"],
+                            "case_rationale": case_info["rationale"],
+                            "metadata": entity_metadata[ent.text]
+                        })
             
             return entities
+            
         except ImportError:
-            # Fallback to LLM-based detection
-            return self._llm_entity_detection(text)
+            # Fallback to LLM-based detection with structured cases
+            return self._llm_entity_detection_with_structured_cases(text)
+    
+    def _llm_entity_detection_with_structured_cases(self, text):
+        """
+        LLM-based entity detection with structured case determination.
+        
+        Args:
+            text: Input text
+            
+        Returns:
+            List of entities with structured case assignments
+        """
+        try:
+            # First, extract entities using LLM
+            entities = self._llm_entity_detection(text)
+            
+            # Then use structured case determination
+            if entities:
+                entity_texts = [e.get("text", "") for e in entities if e.get("text")]
+                
+                if entity_texts:
+                    from ..declension.structured_case_determiner import StructuredCaseDeterminer
+                    case_determiner = StructuredCaseDeterminer(self.llm_client, self.config)
+                    case_assignments = case_determiner.determine_cases_batch(entity_texts, text)
+                    
+                    # Update entities with structured case information
+                    assignment_map = {a.entity_text: a for a in case_assignments}
+                    
+                    for entity in entities:
+                        entity_text = entity.get("text", "")
+                        if entity_text in assignment_map:
+                            assignment = assignment_map[entity_text]
+                            entity.update({
+                                "case": assignment.case,
+                                "confidence": assignment.confidence,
+                                "case_rationale": assignment.rationale,
+                                "linguistic_features": assignment.linguistic_features,
+                                "context_analysis": assignment.context_analysis,
+                                "alternative_cases": assignment.alternative_cases,
+                                "metadata": {
+                                    **entity.get("metadata", {}),
+                                    "structured_analysis": True
+                                }
+                            })
+            
+            return entities
+            
+        except Exception as e:
+            self.logger.error(f"LLM entity detection with structured cases failed: {e}")
+            return []
     
     def _detect_contextual_entities(self, text):
         """
-        Detect contextual entities using LLM.
+        Detect contextual entities using LLM with structured case determination.
         
         Args:
             text: Input text
         
         Returns:
-            list: Detected contextual entities
+            list: Detected contextual entities with structured case assignments
         """
         prompt = f"""
         Extract all important entities from the following text. Include people, organizations, 
@@ -345,17 +454,63 @@ class LexiconEngine:
             if 'category' not in entity:
                 entity['category'] = 'unknown'
         
+        # Apply structured case determination to contextual entities
+        if entities:
+            try:
+                from ..declension.structured_case_determiner import StructuredCaseDeterminer
+                case_determiner = StructuredCaseDeterminer(self.llm_client, self.config)
+                entity_texts = [e.get("text", "") for e in entities if e.get("text")]
+                
+                if entity_texts:
+                    case_assignments = case_determiner.determine_cases_batch(entity_texts, text)
+                    assignment_map = {a.entity_text: a for a in case_assignments}
+                    
+                    # Update entities with structured case information
+                    for entity in entities:
+                        entity_text = entity.get("text", "")
+                        if entity_text in assignment_map:
+                            assignment = assignment_map[entity_text]
+                            entity.update({
+                                "case": assignment.case,
+                                "confidence": min(entity.get("confidence", 0.8), assignment.confidence),
+                                "case_rationale": assignment.rationale,
+                                "linguistic_features": assignment.linguistic_features,
+                                "context_analysis": assignment.context_analysis,
+                                "alternative_cases": assignment.alternative_cases,
+                                "metadata": {
+                                    **entity.get("metadata", {}),
+                                    "detection_strategy": "contextual",
+                                    "structured_analysis": True
+                                }
+                            })
+                        else:
+                            # Fallback case assignment for entities not processed
+                            entity.update({
+                                "case": "locative",
+                                "confidence": entity.get("confidence", 0.5),
+                                "case_rationale": "Fallback assignment for contextual entity"
+                            })
+            except Exception as e:
+                self.logger.warning(f"Structured case determination failed for contextual entities: {e}")
+                # Fallback to simple case assignment
+                for entity in entities:
+                    entity.update({
+                        "case": "locative",
+                        "confidence": entity.get("confidence", 0.5),
+                        "case_rationale": "Fallback assignment"
+                    })
+        
         return entities
 
     def _detect_relational_entities(self, text):
         """
-        Detect entities based on their relationships in the text.
+        Detect entities based on their relationships in the text with structured case determination.
         
         Args:
             text (str): Input text
         
         Returns:
-            list: Entities with relationship metadata
+            list: Entities with relationship metadata and structured case assignments
         """
         prompt = f"""
         Analyze the following text and identify entities and their key relationships:
@@ -387,15 +542,106 @@ class LexiconEngine:
         
         response = self._call_llm(prompt)
         
+        entities = []
         try:
-            relational_data = json.loads(response)
-            return relational_data.get('entities', [])
-        except json.JSONDecodeError:
-            return []
+            # Handle empty or malformed responses
+            if not response or not response.strip():
+                self.logger.warning("Empty response from LLM for relational entity detection")
+                return entities
+            
+            # Try to extract JSON from response (handle code blocks)
+            json_text = response.strip()
+            if "```json" in json_text:
+                # Extract JSON from code blocks
+                import re
+                json_match = re.search(r'```json\s*(.*?)\s*```', json_text, re.DOTALL)
+                if json_match:
+                    json_text = json_match.group(1)
+                else:
+                    self.logger.warning("Found ```json markers but couldn't extract JSON content")
+                    return entities
+            
+            relational_data = json.loads(json_text)
+            extracted_entities = relational_data.get('entities', [])
+            
+            # Extract entity texts for structured case determination
+            if extracted_entities:
+                entity_texts = [e.get("text", "") for e in extracted_entities if e.get("text")]
+                
+                if entity_texts:
+                    try:
+                        from ..declension.structured_case_determiner import StructuredCaseDeterminer
+                        case_determiner = StructuredCaseDeterminer(self.llm_client, self.config)
+                        case_assignments = case_determiner.determine_cases_batch(entity_texts, text)
+                        assignment_map = {a.entity_text: a for a in case_assignments}
+                        
+                        # Build final entities with structured case assignments
+                        for entity_data in extracted_entities:
+                            entity_text = entity_data.get("text", "")
+                            
+                            if entity_text in assignment_map:
+                                assignment = assignment_map[entity_text]
+                                
+                                entity = {
+                                    "id": str(uuid.uuid4()),
+                                    "text": entity_text,
+                                    "type": entity_data.get("type", "unknown"),
+                                    "case": assignment.case,
+                                    "confidence": assignment.confidence,
+                                    "case_rationale": assignment.rationale,
+                                    "linguistic_features": assignment.linguistic_features,
+                                    "context_analysis": assignment.context_analysis,
+                                    "alternative_cases": assignment.alternative_cases,
+                                    "relationships": entity_data.get("relationships", []),
+                                    "metadata": {
+                                        "detection_strategy": "relational",
+                                        "structured_analysis": True
+                                    }
+                                }
+                                entities.append(entity)
+                            else:
+                                # Fallback for entities without case assignment
+                                entity = {
+                                    "id": str(uuid.uuid4()),
+                                    "text": entity_text,
+                                    "type": entity_data.get("type", "unknown"),
+                                    "case": "locative",
+                                    "confidence": 0.6,
+                                    "case_rationale": "Fallback assignment for relational entity",
+                                    "relationships": entity_data.get("relationships", []),
+                                    "metadata": {
+                                        "detection_strategy": "relational",
+                                        "structured_analysis": False
+                                    }
+                                }
+                                entities.append(entity)
+                    except Exception as e:
+                        self.logger.warning(f"Structured case determination failed for relational entities: {e}")
+                        # Fallback to simple assignments
+                        for entity_data in extracted_entities:
+                            entity = {
+                                "id": str(uuid.uuid4()),
+                                "text": entity_data.get("text", ""),
+                                "type": entity_data.get("type", "unknown"),
+                                "case": "locative",
+                                "confidence": 0.5,
+                                "case_rationale": "Fallback assignment",
+                                "relationships": entity_data.get("relationships", []),
+                                "metadata": {
+                                    "detection_strategy": "relational",
+                                    "structured_analysis": False
+                                }
+                            }
+                            entities.append(entity)
+        
+        except json.JSONDecodeError as e:
+            self.logger.error(f"Failed to parse relational entities: {e}")
+        
+        return entities
     
     def _detect_explicit_claims(self, text):
         """
-        Detect explicit claims in the text.
+        Detect explicit claims in the text, including scientific methodology statements.
         
         Args:
             text (str): Input text
@@ -403,34 +649,126 @@ class LexiconEngine:
         Returns:
             list: Explicit claims with metadata
         """
-        prompt = f"""
-        Identify explicit claims in the following text:
-        - Look for clear statements of fact or opinion
-        - Assess the polarity and confidence of each claim
-        - Consider the context and implications
+        # Determine if this is scientific/technical text
+        is_scientific = self._is_scientific_text(text)
         
-        Text: {text}
-        
-        Output format (JSON):
-        [
-            {{
-                "text": "Claim statement",
-                "polarity": "positive|negative|neutral",
-                "confidence": 0.8,
-                "case": "grammatical case",
-                "supporting_evidence": "Brief context"
-            }},
-            ...
-        ]
-        """
+        if is_scientific:
+            prompt = f"""
+            Identify explicit claims and methodological statements in the following scientific text:
+            - Look for clear statements of fact, methodology, or experimental procedures
+            - Include statements about what was done, how it was done, and what was observed
+            - Methodological statements like "were synthesized using", "was performed at", "resulted in"
+            - Experimental observations and results
+            - Assess the polarity and confidence of each claim
+            
+            Text: {text}
+            
+            Output format (JSON):
+            [
+                {{
+                    "text": "Claim or methodological statement",
+                    "type": "factual|methodological|observational|conclusive",
+                    "polarity": "positive|negative|neutral",
+                    "confidence": 0.8,
+                    "case": "accusative",
+                    "supporting_evidence": "Brief context",
+                    "scientific_category": "method|result|observation|conclusion"
+                }},
+                ...
+            ]
+            """
+        else:
+            prompt = f"""
+            Identify explicit claims in the following text:
+            - Look for clear statements of fact or opinion
+            - Assess the polarity and confidence of each claim
+            - Consider the context and implications
+            
+            Text: {text}
+            
+            Output format (JSON):
+            [
+                {{
+                    "text": "Claim statement",
+                    "type": "factual|opinion|assertion",
+                    "polarity": "positive|negative|neutral",
+                    "confidence": 0.8,
+                    "case": "accusative",
+                    "supporting_evidence": "Brief context"
+                }},
+                ...
+            ]
+            """
         
         response = self._call_llm(prompt)
         
         try:
-            explicit_claims = json.loads(response)
+            # Try to parse JSON response
+            if response.strip().startswith('[') and response.strip().endswith(']'):
+                explicit_claims = json.loads(response)
+            elif response.strip().startswith('{') and response.strip().endswith('}'):
+                parsed = json.loads(response)
+                explicit_claims = parsed.get('claims', [])
+            else:
+                # Try to extract JSON from text
+                import re
+                json_match = re.search(r'\[\s*\{.*\}\s*\]', response, re.DOTALL)
+                if json_match:
+                    explicit_claims = json.loads(json_match.group(0))
+                else:
+                    explicit_claims = []
+            
+            # Ensure all claims have required fields
+            for claim in explicit_claims:
+                if 'id' not in claim:
+                    claim['id'] = str(uuid.uuid4())
+                if 'confidence' not in claim:
+                    claim['confidence'] = 0.7
+                if 'case' not in claim:
+                    claim['case'] = 'accusative'  # Claims are typically accusative (objects of assertion)
+                if 'type' not in claim:
+                    claim['type'] = 'factual'
+            
             return explicit_claims
-        except json.JSONDecodeError:
+            
+        except json.JSONDecodeError as e:
+            self.logger.warning(f"Failed to parse claims JSON: {e}")
             return []
+    
+    def _is_scientific_text(self, text):
+        """
+        Determine if text appears to be scientific/technical.
+        
+        Args:
+            text (str): Input text
+            
+        Returns:
+            bool: True if scientific text detected
+        """
+        scientific_indicators = [
+            # Methodology indicators
+            'were synthesized', 'was performed', 'was conducted', 'was carried out',
+            'was analyzed', 'was measured', 'was observed', 'was recorded',
+            'using', 'via', 'through', 'by means of',
+            
+            # Scientific vocabulary
+            'experiment', 'method', 'procedure', 'protocol', 'analysis',
+            'measurement', 'observation', 'data', 'results', 'findings',
+            'temperature', 'concentration', 'solution', 'sample',
+            
+            # Units and measurements
+            '°C', 'mg/mL', 'μg', 'rpm', 'nm', 'pH', 'min', 'hrs',
+            
+            # Chemical/biological terms
+            'synthesis', 'characterization', 'purification', 'extraction',
+            'culture', 'medium', 'buffer', 'reagent', 'solvent'
+        ]
+        
+        text_lower = text.lower()
+        matches = sum(1 for indicator in scientific_indicators if indicator in text_lower)
+        
+        # If more than 3 scientific indicators, consider it scientific text
+        return matches >= 3
     
     def _detect_implicit_claims(self, text):
         """
@@ -617,10 +955,15 @@ class LexiconEngine:
             "edges": []
         }
         
+        # Track node IDs for edge creation
+        entity_nodes = {}
+        claim_nodes = {}
+        
         # Add entities as nodes
         for entity in entities:
+            entity_id = entity.get("id", str(uuid.uuid4()))
             node = {
-                "id": entity.get("id", str(uuid.uuid4())),
+                "id": entity_id,
                 "label": entity.get("text", ""),
                 "type": "entity",
                 "category": entity.get("type", "unknown"),
@@ -630,11 +973,13 @@ class LexiconEngine:
                 "data": entity
             }
             graph["nodes"].append(node)
+            entity_nodes[entity.get("text", "").lower()] = entity_id
         
         # Add claims as nodes
         for claim in claims:
+            claim_id = claim.get("id", str(uuid.uuid4()))
             node = {
-                "id": claim.get("id", str(uuid.uuid4())),
+                "id": claim_id,
                 "label": claim.get("text", ""),
                 "type": "claim",
                 "polarity": claim.get("polarity", "neutral"),
@@ -642,43 +987,198 @@ class LexiconEngine:
                 "data": claim
             }
             graph["nodes"].append(node)
+            claim_nodes[claim.get("text", "").lower()] = claim_id
         
-        # Create edges between entities and claims
+        # Create relationships between entities and claims
+        self._create_entity_claim_relationships(graph, entities, claims, entity_nodes, claim_nodes)
+        
+        # Create relationships between entities based on co-occurrence
+        self._create_entity_cooccurrence_relationships(graph, entities, entity_nodes, text)
+        
+        # Create relationships based on grammatical cases
+        self._create_case_based_relationships(graph, entities, entity_nodes)
+        
+        return graph
+    
+    def _create_entity_claim_relationships(self, graph, entities, claims, entity_nodes, claim_nodes):
+        """
+        Create relationships between entities and claims.
+        
+        Args:
+            graph: Graph to add edges to
+            entities: List of entities
+            claims: List of claims
+            entity_nodes: Mapping of entity text to node IDs
+            claim_nodes: Mapping of claim text to node IDs
+        """
         for claim in claims:
-            claim_id = claim.get("id", "")
+            claim_text = claim.get("text", "").lower()
+            claim_id = claim_nodes.get(claim_text)
             
-            # Connect entities mentioned in the claim
+            if not claim_id:
+                continue
+                
+            # Find entities mentioned in this claim
             for entity in entities:
-                entity_id = entity.get("id", "")
                 entity_text = entity.get("text", "").lower()
+                entity_id = entity_nodes.get(entity_text)
+                
+                if not entity_id:
+                    continue
                 
                 # Check if entity is mentioned in claim
-                if entity_text and entity_text in claim.get("text", "").lower():
+                if entity_text in claim_text or any(word in claim_text for word in entity_text.split()):
+                    edge_id = f"{entity_id}_{claim_id}_mentions"
                     edge = {
-                        "id": f"{entity_id}_{claim_id}",
+                        "id": edge_id,
                         "source": entity_id,
                         "target": claim_id,
                         "type": "mentions",
                         "case": entity.get("case", "locative"),
-                        "weight": 1.0
+                        "weight": min(entity.get("confidence", 0.5), claim.get("confidence", 0.5))
                     }
                     graph["edges"].append(edge)
+    
+    def _create_entity_cooccurrence_relationships(self, graph, entities, entity_nodes, text):
+        """
+        Create relationships between entities based on co-occurrence in text.
         
-        # Add case-based relationship detection
-        for i, node1 in enumerate(graph["nodes"]):
-            for node2 in graph["nodes"][i+1:]:
-                relationship = self._detect_node_relationship(node1, node2)
-                if relationship:
-                    edge = {
-                        "id": f"{node1['id']}_{node2['id']}",
-                        "source": node1["id"],
-                        "target": node2["id"],
-                        "type": relationship.get("type", "related"),
-                        "weight": relationship.get("confidence", 0.5)
-                    }
-                    graph["edges"].append(edge)
+        Args:
+            graph: Graph to add edges to
+            entities: List of entities
+            entity_nodes: Mapping of entity text to node IDs
+            text: Original text
+        """
+        if not text:
+            return
         
-        return graph
+        # Create sentence-level co-occurrence relationships
+        sentences = text.split('. ')
+        
+        for sentence in sentences:
+            sentence_lower = sentence.lower()
+            sentence_entities = []
+            
+            # Find entities in this sentence
+            for entity in entities:
+                entity_text = entity.get("text", "").lower()
+                if entity_text in sentence_lower:
+                    sentence_entities.append(entity)
+            
+            # Create relationships between co-occurring entities
+            for i, entity1 in enumerate(sentence_entities):
+                for j, entity2 in enumerate(sentence_entities[i+1:], i+1):
+                    entity1_text = entity1.get("text", "").lower()
+                    entity2_text = entity2.get("text", "").lower()
+                    
+                    entity1_id = entity_nodes.get(entity1_text)
+                    entity2_id = entity_nodes.get(entity2_text)
+                    
+                    if entity1_id and entity2_id and entity1_id != entity2_id:
+                        # Determine relationship type based on cases
+                        rel_type = self._determine_relationship_type(entity1, entity2)
+                        
+                        edge_id = f"{entity1_id}_{entity2_id}_{rel_type}"
+                        edge = {
+                            "id": edge_id,
+                            "source": entity1_id,
+                            "target": entity2_id,
+                            "type": rel_type,
+                            "case": "locative",  # Default case for relationships
+                            "weight": 0.7
+                        }
+                        graph["edges"].append(edge)
+    
+    def _create_case_based_relationships(self, graph, entities, entity_nodes):
+        """
+        Create relationships between entities based on their grammatical cases.
+        
+        Args:
+            graph: Graph to add edges to
+            entities: List of entities  
+            entity_nodes: Mapping of entity text to node IDs
+        """
+        # Group entities by case
+        entities_by_case = {}
+        for entity in entities:
+            case = entity.get("case", "locative")
+            if case not in entities_by_case:
+                entities_by_case[case] = []
+            entities_by_case[case].append(entity)
+        
+        # Create relationships between nominative and accusative entities (subject-object)
+        if "nominative" in entities_by_case and "accusative" in entities_by_case:
+            for nom_entity in entities_by_case["nominative"]:
+                for acc_entity in entities_by_case["accusative"]:
+                    nom_id = entity_nodes.get(nom_entity.get("text", "").lower())
+                    acc_id = entity_nodes.get(acc_entity.get("text", "").lower())
+                    
+                    if nom_id and acc_id and nom_id != acc_id:
+                        edge_id = f"{nom_id}_{acc_id}_acts_upon"
+                        edge = {
+                            "id": edge_id,
+                            "source": nom_id,
+                            "target": acc_id,
+                            "type": "acts_upon",
+                            "case": "accusative",
+                            "weight": 0.8
+                        }
+                        graph["edges"].append(edge)
+        
+        # Create relationships between genitive and other entities (possession)
+        if "genitive" in entities_by_case:
+            for gen_entity in entities_by_case["genitive"]:
+                for other_case, case_entities in entities_by_case.items():
+                    if other_case == "genitive":
+                        continue
+                    
+                    for other_entity in case_entities:
+                        gen_id = entity_nodes.get(gen_entity.get("text", "").lower())
+                        other_id = entity_nodes.get(other_entity.get("text", "").lower())
+                        
+                        if gen_id and other_id and gen_id != other_id:
+                            edge_id = f"{gen_id}_{other_id}_possesses"
+                            edge = {
+                                "id": edge_id,
+                                "source": gen_id,
+                                "target": other_id,
+                                "type": "possesses",
+                                "case": "genitive",
+                                "weight": 0.7
+                            }
+                            graph["edges"].append(edge)
+    
+    def _determine_relationship_type(self, entity1, entity2):
+        """
+        Determine the type of relationship between two entities based on their cases.
+        
+        Args:
+            entity1: First entity
+            entity2: Second entity
+            
+        Returns:
+            str: Relationship type
+        """
+        case1 = entity1.get("case", "locative")
+        case2 = entity2.get("case", "locative")
+        
+        # Define relationship patterns
+        if case1 == "nominative" and case2 == "accusative":
+            return "acts_upon"
+        elif case1 == "accusative" and case2 == "nominative":
+            return "acted_upon_by"
+        elif case1 == "genitive" or case2 == "genitive":
+            return "possesses"
+        elif case1 == "dative" or case2 == "dative":
+            return "receives_from"
+        elif case1 == "instrumental" or case2 == "instrumental":
+            return "uses"
+        elif case1 == "ablative" or case2 == "ablative":
+            return "originates_from"
+        elif case1 == "locative" or case2 == "locative":
+            return "co_located_with"
+        else:
+            return "related_to"
     
     def _detect_node_relationship(self, node1, node2):
         """
@@ -697,7 +1197,7 @@ class LexiconEngine:
         # Example simple relationship detection
         if node1["type"] == "entity" and node2["type"] == "claim":
             # Check for textual similarity or semantic relationship
-            similarity = self._calculate_semantic_similarity(node1["text"], node2["text"])
+            similarity = self._calculate_semantic_similarity(node1["label"], node2["label"])
             if similarity > 0.5:
                 return {
                     "type": "relates_to",
@@ -717,6 +1217,15 @@ class LexiconEngine:
         Returns:
             float: Similarity score
         """
+        # Configure environment first to handle protobuf issues
+        from .environment import configure_protobuf_environment, test_transformers_import
+        configure_protobuf_environment()
+        
+        # Test if transformers is working before attempting to use it
+        if not test_transformers_import():
+            self.logger.debug("Transformers not available, using simple text similarity")
+            return self._simple_text_similarity(text1, text2)
+        
         try:
             import sentence_transformers
             
@@ -725,15 +1234,36 @@ class LexiconEngine:
             
             # Calculate cosine similarity
             similarity = np.dot(embeddings[0], embeddings[1]) / (
-                np.linalg.norm(embeddings[0]) * np.linalg.norm(embeddings[1])
-            )
+                np.linalg.norm(embeddings[0]) * np.linalg.norm(embeddings[1]))
             
             return float(similarity)
-        except ImportError:
-            # Fallback to simple text comparison
-            return len(set(text1.lower().split()) & set(text2.lower().split())) / len(
-                set(text1.lower().split()) | set(text2.lower().split())
-            )
+        except (ImportError, RuntimeError, Exception) as e:
+            self.logger.debug(f"Semantic similarity fallback due to error: {str(e)}")
+            return self._simple_text_similarity(text1, text2)
+    
+    def _simple_text_similarity(self, text1, text2):
+        """
+        Calculate simple text similarity using word overlap.
+        
+        Args:
+            text1 (str): First text
+            text2 (str): Second text
+        
+        Returns:
+            float: Similarity score based on word overlap
+        """
+        # Tokenize and normalize
+        words1 = set(text1.lower().split())
+        words2 = set(text2.lower().split())
+        
+        # Calculate Jaccard similarity
+        intersection = len(words1 & words2)
+        union = len(words1 | words2)
+        
+        if union == 0:
+            return 0.0
+        
+        return intersection / union
     
     async def process_text_async(self, text: str, metadata: Dict[str, Any] = None) -> Dict[str, Any]:
         """
@@ -1048,12 +1578,13 @@ class LexiconEngine:
         Returns:
             callable: Method to determine grammatical case
         """
-        def determine_case(text):
+        def determine_case(text, context=""):
             """
             Determine the grammatical case of a given text using advanced linguistic techniques.
             
             Args:
                 text (str): Text to determine case for
+                context (str): Surrounding context for better analysis
             
             Returns:
                 dict: Case information with type, confidence, and rationale
@@ -1061,163 +1592,299 @@ class LexiconEngine:
             try:
                 import spacy
                 
-                # Load a transformer-based model with dependency parsing
-                nlp = spacy.load("en_core_web_trf")
-                doc = nlp(text)
+                # Load spaCy model (try transformer first, fallback to smaller model)
+                nlp = None
+                for model_name in ["en_core_web_trf", "en_core_web_sm"]:
+                    try:
+                        nlp = spacy.load(model_name)
+                        break
+                    except IOError:
+                        continue
                 
-                # Default case information
-                case_info = {
-                    "type": "locative",
-                    "confidence": 0.5,
-                    "rationale": "Default fallback"
-                }
+                if nlp is None:
+                    self.logger.warning("No spaCy model available, using rule-based case assignment")
+                    return self._rule_based_case_assignment(text, context)
                 
-                # Analyze dependency parse
+                # Analyze the text in context
+                full_text = f"{context} {text}".strip() if context else text
+                doc = nlp(full_text)
+                
+                # Find the target entity in the processed document
+                target_tokens = []
+                text_words = text.lower().split()
+                
                 for token in doc:
-                    # Nominative (subject) detection
-                    if token.dep_ in ["nsubj", "nsubjpass"]:
-                        case_info = {
-                            "type": "nominative",
-                            "confidence": 0.9,
-                            "rationale": f"Subject of the sentence: {token.text}"
-                        }
-                        break
-                    
-                    # Accusative (direct object) detection
-                    elif token.dep_ in ["dobj", "pobj"]:
-                        case_info = {
-                            "type": "accusative",
-                            "confidence": 0.85,
-                            "rationale": f"Direct object: {token.text}"
-                        }
-                        break
-                    
-                    # Dative (indirect object) detection
-                    elif token.dep_ == "iobj":
-                        case_info = {
-                            "type": "dative",
-                            "confidence": 0.8,
-                            "rationale": f"Indirect object: {token.text}"
-                        }
+                    if token.text.lower() in text_words:
+                        target_tokens.append(token)
+                
+                if not target_tokens:
+                    return self._rule_based_case_assignment(text, context)
+                
+                # Analyze dependency relationships for the most relevant token
+                primary_token = target_tokens[0]  # Start with first match
+                
+                # Try to find the head token if multiple matches
+                for token in target_tokens:
+                    if token.dep_ in ["nsubj", "nsubjpass", "dobj", "iobj", "pobj"]:
+                        primary_token = token
                         break
                 
-                # Additional case refinement
-                if case_info["type"] == "locative":
-                    # Check for prepositional phrases
-                    for token in doc:
-                        if token.dep_ == "prep":
-                            prep_case = {
-                                "in": "locative",
-                                "on": "locative",
-                                "at": "locative",
-                                "to": "dative",
-                                "for": "benefactive",
-                                "from": "ablative",
-                                "with": "instrumental"
-                            }.get(token.text.lower(), "locative")
-                            
-                            case_info = {
-                                "type": prep_case,
-                                "confidence": 0.7,
-                                "rationale": f"Prepositional case: {token.text}"
-                            }
-                            break
+                # Determine case based on dependency role
+                case_info = self._analyze_dependency_case(primary_token, doc, text)
+                
+                # Enhance with entity type analysis
+                if case_info["confidence"] < 0.7:
+                    enhanced_case = self._enhance_case_with_entity_type(text, case_info, doc)
+                    if enhanced_case["confidence"] > case_info["confidence"]:
+                        case_info = enhanced_case
                 
                 return case_info
-            
+                
             except ImportError:
-                # Fallback to simple heuristic if spaCy is not available
-                text = text.lower().strip()
-                
-                # Simple case detection
-                nominative_indicators = ['i', 'we', 'he', 'she', 'it', 'they']
-                accusative_indicators = ['me', 'us', 'him', 'her', 'it', 'them']
-                
-                if any(text.startswith(ind + ' ') or text == ind for ind in nominative_indicators):
-                    return {"type": "nominative", "confidence": 0.6, "rationale": "Simple pronoun match"}
-                
-                if any(text.startswith(ind + ' ') or text == ind for ind in accusative_indicators):
-                    return {"type": "accusative", "confidence": 0.6, "rationale": "Simple pronoun match"}
-                
-                return {"type": "locative", "confidence": 0.5, "rationale": "Default fallback"}
+                self.logger.debug("spaCy not available, using rule-based case assignment")
+                return self._rule_based_case_assignment(text, context)
+            except Exception as e:
+                self.logger.warning(f"Case determination error: {e}, using fallback")
+                return self._rule_based_case_assignment(text, context)
         
-        return determine_case 
-
-def _parse_contextual_entities(self, response):
-    """
-    Parse contextual entities from LLM response.
+        return determine_case
     
-    Args:
-        response: LLM response text
+    def _analyze_dependency_case(self, token, doc, original_text):
+        """
+        Analyze dependency relationships to determine grammatical case.
         
-    Returns:
-        List of parsed entities
-    """
-    entities = []
-    
-    try:
-        # Try to parse JSON response
-        if response.strip().startswith('[') and response.strip().endswith(']'):
-            # Direct JSON array
-            parsed = json.loads(response)
-            if isinstance(parsed, list):
-                entities = parsed
-        elif response.strip().startswith('{') and response.strip().endswith('}'):
-            # JSON object with entities field
-            parsed = json.loads(response)
-            if isinstance(parsed, dict) and 'entities' in parsed:
-                entities = parsed['entities']
-        else:
-            # Try to extract JSON from text
-            import re
-            json_match = re.search(r'\[\s*\{.*\}\s*\]', response, re.DOTALL)
-            if json_match:
-                try:
-                    entities = json.loads(json_match.group(0))
-                except json.JSONDecodeError:
-                    pass
+        Args:
+            token: spaCy token
+            doc: spaCy document
+            original_text: Original entity text
             
-            # If still no entities, try line-by-line parsing
-            if not entities:
-                lines = response.strip().split('\n')
-                current_entity = {}
-                
-                for line in lines:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    
-                    # Check for entity start/end
-                    if line.startswith('- ') or line.startswith('* '):
-                        # Save previous entity if exists
-                        if current_entity and 'text' in current_entity:
-                            entities.append(current_entity)
-                        
-                        # Start new entity
-                        current_entity = {'text': line[2:].strip()}
-                    elif ':' in line:
-                        # Parse key-value pair
-                        key, value = line.split(':', 1)
-                        key = key.strip().lower()
-                        value = value.strip()
-                        
-                        if key and value and current_entity:
-                            current_entity[key] = value
-                
-                # Add final entity
-                if current_entity and 'text' in current_entity:
-                    entities.append(current_entity)
+        Returns:
+            dict: Case information
+        """
+        dep = token.dep_
+        pos = token.pos_
+        
+        # Nominative case patterns
+        if dep in ["nsubj", "nsubjpass"]:
+            return {
+                "type": "nominative",
+                "confidence": 0.9,
+                "rationale": f"Subject of sentence: '{token.text}' has dependency '{dep}'"
+            }
+        
+        # Accusative case patterns  
+        elif dep in ["dobj"]:
+            return {
+                "type": "accusative", 
+                "confidence": 0.85,
+                "rationale": f"Direct object: '{token.text}' has dependency '{dep}'"
+            }
+        
+        # Dative case patterns
+        elif dep in ["iobj", "dative"]:
+            return {
+                "type": "dative",
+                "confidence": 0.8,
+                "rationale": f"Indirect object: '{token.text}' has dependency '{dep}'"
+            }
+        
+        # Genitive case patterns
+        elif dep in ["poss", "nmod"] or "'s" in original_text:
+            return {
+                "type": "genitive",
+                "confidence": 0.75,
+                "rationale": f"Possessive relation: '{token.text}' has dependency '{dep}'"
+            }
+        
+        # Instrumental case patterns
+        elif dep == "pobj" and token.head.text.lower() in ["with", "by", "using", "through"]:
+            return {
+                "type": "instrumental",
+                "confidence": 0.7,
+                "rationale": f"Instrumental relation: '{token.text}' follows '{token.head.text}'"
+            }
+        
+        # Ablative case patterns  
+        elif dep == "pobj" and token.head.text.lower() in ["from", "of", "because"]:
+            return {
+                "type": "ablative",
+                "confidence": 0.7,
+                "rationale": f"Ablative relation: '{token.text}' follows '{token.head.text}'"
+            }
+        
+        # Locative case patterns
+        elif dep == "pobj" and token.head.text.lower() in ["in", "at", "on", "during", "within"]:
+            return {
+                "type": "locative",
+                "confidence": 0.75,
+                "rationale": f"Locative relation: '{token.text}' follows '{token.head.text}'"
+            }
+        
+        # Vocative case patterns
+        elif dep == "vocative" or (pos == "PROPN" and token.i == 0):
+            return {
+                "type": "vocative",
+                "confidence": 0.8,
+                "rationale": f"Direct address: '{token.text}' appears to be vocative"
+            }
+        
+        # Default case based on POS and position
+        else:
+            return self._default_case_assignment(token, original_text)
     
-    except Exception as e:
-        self.logger.error(f"Failed to parse contextual entities: {e}")
+    def _enhance_case_with_entity_type(self, text, current_case, doc):
+        """
+        Enhance case assignment using entity type information.
+        
+        Args:
+            text: Entity text
+            current_case: Current case assignment
+            doc: spaCy document
+            
+        Returns:
+            dict: Enhanced case information
+        """
+        # Find entity type from spaCy NER
+        entity_type = None
+        for ent in doc.ents:
+            if text.lower() in ent.text.lower():
+                entity_type = ent.label_
+                break
+        
+        if not entity_type:
+            return current_case
+        
+        # Enhance based on entity type patterns
+        if entity_type in ["PERSON"] and current_case["confidence"] < 0.6:
+            # People are often subjects (nominative) or addressed (vocative)
+            if any(word in text.lower() for word in ["dr", "prof", "mr", "ms", "mrs"]):
+                return {
+                    "type": "nominative",
+                    "confidence": 0.75,
+                    "rationale": f"Person with title likely subject: {text}"
+                }
+        
+        elif entity_type in ["ORG", "PRODUCT"] and current_case["confidence"] < 0.6:
+            # Organizations and products often instrumental or genitive
+            return {
+                "type": "instrumental",
+                "confidence": 0.65,
+                "rationale": f"Organization/product entity: {text}"
+            }
+        
+        elif entity_type in ["GPE", "LOC"] and current_case["confidence"] < 0.6:
+            # Locations default to locative
+            return {
+                "type": "locative",
+                "confidence": 0.7,
+                "rationale": f"Location entity: {text}"
+            }
+        
+        return current_case
     
-    # Ensure all entities have required fields
-    for entity in entities:
-        if 'id' not in entity:
-            entity['id'] = str(uuid.uuid4())
-        if 'confidence' not in entity:
-            entity['confidence'] = 0.8
-        if 'category' not in entity:
-            entity['category'] = 'unknown'
+    def _rule_based_case_assignment(self, text, context=""):
+        """
+        Rule-based case assignment when spaCy is not available.
+        
+        Args:
+            text: Entity text
+            context: Surrounding context
+            
+        Returns:
+            dict: Case information
+        """
+        text_lower = text.lower()
+        context_lower = context.lower()
+        full_text = f"{context} {text}".lower()
+        
+        # Vocative patterns
+        if any(pattern in full_text for pattern in ["hey ", "hi ", "hello "]):
+            return {
+                "type": "vocative",
+                "confidence": 0.7,
+                "rationale": "Direct address pattern detected"
+            }
+        
+        # Genitive patterns
+        if "'s" in text or " of " in full_text:
+            return {
+                "type": "genitive", 
+                "confidence": 0.7,
+                "rationale": "Possessive pattern detected"
+            }
+        
+        # Instrumental patterns
+        if any(prep in context_lower for prep in ["with ", "by ", "using ", "through "]):
+            return {
+                "type": "instrumental",
+                "confidence": 0.65,
+                "rationale": "Instrumental preposition context"
+            }
+        
+        # Ablative patterns
+        if any(prep in context_lower for prep in ["from ", "because of ", "due to "]):
+            return {
+                "type": "ablative",
+                "confidence": 0.65,
+                "rationale": "Ablative preposition context"
+            }
+        
+        # Locative patterns (locations, times, contexts)
+        if any(prep in context_lower for prep in ["in ", "at ", "on ", "during ", "within "]):
+            return {
+                "type": "locative",
+                "confidence": 0.6,
+                "rationale": "Locative preposition context"
+            }
+        
+        # Default to nominative for proper nouns at sentence start
+        if text[0].isupper() and len(text.split()) <= 3:
+            return {
+                "type": "nominative",
+                "confidence": 0.6,
+                "rationale": "Proper noun likely subject"
+            }
+        
+        # Final fallback
+        return {
+            "type": "locative",
+            "confidence": 0.4,
+            "rationale": "Default assignment - insufficient context"
+        }
     
-    return entities 
+    def _default_case_assignment(self, token, original_text):
+        """
+        Default case assignment when dependency analysis is inconclusive.
+        
+        Args:
+            token: spaCy token
+            original_text: Original entity text
+            
+        Returns:
+            dict: Case information
+        """
+        pos = token.pos_
+        
+        # Proper nouns often nominative
+        if pos == "PROPN":
+            return {
+                "type": "nominative",
+                "confidence": 0.6,
+                "rationale": f"Proper noun: '{original_text}'"
+            }
+        
+        # Common nouns in object position
+        elif pos == "NOUN":
+            return {
+                "type": "accusative",
+                "confidence": 0.5,
+                "rationale": f"Common noun: '{original_text}'"
+            }
+        
+        # Default locative for other cases
+        else:
+            return {
+                "type": "locative",
+                "confidence": 0.4,
+                "rationale": f"Default case for POS: {pos}"
+            } 

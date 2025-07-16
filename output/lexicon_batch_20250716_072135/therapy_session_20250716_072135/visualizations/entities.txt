@@ -1,0 +1,150 @@
+Entities Analysis
+================
+
+Entity Categories:
+
+Uncategorized:
+1. Dr. Maya Wilson
+   - Case: nominative
+   - Confidence: 0.7
+
+2. Dr. Maya Wilson
+   - Case: nominative
+   - Confidence: 0.7
+
+3. Alex
+   - Case: nominative
+   - Confidence: 0.6
+
+4. today
+   - Case: locative
+   - Confidence: 0.6
+
+5. Alex's Boss
+   - Case: nominative
+   - Confidence: 0.6
+
+6. Alex's Dad
+   - Case: nominative
+   - Confidence: 0.6
+
+7. June 15, 2025
+   - Case: instrumental
+   - Confidence: 0.3
+
+8. Maya Wilson
+   - Case: accusative
+   - Confidence: 0.3
+
+9. Alex Thompson
+   - Case: nominative
+   - Confidence: 0.3
+
+10. Wilson
+   - Case: accusative
+   - Confidence: 0.3
+
+11. Wilson
+   - Case: accusative
+   - Confidence: 0.3
+
+12. a moment
+   - Case: nominative
+   - Confidence: 0.3
+
+13. Wilson
+   - Case: instrumental
+   - Confidence: 0.3
+
+14. Wilson
+   - Case: accusative
+   - Confidence: 0.3
+
+15. Wilson
+   - Case: instrumental
+   - Confidence: 0.3
+
+16. one
+   - Case: accusative
+   - Confidence: 0.3
+
+17. one
+   - Case: accusative
+   - Confidence: 0.3
+
+18. Wilson
+   - Case: nominative
+   - Confidence: 0.3
+
+19. Alex Thompson
+   - Case: instrumental
+   - Confidence: 0.3
+
+20. June 15, 2025
+   - Case: accusative
+   - Confidence: 0.3
+
+21. Session #8
+   - Case: nominative
+   - Confidence: 0.3
+
+22. Somatic Therapy
+   - Case: nominative
+   - Confidence: 0.3
+
+23. shoulders
+   - Case: accusative
+   - Confidence: 0.3
+
+24. upper back
+   - Case: nominative
+   - Confidence: 0.3
+
+25. heart
+   - Case: nominative
+   - Confidence: 0.3
+
+26. stomach
+   - Case: accusative
+   - Confidence: 0.3
+
+27. work deadline
+   - Case: nominative
+   - Confidence: 0.3
+
+28. boss
+   - Case: instrumental
+   - Confidence: 0.3
+
+29. dad
+   - Case: instrumental
+   - Confidence: 0.3
+
+30. high expectations
+   - Case: accusative
+   - Confidence: 0.3
+
+31. tension
+   - Case: accusative
+   - Confidence: 0.3
+
+32. breathing
+   - Case: accusative
+   - Confidence: 0.3
+
+33. email
+   - Case: accusative
+   - Confidence: 0.3
+
+34. Alex Thompson
+   - Case: nominative
+   - Confidence: 0.3
+
+35. Work Deadline
+   - Case: instrumental
+   - Confidence: 0.3
+
+36. Tension
+   - Case: accusative
+   - Confidence: 0.3
+

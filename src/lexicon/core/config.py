@@ -9,6 +9,68 @@ from typing import Dict, Any, Optional
 from dataclasses import dataclass, field
 from pathlib import Path
 import json
+import warnings
+
+# Suppress specific PyTorch CUDA warnings
+warnings.filterwarnings(
+    "ignore", 
+    message="CUDA initialization: CUDA unknown error",
+    category=UserWarning
+)
+warnings.filterwarnings(
+    "ignore", 
+    message="`torch.cuda.amp.autocast(args...)` is deprecated",
+    category=FutureWarning
+)
+
+# Add torch configuration function
+def configure_torch_environment(default_device='cuda'):
+    """
+    Configure PyTorch environment with robust device selection.
+    
+    Args:
+        default_device (str): Preferred device type ('cuda' or 'cpu')
+    
+    Returns:
+        torch.device: Configured device
+    """
+    import torch
+    
+    try:
+        if default_device == 'cuda' and torch.cuda.is_available():
+            device = torch.device('cuda')
+            torch.cuda.empty_cache()  # Clear CUDA memory cache
+            print(f"Using CUDA device: {torch.cuda.get_device_name(0)}")
+        else:
+            device = torch.device('cpu')
+            print("Using CPU device")
+        
+        return device
+    
+    except Exception as e:
+        print(f"Device configuration error: {e}")
+        return torch.device('cpu')
+
+# Optional: Add a context manager for device management
+class DeviceContext:
+    """
+    Context manager for managing PyTorch device configuration.
+    
+    Example:
+        with DeviceContext() as device:
+            # Your PyTorch operations here
+            model = model.to(device)
+    """
+    def __init__(self, default_device='cuda'):
+        self.default_device = default_device
+        self.device = None
+    
+    def __enter__(self):
+        self.device = configure_torch_environment(self.default_device)
+        return self.device
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
 
 
 @dataclass

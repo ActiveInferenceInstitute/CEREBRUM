@@ -5,11 +5,49 @@ Provides visualization of entity neighborhoods within the knowledge graph.
 """
 
 import logging
+import re
 from pathlib import Path
 import uuid
 from typing import Dict, List, Any, Optional, Union
 
 logger = logging.getLogger(__name__)
+
+def _sanitize_filename(text: str, max_length: int = 30) -> str:
+    """
+    Sanitize text for use in filenames by removing/replacing problematic characters.
+    
+    Args:
+        text: Text to sanitize
+        max_length: Maximum length of resulting filename
+        
+    Returns:
+        Sanitized filename-safe string
+    """
+    # Convert to lowercase
+    sanitized = text.lower()
+    
+    # Replace spaces with underscores
+    sanitized = sanitized.replace(" ", "_")
+    
+    # Remove or replace special characters that cause filesystem issues
+    # Keep only alphanumeric, underscores, and hyphens
+    sanitized = re.sub(r'[^a-z0-9_\-]', '', sanitized)
+    
+    # Remove multiple consecutive underscores/hyphens
+    sanitized = re.sub(r'[_\-]+', '_', sanitized)
+    
+    # Remove leading/trailing underscores
+    sanitized = sanitized.strip('_')
+    
+    # Ensure we have something left
+    if not sanitized:
+        sanitized = "unknown_entity"
+    
+    # Truncate to max length
+    if len(sanitized) > max_length:
+        sanitized = sanitized[:max_length].rstrip('_')
+    
+    return sanitized
 
 def generate_entity_neighborhood_visualizations(graph_data, output_dir):
     """
@@ -210,7 +248,7 @@ class EntityNeighborhoodVisualizer:
             plt.tight_layout()
             
             # Create output path
-            entity_slug = entity_label.lower().replace(" ", "_")[:30]
+            entity_slug = _sanitize_filename(entity_label)
             output_path = output_dir / f"entity_{entity_slug}_{entity_id[:8]}.png"
             
             # Save visualization

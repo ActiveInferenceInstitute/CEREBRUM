@@ -151,7 +151,7 @@ class TestLexiconEndToEnd(unittest.TestCase):
                 sorted_entities = sorted(entities, key=lambda e: e.get("confidence", 0), reverse=True)
                 
                 for i, entity in enumerate(sorted_entities):
-                    f.write(f"{i+1}. {entity['text']}\n")
+                    f.write(f"{i+1}. {entity.get('label', entity.get('text', 'Unknown'))}\n")
                     f.write(f"   - Type: {entity.get('entity_type', 'Unknown')}\n")
                     f.write(f"   - Case: {entity.get('case', 'none')}\n")
                     f.write(f"   - Confidence: {entity.get('confidence', 'N/A')}\n\n")
@@ -166,7 +166,7 @@ class TestLexiconEndToEnd(unittest.TestCase):
                 sorted_claims = sorted(claims, key=lambda c: c.get("confidence", 0), reverse=True)
                 
                 for i, claim in enumerate(sorted_claims):
-                    f.write(f"{i+1}. {claim['text']}\n")
+                    f.write(f"{i+1}. {claim.get('label', claim.get('text', 'Unknown'))}\n")
                     f.write(f"   - Polarity: {claim.get('polarity', 'Unknown')}\n")
                     f.write(f"   - Case: {claim.get('case', 'none')}\n")
                     f.write(f"   - Confidence: {claim.get('confidence', 'N/A')}\n\n")
