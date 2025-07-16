@@ -1,0 +1,198 @@
+Entities Analysis
+================
+
+Entity Categories:
+
+Uncategorized:
+1. June 15, 2025
+   - Case: locative
+   - Confidence: 1.0
+
+2. Maya Wilson
+   - Case: nominative
+   - Confidence: 0.6
+
+3. Alex Thompson
+   - Case: nominative
+   - Confidence: 0.6
+
+4. Wilson
+   - Case: nominative
+   - Confidence: 0.6
+
+5. Alex
+   - Case: nominative
+   - Confidence: 0.6
+
+6. today
+   - Case: locative
+   - Confidence: 0.6
+
+7. Wilson
+   - Case: nominative
+   - Confidence: 0.6
+
+8. Wilson
+   - Case: nominative
+   - Confidence: 0.6
+
+9. Wilson
+   - Case: nominative
+   - Confidence: 0.6
+
+10. Wilson
+   - Case: nominative
+   - Confidence: 0.6
+
+11. Alex
+   - Case: nominative
+   - Confidence: 0.6
+
+12. Wilson
+   - Case: nominative
+   - Confidence: 0.6
+
+13. today
+   - Case: locative
+   - Confidence: 0.6
+
+14. Alex
+   - Case: nominative
+   - Confidence: 0.6
+
+15. Sarah
+   - Case: nominative
+   - Confidence: 0.6
+
+16. Sarah
+   - Case: nominative
+   - Confidence: 0.6
+
+17. Wilson
+   - Case: nominative
+   - Confidence: 0.6
+
+18. Alex
+   - Case: nominative
+   - Confidence: 0.6
+
+19. Sarah
+   - Case: nominative
+   - Confidence: 0.6
+
+20. Alex
+   - Case: nominative
+   - Confidence: 0.6
+
+21. Wilson
+   - Case: nominative
+   - Confidence: 0.6
+
+22. tomorrow
+   - Case: locative
+   - Confidence: 0.6
+
+23. Dr. Maya Wilson
+   - Case: nominative
+   - Confidence: 0.6
+
+24. Alex Thompson
+   - Case: nominative
+   - Confidence: 0.6
+
+25. Sarah
+   - Case: genitive
+   - Confidence: 0.6
+
+26. Marcus
+   - Case: nominative
+   - Confidence: 0.6
+
+27. shoulders
+   - Case: accusative
+   - Confidence: 0.6
+
+28. neck
+   - Case: accusative
+   - Confidence: 0.6
+
+29. chest area
+   - Case: locative
+   - Confidence: 0.6
+
+30. work stress
+   - Case: ablative
+   - Confidence: 0.6
+
+31. deadlines
+   - Case: accusative
+   - Confidence: 0.6
+
+32. meeting
+   - Case: accusative
+   - Confidence: 0.6
+
+33. boss
+   - Case: genitive
+   - Confidence: 0.6
+
+34. presentation
+   - Case: accusative
+   - Confidence: 0.6
+
+35. board
+   - Case: accusative
+   - Confidence: 0.6
+
+36. grounding exercise
+   - Case: accusative
+   - Confidence: 0.6
+
+37. conscious breath
+   - Case: accusative
+   - Confidence: 0.6
+
+38. compassion
+   - Case: accusative
+   - Confidence: 0.6
+
+39. tension
+   - Case: accusative
+   - Confidence: 0.6
+
+40. pattern
+   - Case: accusative
+   - Confidence: 0.6
+
+41. authority figure
+   - Case: accusative
+   - Confidence: 0.6
+
+42. Session #8
+   - Case: nominative
+   - Confidence: 0.6
+
+43. Dr. Maya Wilson
+   - Case: nominative
+   - Confidence: 0.6
+
+44. Alex Thompson
+   - Case: nominative
+   - Confidence: 0.6
+
+45. Sarah
+   - Case: genitive
+   - Confidence: 0.6
+
+46. Marcus
+   - Case: nominative
+   - Confidence: 0.6
+
+47. shoulder tension
+   - Case: accusative
+   - Confidence: 0.6
+
+48. work stress
+   - Case: ablative
+   - Confidence: 0.6
+

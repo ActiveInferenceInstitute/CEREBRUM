@@ -1,0 +1,26 @@
+Graph Statistics
+===============
+
+Total nodes: 75
+Total edges: 1920
+
+Node Types:
+  - entity: 48
+  - claim: 27
+
+Edge Types:
+  - mentions: 558
+  - related_to: 460
+  - co_located_with: 54
+  - acts_upon: 517
+  - originates_from: 90
+  - possesses: 237
+  - acted_upon_by: 4
+
+Cases:
+  - nominative: 31
+  - locative: 5
+  - genitive: 3
+  - accusative: 31
+  - ablative: 3
+  - instrumental: 2

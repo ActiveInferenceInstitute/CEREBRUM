@@ -599,22 +599,85 @@ class LexiconEngine:
 
     def _robust_json_parse(self, response: str) -> List[Dict]:
         """Robust JSON parsing with multiple strategies."""
+        
+        # Strategy 1: Direct JSON parsing
         try:
-            return json.loads(response)
+            parsed = json.loads(response)
+            if isinstance(parsed, list):
+                return parsed
+            elif isinstance(parsed, dict):
+                # Look for common entity list keys
+                for key in ['entities', 'data', 'results', 'items']:
+                    if key in parsed and isinstance(parsed[key], list):
+                        return parsed[key]
+                # If it's a single entity object, wrap in list
+                if 'text' in parsed or 'entity' in parsed:
+                    return [parsed]
+            return []
         except json.JSONDecodeError:
-            # Fallback to manual repair
-            response = re.sub(r',(\s*[}\]])', r'\1', response)  # Fix trailing commas
-            response = response.replace("'", '"')  # Fix single quotes
+            pass
+        
+        # Strategy 2: Extract JSON from code blocks
+        json_matches = re.findall(r'```json\s*(.*?)\s*```', response, re.DOTALL)
+        for json_str in json_matches:
             try:
-                return json.loads(response)
+                parsed = json.loads(json_str)
+                if isinstance(parsed, list):
+                    return parsed
+                elif isinstance(parsed, dict):
+                    for key in ['entities', 'data', 'results', 'items']:
+                        if key in parsed and isinstance(parsed[key], list):
+                            return parsed[key]
             except json.JSONDecodeError:
-                # More repairs: add missing closing braces if needed
-                if '{' in response and response.count('{') > response.count('}'):
-                    response += '}' * (response.count('{') - response.count('}'))
-                try:
-                    return json.loads(response)
-                except json.JSONDecodeError:
-                    return []
+                continue
+        
+        # Strategy 3: Find JSON-like structures
+        json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
+        json_matches = re.findall(json_pattern, response)
+        entities = []
+        for json_str in json_matches:
+            try:
+                parsed = json.loads(json_str)
+                if isinstance(parsed, dict) and ('text' in parsed or 'entity' in parsed):
+                    entities.append(parsed)
+            except json.JSONDecodeError:
+                continue
+        if entities:
+            return entities
+        
+        # Strategy 4: Line-by-line entity extraction
+        lines = response.split('\n')
+        entities = []
+        current_entity = {}
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            
+            # Look for key-value pairs
+            if ':' in line:
+                key, value = line.split(':', 1)
+                key = key.strip().strip('"').lower()
+                value = value.strip().strip('",')
+                
+                if key in ['text', 'entity', 'name']:
+                    if current_entity:
+                        entities.append(current_entity)
+                    current_entity = {'text': value}
+                elif key in ['type', 'category'] and current_entity:
+                    current_entity['type'] = value
+                elif key == 'confidence' and current_entity:
+                    try:
+                        current_entity['confidence'] = float(value)
+                    except ValueError:
+                        current_entity['confidence'] = 0.5
+        
+        # Add final entity
+        if current_entity and 'text' in current_entity:
+            entities.append(current_entity)
+        
+        return entities
     
     def _detect_explicit_claims(self, text):
         """
@@ -640,18 +703,14 @@ class LexiconEngine:
             
             Text: {text}
             
-            Output format (JSON):
+            Return ONLY a JSON array:
             [
                 {{
                     "text": "Claim or methodological statement",
-                    "type": "factual|methodological|observational|conclusive",
-                    "polarity": "positive|negative|neutral",
-                    "confidence": 0.8,
-                    "case": "accusative",
-                    "supporting_evidence": "Brief context",
-                    "scientific_category": "method|result|observation|conclusion"
-                }},
-                ...
+                    "type": "factual",
+                    "polarity": "positive",
+                    "confidence": 0.8
+                }}
             ]
             """
         else:
@@ -663,54 +722,92 @@ class LexiconEngine:
             
             Text: {text}
             
-            Output format (JSON):
+            Return ONLY a JSON array:
             [
                 {{
                     "text": "Claim statement",
-                    "type": "factual|opinion|assertion",
-                    "polarity": "positive|negative|neutral",
-                    "confidence": 0.8,
-                    "case": "accusative",
-                    "supporting_evidence": "Brief context"
-                }},
-                ...
+                    "type": "factual",
+                    "polarity": "positive", 
+                    "confidence": 0.8
+                }}
             ]
             """
         
         response = self._call_llm(prompt)
         
         try:
-            # Try to parse JSON response
-            if response.strip().startswith('[') and response.strip().endswith(']'):
-                explicit_claims = json.loads(response)
-            elif response.strip().startswith('{') and response.strip().endswith('}'):
-                parsed = json.loads(response)
-                explicit_claims = parsed.get('claims', [])
-            else:
-                # Try to extract JSON from text
-                import re
-                json_match = re.search(r'\[\s*\{.*\}\s*\]', response, re.DOTALL)
-                if json_match:
-                    explicit_claims = json.loads(json_match.group(0))
-                else:
-                    explicit_claims = []
+            # Enhanced parsing with robust fallbacks
+            explicit_claims = self._robust_json_parse(response)
             
-            # Ensure all claims have required fields
+            # Ensure all claims have required fields and assign cases
             for claim in explicit_claims:
                 if 'id' not in claim:
                     claim['id'] = str(uuid.uuid4())
                 if 'confidence' not in claim:
                     claim['confidence'] = 0.7
-                if 'case' not in claim:
-                    claim['case'] = 'accusative'  # Claims are typically accusative (objects of assertion)
                 if 'type' not in claim:
                     claim['type'] = 'factual'
+                if 'polarity' not in claim:
+                    claim['polarity'] = 'neutral'
+                
+                # Assign grammatical case for claims
+                claim_text = claim.get('text', '')
+                claim['case'] = self._determine_claim_case(claim_text, text)
             
             return explicit_claims
             
-        except json.JSONDecodeError as e:
-            self.logger.warning(f"Failed to parse claims JSON: {e}")
+        except Exception as e:
+            self.logger.warning(f"Failed to parse claims: {e}")
             return []
+    
+    def _determine_claim_case(self, claim_text: str, context: str) -> str:
+        """
+        Determine the grammatical case for a claim based on its content and function.
+        
+        Args:
+            claim_text: The claim text
+            context: Surrounding context
+            
+        Returns:
+            Grammatical case for the claim
+        """
+        claim_lower = claim_text.lower()
+        
+        # Claims that make assertions about subjects
+        if any(pattern in claim_lower for pattern in [
+            'i feel', 'i can', 'i am', 'i have', 'i think', 'i believe',
+            'he is', 'she is', 'it is', 'they are', 'we are'
+        ]):
+            return 'nominative'  # Subject-oriented claims
+        
+        # Claims about direct experiences or observations
+        elif any(pattern in claim_lower for pattern in [
+            'feel the', 'notice the', 'experience the', 'observe the',
+            'see the', 'sense the', 'detect the'
+        ]):
+            return 'accusative'  # Object-oriented claims
+        
+        # Claims about origins or causes
+        elif any(pattern in claim_lower for pattern in [
+            'from', 'because of', 'due to', 'caused by', 'resulting from'
+        ]):
+            return 'ablative'  # Source/cause oriented
+        
+        # Claims about locations or contexts
+        elif any(pattern in claim_lower for pattern in [
+            'in the', 'at the', 'on the', 'during', 'within'
+        ]):
+            return 'locative'  # Context oriented
+        
+        # Claims about methods or tools
+        elif any(pattern in claim_lower for pattern in [
+            'using', 'with', 'by means of', 'through', 'via'
+        ]):
+            return 'instrumental'  # Method oriented
+        
+        # Default case for general claims
+        else:
+            return 'accusative'  # Most claims are about objects of assertion
     
     def _is_scientific_text(self, text):
         """
@@ -765,25 +862,40 @@ class LexiconEngine:
         
         Text: {text}
         
-        Output format (JSON):
+        Return ONLY a JSON array:
         [
             {{
                 "text": "Inferred claim",
                 "type": "implicit",
-                "polarity": "positive|negative|neutral",
-                "confidence": 0.6,
-                "inference_rationale": "How this claim was derived"
-            }},
-            ...
+                "polarity": "neutral",
+                "confidence": 0.6
+            }}
         ]
         """
         
         response = self._call_llm(prompt)
         
         try:
-            implicit_claims = json.loads(response)
+            implicit_claims = self._robust_json_parse(response)
+            
+            # Ensure all claims have required fields and assign cases
+            for claim in implicit_claims:
+                if 'id' not in claim:
+                    claim['id'] = str(uuid.uuid4())
+                if 'confidence' not in claim:
+                    claim['confidence'] = 0.6
+                if 'type' not in claim:
+                    claim['type'] = 'implicit'
+                if 'polarity' not in claim:
+                    claim['polarity'] = 'neutral'
+                
+                # Assign grammatical case for claims
+                claim_text = claim.get('text', '')
+                claim['case'] = self._determine_claim_case(claim_text, text)
+            
             return implicit_claims
-        except json.JSONDecodeError:
+        except Exception as e:
+            self.logger.warning(f"Failed to parse implicit claims: {e}")
             return []
     
     def _detect_emotional_claims(self, text):
@@ -804,25 +916,40 @@ class LexiconEngine:
         
         Text: {text}
         
-        Output format (JSON):
+        Return ONLY a JSON array:
         [
             {{
                 "text": "Emotional claim or sentiment",
                 "emotion_type": "primary emotion",
                 "intensity": 0.7,
-                "context": "Emotional context",
-                "polarity": "positive|negative|neutral"
-            }},
-            ...
+                "polarity": "neutral"
+            }}
         ]
         """
         
         response = self._call_llm(prompt)
         
         try:
-            emotional_claims = json.loads(response)
+            emotional_claims = self._robust_json_parse(response)
+            
+            # Ensure all claims have required fields and assign cases
+            for claim in emotional_claims:
+                if 'id' not in claim:
+                    claim['id'] = str(uuid.uuid4())
+                if 'confidence' not in claim:
+                    claim['confidence'] = claim.get('intensity', 0.7)
+                if 'type' not in claim:
+                    claim['type'] = 'emotional'
+                if 'polarity' not in claim:
+                    claim['polarity'] = 'neutral'
+                
+                # Assign grammatical case for claims
+                claim_text = claim.get('text', '')
+                claim['case'] = self._determine_claim_case(claim_text, text)
+            
             return emotional_claims
-        except json.JSONDecodeError:
+        except Exception as e:
+            self.logger.warning(f"Failed to parse emotional claims: {e}")
             return []
     
     def process_text(self, text, metadata=None):
@@ -992,6 +1119,8 @@ class LexiconEngine:
                 "id": claim_id,
                 "label": claim.get("text", ""),
                 "type": "claim",
+                "case": claim.get("case", "accusative"),  # Include case field for claims
+                "case_rationale": claim.get("case_rationale", ""),
                 "polarity": claim.get("polarity", "neutral"),
                 "confidence": claim.get("confidence", 1.0),
                 "data": claim
@@ -1036,8 +1165,36 @@ class LexiconEngine:
                 if not entity_id:
                     continue
                 
-                # Check if entity is mentioned in claim
-                if entity_text in claim_text or any(word in claim_text for word in entity_text.split()):
+                # Enhanced matching strategy
+                is_connected = False
+                connection_strength = 0.0
+                
+                # 1. Direct text matching
+                if entity_text in claim_text:
+                    is_connected = True
+                    connection_strength = 0.9
+                
+                # 2. Word-level matching
+                elif any(word in claim_text for word in entity_text.split()):
+                    is_connected = True
+                    connection_strength = 0.7
+                
+                # 3. Partial matching for complex entities
+                elif len(entity_text) > 3 and any(entity_text in word for word in claim_text.split()):
+                    is_connected = True
+                    connection_strength = 0.6
+                
+                # 4. Reverse matching (claim words in entity)
+                elif any(word in entity_text for word in claim_text.split() if len(word) > 3):
+                    is_connected = True
+                    connection_strength = 0.5
+                
+                # 5. Semantic matching for people and places
+                elif self._semantic_entity_claim_match(entity, claim):
+                    is_connected = True
+                    connection_strength = 0.8
+                
+                if is_connected:
                     edge_id = f"{entity_id}_{claim_id}_mentions"
                     edge = {
                         "id": edge_id,
@@ -1045,9 +1202,46 @@ class LexiconEngine:
                         "target": claim_id,
                         "type": "mentions",
                         "case": entity.get("case", "locative"),
-                        "weight": min(entity.get("confidence", 0.5), claim.get("confidence", 0.5))
+                        "weight": min(entity.get("confidence", 0.5), claim.get("confidence", 0.5)) * connection_strength
                     }
                     graph["edges"].append(edge)
+    
+    def _semantic_entity_claim_match(self, entity, claim):
+        """
+        Check for semantic relationships between entities and claims.
+        
+        Args:
+            entity: Entity dictionary
+            claim: Claim dictionary
+            
+        Returns:
+            bool: True if there's a semantic match
+        """
+        entity_text = entity.get("text", "").lower()
+        claim_text = claim.get("text", "").lower()
+        entity_type = entity.get("type", "").lower()
+        
+        # Personal pronoun matching for people
+        if entity_type in ["person", "people"] or any(name_word in entity_text for name_word in ["dr", "prof", "mr", "ms", "mrs"]):
+            if any(pronoun in claim_text for pronoun in ["i ", "me ", "my ", "myself", "he ", "him ", "his ", "she ", "her ", "they ", "them "]):
+                return True
+        
+        # Emotional/physical state matching
+        if "feel" in claim_text or "emotion" in claim_text:
+            if any(body_part in entity_text for body_part in ["shoulder", "neck", "back", "chest", "heart"]):
+                return True
+        
+        # Professional relationship matching  
+        if any(title in entity_text for title in ["dr", "doctor", "therapist", "prof"]):
+            if any(therapy_word in claim_text for therapy_word in ["therapy", "session", "treatment", "healing", "guidance"]):
+                return True
+        
+        # Temporal matching
+        if entity_type in ["date", "time"] or any(time_word in entity_text for time_word in ["today", "now", "session"]):
+            if any(time_ref in claim_text for time_ref in ["today", "now", "current", "present"]):
+                return True
+        
+        return False
     
     def _create_entity_cooccurrence_relationships(self, graph, entities, entity_nodes, text):
         """

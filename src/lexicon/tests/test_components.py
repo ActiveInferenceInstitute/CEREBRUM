@@ -203,24 +203,169 @@ class TestLexiconComponents(unittest.TestCase):
             self.fail(f"Entity Linker failed: {str(e)}")
     
     @unittest.skipIf(not os.environ.get("OPENROUTER_API_KEY"), "OpenRouter API key not available")
-    def test_engine_initialization(self):
-        """Test engine initialization."""
+    def test_structured_case_determiner(self):
+        """Test structured case determination with improved JSON parsing."""
+        print("Testing StructuredCaseDeterminer")
+        
         try:
+            from src.lexicon.declension.structured_case_determiner import StructuredCaseDeterminer
+            from src.llm.OpenRouter.openrouter import OpenRouterClient, OpenRouterConfig
+            
+            # Initialize OpenRouter client
+            router_config = OpenRouterConfig(
+                api_key=os.environ.get("OPENROUTER_API_KEY"),
+                default_model="anthropic/claude-3.5-sonnet"
+            )
+            openrouter_client = OpenRouterClient(router_config)
+            
+            # Initialize case determiner
+            case_determiner = StructuredCaseDeterminer(openrouter_client, self.config)
+            
+            # Test with therapy session entities
+            entities = ["Dr. Wilson", "Alex", "tension", "shoulders", "stress", "work deadline"]
+            context = "Dr. Wilson asked Alex about the tension in his shoulders. Alex said the stress comes from the work deadline."
+            
+            # Test batch case determination
+            assignments = case_determiner.determine_cases_batch(entities, context)
+            
+            # Validate assignments
+            self.assertIsInstance(assignments, list)
+            self.assertEqual(len(assignments), len(entities), "Should have assignment for each entity")
+            
+            # Check assignment structure
+            case_variety = set()
+            for assignment in assignments:
+                self.assertIn(assignment.entity_text, entities)
+                self.assertIsInstance(assignment.case, str)
+                self.assertIsInstance(assignment.confidence, (int, float))
+                self.assertGreater(assignment.confidence, 0)
+                self.assertLessEqual(assignment.confidence, 1)
+                self.assertIsInstance(assignment.rationale, str)
+                case_variety.add(assignment.case)
+            
+            # Should have some case diversity
+            self.assertGreater(len(case_variety), 1, "Should assign diverse cases")
+            
+            # Test single case determination
+            single_assignment = case_determiner.determine_single_case("Dr. Wilson", context)
+            self.assertIsInstance(single_assignment.entity_text, str)
+            self.assertIsInstance(single_assignment.case, str)
+            
+            # Validate expected cases for specific entities
+            assignment_map = {a.entity_text: a for a in assignments}
+            
+            # Dr. Wilson should likely be nominative (subject/agent)
+            if "Dr. Wilson" in assignment_map:
+                dr_case = assignment_map["Dr. Wilson"].case
+                self.assertIn(dr_case, ["nominative", "vocative"], 
+                            f"Dr. Wilson should be nominative or vocative, got {dr_case}")
+            
+            # Shoulders should likely be locative (location of tension)
+            if "shoulders" in assignment_map:
+                shoulders_case = assignment_map["shoulders"].case
+                self.assertIn(shoulders_case, ["locative", "accusative"], 
+                            f"shoulders should be locative or accusative, got {shoulders_case}")
+            
+            print(f"Case determiner test successful - Assigned cases: {case_variety}")
+            
+        except Exception as e:
+            print(f"Structured case determiner test failed: {e}")
+            raise
+    
+    @unittest.skipIf(not os.environ.get("OPENROUTER_API_KEY"), "OpenRouter API key not available")
+    def test_engine_initialization(self):
+        """Test LexiconEngine initialization and basic processing."""
+        print("Testing LexiconEngine initialization")
+        
+        try:
+            # Test engine initialization
             engine = LexiconEngine(self.config)
             self.assertIsNotNone(engine)
             self.assertIsNotNone(engine.llm_client)
             
-            # Save test results
-            with open(self.output_dir / "engine_initialization_test.txt", "w") as f:
-                f.write(f"Engine Initialization Test\n")
-                f.write(f"========================\n\n")
-                f.write(f"Engine initialized successfully\n")
-                f.write(f"Model: {self.config.default_model}\n")
+            # Test processing with therapy session text
+            therapy_text = """
+            Dr. Wilson: How are you feeling today, Alex?
+            Alex: I feel tense. There's tightness in my shoulders.
+            Dr. Wilson: When did this tension start?
+            Alex: It started after the work deadline. The stress comes from my job.
+            """
             
-            print("LexiconEngine initialized successfully")
+            result = engine.process_text(therapy_text)
+            
+            # Validate result structure
+            self.assertIsInstance(result, dict)
+            self.assertIn("status", result)
+            self.assertEqual(result["status"], "success")
+            
+            # Check for required keys
+            required_keys = ["entities", "claims", "relations", "graph", "stats"]
+            for key in required_keys:
+                self.assertIn(key, result, f"Missing required key: {key}")
+            
+            # Validate entities with case assignments
+            entities = result["entities"]
+            self.assertIsInstance(entities, list)
+            self.assertGreater(len(entities), 0, "Should detect entities")
+            
+            # Check entity structure and case assignments
+            entity_cases_found = set()
+            for entity in entities:
+                self.assertIn("text", entity)
+                self.assertIn("case", entity)
+                self.assertIn("confidence", entity)
+                entity_cases_found.add(entity["case"])
+            
+            # Should have some case diversity (not all locative)
+            self.assertGreater(len(entity_cases_found), 1, "Should have diverse case assignments")
+            
+            # Validate claims with case assignments
+            claims = result["claims"]
+            self.assertIsInstance(claims, list)
+            self.assertGreater(len(claims), 0, "Should detect claims")
+            
+            # Check claims have cases assigned
+            claim_cases_found = set()
+            for claim in claims:
+                self.assertIn("text", claim)
+                self.assertIn("case", claim)
+                self.assertIn("confidence", claim)
+                # Claims should not have 'none' as case
+                self.assertNotEqual(claim["case"], "none")
+                claim_cases_found.add(claim["case"])
+            
+            # Validate relations
+            relations = result["relations"]
+            self.assertIsInstance(relations, list)
+            
+            # Validate graph structure
+            graph = result["graph"]
+            self.assertIsInstance(graph, dict)
+            self.assertIn("nodes", graph)
+            self.assertIn("edges", graph)
+            
+            nodes = graph["nodes"]
+            edges = graph["edges"]
+            self.assertIsInstance(nodes, list)
+            self.assertIsInstance(edges, list)
+            
+            # Should have nodes and edges
+            self.assertGreater(len(nodes), 0, "Graph should have nodes")
+            
+            # Validate stats
+            stats = result["stats"]
+            self.assertIsInstance(stats, dict)
+            self.assertEqual(stats["entities"], len(entities))
+            self.assertEqual(stats["claims"], len(claims))
+            self.assertEqual(stats["nodes"], len(nodes))
+            self.assertEqual(stats["edges"], len(edges))
+            
+            print(f"Engine test successful - Found {len(entities)} entities with cases: {entity_cases_found}")
+            print(f"Found {len(claims)} claims with cases: {claim_cases_found}")
             
         except Exception as e:
-            self.fail(f"LexiconEngine initialization failed: {str(e)}")
+            print(f"Engine initialization test failed: {e}")
+            raise
     
     @classmethod
     def tearDownClass(cls):

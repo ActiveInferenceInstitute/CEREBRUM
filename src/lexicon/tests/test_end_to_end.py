@@ -70,112 +70,164 @@ class TestLexiconEndToEnd(unittest.TestCase):
     
     @unittest.skipIf(not os.environ.get("OPENROUTER_API_KEY"), "OpenRouter API key not available")
     def test_process_text(self):
-        """Test processing text through the complete pipeline."""
+        """Test comprehensive text processing with improved case and claim handling."""
+        print("Testing comprehensive text processing")
+        
+        # Use therapy session text that was problematic before
+        therapy_text = """
+        # Somatic Therapy Session
+        
+        **Date**: June 15, 2025  
+        **Session**: #8  
+        **Therapist**: Dr. Maya Wilson  
+        **Client**: Alex Thompson
+
+        **Dr. Wilson**: Welcome, Alex. How are you feeling today?
+
+        **Alex**: Tense. I can feel tightness in my shoulders.
+
+        **Dr. Wilson**: When you notice the tension, where do you sense it most?
+
+        **Alex**: Mostly in my shoulders and neck. Sometimes it feels like a weight pressing on me.  
+        I wish I could let go of this heaviness, but it seems to come from my work stress.  
+        My friend's advice helps a bit, and I try to give myself some compassion.  
+        Dr. Wilson, can you guide me through a grounding exercise?
+
+        **Dr. Wilson**: Of course. Let's begin by noticing the support of the chair beneath you.
+        """
+        
         try:
-            # Initialize engine
-            engine = LexiconEngine(self.config)
+            result = self.engine.process_text(therapy_text)
             
-            # Process text
-            start_time = time.time()
-            result = engine.process_text(self.sample_text, {"test": True})
-            processing_time = time.time() - start_time
+            # Basic validation
+            self.assertIsInstance(result, dict)
+            self.assertEqual(result.get("status"), "success")
             
-            # Verify result structure
-            self.assertIsNotNone(result)
-            self.assertEqual(result["status"], "success")
-            self.assertIn("graph", result)
-            self.assertIn("nodes", result["graph"])
-            self.assertIn("edges", result["graph"])
-            self.assertIn("stats", result)
+            # Validate all required keys exist
+            required_keys = ["entities", "claims", "relations", "graph", "stats", "metadata"]
+            for key in required_keys:
+                self.assertIn(key, result, f"Missing required key: {key}")
             
-            # Verify graph content
-            self.assertGreater(len(result["graph"]["nodes"]), 0)
+            # Test entity extraction and case assignment
+            entities = result["entities"]
+            self.assertIsInstance(entities, list)
+            self.assertGreater(len(entities), 0, "Should extract entities from therapy session")
             
-            # Save result for inspection
-            output_path = self.output_dir / "end_to_end_result.json"
-            with open(output_path, 'w') as f:
-                json.dump(result, f, indent=2)
+            # Check for specific entities we expect
+            entity_texts = [e.get("text", "").lower() for e in entities]
+            expected_entities = ["dr. wilson", "alex", "shoulders", "tension", "stress"]
             
-            # Create visualizations directory
-            vis_dir = self.output_dir / "visualizations"
-            vis_dir.mkdir(parents=True, exist_ok=True)
+            found_entities = []
+            for expected in expected_entities:
+                if any(expected in entity_text for entity_text in entity_texts):
+                    found_entities.append(expected)
             
-            # Save graph statistics
-            stats_file = vis_dir / "graph_statistics.txt"
-            with open(stats_file, 'w') as f:
-                f.write(f"Graph Statistics\n")
-                f.write(f"===============\n\n")
-                f.write(f"Processing time: {processing_time:.2f} seconds\n")
-                f.write(f"Total nodes: {result['stats']['nodes']}\n")
-                f.write(f"Total edges: {result['stats']['edges']}\n\n")
-                
-                # Node types
-                node_types = {}
-                for node in result["graph"]["nodes"]:
-                    node_type = node.get("type", "unknown")
-                    node_types[node_type] = node_types.get(node_type, 0) + 1
-                
-                f.write("Node Types:\n")
-                for node_type, count in node_types.items():
-                    f.write(f"  - {node_type}: {count}\n")
-                f.write("\n")
-                
-                # Edge types
-                edge_types = {}
-                for edge in result["graph"]["edges"]:
-                    edge_type = edge.get("type", "unknown")
-                    edge_types[edge_type] = edge_types.get(edge_type, 0) + 1
-                
-                f.write("Edge Types:\n")
-                for edge_type, count in edge_types.items():
-                    f.write(f"  - {edge_type}: {count}\n")
-                f.write("\n")
-                
-                # Cases
-                cases = {}
-                for node in result["graph"]["nodes"]:
-                    case = node.get("case", "none")
-                    cases[case] = cases.get(case, 0) + 1
-                
-                f.write("Cases:\n")
-                for case, count in cases.items():
-                    f.write(f"  - {case}: {count}\n")
+            self.assertGreater(len(found_entities), 2, f"Should find key entities. Found: {found_entities}")
             
-            # Save entity list
-            entities_file = vis_dir / "entities.txt"
-            with open(entities_file, 'w') as f:
-                f.write(f"Entities\n")
-                f.write(f"========\n\n")
-                
-                entities = [n for n in result["graph"]["nodes"] if n.get("type") == "entity"]
-                sorted_entities = sorted(entities, key=lambda e: e.get("confidence", 0), reverse=True)
-                
-                for i, entity in enumerate(sorted_entities):
-                    f.write(f"{i+1}. {entity.get('label', entity.get('text', 'Unknown'))}\n")
-                    f.write(f"   - Type: {entity.get('entity_type', 'Unknown')}\n")
-                    f.write(f"   - Case: {entity.get('case', 'none')}\n")
-                    f.write(f"   - Confidence: {entity.get('confidence', 'N/A')}\n\n")
+            # Validate entity case assignments
+            entity_cases = set()
+            entities_with_cases = 0
             
-            # Save claims list
-            claims_file = vis_dir / "claims.txt"
-            with open(claims_file, 'w') as f:
-                f.write(f"Claims\n")
-                f.write(f"======\n\n")
+            for entity in entities:
+                self.assertIn("case", entity, "All entities should have case assignments")
+                self.assertIn("confidence", entity, "All entities should have confidence")
+                self.assertIsInstance(entity["confidence"], (int, float))
                 
-                claims = [n for n in result["graph"]["nodes"] if n.get("type") == "claim"]
-                sorted_claims = sorted(claims, key=lambda c: c.get("confidence", 0), reverse=True)
-                
-                for i, claim in enumerate(sorted_claims):
-                    f.write(f"{i+1}. {claim.get('label', claim.get('text', 'Unknown'))}\n")
-                    f.write(f"   - Polarity: {claim.get('polarity', 'Unknown')}\n")
-                    f.write(f"   - Case: {claim.get('case', 'none')}\n")
-                    f.write(f"   - Confidence: {claim.get('confidence', 'N/A')}\n\n")
+                case = entity.get("case")
+                if case and case != "none":
+                    entity_cases.add(case)
+                    entities_with_cases += 1
             
-            print(f"End-to-End Test: {len(result['graph']['nodes'])} nodes, {len(result['graph']['edges'])} edges")
-            print(f"Test result saved to {output_path}")
+            # Should have case diversity (not all locative)
+            self.assertGreater(len(entity_cases), 1, f"Should have diverse case assignments, got: {entity_cases}")
+            self.assertGreater(entities_with_cases, len(entities) * 0.7, "Most entities should have valid cases")
+            
+            # Test claim extraction and case assignment
+            claims = result["claims"]
+            self.assertIsInstance(claims, list)
+            self.assertGreater(len(claims), 0, "Should extract claims from therapy session")
+            
+            # Validate claim structure and case assignments
+            claims_with_cases = 0
+            claim_cases = set()
+            
+            for claim in claims:
+                self.assertIn("text", claim, "All claims should have text")
+                self.assertIn("case", claim, "All claims should have case assignments")
+                self.assertIn("confidence", claim, "All claims should have confidence")
+                
+                # Claims should not have 'none' as case
+                case = claim.get("case")
+                self.assertNotEqual(case, "none", f"Claim case should not be 'none': {claim.get('text', '')}")
+                
+                if case:
+                    claim_cases.add(case)
+                    claims_with_cases += 1
+            
+            self.assertEqual(claims_with_cases, len(claims), "All claims should have valid cases")
+            self.assertGreater(len(claim_cases), 0, f"Should have claim case assignments: {claim_cases}")
+            
+            # Test relation extraction
+            relations = result["relations"]
+            self.assertIsInstance(relations, list)
+            
+            # Test graph structure
+            graph = result["graph"]
+            self.assertIsInstance(graph, dict)
+            self.assertIn("nodes", graph)
+            self.assertIn("edges", graph)
+            
+            nodes = graph["nodes"]
+            edges = graph["edges"]
+            
+            self.assertGreater(len(nodes), 0, "Graph should have nodes")
+            
+            # Validate node structure
+            for node in nodes:
+                self.assertIn("id", node)
+                self.assertIn("type", node)
+                
+            # Test statistics consistency
+            stats = result["stats"]
+            self.assertEqual(stats["entities"], len(entities))
+            self.assertEqual(stats["claims"], len(claims))
+            self.assertEqual(stats["nodes"], len(nodes))
+            self.assertEqual(stats["edges"], len(edges))
+            
+            # Log detailed results for verification
+            print(f"Processed therapy session successfully:")
+            print(f"  - Entities: {len(entities)} with cases: {entity_cases}")
+            print(f"  - Claims: {len(claims)} with cases: {claim_cases}")
+            print(f"  - Relations: {len(relations)}")
+            print(f"  - Graph: {len(nodes)} nodes, {len(edges)} edges")
+            
+            # Test that we don't have the previous errors
+            entity_case_none_count = sum(1 for e in entities if e.get("case") == "none")
+            claim_case_none_count = sum(1 for c in claims if c.get("case") == "none")
+            
+            self.assertEqual(entity_case_none_count, 0, "No entities should have 'none' case")
+            self.assertEqual(claim_case_none_count, 0, "No claims should have 'none' case")
+            
+            # Save detailed test results
+            test_results = {
+                "test_type": "comprehensive_therapy_session_processing",
+                "input_length": len(therapy_text),
+                "entities_found": len(entities),
+                "entity_cases": list(entity_cases),
+                "claims_found": len(claims),
+                "claim_cases": list(claim_cases),
+                "relations_found": len(relations),
+                "graph_nodes": len(nodes),
+                "graph_edges": len(edges),
+                "validation_passed": True
+            }
+            
+            with open(self.output_dir / "comprehensive_processing_test.json", "w") as f:
+                json.dump(test_results, f, indent=2)
             
         except Exception as e:
-            self.fail(f"End-to-end test failed: {str(e)}")
+            print(f"Comprehensive processing test failed: {e}")
+            raise
     
     def test_missing_format_parsers(self):
         """Test that missing format parsers directory is properly handled."""

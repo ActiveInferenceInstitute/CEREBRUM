@@ -144,71 +144,37 @@ class StructuredCaseDeterminer:
         Returns:
             Structured prompt
         """
-        entities_list = "\n".join(f"{i+1}. {entity}" for i, entity in enumerate(entities))
+        entities_list = "\n".join(f"{i+1}. \"{entity}\"" for i, entity in enumerate(entities))
         
-        prompt = f"""Analyze the grammatical cases of entities in context using CEREBRUM's 8-case system.
+        prompt = f"""Analyze grammatical cases for entities in this text using CEREBRUM's 8-case system.
 
-CONTEXT TEXT:
-"{context}"
+TEXT: "{context}"
 
-ENTITIES TO ANALYZE:
+ENTITIES:
 {entities_list}
 
-CEREBRUM'S 8-CASE SYSTEM:
-1. NOMINATIVE (NOM): Agents/subjects that perform actions
-2. ACCUSATIVE (ACC): Direct objects receiving actions  
-3. GENITIVE (GEN): Possessive relationships or sources
-4. DATIVE (DAT): Recipients or beneficiaries
-5. LOCATIVE (LOC): Locations or contextual settings
-6. INSTRUMENTAL (INS): Tools, means, or instruments
-7. ABLATIVE (ABL): Origins or causes
-8. VOCATIVE (VOC): Direct address or summons
+CASES:
+- nominative: subjects/agents performing actions
+- accusative: direct objects receiving actions  
+- genitive: possession/source ("of", "'s")
+- dative: recipients/beneficiaries ("to", "for")
+- locative: locations/context ("in", "at", "on")
+- instrumental: tools/means ("with", "using", "by")
+- ablative: origins/causes ("from", "because of")
+- vocative: direct address
 
-For each entity, provide a detailed analysis including:
+Respond with ONLY this JSON format - no other text:
 
-ANALYSIS INSTRUCTIONS:
-1. Identify the entity's syntactic role in the context
-2. Determine which CEREBRUM case best fits this role
-3. Assess confidence level (0.0-1.0)
-4. Provide clear linguistic reasoning
-5. Consider alternative case possibilities
-6. Extract relevant linguistic features
-
-Return your analysis in this JSON format:
-```json
 {{
-  "case_assignments": [
+  "assignments": [
     {{
-      "entity_text": "entity text exactly as provided",
-      "case": "case_name",
-      "confidence": 0.9,
-      "rationale": "Clear explanation of why this case was chosen",
-      "linguistic_features": {{
-        "syntactic_role": "subject/object/modifier/etc",
-        "dependency_relation": "nsubj/dobj/pobj/etc",
-        "preposition": "with/by/from/etc or null",
-        "semantic_role": "agent/patient/instrument/etc"
-      }},
-      "context_analysis": "How the entity functions in this specific context",
-      "alternative_cases": [
-        {{
-          "case": "alternative_case_name",
-          "confidence": 0.3,
-          "reasoning": "Why this case was considered but not chosen"
-        }}
-      ]
+      "entity": "exact entity text",
+      "case": "case_name", 
+      "confidence": 0.8,
+      "reason": "brief explanation"
     }}
   ]
-}}
-```
-
-IMPORTANT GUIDELINES:
-- Confidence should reflect certainty based on linguistic evidence
-- Rationale should reference specific grammatical patterns
-- Consider the semantic meaning, not just syntax
-- If multiple cases are plausible, choose the most semantically appropriate
-- Provide at least one alternative case consideration per entity
-"""
+}}"""
         return prompt
     
     def _parse_structured_response(self, response: str, entities: List[str]) -> List[CaseAssignment]:
@@ -300,13 +266,19 @@ IMPORTANT GUIDELINES:
     
     def _extract_json_strategy_2(self, response: str) -> Optional[str]:
         """Extract JSON from response without code blocks."""
-        json_match = re.search(r'(\{\s*"case_assignments"\s*:.*\})', response, re.DOTALL)
+        # Try new simplified format first
+        json_match = re.search(r'(\{\s*"assignments"\s*:.*?\})', response, re.DOTALL)
+        if json_match:
+            return json_match.group(1)
+        
+        # Fallback to old format
+        json_match = re.search(r'(\{\s*"case_assignments"\s*:.*?\})', response, re.DOTALL)
         return json_match.group(1) if json_match else None
     
     def _repair_json_strategy_3(self, response: str) -> Optional[str]:
         """Attempt to repair common JSON formatting issues."""
-        # Extract potential JSON content
-        json_match = re.search(r'(\{.*\})', response, re.DOTALL)
+        # Extract potential JSON content - look for both new and old formats
+        json_match = re.search(r'(\{.*?\})', response, re.DOTALL)
         if not json_match:
             return None
         
@@ -322,22 +294,24 @@ IMPORTANT GUIDELINES:
         # Fix single quotes to double quotes
         json_str = json_str.replace("'", '"')
         
+        # Fix common word substitutions
+        json_str = re.sub(r'"(nominative|accusative|genitive|dative|locative|instrumental|ablative|vocative)"', 
+                         lambda m: f'"{m.group(1).lower()}"', json_str)
+        
+        # Ensure proper JSON structure
+        if 'assignments' not in json_str and 'case_assignments' not in json_str:
+            # Try to wrap content in proper structure
+            if '"entity"' in json_str and '"case"' in json_str:
+                # Looks like assignment objects, wrap in assignments array
+                json_str = f'{{"assignments": [{json_str}]}}'
+        
         # Attempt to find and fix incomplete JSON
         if not json_str.strip().endswith('}'):
-            # Try to find the last complete structure
-            brace_count = 0
-            last_valid_pos = -1
-            for i, char in enumerate(json_str):
-                if char == '{':
-                    brace_count += 1
-                elif char == '}':
-                    brace_count -= 1
-                    if brace_count == 0:
-                        last_valid_pos = i + 1
-                        break
-            
-            if last_valid_pos > 0:
-                json_str = json_str[:last_valid_pos]
+            # Count braces and try to balance
+            open_braces = json_str.count('{')
+            close_braces = json_str.count('}')
+            if open_braces > close_braces:
+                json_str += '}' * (open_braces - close_braces)
         
         return json_str
     
@@ -346,46 +320,75 @@ IMPORTANT GUIDELINES:
         assignments = []
         lines = response.split('\n')
         
+        current_entity = None
+        current_case = None
+        current_confidence = 0.6
+        current_reason = "Line-by-line parsing"
+        
         for line in lines:
             line = line.strip()
             if not line:
                 continue
             
-            # Look for patterns like: "entity_name": "case"
-            pattern = r'"([^"]+)":\s*"([^"]+)"'
-            matches = re.findall(pattern, line)
+            # Look for entity patterns
+            entity_match = re.search(r'"?([^"]+)"?\s*:\s*"?([^",]+)"?', line)
+            if entity_match:
+                key, value = entity_match.groups()
+                key = key.strip().lower()
+                value = value.strip().lower()
+                
+                if key in ['entity', 'entity_text'] and value in [e.lower() for e in entities]:
+                    current_entity = next(e for e in entities if e.lower() == value)
+                elif key == 'case' and current_entity:
+                    current_case = value
+                elif key == 'confidence' and current_entity:
+                    try:
+                        current_confidence = float(value)
+                    except ValueError:
+                        pass
+                elif key in ['reason', 'rationale'] and current_entity:
+                    current_reason = value
             
-            for entity_text, case in matches:
-                # Check if this entity is in our list
-                if entity_text in entities:
-                    assignment = CaseAssignment(
-                        entity_text=entity_text,
-                        case=case.lower(),
-                        confidence=0.6,
-                        rationale="Line-by-line parsing fallback",
-                        linguistic_features={"fallback_pattern": "line_parsing"},
-                        context_analysis="Parsed from line-by-line fallback",
-                        alternative_cases=[]
-                    )
-                    assignments.append(assignment)
+            # Check if we have complete assignment info
+            if current_entity and current_case:
+                assignment = CaseAssignment(
+                    entity_text=current_entity,
+                    case=current_case,
+                    confidence=current_confidence,
+                    rationale=current_reason,
+                    linguistic_features={"fallback_pattern": "line_parsing"},
+                    context_analysis="Parsed from line-by-line fallback",
+                    alternative_cases=[]
+                )
+                assignments.append(assignment)
+                # Reset for next entity
+                current_entity = None
+                current_case = None
+                current_confidence = 0.6
+                current_reason = "Line-by-line parsing"
         
         return assignments
     
     def _process_parsed_json(self, parsed: dict, entities: List[str]) -> List[CaseAssignment]:
         """Process successfully parsed JSON into case assignments."""
         assignments = []
-        case_assignments = parsed.get("case_assignments", [])
+        
+        # Handle both new and old formats
+        case_assignments = parsed.get("assignments", parsed.get("case_assignments", []))
         
         # Process each assignment
         for assignment_data in case_assignments:
-            entity_text = assignment_data.get("entity_text", "")
+            # Handle both new and old field names
+            entity_text = assignment_data.get("entity", assignment_data.get("entity_text", ""))
             
             # Validate entity matches our input
             if entity_text not in entities:
                 # Try to find closest match
                 closest_match = None
                 for entity in entities:
-                    if entity.lower() in entity_text.lower() or entity_text.lower() in entity.lower():
+                    if (entity.lower() in entity_text.lower() or 
+                        entity_text.lower() in entity.lower() or
+                        entity.lower() == entity_text.lower()):
                         closest_match = entity
                         break
                 
@@ -395,14 +398,14 @@ IMPORTANT GUIDELINES:
                     self.logger.warning(f"Entity '{entity_text}' not found in original list")
                     continue
             
-            # Create case assignment
+            # Create case assignment with flexible field mapping
             assignment = CaseAssignment(
                 entity_text=entity_text,
                 case=assignment_data.get("case", "locative"),
                 confidence=assignment_data.get("confidence", 0.5),
-                rationale=assignment_data.get("rationale", "LLM assignment"),
-                linguistic_features=assignment_data.get("linguistic_features", {}),
-                context_analysis=assignment_data.get("context_analysis", ""),
+                rationale=assignment_data.get("reason", assignment_data.get("rationale", "LLM assignment")),
+                linguistic_features=assignment_data.get("linguistic_features", {"source": "simplified_llm"}),
+                context_analysis=assignment_data.get("context_analysis", "LLM analysis"),
                 alternative_cases=assignment_data.get("alternative_cases", [])
             )
             
