@@ -54,7 +54,7 @@ The CEREBRUM repository is organized into the following structure:
 
 ## Implementation Workflow
 
-![CEREBRUM Implementation Workflow](docs/diagrams/implementation_workflow.png)
+![CEREBRUM Implementation Workflow](docs/diagrams/implementation_workflow.mermaid)
 
 ## Getting Started
 
@@ -105,7 +105,7 @@ For more detailed information about the paper building process, please see `pape
 
 ## Use Cases
 
-![CEREBRUM Use Cases](docs/diagrams/use_cases_mindmap.png)
+![CEREBRUM Use Cases](docs/diagrams/use_cases_mindmap.mermaid)
 
 ## Citation
 If you use CEREBRUM in your research, please cite:
