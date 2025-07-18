@@ -28,7 +28,7 @@ Key features include:
 
 ## Project Architecture
 
-![CEREBRUM Project Architecture](docs/diagrams/project_architecture.png)
+![CEREBRUM Project Architecture](docs/diagrams/project_architecture.mermaid)
 
 ## Repository Structure
 The CEREBRUM repository is organized into the following structure:
