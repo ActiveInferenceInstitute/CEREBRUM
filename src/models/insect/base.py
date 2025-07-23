@@ -127,9 +127,87 @@ class InsectModel(ActiveInferenceModel):
         Returns:
             Dictionary of initialized neural structures
         """
-        # This will be implemented in neural_structures.py
-        # For now, return empty dict
-        return {}
+        neural_structures = {}
+        
+        # Mushroom Body - Learning and Memory
+        neural_structures['mushroom_body'] = {
+            'type': 'mushroom_body',
+            'activity': np.random.rand(100),  # 100 Kenyon cells
+            'learning_rate': config.get('mushroom_body_learning_rate', 0.01),
+            'memory_capacity': config.get('mushroom_body_memory', 1000),
+            'case_assignment': Case.ACCUSATIVE,
+            'connections': {
+                'input': ['antennal_lobe', 'optic_lobe'],
+                'output': ['central_complex', 'subesophageal_ganglion']
+            }
+        }
+        
+        # Central Complex - Navigation and Spatial Processing
+        neural_structures['central_complex'] = {
+            'type': 'central_complex',
+            'activity': np.random.rand(50),  # 50 neurons
+            'spatial_map': np.zeros((10, 10)),  # 10x10 spatial grid
+            'heading_direction': 0.0,
+            'case_assignment': Case.NOMINATIVE,
+            'connections': {
+                'input': ['mushroom_body', 'optic_lobe'],
+                'output': ['ventral_nerve_cord']
+            }
+        }
+        
+        # Antennal Lobe - Olfactory Processing
+        neural_structures['antennal_lobe'] = {
+            'type': 'antennal_lobe',
+            'activity': np.random.rand(30),  # 30 glomeruli
+            'odor_responses': np.random.rand(30),
+            'case_assignment': Case.DATIVE,
+            'connections': {
+                'input': ['sensory_input'],
+                'output': ['mushroom_body', 'subesophageal_ganglion']
+            }
+        }
+        
+        # Optic Lobe - Visual Processing
+        neural_structures['optic_lobe'] = {
+            'type': 'optic_lobe',
+            'activity': np.random.rand(200),  # 200 visual neurons
+            'motion_detection': np.random.rand(20),
+            'color_processing': np.random.rand(10),
+            'case_assignment': Case.DATIVE,
+            'connections': {
+                'input': ['sensory_input'],
+                'output': ['mushroom_body', 'central_complex']
+            }
+        }
+        
+        # Subesophageal Ganglion - Motor Control
+        neural_structures['subesophageal_ganglion'] = {
+            'type': 'subesophageal_ganglion',
+            'activity': np.random.rand(40),  # 40 motor neurons
+            'motor_commands': np.zeros(10),
+            'case_assignment': Case.GENITIVE,
+            'connections': {
+                'input': ['mushroom_body', 'central_complex'],
+                'output': ['motor_output']
+            }
+        }
+        
+        # Ventral Nerve Cord - Coordination
+        neural_structures['ventral_nerve_cord'] = {
+            'type': 'ventral_nerve_cord',
+            'activity': np.random.rand(60),  # 60 coordination neurons
+            'rhythm_generators': np.random.rand(5),
+            'case_assignment': Case.INSTRUMENTAL,
+            'connections': {
+                'input': ['central_complex', 'subesophageal_ganglion'],
+                'output': ['motor_output']
+            }
+        }
+        
+        # Add neural structure as attribute for visualization
+        self.neural_structure = neural_structures
+        
+        return neural_structures
     
     def _initialize_case_assignments(self) -> Dict[str, Case]:
         """
@@ -154,9 +232,97 @@ class InsectModel(ActiveInferenceModel):
         Returns:
             Dictionary of behavioral modules
         """
-        # This will be implemented in behaviors.py
-        # For now, return empty dict
-        return {}
+        behavioral_modules = {}
+        
+        # Foraging Module
+        behavioral_modules['foraging'] = {
+            'type': 'foraging',
+            'energy_level': 1.0,
+            'food_memory': [],
+            'search_pattern': 'spiral',
+            'efficiency': 0.8,
+            'case_assignment': Case.ACCUSATIVE,
+            'parameters': {
+                'search_radius': 10.0,
+                'energy_threshold': 0.3,
+                'memory_decay': 0.95
+            }
+        }
+        
+        # Navigation Module
+        behavioral_modules['navigation'] = {
+            'type': 'navigation',
+            'current_position': np.array([0.0, 0.0, 0.0]),
+            'home_position': np.array([0.0, 0.0, 0.0]),
+            'path_memory': [],
+            'case_assignment': Case.NOMINATIVE,
+            'parameters': {
+                'max_speed': 2.0,
+                'turning_rate': 0.5,
+                'path_smoothing': 0.8
+            }
+        }
+        
+        # Communication Module
+        behavioral_modules['communication'] = {
+            'type': 'communication',
+            'pheromone_trail': [],
+            'signal_strength': 1.0,
+            'reception_sensitivity': 0.8,
+            'case_assignment': Case.DATIVE,
+            'parameters': {
+                'signal_decay': 0.9,
+                'reception_range': 5.0,
+                'encoding_efficiency': 0.7
+            }
+        }
+        
+        # Social Interaction Module
+        behavioral_modules['social'] = {
+            'type': 'social',
+            'colony_members': [],
+            'hierarchy_position': 0,
+            'cooperation_level': 0.6,
+            'case_assignment': Case.GENITIVE,
+            'parameters': {
+                'interaction_range': 3.0,
+                'hierarchy_weight': 0.5,
+                'cooperation_threshold': 0.4
+            }
+        }
+        
+        # Motor Control Module
+        behavioral_modules['motor'] = {
+            'type': 'motor',
+            'current_action': 'idle',
+            'action_queue': [],
+            'motor_commands': np.zeros(6),  # 6 degrees of freedom
+            'case_assignment': Case.INSTRUMENTAL,
+            'parameters': {
+                'max_force': 1.0,
+                'response_time': 0.1,
+                'precision': 0.8
+            }
+        }
+        
+        # Sensory Processing Module
+        behavioral_modules['sensory'] = {
+            'type': 'sensory',
+            'sensory_filters': {
+                'visual': np.ones(10),
+                'olfactory': np.ones(5),
+                'mechanosensory': np.ones(4)
+            },
+            'attention_focus': 'general',
+            'case_assignment': Case.DATIVE,
+            'parameters': {
+                'filter_decay': 0.98,
+                'attention_switch_rate': 0.2,
+                'sensitivity_threshold': 0.1
+            }
+        }
+        
+        return behavioral_modules
     
     def transform_case(self, target_case: Case) -> bool:
         """
@@ -298,8 +464,13 @@ class InsectModel(ActiveInferenceModel):
         # Update priorities in neural structures
         priority_list = priorities.get(target_case, [])
         for i, structure_name in enumerate(priority_list):
-            if structure_name in self.neural_structures:
-                self.neural_structures[structure_name]['priority'] = len(priority_list) - i
+            if structure_name in self.neural_structure:
+                # Handle both NeuralStructureProcessor objects and dictionaries
+                structure = self.neural_structure[structure_name]
+                if hasattr(structure, 'priority'):
+                    structure.priority = len(priority_list) - i
+                elif isinstance(structure, dict):
+                    structure['priority'] = len(priority_list) - i
     
     def process_sensory_input(self, input_data: SensoryInput) -> Dict[str, Any]:
         """
@@ -323,23 +494,23 @@ class InsectModel(ActiveInferenceModel):
             
             # Process visual input
             if input_data.visual is not None:
-                if 'optic_lobe' in self.neural_structures:
-                    processed_data['visual'] = self.neural_structures['optic_lobe'].process_input(input_data.visual)
+                if 'optic_lobe' in self.neural_structure:
+                    processed_data['visual'] = self.neural_structure['optic_lobe'].process_input(input_data.visual)
             
             # Process olfactory input
             if input_data.olfactory is not None:
-                if 'antennal_lobe' in self.neural_structures:
-                    processed_data['olfactory'] = self.neural_structures['antennal_lobe'].process_input(input_data.olfactory)
+                if 'antennal_lobe' in self.neural_structure:
+                    processed_data['olfactory'] = self.neural_structure['antennal_lobe'].process_input(input_data.olfactory)
             
             # Process pheromonal input
             if input_data.pheromonal is not None:
-                if 'antennal_lobe' in self.neural_structures:
-                    processed_data['pheromonal'] = self.neural_structures['antennal_lobe'].process_input(input_data.pheromonal)
+                if 'antennal_lobe' in self.neural_structure:
+                    processed_data['pheromonal'] = self.neural_structure['antennal_lobe'].process_input(input_data.pheromonal)
             
             # Process mechanosensory input
             if input_data.mechanosensory is not None:
-                if 'ventral_nerve_cord' in self.neural_structures:
-                    processed_data['mechanosensory'] = self.neural_structures['ventral_nerve_cord'].process_input(input_data.mechanosensory)
+                if 'ventral_nerve_cord' in self.neural_structure:
+                    processed_data['mechanosensory'] = self.neural_structure['ventral_nerve_cord'].process_input(input_data.mechanosensory)
             
             # Update performance metrics
             processing_time = time.time() - start_time

@@ -33,6 +33,7 @@ from .animation_creator import (
     InsectAnimationCreator,
     SwarmAnimationCreator
 )
+from .comprehensive_visualizer import ComprehensiveVisualizer
 
 __all__ = [
     # Main visualizers
@@ -60,7 +61,10 @@ __all__ = [
     
     # Animation
     'InsectAnimationCreator',
-    'SwarmAnimationCreator'
+    'SwarmAnimationCreator',
+    
+    # Comprehensive visualization
+    'ComprehensiveVisualizer'
 ]
 
 __version__ = "0.1.0"

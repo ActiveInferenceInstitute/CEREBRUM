@@ -43,7 +43,7 @@ def get_output_dir() -> str:
         Path to the output directory
     """
     project_root = find_project_root()
-    output_dir = os.path.join(project_root, "src", "tests", "example_outputs")
+    output_dir = os.path.join(project_root, "output")
     os.makedirs(output_dir, exist_ok=True)
     return output_dir
 
@@ -55,7 +55,7 @@ def get_logs_dir() -> str:
         Path to the logs directory
     """
     project_root = find_project_root()
-    logs_dir = os.path.join(project_root, "src", "tests", "logs")
+    logs_dir = os.path.join(project_root, "output", "logs")
     os.makedirs(logs_dir, exist_ok=True)
     return logs_dir
 
