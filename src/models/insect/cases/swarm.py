@@ -93,6 +93,7 @@ class SwarmCase:
         self.config = config or {}
         self._case = Case.NOMINATIVE  # Default case
         self.case_id = "SWARM"
+        self.case_name = "swarm"
         
         # Swarm dynamics parameters
         self.cohesion_strength = self.config.get('cohesion_strength', 0.5)

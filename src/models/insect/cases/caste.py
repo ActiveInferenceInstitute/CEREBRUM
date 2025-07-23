@@ -84,6 +84,7 @@ class CasteCase:
         self.config = config or {}
         self._case = Case.NOMINATIVE  # Default case
         self.case_id = "CAST"
+        self.case_name = "caste"
         
         # Caste profiles
         self.caste_profiles = self._initialize_caste_profiles()

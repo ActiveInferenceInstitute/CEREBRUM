@@ -88,6 +88,7 @@ class SubstrateCase:
         self.config = config or {}
         self._case = Case.NOMINATIVE  # Default case
         self.case_id = "SUB"
+        self.case_name = "substrate"
         
         # Substrate property templates
         self.substrate_templates = self._initialize_substrate_templates()

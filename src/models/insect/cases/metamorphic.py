@@ -65,6 +65,7 @@ class MetamorphicCase:
         self.config = config or {}
         self._case = Case.NOMINATIVE  # Default case
         self.case_id = "MET"
+        self.case_name = "metamorphic"
         
         # Developmental parameters
         self.stage_durations = {

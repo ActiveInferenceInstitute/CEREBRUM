@@ -82,6 +82,7 @@ class StigmergicCase:
         self.config = config or {}
         self._case = Case.NOMINATIVE  # Default case
         self.case_id = "STIG"
+        self.case_name = "stigmergic"
         
         # Signal parameters
         self.signal_templates = self._initialize_signal_templates()

@@ -81,6 +81,7 @@ class PheromonalCase:
         self.config = config or {}
         self._case = Case.NOMINATIVE  # Default case
         self.case_id = "PHE"
+        self.case_name = "pheromonal"
         
         # Pheromone processing parameters
         self.volatility_rates = {
@@ -410,4 +411,40 @@ class PheromonalCase:
             'pheromone_types': pheromone_types,
             'memory_entries': len(self.pheromone_memory),
             'avg_encounters_per_type': total_encounters / len(pheromone_types) if pheromone_types else 0
-        } 
+        }
+    
+    def detect_signals(self, position: np.ndarray, detection_radius: float) -> List[ChemicalSignal]:
+        """
+        Detect pheromone signals within a given radius.
+        
+        Args:
+            position: Current position
+            detection_radius: Detection radius
+            
+        Returns:
+            List of detected chemical signals
+        """
+        detected_signals = []
+        current_time = self._get_current_time()
+        
+        for pheromone_id, pheromone in self.active_pheromones.items():
+            # Check if pheromone is still active
+            if current_time - pheromone.timestamp > pheromone.duration:
+                continue
+            
+            # Calculate distance to pheromone
+            if pheromone.target_position is not None:
+                distance = np.linalg.norm(position - pheromone.target_position)
+                
+                if distance <= detection_radius:
+                    # Create chemical signal from pheromone
+                    signal = ChemicalSignal(
+                        pheromone_type=pheromone.pheromone_type,
+                        concentration=pheromone.concentration,
+                        volatility=self.volatility_rates.get(pheromone.pheromone_type, 0.5),
+                        source_position=pheromone.target_position,
+                        timestamp=pheromone.timestamp
+                    )
+                    detected_signals.append(signal)
+        
+        return detected_signals 

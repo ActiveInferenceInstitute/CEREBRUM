@@ -9,9 +9,11 @@ to create realistic insect behavior simulations.
 import numpy as np
 import time
 import logging
+import os
+import json
+from datetime import datetime
 from typing import Dict, Any, List
-import matplotlib.pyplot as plt
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
 from src.models.insect.base import (
     InsectModel, 
@@ -441,6 +443,62 @@ class InsectColony:
         logger.info(f"  Threats avoided: {self.statistics['total_threats_avoided']}")
         logger.info(f"  Pheromones created: {self.statistics['total_pheromones_created']}")
         logger.info(f"  Simulation steps: {self.statistics['simulation_steps']}")
+    
+    def save_simulation_data(self, output_dir: str):
+        """Save simulation data to files."""
+        # Create output directory if it doesn't exist
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Save colony statistics
+        stats_file = os.path.join(output_dir, "colony_statistics.json")
+        with open(stats_file, 'w') as f:
+            json.dump(self.statistics, f, indent=2, default=str)
+        
+        # Save member positions and states
+        members_data = {}
+        for member_id, model in self.members.items():
+            # Convert enum values to strings for JSON serialization
+            member_state = self.member_states[member_id].copy()
+            member_state['caste'] = member_state['caste'].value
+            member_state['developmental_stage'] = member_state['developmental_stage'].value
+            
+            members_data[member_id] = {
+                'position': self.member_positions[member_id].tolist(),
+                'behavioral_state': model.behavioral_state.value,
+                'current_case': model.case.value,
+                'species': model.species,
+                'member_state': member_state
+            }
+        
+        members_file = os.path.join(output_dir, "member_states.json")
+        with open(members_file, 'w') as f:
+            json.dump(members_data, f, indent=2)
+        
+        # Save case-specific data
+        case_data = {
+            'pheromonal': self.pheromonal_case.get_pheromone_environment(),
+            'swarm': self.swarm_case.get_swarm_statistics(),
+            'substrate': self.substrate_case.get_substrate_statistics(),
+            'stigmergic': self.stigmergic_case.get_stigmergic_statistics()
+        }
+        
+        case_file = os.path.join(output_dir, "case_statistics.json")
+        with open(case_file, 'w') as f:
+            json.dump(case_data, f, indent=2, default=str)
+        
+        # Save environment data
+        env_data = {
+            'food_sources': [pos.tolist() for pos in self.environment.food_sources],
+            'threats': [pos.tolist() for pos in self.environment.threats],
+            'temperature': self.environment.temperature,
+            'humidity': self.environment.humidity
+        }
+        
+        env_file = os.path.join(output_dir, "environment_data.json")
+        with open(env_file, 'w') as f:
+            json.dump(env_data, f, indent=2)
+        
+        logger.info(f"Simulation data saved to {output_dir}")
 
 
 def run_insect_simulation():
@@ -494,6 +552,10 @@ def run_insect_simulation():
                 environment.food_sources[i] += np.random.randn(3) * 0.1
                 environment.food_sources[i][2] = 0.0
     
+    # Create timestamped output directory
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_dir = f"output/insect_simulation_{timestamp}"
+    
     # Final statistics
     logger.info("Simulation completed!")
     colony._log_statistics()
@@ -518,6 +580,9 @@ def run_insect_simulation():
     stigmergic_stats = colony.stigmergic_case.get_stigmergic_statistics()
     logger.info(f"  Active signals: {stigmergic_stats['active_signals']}")
     logger.info(f"  Total responses: {stigmergic_stats['total_responses']}")
+    
+    # Save simulation data to files
+    colony.save_simulation_data(output_dir)
 
 
 if __name__ == "__main__":
