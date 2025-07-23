@@ -1,26 +1,114 @@
+---
+config:
+  look: neo
+  theme: cerebrum
+  layout: elk
+---
+
 graph TD
-    A[CEREBRUM Framework] --> B[Core Engine]
-    A --> C[Model Library]
-    A --> D[Transformation Engine]
-    A --> E[Visualization Tools]
+    %% Style definitions
+    classDef framework fill:#4ECDC4,stroke:#2C3E50,stroke-width:3px,color:#FFFFFF,font-weight:bold
+    classDef engine fill:#45B7D1,stroke:#2C3E50,stroke-width:2px,color:#FFFFFF,font-weight:600
+    classDef library fill:#96CEB4,stroke:#2C3E50,stroke-width:2px,color:#2C3E50,font-weight:500
+    classDef transformation fill:#FFE66D,stroke:#2C3E50,stroke-width:2px,color:#2C3E50,font-weight:500
+    classDef visualization fill:#FF6B6B,stroke:#2C3E50,stroke-width:2px,color:#FFFFFF,font-weight:500
+    classDef integration fill:#A29BFE,stroke:#2C3E50,stroke-width:2px,color:#FFFFFF,font-weight:500
     
-    B --> B1[Active Inference Module]
-    B --> B2[Bayesian Representation]
-    B --> B3[Case Management]
+    %% Main framework
+    CEREBRUM["🏛️ CEREBRUM Framework<br/><small>Case-Enabled Reasoning Engine with<br/>Bayesian Representations for Unified Modeling</small>"]:::framework
     
-    C --> C1[Predefined Models]
-    C --> C2[Custom Model Templates]
+    %% Core Engine components
+    subgraph "Core Engine"
+        direction TB
+        ActiveInference["🧠 Active Inference Module<br/><small>[NOM] - Action selection and prediction</small>"]:::engine
+        BayesianRep["📊 Bayesian Representation<br/><small>[ACC] - Probabilistic modeling</small>"]:::engine
+        CaseManagement["🗂️ Case Management<br/><small>[GEN] - Case system coordination</small>"]:::engine
+        
+        ActiveInference --> BayesianRep
+        BayesianRep --> CaseManagement
+    end
     
-    D --> D1[Model Adaptation]
-    D --> D2[Case Transformation]
-    D --> D3[Learning Mechanisms]
+    %% Model Library components
+    subgraph "Model Library"
+        direction LR
+        PredefinedModels["📚 Predefined Models<br/><small>Ready-to-use implementations</small>"]:::library
+        CustomTemplates["🎨 Custom Model Templates<br/><small>Extensible framework</small>"]:::library
+        ModelInstances["🔧 Model Instances<br/><small>Runtime implementations</small>"]:::library
+        
+        PredefinedModels --> ModelInstances
+        CustomTemplates --> ModelInstances
+    end
     
-    E --> E1[Interactive Visualizations]
-    E --> E2[Model Inspection Tools]
-    E --> E3[Diagnostic Reports]
+    %% Transformation Engine components
+    subgraph "Transformation Engine"
+        direction TB
+        ModelAdaptation["🔄 Model Adaptation<br/><small>[INS] - Adaptive learning processes</small>"]:::transformation
+        CaseTransformation["🔄 Case Transformation<br/><small>[LOC] - Context-aware mappings</small>"]:::transformation
+        LearningMechanisms["📈 Learning Mechanisms<br/><small>[ABL] - Knowledge acquisition</small>"]:::transformation
+        
+        ModelAdaptation --> CaseTransformation
+        CaseTransformation --> LearningMechanisms
+    end
     
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style B fill:#bbf,stroke:#333
-    style C fill:#bbf,stroke:#333
-    style D fill:#bbf,stroke:#333
-    style E fill:#bbf,stroke:#333 
+    %% Visualization Tools components
+    subgraph "Visualization & Interaction"
+        direction LR
+        InteractiveViz["🎯 Interactive Visualizations<br/><small>User interface and exploration</small>"]:::visualization
+        ModelInspection["🔍 Model Inspection Tools<br/><small>Debugging and analysis</small>"]:::visualization
+        DiagnosticReports["📋 Diagnostic Reports<br/><small>Performance analytics</small>"]:::visualization
+        
+        InteractiveViz --> ModelInspection
+        ModelInspection --> DiagnosticReports
+    end
+    
+    %% Integration layer
+    subgraph "Integration Layer"
+        direction TB
+        RESTAPI["🌐 REST API<br/><small>External interface</small>"]:::integration
+        LanguageSDKs["🔧 Language SDKs<br/><small>Multi-language support</small>"]:::integration
+        CommandLineTools["💻 Command Line Tools<br/><small>Automation interface</small>"]:::integration
+        
+        RESTAPI --> LanguageSDKs
+        LanguageSDKs --> CommandLineTools
+    end
+    
+    %% Main system connections
+    CEREBRUM --> CoreEngine["Core Engine"]
+    CEREBRUM --> ModelLib["Model Library"]
+    CEREBRUM --> TransEng["Transformation Engine"]
+    CEREBRUM --> VizTools["Visualization Tools"]
+    
+    %% Internal connections
+    CoreEngine --> ActiveInference
+    ModelLib --> PredefinedModels
+    TransEng --> ModelAdaptation
+    VizTools --> InteractiveViz
+    
+    %% Cross-system connections
+    ActiveInference --> ModelAdaptation
+    BayesianRep --> LearningMechanisms
+    CaseManagement --> CaseTransformation
+    ModelInstances --> ModelInspection
+    
+    %% Integration connections
+    ActiveInference --> RESTAPI
+    PredefinedModels --> LanguageSDKs
+    ModelAdaptation --> CommandLineTools
+    InteractiveViz --> RESTAPI
+    
+    %% Interactive elements
+    click CEREBRUM "https://github.com/ActiveInferenceInstitute/CEREBRUM" "View project repository"
+    click ActiveInference "src/core/active_inference.py" "View active inference implementation"
+    click BayesianRep "src/core/bayesian_representation.py" "View Bayesian representation"
+    click CaseManagement "src/cases/" "View case management system"
+    click PredefinedModels "src/models/" "View predefined models"
+    click ModelAdaptation "src/transformations/" "View transformation logic"
+    click InteractiveViz "src/visualization/" "View visualization tools"
+    click RESTAPI "docs/api/" "View API documentation"
+    
+    %% Enhanced styling
+    linkStyle default stroke:#7F8C8D,stroke-width:2px
+    linkStyle 0 stroke:#4ECDC4,stroke-width:3px
+    linkStyle 1 stroke:#45B7D1,stroke-width:3px
+    linkStyle 2 stroke:#96CEB4,stroke-width:3px
+    linkStyle 3 stroke:#FFE66D,stroke-width:3px 

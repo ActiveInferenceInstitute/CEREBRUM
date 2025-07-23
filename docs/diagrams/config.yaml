@@ -1,0 +1,176 @@
+# CEREBRUM Enhanced Mermaid Configuration
+# This file defines modern styling and themes for all CEREBRUM diagrams
+
+# Global Configuration
+config:
+  # Modern styling options
+  look: neo
+  theme: cerebrum
+  layout: elk
+  
+  # Performance and accessibility
+  responsive: true
+  accessibility: true
+  lazyLoading: true
+
+# CEREBRUM Branded Theme
+themeVariables:
+  # Primary CEREBRUM Colors
+  primaryColor: '#4ECDC4'
+  primaryTextColor: '#2C3E50'
+  primaryBorderColor: '#34495E'
+  
+  # Secondary Colors
+  secondaryColor: '#45B7D1'
+  secondaryTextColor: '#2C3E50'
+  secondaryBorderColor: '#2980B9'
+  
+  # Accent Colors
+  tertiaryColor: '#96CEB4'
+  tertiaryTextColor: '#2C3E50'
+  tertiaryBorderColor: '#27AE60'
+  
+  # Neutral Colors
+  neutralColor: '#95A5A6'
+  neutralTextColor: '#2C3E50'
+  neutralBorderColor: '#7F8C8D'
+  
+  # Background and Surface
+  background: '#FFFFFF'
+  surfaceColor: '#F8F9FA'
+  surfaceBorderColor: '#E9ECEF'
+  
+  # Text Colors
+  textColor: '#2C3E50'
+  fontSize: '14px'
+  fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+  
+  # Line and Connection Colors
+  lineColor: '#7F8C8D'
+  borderColor: '#BDC3C7'
+  
+  # Error and Warning Colors
+  errorBkgColor: '#FF6B6B'
+  errorTextColor: '#FFFFFF'
+  warningBkgColor: '#FFE66D'
+  warningTextColor: '#2C3E50'
+  successBkgColor: '#51CF66'
+  successTextColor: '#FFFFFF'
+
+# Component-Specific Styling
+classDef:
+  # Framework Components
+  framework:
+    fill: '#4ECDC4'
+    stroke: '#2C3E50'
+    stroke-width: '3px'
+    color: '#FFFFFF'
+    font-weight: 'bold'
+  
+  # Core Engine Components
+  engine:
+    fill: '#45B7D1'
+    stroke: '#2C3E50'
+    stroke-width: '2px'
+    color: '#FFFFFF'
+    font-weight: '600'
+  
+  # Model Library Components
+  library:
+    fill: '#96CEB4'
+    stroke: '#2C3E50'
+    stroke-width: '2px'
+    color: '#2C3E50'
+    font-weight: '500'
+  
+  # Transformation Components
+  transformation:
+    fill: '#FFE66D'
+    stroke: '#2C3E50'
+    stroke-width: '2px'
+    color: '#2C3E50'
+    font-weight: '500'
+  
+  # Visualization Components
+  visualization:
+    fill: '#FF6B6B'
+    stroke: '#2C3E50'
+    stroke-width: '2px'
+    color: '#FFFFFF'
+    font-weight: '500'
+  
+  # Integration Components
+  integration:
+    fill: '#A29BFE'
+    stroke: '#2C3E50'
+    stroke-width: '2px'
+    color: '#FFFFFF'
+    font-weight: '500'
+  
+  # Data Components
+  data:
+    fill: '#FD79A8'
+    stroke: '#2C3E50'
+    stroke-width: '2px'
+    color: '#FFFFFF'
+    font-weight: '500'
+  
+  # Process Components
+  process:
+    fill: '#00B894'
+    stroke: '#2C3E50'
+    stroke-width: '2px'
+    color: '#FFFFFF'
+    font-weight: '500'
+  
+  # Decision Components
+  decision:
+    fill: '#FDCB6E'
+    stroke: '#2C3E50'
+    stroke-width: '2px'
+    color: '#2C3E50'
+    font-weight: '600'
+  
+  # Clickable Components
+  clickable:
+    fill: '#74B9FF'
+    stroke: '#2C3E50'
+    stroke-width: '2px'
+    color: '#FFFFFF'
+    font-weight: '500'
+    cursor: 'pointer'
+  
+  # Default Styling
+  default:
+    fill: '#F8F9FA'
+    stroke: '#BDC3C7'
+    stroke-width: '1px'
+    color: '#2C3E50'
+    font-weight: '400'
+
+# Interactive Features Configuration
+interactive:
+  enabled: true
+  tooltips: true
+  clickable: true
+  hover: true
+  
+# Responsive Design
+responsive:
+  breakpoints:
+    mobile: 768
+    tablet: 1024
+    desktop: 1200
+  
+# Animation Settings
+animation:
+  enabled: true
+  duration: 500
+  easing: 'ease-in-out'
+
+# Export Settings
+export:
+  format: 'png'
+  quality: 'high'
+  background: 'transparent'
+  scale: 2 

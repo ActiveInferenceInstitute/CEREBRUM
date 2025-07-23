@@ -1,0 +1,114 @@
+---
+config:
+  look: neo
+  theme: cerebrum
+  layout: elk
+---
+
+stateDiagram-v2
+    [*] --> ModelConception
+    
+    state ModelConception {
+        [*] --> ProblemDefinition
+        ProblemDefinition --> RequirementsGathering: Gather Requirements [DAT]
+        RequirementsGathering --> ProblemDefinition: Requirements Incomplete
+        RequirementsGathering --> UseCaseAnalysis: Requirements Complete
+        UseCaseAnalysis --> ProblemDefinition: Use Cases Incomplete
+        UseCaseAnalysis --> ModelDesign: Use Cases Complete
+    }
+    
+    ModelConception --> ModelDevelopment: Start Development [ACC]
+    ModelConception --> [*]: Cancel Project
+    
+    state ModelDevelopment {
+        [*] --> ArchitectureDesign
+        ArchitectureDesign --> CaseStructureDefinition: Design Architecture [NOM]
+        CaseStructureDefinition --> BayesianModelDesign: Define Cases
+        BayesianModelDesign --> TransformationDesign: Design Bayesian Model
+        TransformationDesign --> Implementation: Design Transformations
+        Implementation --> Testing: Implement Model
+        Testing --> Implementation: Tests Failed
+        Testing --> Validation: Tests Passed
+        Validation --> Implementation: Validation Failed
+    }
+    
+    ModelDevelopment --> ModelTraining: Begin Training [GEN]
+    ModelDevelopment --> ModelArchived: Archive Model
+    
+    state ModelTraining {
+        [*] --> DataPreparation
+        DataPreparation --> ModelInitialization: Prepare Data [INS]
+        ModelInitialization --> TrainingExecution: Initialize Model
+        TrainingExecution --> PerformanceMonitoring: Execute Training
+        PerformanceMonitoring --> TrainingExecution: Performance Poor
+        PerformanceMonitoring --> ModelEvaluation: Performance Good
+        ModelEvaluation --> TrainingExecution: Evaluation Failed
+        ModelEvaluation --> HyperparameterTuning: Evaluation Passed
+        HyperparameterTuning --> TrainingExecution: Tune Parameters
+    }
+    
+    ModelTraining --> ModelDeployment: Deploy Model [LOC]
+    ModelTraining --> ModelArchived: Archive Model
+    
+    state ModelDeployment {
+        [*] --> EnvironmentSetup
+        EnvironmentSetup --> ModelDeployment: Setup Environment
+        ModelDeployment --> IntegrationTesting: Deploy Model
+        IntegrationTesting --> ModelDeployment: Integration Failed
+        IntegrationTesting --> ProductionDeployment: Integration Passed
+        ProductionDeployment --> ActiveMonitoring: Deploy to Production
+    }
+    
+    ModelDeployment --> ModelInProduction: Model Active
+    ModelDeployment --> ModelArchived: Archive Model
+    
+    state ModelInProduction {
+        [*] --> ActiveServing
+        ActiveServing --> PerformanceMonitoring: Serve Requests
+        PerformanceMonitoring --> ActiveServing: Performance OK
+        PerformanceMonitoring --> ModelRetraining: Performance Degraded
+        ModelRetraining --> ActiveServing: Retraining Complete
+        ModelRetraining --> PerformanceMonitoring: Retraining Failed
+        ActiveServing --> ModelMaintenance: Maintenance Required
+        ModelMaintenance --> ActiveServing: Maintenance Complete
+    }
+    
+    ModelInProduction --> ModelRetirement: Retire Model [ABL]
+    ModelInProduction --> ModelArchived: Archive Model
+    
+    state ModelRetirement {
+        [*] --> RetirementPlanning
+        RetirementPlanning --> GradualDecommissioning: Plan Retirement
+        GradualDecommissioning --> DataMigration: Decommission Gradually
+        DataMigration --> ModelArchiving: Migrate Data
+        ModelArchiving --> Documentation: Archive Model
+        Documentation --> RetirementPlanning: Documentation Incomplete
+    }
+    
+    ModelRetirement --> ModelArchived: Archive Model
+    ModelArchived --> [*]: Permanent Deletion
+    
+    %% Interactive elements
+    note right of ModelConception
+        Click to view conception documentation
+    end note
+    
+    note right of ModelDevelopment
+        Click to view development guidelines
+    end note
+    
+    note right of ModelTraining
+        Click to view training procedures
+    end note
+    
+    note right of ModelDeployment
+        Click to view deployment guide
+    end note
+    
+    note right of ModelInProduction
+        Click to view production monitoring
+    end note
+    
+    note right of ModelRetirement
+        Click to view retirement procedures
+    end note 

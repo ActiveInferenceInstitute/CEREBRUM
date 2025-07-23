@@ -1,0 +1,43 @@
+---
+config:
+  look: neo
+  theme: cerebrum
+  layout: elk
+---
+
+stateDiagram-v2
+    [*] --> ModelCreated
+    
+    state ModelCreated {
+        [*] --> Draft
+        Draft --> Validated: Validate Configuration [DAT]
+        Validated --> Draft: Validation Failed
+        Validated --> Ready: Validation Passed
+    }
+    
+    ModelCreated --> ModelTraining: Start Training [ACC]
+    ModelCreated --> [*]: Delete Model
+    
+    state ModelTraining {
+        [*] --> Initializing
+        Initializing --> Training: Begin Training [NOM]
+        Training --> Evaluating: Training Complete
+        Evaluating --> Training: Evaluation Failed
+        Evaluating --> Validated: Evaluation Passed
+    }
+    
+    ModelTraining --> ModelDeployed: Deploy Model [GEN]
+    ModelTraining --> ModelArchived: Archive Model
+    
+    state ModelDeployed {
+        [*] --> Active
+        Active --> Monitoring: Monitor Performance [INS]
+        Monitoring --> Active: Performance OK
+        Monitoring --> Degraded: Performance Degraded
+        Degraded --> Retraining: Retrain Model
+        Retraining --> Active: Retraining Complete
+    }
+    
+    ModelDeployed --> ModelRetired: Retire Model [LOC]
+    ModelRetired --> ModelArchived: Archive Model
+    ModelArchived --> [*]: Permanent Deletion

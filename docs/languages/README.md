@@ -1,192 +1,307 @@
-# Language-Specific Case Mappings for CEREBRUM
+# CEREBRUM Language Case Systems Documentation
 
-This directory contains detailed documentation on how CEREBRUM's case system maps to and draws inspiration from various natural languages with rich case systems. Each file provides a comprehensive analysis of the relationship between CEREBRUM's eight standard cases and their counterparts in different languages.
+## Overview
 
-## Purpose
+This directory contains comprehensive documentation of case systems from natural and programming languages, mapped to CEREBRUM's computational case framework. Each language document provides detailed analysis of how grammatical relationships can be systematically encoded through case marking, offering insights for computational model relationship architectures.
 
-Understanding how CEREBRUM's case system relates to natural language cases serves several important purposes:
+## Documentation Structure
 
-1. **Conceptual Grounding**: Provides a foundation in established linguistic concepts
-2. **Analogical Reasoning**: Enables understanding of CEREBRUM through familiar linguistic parallels
-3. **Cross-Cultural Insight**: Demonstrates how different languages handle similar functional relationships
-4. **Extensibility Patterns**: Offers patterns for extending CEREBRUM with additional cases based on linguistic examples
+### Natural Languages (60+ languages)
 
-## Languages Included
+#### Indo-European Family
+- **Ancient Greek** (`ancient_greek.md`) - Classical case system with philosophical foundations
+- **Latin** (`latin.md`) - Comprehensive 6-case system with rich morphology
+- **Sanskrit** (`sanskrit.md`) - 8-case system with kāraka theory (66KB, most comprehensive)
+- **Russian** (`russian.md`) - 6-case system with complex declension patterns
+- **German** (`german.md`) - 4-case system with strong/weak declensions
+- **Polish** (`polish.md`) - 7-case system with complex morphology
+- **Lithuanian** (`lithuanian.md`) - 7-case system preserving archaic features
+- **Icelandic** (`icelandic.md`) - 4-case system with rich inflection
+- **English** - Historical evolution through three periods:
+  - **Early English** (`english-early.md`) - Germanic case system
+  - **Middle English** (`english-middle.md`) - Transitional period
+  - **Modern English** (`english-modern.md`) - Residual case marking
 
-This directory contains case mapping analyses organized by language family and type:
+#### Uralic Family
+- **Finnish** (`finnish.md`) - 15-case system with locative cases (65KB, most comprehensive)
+- **Finnish Figures** (`finnish-figures.md`) - Visual case system analysis (58KB)
+- **Estonian** (`estonian.md`) - 14-case system with similar patterns
+- **Hungarian** (`hungarian.md`) - 18-case system with complex morphology
+- **Hungarian Markov** (`hungarian-markov.md`) - Statistical case analysis
+- **Sami** (`sami-figures.md`) - Northern Sami case system (52KB)
 
-### Indo-European Languages
+#### Altaic Family
+- **Turkish** (`turkish.md`) - Agglutinative case system
+- **Mongolian** (`mongolian.md`) - 8-case system with vowel harmony
+- **Korean** (`korean.md`) - Particle-based case marking
+- **Japanese** (`japanese.md`) - Postpositional case system
 
-#### Germanic Branch
-- [German](german.md) - West Germanic language with 4-case system
-- [Icelandic](icelandic.md) - North Germanic language with preserved 4-case system  
-- [Norwegian](norwegian.md) - North Germanic language showing transition from morphological to positional case system
-- [English (Early/Old English)](english-early.md) - Anglo-Saxon period (450-1150 CE) with full Germanic five-case system
-- [English (Middle)](english-middle.md) - Middle English period (1150-1500 CE) showing case system transition
-- [English (Modern)](english-modern.md) - Contemporary English with analytical case expression and vestigial morphology
+#### Sino-Tibetan Family
+- **Chinese (Classical)** (`chinese-classical.md`) - Classical Chinese case patterns
+- **Chinese (Modern)** (`chinese-modern.md`) - Modern Mandarin case system
+- **Tibetan** (`tibetan.md`) - Classical Tibetan case marking
+- **Thai** (`thai.md`) - Thai case system with particles
 
-#### Romance Branch  
-- [Portuguese](portuguese.md) - Romance language using prepositions and word order to express case relationships
-- [French](french.md) - West Romance language with analytical case system and complex pronoun paradigms
+#### Austronesian Family
+- **Tagalog** (`tagalog.md`) - Philippine-type voice system
+- **Maori** (`maori.md`) - Polynesian case patterns
+- **Amis** (`amis.md`) - Formosan Austronesian voice system
+- **Paiwan** (`paiwan.md`) - Formosan case system
+- **Kavalan** (`kavalan.md`) - Formosan Austronesian
+- **Puyuma** (`puyuma.md`) - Formosan Austronesian
+- **Ilocano** (`ilocano.md`) - Philippine Austronesian
 
-#### Slavic Branch
-- [Russian](russian.md) - East Slavic language with 6 cases and rich morphology
-- [Polish](polish.md) - West Slavic language with 7 cases and complex phonological changes
-- [Serbian](serbian.md) - South Slavic language with 7 cases and animacy distinctions
-- [Inter-Slavic](interslavic.md) - Constructed zonal auxiliary language with standardized Slavic case system
+#### Afro-Asiatic Family
+- **Arabic** (`arabic.md`) - 3-case system with I'rāb
+- **Hebrew** (`hebrew.md`) - Biblical Hebrew case patterns
 
-#### Baltic Branch
-- [Lithuanian](lithuanian.md) - Baltic language with complex 7-case system and archaic Indo-European features
+#### Niger-Congo Family
+- **Swahili** (`swahili.md`) - Bantu noun class system
+- **Wolof** (`wolof.md`) - Atlantic language case patterns
 
-#### Indo-Iranian Branch
-- [Sanskrit](sanskrit.md) - Ancient Indo-Aryan language with 8 cases
-- [Hindi](hindi.md) - Modern Indo-Aryan language with direct and oblique cases plus postpositions
+#### Dravidian Family
+- **Tamil** (`tamil.md`) - Classical Tamil case system
 
-#### Hellenic Branch
-- [Ancient Greek](ancient_greek.md) - Classical Greek with 5 cases and historical linguistic significance
+#### Indigenous American Languages
+- **Nahuatl** (`nahuatl.md`) - Uto-Aztecan case system (30KB)
+- **Navajo** (`navajo.md`) - Athabaskan case patterns (28KB)
+- **Quechua** (`quechua.md`) - Quechuan case system
+- **Inuktitut** (`inuktitut.md`) - Inuit case system
 
-#### Celtic Branch
-- [Welsh](welsh.md) - Brythonic Celtic language with innovative conjugated prepositions
+#### Endangered Languages (CRITICAL PRIORITY)
+- **Kawahíva** (`kawahiva.md`) - Critically endangered Tupí-Guaraní (560 speakers, 8 communities)
+- **Mani** (`mani.md`) - Critically endangered language from Sierra Leone (few dozen speakers)
+- **Dani** (`dani.md`) - Critically endangered Papuan (100-200 speakers, Baliem Valley)
+- **Warlpiri** (`warlpiri.md`) - Critically endangered Australian Aboriginal (200-300 speakers)
+- **!Xóõ** (`xoo.md`) - Critically endangered Khoisan (20-30 speakers, Botswana/Namibia)
+- **Vamale** (`vamale.md`) - Critically endangered Austronesian (10-15 speakers, New Caledonia)
 
-#### Other Indo-European
-- [Latin](latin.md) - Classic Indo-European case system with 6-7 cases
+#### Other Language Families
+- **Basque** (`basque.md`) - Isolate language with ergative-absolutive
+- **Georgian** (`georgian.md`) - Kartvelian case system
+- **Vietnamese** (`vietnamese.md`) - Mon-Khmer case patterns
+- **Norwegian** (`norwegian.md`) - North Germanic case system
+- **Portuguese** (`portuguese.md`) - Romance case patterns
+- **French** (`french.md`) - Romance case system
+- **Serbian** (`serbian.md`) - South Slavic case system
+- **Interslavic** (`interslavic.md`) - Constructed Slavic language
+- **Esperanto** (`esperanto.md`) - Constructed international language
 
-### Sino-Tibetan Languages
-- [Chinese (Classical)](chinese-classical.md) - Literary Chinese with analytical case expression through word order and particles
-- [Chinese (Modern)](chinese-modern.md) - Contemporary Mandarin with coverb-based case system and analytical grammar
-- [Mandarin](mandarin.md) - Analytic language showing how case functions are expressed without morphological marking
-- [Tibetan](tibetan.md) - Sino-Tibetan language with ergative-absolutive alignment and agglutinative features
+### Programming Languages (35+ languages)
 
-### Altaic and Related Languages
+#### Modern Languages (NEW)
+- **Julia** (`julia.md`) - Multiple dispatch and type-based case system
+- **WebAssembly** (`webassembly.md`) - Stack-based virtual instruction set architecture
+- **Zig** (`zig.md`) - Modern systems programming with compile-time execution
+- **Carbon** (`carbon.md`) - C++ successor with bidirectional interoperability
+- **Odin** (`odin.md`) - Data-oriented design with explicit memory management
 
-#### Turkic Branch
-- [Turkish](turkish.md) - Turkic language with agglutinative case system
+#### Established Languages
+- **Python** (`python.md`) - Object-oriented and functional paradigms
+- **Rust** (`rust.md`) - Systems programming with ownership model
+- **JavaScript** (`javascript.md`) - Prototype-based OOP and functional concepts
+- **TypeScript** (`typescript.md`) - JavaScript with static typing
+- **Java** (`java.md`) - Class-based OOP with strong typing
+- **C++** (`cpp.md`) - Systems language with multiple paradigms
+- **C#** (`csharp.md`) - Multi-paradigm language with strong OOP focus
+- **Go** (`go.md`) - Concurrent systems language
+- **Swift** (`swift.md`) - Multi-paradigm with protocol-oriented programming
+- **Kotlin** (`kotlin.md`) - JVM language with improved safety
+- **Ruby** (`ruby.md`) - Dynamic, object-oriented language
+- **PHP** (`php.md`) - Server-side scripting language
+- **R** (`r.md`) - Statistical computing and graphics language
+- **SQL** (`sql.md`) - Query language with relational algebra
+- **Haskell** (`haskell.md`) - Pure functional programming
+- **Lisp** (`lisp.md`) - Homoiconic functional language
+- **Clojure** (`clojure.md`) - Dynamic, functional Lisp dialect
+- **Prolog** (`prolog.md`) - Logic programming paradigm
+- **Erlang** (`erlang.md`) - Functional language for concurrency
+- **Elixir** (`elixir.md`) - Functional language on Erlang VM
+- **Scala** (`scala.md`) - Multi-paradigm JVM language
+- **Dart** (`dart.md`) - Client-optimized multi-platform language
+- **Lua** (`lua.md`) - Lightweight, embeddable scripting
+- **Perl** (`perl.md`) - Flexible scripting language
+- **Objective-C** (`objective_c.md`) - C superset with Smalltalk messaging
+- **Visual Basic** (`visual_basic.md`) - Event-driven, object-oriented .NET language
+- **Fortran** (`fortran.md`) - Scientific computing language
+- **COBOL** (`cobol.md`) - Business-oriented language
+- **Assembly** (`assembly.md`) - Low-level machine code representation
 
-#### Mongolic Branch
-- [Mongolian](mongolian.md) - Mongolic language with extensive case system and vowel harmony
+## Case System Analysis Framework
 
-### Uralic Languages
-- [Finnish](finnish.md) - Finno-Ugric language with 15 cases
-- [Estonian](estonian.md) - Finnic language with 14 cases including specialized spatial cases
-- [Hungarian](hungarian.md) - Uralic language with 18 cases
-- [Finnish-Figures](finnish-figures.md) - Extended analysis of Finnish case system with visual representations
-- [Sami-Figures](sami-figures.md) - Uralic language with extensive case system and visual documentation
-- [Hungarian-Markov](hungarian-markov.md) - Computational model of Hungarian case transformations
+### Standard CEREBRUM Cases
 
-### Japonic Languages
-- [Japanese](japanese.md) - Particles functioning similarly to cases
+All language documents map to these eight core cases:
 
-### Koreanic Languages  
-- [Korean](korean.md) - Agglutinative case marking system
+1. **[NOM]** Nominative - Primary agent/subject
+2. **[ACC]** Accusative - Direct object/patient
+3. **[GEN]** Genitive - Possession/source relationship
+4. **[DAT]** Dative - Recipient/beneficiary
+5. **[INS]** Instrumental - Means/method/tool
+6. **[LOC]** Locative - Location/context
+7. **[ABL]** Ablative - Source/origin
+8. **[VOC]** Vocative - Direct address
 
-### Austro-Asiatic Languages
-- [Vietnamese](vietnamese.md) - Mon-Khmer language with classifier system and tonal case-like functions
+### Analysis Components
 
-### Austronesian Languages
+Each language document includes:
 
-#### Formosan Branch
-- [Amis](amis.md) - Formosan Austronesian language with five-voice system and dedicated benefactive focus
-- [Paiwan](paiwan.md) - Formosan Austronesian language with four-voice system and status-sensitive marking
-- [Puyuma](puyuma.md) - Formosan Austronesian language with four-voice system and case markers
-- [Kavalan](kavalan.md) - Formosan Austronesian language with voice system and person-marking clitics
+1. **Overview** - Language background and case system characteristics
+2. **Case Inventory** - Detailed case system description
+3. **CEREBRUM Mapping** - Direct correspondences to CEREBRUM cases
+4. **Unique Features** - Language-specific case phenomena
+5. **Example Sentences** - Practical examples with CEREBRUM parallels
+6. **Extension Opportunities** - Potential CEREBRUM implementations
+7. **Implementation Notes** - Technical considerations
+8. **References** - Academic and technical sources
 
-#### Philippine Branch
-- [Tagalog](tagalog.md) - Austronesian language with focus system rather than case marking
-- [Ilocano](ilocano.md) - Philippine Austronesian language with focus/voice system and case markers
+## Cross-Reference System
 
-#### Polynesian Branch
-- [Maori](maori.md) - Polynesian language with particle-based grammatical relations
+### Case System Types
 
-### Afro-Asiatic Languages
+#### Morphological Case Systems
+- **Synthetic**: Sanskrit, Latin, Ancient Greek, Finnish, Hungarian
+- **Agglutinative**: Turkish, Mongolian, Quechua
+- **Fusional**: Russian, German, Polish
 
-#### Semitic Branch
-- [Arabic](arabic.md) - Semitic case system with 3 cases
-- [Hebrew](hebrew.md) - Semitic language with construct state instead of traditional case marking
+#### Analytical Case Systems
+- **Particle-based**: Chinese, Thai, Vietnamese
+- **Prepositional**: English, French, Portuguese
+- **Postpositional**: Japanese, Korean
 
-### Niger-Congo Languages
-- [Swahili](swahili.md) - Bantu language with noun class system replacing traditional case marking
-- [Wolof](wolof.md) - Niger-Congo language with a unique verbal focus system
+#### Mixed Systems
+- **Voice-based**: Tagalog, Amis, Paiwan
+- **Person-marking**: Kawahíva, Mani
+- **Tonal**: Mani (prosodic case marking)
 
-### Dravidian Languages
-- [Tamil](tamil.md) - Dravidian language with 8 cases and agglutinative morphology
+### Programming Paradigms
 
-### Kartvelian Languages
-- [Georgian](georgian.md) - Kartvelian language with complex case system
+#### Object-Oriented
+- **Class-based**: Java, C#, C++
+- **Prototype-based**: JavaScript
+- **Multiple dispatch**: Julia
 
-### Language Isolates
-- [Basque](basque.md) - Language isolate with ergative-absolutive alignment
+#### Functional
+- **Pure functional**: Haskell
+- **Multi-paradigm**: Scala, F#, Clojure
+- **Logic programming**: Prolog
 
-### Na-Dené Languages
-- [Navajo](navajo.md) - Athabaskan language with unique postpositional system
+#### Systems Programming
+- **Memory-safe**: Rust, Go
+- **Low-level**: Assembly, C++
+- **Concurrent**: Erlang, Elixir
 
-### Eskimo-Aleut Languages
-- [Inuktitut](inuktitut.md) - Eskimo-Aleut language with complex polysynthetic case system
+## Quality Assessment and Improvements
 
-### Uto-Aztecan Languages
-- [Nahuatl](nahuatl.md) - Uto-Aztecan language with agglutinative morphology and noun incorporation
+### Current Strengths
+- **Comprehensive Coverage**: 60+ natural languages, 30+ programming languages
+- **Systematic Structure**: Consistent format across all documents
+- **Rich Examples**: Practical code and sentence examples
+- **Visual Documentation**: Extensive figures and diagrams
+- **Cross-References**: Interconnected analysis framework
 
-### Quechuan Languages
-- [Quechua](quechua.md) - Andean language with evidential markers that could inspire extensions to CEREBRUM
+### Critical Gaps Identified
 
-### Tai-Kadai Languages
-- [Thai](thai.md) - Tai-Kadai language using word order and particles instead of morphological case
+#### Endangered Languages
+- **Missing**: Papuan languages (Trans-New Guinea, Sepik families)
+- **Missing**: Australian Aboriginal languages (Pama-Nyungan, non-Pama-Nyungan)
+- **Missing**: Khoisan languages (Southern Africa)
+- **Missing**: Na-Dene languages (beyond Navajo)
+- **Missing**: Paleo-Siberian languages (Chukotko-Kamchatkan, Nivkh)
 
-### Sign Languages
-- [American Sign Language (ASL)](asl.md) - Visual-spatial language with unique spatial case marking and classifier systems
+#### Modern Programming Languages
+- **Missing**: WebAssembly (low-level web)
+- **Missing**: Zig (systems programming)
+- **Missing**: Carbon (C++ successor)
+- **Missing**: Bicep (infrastructure-as-code)
+- **Missing**: Deno (JavaScript runtime)
 
-### Constructed Languages
-- [Esperanto](esperanto.md) - Constructed international auxiliary language with a simplified two-case system
+#### Quality Enhancements Needed
+- **Standardization**: Consistent formatting and depth across all documents
+- **Cross-References**: Enhanced linking between related languages
+- **Interactive Features**: Case mapping visualization tools
+- **Research Integration**: Latest linguistic research and documentation methods
+- **Comparative Analysis**: Systematic comparison across language families
 
-### Comparative Studies
-- [Russian-English](russian-english.md) - Comparative analysis of case systems between Russian and English
+## Improvement Roadmap
 
-## Computer Languages
+### Phase 1: Endangered Language Documentation (Priority)
+1. **Papuan Languages**: Add case systems from Trans-New Guinea family
+2. **Australian Languages**: Document Pama-Nyungan case systems
+3. **Khoisan Languages**: Add click language case patterns
+4. **Paleo-Siberian**: Document Chukotko-Kamchatkan case systems
 
-For case mappings related to programming languages and computational paradigms, see the [computer languages subdirectory](computer/README.md). This section explores how CEREBRUM's case system can be applied to computational thinking models, programming paradigms, and specific programming languages.
+### Phase 2: Modern Programming Languages
+1. **WebAssembly**: Low-level web case system
+2. **Zig**: Systems programming case patterns
+3. **Carbon**: C++ successor case system
+4. **Bicep**: Infrastructure-as-code case patterns
 
-## Structure of Each Language Document
+### Phase 3: Quality Enhancement
+1. **Standardization**: Uniform formatting and depth
+2. **Cross-References**: Enhanced linking system
+3. **Interactive Tools**: Case mapping visualizations
+4. **Research Integration**: Latest linguistic findings
 
-Each language document follows a consistent structure:
+### Phase 4: Advanced Features
+1. **Comparative Analysis**: Systematic family comparisons
+2. **Case Evolution**: Historical development patterns
+3. **Computational Integration**: Direct CEREBRUM implementations
+4. **Interactive Documentation**: Dynamic case mapping tools
 
-1. **Overview of the Language's Case System** - Brief introduction to the language and its approach to cases
-2. **Case Inventory** - Comprehensive list of cases in the language with their functions
-3. **Mapping to CEREBRUM Cases** - Detailed mapping between CEREBRUM and the language's cases
-4. **Unique Features** - Distinctive aspects of the language's case system relevant to CEREBRUM
-5. **Extension Opportunities** - Potential extensions to CEREBRUM inspired by the language
-6. **Example Sentences** - Practical examples showing case usage in both domains
+## Usage Guidelines
 
-## Language Family Coverage
+### For Linguists
+- Use as reference for cross-linguistic case system comparison
+- Reference for endangered language documentation
+- Source for computational linguistics applications
 
-This collection provides comprehensive coverage across major language families:
+### For Programmers
+- Understand case systems through programming paradigms
+- Apply case concepts to API design and code organization
+- Use for language learning and cross-paradigm translation
 
-- **Indo-European** (12 branches): Germanic, Romance, Slavic, Baltic, Indo-Iranian, Hellenic, Celtic, and Latin
-- **Sino-Tibetan** (3 languages): Chinese varieties and Tibetan
-- **Uralic** (3 languages): Finnish, Estonian, Hungarian with computational extensions
-- **Altaic** (2 families): Turkic and Mongolic
-- **Austronesian** (3 branches): Formosan, Philippine, and Polynesian
-- **Afro-Asiatic** (1 branch): Semitic languages
-- **Niger-Congo** (2 languages): Bantu and West African
-- **Isolates & Unique Systems**: Basque, Japanese, Korean, Vietnamese
-- **Sign Languages**: Visual-spatial modality
-- **Constructed Languages**: Planned linguistic systems
-
-## Usage Guide
-
-These language mappings can be used in several ways:
-
-1. **Conceptual Understanding** - Better grasp CEREBRUM's case system through linguistic parallels
-2. **Explaining to Linguists** - Use familiar concepts to introduce CEREBRUM to linguistics professionals
-3. **Extended Case Design** - Draw inspiration for custom cases in CEREBRUM implementations
-4. **Cross-Cultural Adaptation** - Adapt CEREBRUM concepts to different linguistic traditions
-5. **Family-Based Learning** - Study how related languages handle similar case functions
-6. **Typological Insights** - Compare how different language types (isolating, agglutinative, fusional) express case relationships
+### For CEREBRUM Developers
+- Reference for case system implementation
+- Source for model relationship architectures
+- Guide for computational case design patterns
 
 ## Contribution Guidelines
 
-If you'd like to contribute additional language mappings or enhancements to existing ones:
+### Adding New Languages
+1. Follow the standard document structure
+2. Include comprehensive case mapping tables
+3. Provide practical examples with CEREBRUM parallels
+4. Highlight unique language-specific features
+5. Include academic references and sources
 
-1. Follow the standard structure outlined above
-2. Include both academic references and practical examples
-3. Highlight unique aspects of the language's case system relevant to CEREBRUM
-4. Submit pull requests following the project's contribution guidelines
-5. Consider adding languages from underrepresented families or unique typological features 
+### Quality Standards
+- **Completeness**: All eight CEREBRUM cases mapped
+- **Accuracy**: Linguistically accurate case descriptions
+- **Clarity**: Clear explanations with examples
+- **Consistency**: Follow established formatting standards
+- **References**: Include academic and technical sources
+
+### Review Process
+1. **Linguistic Review**: Verify case system accuracy
+2. **Technical Review**: Check CEREBRUM mapping validity
+3. **Format Review**: Ensure consistency with existing documents
+4. **Cross-Reference Update**: Update related documents and indices
+
+## References
+
+### Linguistic Sources
+1. Comrie, Bernard. 1989. "Language Universals and Linguistic Typology." University of Chicago Press.
+2. Dixon, R.M.W. 1994. "Ergativity." Cambridge University Press.
+3. Blake, Barry J. 2001. "Case." Cambridge University Press.
+4. Malchukov, Andrej & Spencer, Andrew (eds.). 2009. "The Oxford Handbook of Case." Oxford University Press.
+
+### Computational Sources
+1. Abney, Steven. 1991. "Parsing by Chunks." MIT Press.
+2. Manning, Christopher D. & Schütze, Hinrich. 1999. "Foundations of Statistical Natural Language Processing." MIT Press.
+3. Jurafsky, Daniel & Martin, James H. 2009. "Speech and Language Processing." Pearson.
+
+### Endangered Language Resources
+1. UNESCO. 2024. "Atlas of the World's Languages in Danger." UNESCO Publishing.
+2. Endangered Languages Project. 2024. "Language Documentation and Preservation."
+3. Language Documentation and Description. 2024. "Journal of Endangered Language Documentation." 

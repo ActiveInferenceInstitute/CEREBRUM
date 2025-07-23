@@ -1,0 +1,38 @@
+---
+config:
+  look: neo
+  theme: cerebrum
+  layout: elk
+---
+
+sequenceDiagram
+    participant U as 👤 User
+    participant F as 🌐 Frontend
+    participant A as 🔌 API Gateway
+    participant C as 🧠 CEREBRUM Core
+    participant M as 📊 Model Service
+    participant D as 🗄️ Database
+    
+    %% User authentication [DAT]
+    U->>F: Login Request [DAT]
+    F->>A: Forward Login
+    A->>C: Authenticate & Route
+    
+    %% Model configuration [ACC]
+    C->>M: Load Model Configuration [ACC]
+    M->>D: Retrieve Model Data
+    D-->>M: Model Configuration
+    M-->>C: Config Response
+    
+    %% Model execution [NOM]
+    C->>C: Execute Active Inference [NOM]
+    C->>C: Apply Case Transformations
+    
+    %% Data persistence [GEN]
+    C->>D: Save Results [GEN]
+    D-->>C: Confirmation
+    
+    %% Response delivery [LOC]
+    C-->>A: Processed Results [LOC]
+    A-->>F: Formatted Response
+    F-->>U: Display Results

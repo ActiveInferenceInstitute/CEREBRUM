@@ -1,0 +1,92 @@
+---
+config:
+  look: neo
+  theme: cerebrum
+  layout: elk
+---
+
+sequenceDiagram
+    participant U as 👤 User
+    participant F as 🌐 Frontend
+    participant G as 🔌 API Gateway
+    participant A as 🔐 Auth Service
+    participant C as 🧠 CEREBRUM Core
+    participant M as 📊 Model Service
+    participant T as 🗂️ Case Service
+    participant I as 🎯 Inference Service
+    participant D as 🗄️ Database
+    participant E as 🌐 External API
+    participant L as 📝 Logger
+    
+    %% User authentication [DAT]
+    U->>F: Login Request [DAT]
+    F->>G: Forward Login
+    G->>A: Authenticate User
+    A->>D: Validate Credentials
+    D-->>A: User Valid
+    A-->>G: Auth Token
+    G-->>F: Auth Response
+    F-->>U: Login Success
+    
+    %% Model configuration [ACC]
+    U->>F: Configure Model [ACC]
+    F->>G: Model Config Request
+    G->>A: Validate Token
+    A-->>G: Token Valid
+    G->>C: Route to Core
+    C->>M: Load Model Config
+    M->>D: Retrieve Model Data
+    D-->>M: Model Configuration
+    M-->>C: Config Response
+    C-->>G: Core Response
+    G-->>F: Config Response
+    F-->>U: Configuration Complete
+    
+    %% Case processing [NOM]
+    U->>F: Submit Data [NOM]
+    F->>G: Data Submission
+    G->>C: Route to Core
+    C->>T: Process Cases
+    T->>C: Case Analysis
+    C->>I: Execute Inference
+    I->>C: Inference Results
+    
+    %% Data persistence [GEN]
+    C->>D: Save Results [GEN]
+    D-->>C: Save Confirmation
+    C->>L: Log Operation
+    
+    %% External integration [INS]
+    C->>E: Fetch External Data [INS]
+    E-->>C: External Response
+    C->>L: Log External Call
+    
+    %% Response delivery [LOC]
+    C-->>G: Processed Results [LOC]
+    G-->>F: Formatted Response
+    F-->>U: Display Results
+    
+    %% Error handling
+    Note over C,D: If database error occurs
+    C->>L: Log Error
+    C-->>G: Error Response
+    G-->>F: Error Message
+    F-->>U: Show Error
+    
+    %% Performance monitoring
+    Note over G,C: Monitor response times
+    G->>L: Log Performance Metrics
+    C->>L: Log Processing Time
+    
+    %% Interactive elements
+    Note right of U: User Interface
+    Note right of F: Frontend Application
+    Note right of G: API Gateway
+    Note right of A: Authentication Service
+    Note right of C: CEREBRUM Core Engine
+    Note right of M: Model Management Service
+    Note right of T: Case Processing Service
+    Note right of I: Active Inference Service
+    Note right of D: Database Layer
+    Note right of E: External APIs
+    Note right of L: Logging Service 

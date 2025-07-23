@@ -1,0 +1,74 @@
+---
+config:
+  look: neo
+  theme: cerebrum
+  layout: elk
+---
+
+flowchart TD
+    %% Style definitions
+    classDef data fill:#FD79A8,stroke:#2C3E50,stroke-width:2px,color:#FFFFFF,font-weight:500
+    classDef process fill:#00B894,stroke:#2C3E50,stroke-width:2px,color:#FFFFFF,font-weight:500
+    classDef storage fill:#A29BFE,stroke:#2C3E50,stroke-width:2px,color:#FFFFFF,font-weight:500
+    classDef output fill:#FF6B6B,stroke:#2C3E50,stroke-width:2px,color:#FFFFFF,font-weight:500
+    
+    %% Data sources [DAT]
+    subgraph "Data Sources [DAT]"
+        direction LR
+        UserInput["👤 User Input<br/><small>Manual data entry</small>"]:::data
+        SensorData["📡 Sensor Data<br/><small>Real-time feeds</small>"]:::data
+        ExternalAPI["🌐 External APIs<br/><small>Third-party data</small>"]:::data
+    end
+    
+    %% Data processing [ACC]
+    subgraph "Data Processing [ACC]"
+        direction TB
+        Validation["✅ Data Validation<br/><small>Quality checks</small>"]:::process
+        Transformation["🔄 Data Transformation<br/><small>Format conversion</small>"]:::process
+        Analysis["📊 Data Analysis<br/><small>Pattern recognition</small>"]:::process
+    end
+    
+    %% Data storage [GEN]
+    subgraph "Data Storage [GEN]"
+        direction LR
+        RawStorage["🗄️ Raw Data Storage<br/><small>Original data</small>"]:::storage
+        ProcessedStorage["📊 Processed Data Storage<br/><small>Cleaned data</small>"]:::storage
+        ModelStorage["🧠 Model Storage<br/><small>Model artifacts</small>"]:::storage
+    end
+    
+    %% Data output [INS]
+    subgraph "Data Output [INS]"
+        direction LR
+        Reports["📋 Reports<br/><small>Analytical reports</small>"]:::output
+        Visualizations["📊 Visualizations<br/><small>Data visualizations</small>"]:::output
+        APIs["🔌 APIs<br/><small>Data interfaces</small>"]:::output
+    end
+    
+    %% Data flow connections
+    UserInput --> Validation
+    SensorData --> Validation
+    ExternalAPI --> Validation
+    
+    Validation --> Transformation
+    Transformation --> Analysis
+    
+    Analysis --> RawStorage
+    RawStorage --> ProcessedStorage
+    ProcessedStorage --> ModelStorage
+    
+    ModelStorage --> Reports
+    ModelStorage --> Visualizations
+    ModelStorage --> APIs
+    
+    %% Interactive elements
+    click UserInput "docs/data-sources/user-input.md" "View user input documentation"
+    click Validation "src/data/validation.py" "View validation logic"
+    click Analysis "src/processing/analysis.py" "View analysis logic"
+    click Reports "docs/reports/" "View report templates"
+    
+    %% Enhanced styling
+    linkStyle default stroke:#7F8C8D,stroke-width:2px
+    linkStyle 0 stroke:#FD79A8,stroke-width:3px
+    linkStyle 1 stroke:#00B894,stroke-width:3px
+    linkStyle 2 stroke:#A29BFE,stroke-width:3px
+    linkStyle 3 stroke:#FF6B6B,stroke-width:3px

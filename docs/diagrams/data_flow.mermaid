@@ -1,0 +1,131 @@
+---
+config:
+  look: neo
+  theme: cerebrum
+  layout: elk
+---
+
+flowchart TD
+    %% Style definitions
+    classDef data fill:#FD79A8,stroke:#2C3E50,stroke-width:2px,color:#FFFFFF,font-weight:500
+    classDef process fill:#00B894,stroke:#2C3E50,stroke-width:2px,color:#FFFFFF,font-weight:500
+    classDef storage fill:#A29BFE,stroke:#2C3E50,stroke-width:2px,color:#FFFFFF,font-weight:500
+    classDef output fill:#FF6B6B,stroke:#2C3E50,stroke-width:2px,color:#FFFFFF,font-weight:500
+    classDef external fill:#FFE66D,stroke:#2C3E50,stroke-width:2px,color:#2C3E50,font-weight:600
+    
+    %% Data sources [DAT]
+    subgraph "Data Sources [DAT]"
+        direction LR
+        UserInput["👤 User Input<br/><small>Manual data entry</small>"]:::data
+        SensorData["📡 Sensor Data<br/><small>Real-time feeds</small>"]:::data
+        ExternalAPI["🌐 External APIs<br/><small>Third-party data</small>"]:::data
+        FileUpload["📁 File Upload<br/><small>Document uploads</small>"]:::data
+        DatabaseImport["🗄️ Database Import<br/><small>Existing data</small>"]:::data
+    end
+    
+    %% Data ingestion [ACC]
+    subgraph "Data Ingestion [ACC]"
+        direction TB
+        Validation["✅ Data Validation<br/><small>Quality checks</small>"]:::process
+        Normalization["⚖️ Data Normalization<br/><small>Format standardization</small>"]:::process
+        Enrichment["📊 Data Enrichment<br/><small>Feature addition</small>"]:::process
+        Deduplication["🔄 Data Deduplication<br/><small>Remove duplicates</small>"]:::process
+        Transformation["🔄 Data Transformation<br/><small>Format conversion</small>"]:::process
+    end
+    
+    %% Data storage [GEN]
+    subgraph "Data Storage [GEN]"
+        direction LR
+        RawStorage["🗄️ Raw Data Storage<br/><small>Original data</small>"]:::storage
+        ProcessedStorage["📊 Processed Data Storage<br/><small>Cleaned data</small>"]:::storage
+        FeatureStorage["🔧 Feature Storage<br/><small>Extracted features</small>"]:::storage
+        ModelStorage["🧠 Model Storage<br/><small>Model artifacts</small>"]:::storage
+        CacheStorage["⚡ Cache Storage<br/><small>Performance cache</small>"]:::storage
+    end
+    
+    %% Data processing [NOM]
+    subgraph "Data Processing [NOM]"
+        direction TB
+        FeatureExtraction["🔍 Feature Extraction<br/><small>Pattern recognition</small>"]:::process
+        StatisticalAnalysis["📈 Statistical Analysis<br/><small>Quantitative analysis</small>"]:::process
+        MachineLearning["🤖 Machine Learning<br/><small>Predictive modeling</small>"]:::process
+        CaseAnalysis["🗂️ Case Analysis<br/><small>Case-based reasoning</small>"]:::process
+        ActiveInference["🎯 Active Inference<br/><small>Bayesian reasoning</small>"]:::process
+    end
+    
+    %% Data output [INS]
+    subgraph "Data Output [INS]"
+        direction LR
+        Reports["📋 Reports<br/><small>Analytical reports</small>"]:::output
+        Visualizations["📊 Visualizations<br/><small>Data visualizations</small>"]:::output
+        APIs["🔌 APIs<br/><small>Data interfaces</small>"]:::output
+        Alerts["🚨 Alerts<br/><small>Notification system</small>"]:::output
+        Dashboards["📈 Dashboards<br/><small>Real-time monitoring</small>"]:::output
+    end
+    
+    %% External systems [LOC]
+    subgraph "External Systems [LOC]"
+        direction TB
+        MLPlatform["🤖 ML Platform<br/><small>External ML services</small>"]:::external
+        DataWarehouse["📦 Data Warehouse<br/><small>Enterprise data</small>"]:::external
+        MonitoringTool["📈 Monitoring Tool<br/><small>Performance tracking</small>"]:::external
+        NotificationService["🔔 Notification Service<br/><small>External alerts</small>"]:::external
+    end
+    
+    %% Data flow connections
+    UserInput --> Validation
+    SensorData --> Validation
+    ExternalAPI --> Validation
+    FileUpload --> Validation
+    DatabaseImport --> Validation
+    
+    Validation --> Normalization
+    Normalization --> Enrichment
+    Enrichment --> Deduplication
+    Deduplication --> Transformation
+    
+    Transformation --> RawStorage
+    RawStorage --> ProcessedStorage
+    ProcessedStorage --> FeatureStorage
+    
+    FeatureStorage --> FeatureExtraction
+    FeatureExtraction --> StatisticalAnalysis
+    StatisticalAnalysis --> MachineLearning
+    MachineLearning --> CaseAnalysis
+    CaseAnalysis --> ActiveInference
+    
+    ActiveInference --> ModelStorage
+    ModelStorage --> CacheStorage
+    
+    ActiveInference --> Reports
+    ActiveInference --> Visualizations
+    ActiveInference --> APIs
+    ActiveInference --> Alerts
+    ActiveInference --> Dashboards
+    
+    %% External connections
+    MachineLearning --> MLPlatform
+    StatisticalAnalysis --> DataWarehouse
+    ActiveInference --> MonitoringTool
+    Alerts --> NotificationService
+    
+    %% Feedback loops
+    Reports -.->|"Feedback"| FeatureExtraction
+    Visualizations -.->|"Insights"| StatisticalAnalysis
+    Dashboards -.->|"Monitoring"| ActiveInference
+    
+    %% Interactive elements
+    click UserInput "docs/data-sources/user-input.md" "View user input documentation"
+    click Validation "src/data/validation.py" "View validation logic"
+    click FeatureExtraction "src/processing/feature_extraction.py" "View feature extraction"
+    click ActiveInference "src/core/active_inference.py" "View active inference"
+    click Reports "docs/reports/" "View report templates"
+    click MLPlatform "docs/integrations/ml-platform.md" "View ML platform integration"
+    
+    %% Enhanced styling
+    linkStyle default stroke:#7F8C8D,stroke-width:2px
+    linkStyle 0 stroke:#FD79A8,stroke-width:3px
+    linkStyle 1 stroke:#00B894,stroke-width:3px
+    linkStyle 2 stroke:#A29BFE,stroke-width:3px
+    linkStyle 3 stroke:#FF6B6B,stroke-width:3px
+    linkStyle 4 stroke:#FFE66D,stroke-width:2px 

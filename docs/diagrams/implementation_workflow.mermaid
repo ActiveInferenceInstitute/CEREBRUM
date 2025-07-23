@@ -1,12 +1,98 @@
-flowchart LR
-    A[Define Case Structure] --> B[Create Bayesian Model]
-    B --> C[Configure Transformations]
-    C --> D[Train/Adapt Model]
-    D --> E[Evaluate Results]
-    E -->|Iterate| A
+---
+config:
+  look: neo
+  theme: cerebrum
+  layout: elk
+---
+
+flowchart TD
+    %% Style definitions
+    classDef start fill:#00B894,stroke:#2C3E50,stroke-width:3px,color:#FFFFFF,font-weight:bold
+    classDef process fill:#45B7D1,stroke:#2C3E50,stroke-width:2px,color:#FFFFFF,font-weight:600
+    classDef decision fill:#FDCB6E,stroke:#2C3E50,stroke-width:2px,color:#2C3E50,font-weight:600
+    classDef data fill:#FD79A8,stroke:#2C3E50,stroke-width:2px,color:#FFFFFF,font-weight:500
+    classDef end fill:#FF6B6B,stroke:#2C3E50,stroke-width:3px,color:#FFFFFF,font-weight:bold
+    classDef success fill:#27AE60,stroke:#2C3E50,stroke-width:2px,color:#FFFFFF,font-weight:500
     
-    style A fill:#bbf,stroke:#333
-    style B fill:#bbf,stroke:#333
-    style C fill:#bbf,stroke:#333
-    style D fill:#bbf,stroke:#333
-    style E fill:#bbf,stroke:#333 
+    %% Workflow start
+    Start([🏁 Start Implementation<br/><small>Begin CEREBRUM project</small>]):::start
+    
+    %% Phase 1: Case Structure Definition
+    DefineCase["📋 Define Case Structure<br/><small>[DAT] - Identify linguistic cases and relationships</small>"]:::process
+    ValidateCase["✅ Validate Case Structure<br/><small>Ensure completeness and consistency</small>"]:::process
+    
+    %% Phase 2: Bayesian Model Creation
+    CreateModel["🧮 Create Bayesian Model<br/><small>[ACC] - Design probabilistic framework</small>"]:::process
+    ConfigurePriors["⚙️ Configure Priors<br/><small>Set initial beliefs and assumptions</small>"]:::process
+    
+    %% Phase 3: Transformation Configuration
+    ConfigureTransforms["🔄 Configure Transformations<br/><small>[INS] - Define case transformation rules</small>"]:::process
+    ValidateTransforms["✅ Validate Transformations<br/><small>Test transformation logic</small>"]:::process
+    
+    %% Phase 4: Model Training and Adaptation
+    TrainModel["🎯 Train/Adapt Model<br/><small>[NOM] - Learn from data and feedback</small>"]:::process
+    MonitorTraining["📊 Monitor Training<br/><small>Track performance metrics</small>"]:::process
+    
+    %% Phase 5: Evaluation and Results
+    EvaluateResults["📈 Evaluate Results<br/><small>[GEN] - Assess model performance</small>"]:::process
+    GenerateReport["📋 Generate Report<br/><small>Document findings and insights</small>"]:::process
+    
+    %% Decision points
+    QualityCheck{"❓ Quality Check<br/><small>Meet performance criteria?</small>"}:::decision
+    IterationDecision{"🔄 Iteration Decision<br/><small>Need further refinement?</small>"}:::decision
+    
+    %% Data stores
+    CaseStore[("🗂️ Case Repository<br/><small>Structured case definitions</small>")]:::data
+    ModelStore[("🧮 Model Repository<br/><small>Trained model artifacts</small>")]:::data
+    ResultsStore[("📊 Results Repository<br/><small>Performance metrics and reports</small>")]:::data
+    
+    %% Success and end states
+    Success["✅ Implementation Complete<br/><small>Project successfully deployed</small>"]:::success
+    End([🏁 Project Complete<br/><small>Implementation finished</small>]):::end
+    
+    %% Main workflow
+    Start --> DefineCase
+    DefineCase --> CaseStore
+    CaseStore --> ValidateCase
+    ValidateCase --> CreateModel
+    
+    CreateModel --> ConfigurePriors
+    ConfigurePriors --> ModelStore
+    ModelStore --> ConfigureTransforms
+    
+    ConfigureTransforms --> ValidateTransforms
+    ValidateTransforms --> TrainModel
+    
+    TrainModel --> MonitorTraining
+    MonitorTraining --> EvaluateResults
+    
+    EvaluateResults --> ResultsStore
+    ResultsStore --> GenerateReport
+    GenerateReport --> QualityCheck
+    
+    %% Decision paths
+    QualityCheck -->|Pass| Success
+    QualityCheck -->|Fail| IterationDecision
+    
+    IterationDecision -->|Yes| DefineCase
+    IterationDecision -->|No| End
+    
+    Success --> End
+    
+    %% Interactive elements
+    click Start "docs/getting-started.md" "View getting started guide"
+    click DefineCase "src/cases/" "View case definitions"
+    click CreateModel "src/models/" "View model implementations"
+    click ConfigureTransforms "src/transformations/" "View transformation logic"
+    click TrainModel "docs/training/" "View training documentation"
+    click EvaluateResults "docs/evaluation/" "View evaluation metrics"
+    click CaseStore "docs/case-repository/" "View case repository"
+    click ModelStore "docs/model-repository/" "View model repository"
+    click ResultsStore "docs/results/" "View results documentation"
+    
+    %% Enhanced styling
+    linkStyle default stroke:#7F8C8D,stroke-width:2px
+    linkStyle 0 stroke:#00B894,stroke-width:3px
+    linkStyle 1 stroke:#45B7D1,stroke-width:2px
+    linkStyle 2 stroke:#FDCB6E,stroke-width:2px
+    linkStyle 3 stroke:#27AE60,stroke-width:2px 
