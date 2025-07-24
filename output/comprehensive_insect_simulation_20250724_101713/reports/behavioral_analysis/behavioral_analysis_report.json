@@ -1,0 +1,15 @@
+{
+  "total_events": 300,
+  "behavioral_states": {
+    "idle": 300
+  },
+  "behavior_success_rates": {
+    "idle": {
+      "count": 300,
+      "success_rate": 1.0,
+      "average_confidence": 0.8133333333333334
+    }
+  },
+  "energy_efficiency": {},
+  "behavioral_transitions": {}
+}

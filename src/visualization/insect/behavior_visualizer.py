@@ -58,29 +58,24 @@ class BehaviorPatternVisualizer:
         
         logger.info("Initialized BehaviorPatternVisualizer")
     
-    def track_behavior(self, insect: InsectModel, behavior_result: Optional[BehaviorResult] = None):
+    def track_behavior(self, insect: InsectModel, event_data: Dict[str, Any]):
         """
         Track behavioral changes and results.
         
         Args:
             insect: The insect model
-            behavior_result: Optional result of a behavioral action
+            event_data: Event data from simulation
         """
         entry = {
-            'timestamp': time.time(),
+            'timestamp': event_data.get('timestamp', time.time()),
             'behavioral_state': insect.behavioral_state,
             'case': insect.current_case,
-            'position': getattr(insect, 'position', np.zeros(3)),
-            'performance': insect.get_performance_summary()
+            'position': event_data.get('position', getattr(insect, 'position', np.zeros(3))),
+            'performance': insect.get_performance_summary(),
+            'confidence': event_data.get('processed_data', {}).get('confidence', 0.0),
+            'action_type': event_data.get('processed_data', {}).get('action_selected', 'unknown'),
+            'step': event_data.get('step', 0)
         }
-        
-        if behavior_result:
-            entry['behavior_result'] = {
-                'success': behavior_result.success,
-                'energy_expended': behavior_result.energy_expended,
-                'time_spent': behavior_result.time_spent,
-                'information_gained': behavior_result.information_gained
-            }
         
         self.behavior_history.append(entry)
     
@@ -96,9 +91,175 @@ class BehaviorPatternVisualizer:
         """
         if not self.behavior_history:
             fig, ax = plt.subplots(figsize=self.figsize, dpi=self.dpi)
-            ax.text(0.5, 0.5, 'No behavior history available', ha='center', va='center', transform=ax.transAxes)
+            ax.text(0.5, 0.5, 'Behavior data being collected...', ha='center', va='center', transform=ax.transAxes)
             ax.set_title('Behavior Timeline')
+            if save_path:
+                plt.savefig(save_path, dpi=self.dpi, bbox_inches='tight')
             return fig
+        
+        # Create timeline visualization
+        fig, ax = plt.subplots(figsize=self.figsize, dpi=self.dpi)
+        
+        # Extract timeline data
+        timestamps = [entry['timestamp'] for entry in self.behavior_history]
+        behaviors = [entry['behavioral_state'].value for entry in self.behavior_history]
+        confidences = [entry['confidence'] for entry in self.behavior_history]
+        
+        # Normalize timestamps
+        start_time = min(timestamps) if timestamps else 0
+        normalized_times = [t - start_time for t in timestamps]
+        
+        # Plot behavior timeline
+        unique_behaviors = list(set(behaviors))
+        behavior_indices = [unique_behaviors.index(b) for b in behaviors]
+        
+        ax.plot(normalized_times, behavior_indices, 'o-', linewidth=2, markersize=4)
+        ax.set_title('Behavior Timeline')
+        ax.set_xlabel('Time (seconds)')
+        ax.set_ylabel('Behavior Type')
+        ax.set_yticks(range(len(unique_behaviors)))
+        ax.set_yticklabels(unique_behaviors)
+        ax.grid(True, alpha=0.3)
+        
+        # Add confidence as color intensity
+        if confidences:
+            scatter = ax.scatter(normalized_times, behavior_indices, c=confidences, 
+                               cmap='viridis', s=50, alpha=0.7)
+            plt.colorbar(scatter, ax=ax, label='Confidence')
+        
+        plt.tight_layout()
+        
+        if save_path:
+            plt.savefig(save_path, dpi=self.dpi, bbox_inches='tight')
+        
+        return fig
+    
+    def generate_comprehensive_visualizations(self, output_dir: str):
+        """
+        Generate comprehensive swarm analysis visualizations.
+        
+        Args:
+            output_dir: Output directory for visualizations
+        """
+        swarm_dir = os.path.join(output_dir, "visualizations", "swarm_analysis")
+        os.makedirs(swarm_dir, exist_ok=True)
+        
+        if not self.behavior_history:
+            print("    No swarm behavior data available for visualization")
+            return
+        
+        # Generate swarm coordination analysis
+        fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+        fig.suptitle('Comprehensive Swarm Analysis', fontsize=16)
+        
+        # Extract data from behavior history
+        steps = [entry['step'] for entry in self.behavior_history]
+        confidences = [entry['confidence'] for entry in self.behavior_history]
+        behaviors = [entry['behavioral_state'].value for entry in self.behavior_history]
+        cases = [entry['case'].value for entry in self.behavior_history]
+        
+        # Plot confidence over time
+        if len(steps) > 0 and len(confidences) > 0:
+            axes[0, 0].plot(steps, confidences, 'b-', linewidth=2, marker='o', markersize=3)
+            axes[0, 0].set_title('Swarm Confidence Over Time')
+            axes[0, 0].set_xlabel('Simulation Step')
+            axes[0, 0].set_ylabel('Confidence')
+            axes[0, 0].grid(True, alpha=0.3)
+        
+        # Plot behavioral state distribution
+        if behaviors:
+            behavior_counts = {}
+            for behavior in behaviors:
+                behavior_counts[behavior] = behavior_counts.get(behavior, 0) + 1
+            
+            if behavior_counts:
+                behavior_names = list(behavior_counts.keys())
+                behavior_values = list(behavior_counts.values())
+                colors = [self.behavior_colors.get(BehavioralState(name), '#cccccc') for name in behavior_names]
+                axes[0, 1].bar(behavior_names, behavior_values, color=colors, alpha=0.7)
+                axes[0, 1].set_title('Behavioral State Distribution')
+                axes[0, 1].set_ylabel('Frequency')
+                axes[0, 1].tick_params(axis='x', rotation=45)
+        
+        # Plot case distribution
+        if cases:
+            case_counts = {}
+            for case in cases:
+                case_counts[case] = case_counts.get(case, 0) + 1
+            
+            if case_counts:
+                case_names = list(case_counts.keys())
+                case_values = list(case_counts.values())
+                axes[1, 0].bar(case_names, case_values, color='lightcoral', alpha=0.7)
+                axes[1, 0].set_title('Case Distribution in Swarm')
+                axes[1, 0].set_ylabel('Frequency')
+                axes[1, 0].tick_params(axis='x', rotation=45)
+        
+        # Plot performance statistics
+        if len(confidences) > 0:
+            axes[1, 1].hist(confidences, bins=20, alpha=0.7, color='skyblue', edgecolor='black')
+            axes[1, 1].set_title('Swarm Performance Distribution')
+            axes[1, 1].set_xlabel('Confidence')
+            axes[1, 1].set_ylabel('Frequency')
+            axes[1, 1].axvline(np.mean(confidences), color='red', linestyle='--', 
+                              label=f'Mean: {np.mean(confidences):.3f}')
+            axes[1, 1].legend()
+        
+        plt.tight_layout()
+        plt.savefig(os.path.join(swarm_dir, 'swarm_coordination_analysis.png'), dpi=300, bbox_inches='tight')
+        plt.close(fig)
+        
+        # Generate collective behavior analysis
+        fig, ax = plt.subplots(figsize=(12, 8))
+        
+        if len(steps) > 0 and len(confidences) > 0:
+            # Calculate moving average for smoother trend
+            window_size = min(10, len(confidences) // 4)
+            if window_size > 1:
+                moving_avg = np.convolve(confidences, np.ones(window_size)/window_size, mode='valid')
+                moving_steps = steps[window_size-1:]
+                ax.plot(moving_steps, moving_avg, 'g-', linewidth=3, label='Moving Average')
+            
+            ax.plot(steps, confidences, 'b-', linewidth=1, alpha=0.5, label='Raw Data')
+            ax.set_title('Collective Behavior Analysis')
+            ax.set_xlabel('Simulation Step')
+            ax.set_ylabel('Confidence')
+            ax.grid(True, alpha=0.3)
+            ax.legend()
+        
+        plt.tight_layout()
+        plt.savefig(os.path.join(swarm_dir, 'collective_behavior_analysis.png'), dpi=300, bbox_inches='tight')
+        plt.close(fig)
+        
+        # Generate swarm performance metrics
+        if len(confidences) > 0:
+            fig, ax = plt.subplots(figsize=(10, 8))
+            
+            # Calculate performance metrics
+            avg_confidence = np.mean(confidences)
+            max_confidence = np.max(confidences)
+            min_confidence = np.min(confidences)
+            std_confidence = np.std(confidences)
+            
+            metrics = ['Average', 'Maximum', 'Minimum', 'Std Dev']
+            values = [avg_confidence, max_confidence, min_confidence, std_confidence]
+            colors = ['green', 'blue', 'red', 'orange']
+            
+            bars = ax.bar(metrics, values, color=colors, alpha=0.7)
+            ax.set_title('Swarm Performance Metrics')
+            ax.set_ylabel('Confidence Value')
+            
+            # Add value labels on bars
+            for bar, value in zip(bars, values):
+                height = bar.get_height()
+                ax.text(bar.get_x() + bar.get_width()/2., height + 0.01,
+                       f'{value:.3f}', ha='center', va='bottom')
+            
+            plt.tight_layout()
+            plt.savefig(os.path.join(swarm_dir, 'swarm_performance_metrics.png'), dpi=300, bbox_inches='tight')
+            plt.close(fig)
+        
+        print(f"    Generated swarm analysis visualizations in {swarm_dir}")
         
         fig, (ax1, ax2) = plt.subplots(2, 1, figsize=self.figsize, dpi=self.dpi)
         
@@ -386,6 +547,149 @@ class SwarmBehaviorVisualizer:
         axes[1, 1].plot(center_x, center_y, 'o-', linewidth=2, markersize=4)
         axes[1, 1].set_xlabel('X Position')
         axes[1, 1].set_ylabel('Y Position')
+        axes[1, 1].set_title('Swarm Center Trajectory')
+        axes[1, 1].grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        
+        if save_path:
+            plt.savefig(save_path, dpi=self.dpi, bbox_inches='tight')
+        
+        return fig
+    
+    def generate_comprehensive_visualizations(self, output_dir: str):
+        """
+        Generate comprehensive swarm analysis visualizations.
+        
+        Args:
+            output_dir: Output directory for visualizations
+        """
+        swarm_dir = os.path.join(output_dir, "visualizations", "swarm_analysis")
+        os.makedirs(swarm_dir, exist_ok=True)
+        
+        if not self.swarm_history:
+            print("    No swarm behavior data available for visualization")
+            return
+        
+        # Generate swarm dynamics analysis
+        fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+        fig.suptitle('Comprehensive Swarm Analysis', fontsize=16)
+        
+        # Extract data from swarm history
+        timestamps = [entry['timestamp'] for entry in self.swarm_history]
+        dispersions = [entry['swarm_dispersion'] for entry in self.swarm_history]
+        cohesions = [entry['swarm_cohesion'] for entry in self.swarm_history]
+        centers = [entry['swarm_center'] for entry in self.swarm_history]
+        
+        # Normalize timestamps
+        start_time = min(timestamps) if timestamps else 0
+        normalized_times = [t - start_time for t in timestamps]
+        
+        # Plot dispersion over time
+        if len(normalized_times) > 0 and len(dispersions) > 0:
+            axes[0, 0].plot(normalized_times, dispersions, 'o-', linewidth=2, markersize=4)
+            axes[0, 0].set_title('Swarm Dispersion Over Time')
+            axes[0, 0].set_xlabel('Time (seconds)')
+            axes[0, 0].set_ylabel('Dispersion')
+            axes[0, 0].grid(True, alpha=0.3)
+        
+        # Plot cohesion over time
+        if len(normalized_times) > 0 and len(cohesions) > 0:
+            axes[0, 1].plot(normalized_times, cohesions, 's-', linewidth=2, markersize=4)
+            axes[0, 1].set_title('Swarm Cohesion Over Time')
+            axes[0, 1].set_xlabel('Time (seconds)')
+            axes[0, 1].set_ylabel('Cohesion')
+            axes[0, 1].grid(True, alpha=0.3)
+        
+        # Plot dispersion vs cohesion
+        if len(dispersions) > 0 and len(cohesions) > 0:
+            axes[1, 0].scatter(dispersions, cohesions, alpha=0.6, c=normalized_times, cmap='viridis')
+            axes[1, 0].set_xlabel('Dispersion')
+            axes[1, 0].set_ylabel('Cohesion')
+            axes[1, 0].set_title('Dispersion vs Cohesion')
+            axes[1, 0].grid(True, alpha=0.3)
+            plt.colorbar(axes[1, 0].collections[0], ax=axes[1, 0], label='Time')
+        
+        # Plot swarm center trajectory
+        if len(centers) > 0:
+            center_x = [center[0] for center in centers]
+            center_y = [center[1] for center in centers]
+            scatter = axes[1, 1].scatter(center_x, center_y, c=normalized_times, cmap='viridis', s=50, alpha=0.7)
+            axes[1, 1].set_xlabel('X Position')
+            axes[1, 1].set_ylabel('Y Position')
+            axes[1, 1].set_title('Swarm Center Trajectory')
+            axes[1, 1].grid(True, alpha=0.3)
+            plt.colorbar(scatter, ax=axes[1, 1], label='Time')
+        
+        plt.tight_layout()
+        plt.savefig(os.path.join(swarm_dir, 'swarm_dynamics_analysis.png'), dpi=300, bbox_inches='tight')
+        plt.close(fig)
+        
+        # Generate swarm state distribution
+        if self.swarm_history:
+            fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+            fig.suptitle('Swarm State Distribution', fontsize=16)
+            
+            # Extract insect states and cases
+            all_states = []
+            all_cases = []
+            for entry in self.swarm_history:
+                all_states.extend([state.value for state in entry['insect_states']])
+                all_cases.extend([case.value for case in entry['insect_cases']])
+            
+            # Plot state distribution
+            if all_states:
+                state_counts = {}
+                for state in all_states:
+                    state_counts[state] = state_counts.get(state, 0) + 1
+                
+                if state_counts:
+                    state_names = list(state_counts.keys())
+                    state_values = list(state_counts.values())
+                    axes[0, 0].bar(state_names, state_values, color='skyblue', alpha=0.7)
+                    axes[0, 0].set_title('Behavioral State Distribution')
+                    axes[0, 0].set_ylabel('Frequency')
+                    axes[0, 0].tick_params(axis='x', rotation=45)
+            
+            # Plot case distribution
+            if all_cases:
+                case_counts = {}
+                for case in all_cases:
+                    case_counts[case] = case_counts.get(case, 0) + 1
+                
+                if case_counts:
+                    case_names = list(case_counts.keys())
+                    case_values = list(case_counts.values())
+                    axes[0, 1].bar(case_names, case_values, color='lightcoral', alpha=0.7)
+                    axes[0, 1].set_title('Case Distribution')
+                    axes[0, 1].set_ylabel('Frequency')
+                    axes[0, 1].tick_params(axis='x', rotation=45)
+            
+            # Plot dispersion histogram
+            if dispersions:
+                axes[1, 0].hist(dispersions, bins=20, alpha=0.7, color='orange', edgecolor='black')
+                axes[1, 0].set_title('Dispersion Distribution')
+                axes[1, 0].set_xlabel('Dispersion')
+                axes[1, 0].set_ylabel('Frequency')
+                axes[1, 0].axvline(np.mean(dispersions), color='red', linestyle='--', 
+                                  label=f'Mean: {np.mean(dispersions):.3f}')
+                axes[1, 0].legend()
+            
+            # Plot cohesion histogram
+            if cohesions:
+                axes[1, 1].hist(cohesions, bins=20, alpha=0.7, color='green', edgecolor='black')
+                axes[1, 1].set_title('Cohesion Distribution')
+                axes[1, 1].set_xlabel('Cohesion')
+                axes[1, 1].set_ylabel('Frequency')
+                axes[1, 1].axvline(np.mean(cohesions), color='red', linestyle='--', 
+                                  label=f'Mean: {np.mean(cohesions):.3f}')
+                axes[1, 1].legend()
+            
+            plt.tight_layout()
+            plt.savefig(os.path.join(swarm_dir, 'swarm_state_distribution.png'), dpi=300, bbox_inches='tight')
+            plt.close(fig)
+        
+        print(f"    Generated swarm analysis visualizations in {swarm_dir}")
         axes[1, 1].set_title('Swarm Center Trajectory')
         axes[1, 1].grid(True, alpha=0.3)
         axes[1, 1].set_aspect('equal')

@@ -1,0 +1,40 @@
+{
+  "simulation_overview": {
+    "total_events": 300,
+    "total_insects": 3,
+    "simulation_duration": 55.79019313529626,
+    "events_per_second": 6.179727598571844
+  },
+  "performance_summary": {
+    "average_confidence": 0.8133333333333334,
+    "success_rate": 1.0,
+    "confidence_std": 0.0618241233033047
+  },
+  "insect_summary": {
+    "Fruit_Fly": {
+      "total_events": 100,
+      "average_confidence": 0.8,
+      "success_rate": 1.0
+    },
+    "Ant": {
+      "total_events": 100,
+      "average_confidence": 0.82,
+      "success_rate": 1.0
+    },
+    "Honeybee": {
+      "total_events": 100,
+      "average_confidence": 0.82,
+      "success_rate": 1.0
+    }
+  },
+  "case_summary": {
+    "NOM": 63,
+    "LOC": 80,
+    "INS": 78,
+    "ACC": 40,
+    "GEN": 39
+  },
+  "behavioral_summary": {
+    "idle": 300
+  }
+}

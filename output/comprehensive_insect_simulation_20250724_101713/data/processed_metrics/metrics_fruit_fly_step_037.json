@@ -1,0 +1,24 @@
+{
+  "step": 37,
+  "insect_id": "Fruit_Fly",
+  "timestamp": 1753377453.6029787,
+  "performance_metrics": {
+    "confidence": 0.0,
+    "action_accuracy": 0.6459085551026054,
+    "energy_efficiency": 0.7352697166444452,
+    "learning_rate": 0.01,
+    "memory_utilization": 0.6890827238225443
+  },
+  "behavioral_metrics": {
+    "behavior_duration": 1.0,
+    "behavior_success": false,
+    "energy_cost": 0.01,
+    "information_gain": 0.12632790619912648
+  },
+  "case_metrics": {
+    "case_type": "ACC",
+    "case_effectiveness": 0.0,
+    "case_transitions": 25,
+    "case_appropriateness": 0.8871250640305421
+  }
+}

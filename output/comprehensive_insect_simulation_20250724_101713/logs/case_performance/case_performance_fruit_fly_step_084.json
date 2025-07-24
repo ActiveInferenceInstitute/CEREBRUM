@@ -1,0 +1,67 @@
+{
+  "step": 84,
+  "insect_id": "Fruit_Fly",
+  "timestamp": 1753377493.4217,
+  "case": "GEN",
+  "performance_metrics": {
+    "case": "GEN",
+    "performance": 0.0,
+    "total_actions": 169,
+    "success_rate": 0.3
+  },
+  "context": {
+    "step": 84,
+    "insect_id": "Fruit_Fly",
+    "timestamp": 1753377493.4190326,
+    "case": "GEN",
+    "behavioral_state": "idle",
+    "position": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "sensory_data": {
+      "visual": [
+        -0.016923456608273723,
+        0.06692320429233821,
+        -1.2170975721450599,
+        0.3500975652141487,
+        -0.3324941448964598,
+        0.6098416953137744,
+        0.08834259984627131,
+        1.6802922403586527,
+        -1.3543253040171066,
+        1.9828176265060402
+      ],
+      "olfactory": [
+        0.2251465639172567,
+        -1.8103390162387716,
+        2.041698129640253,
+        1.6039441364397993,
+        -0.47615907146479325
+      ],
+      "pheromonal": [
+        -0.6791973861052957,
+        0.9195612683894763,
+        0.011758983072868058
+      ],
+      "mechanosensory": [
+        1.63844411428311,
+        0.46653224376168945,
+        -0.7148137313577285,
+        -0.6014957473981869
+      ]
+    },
+    "processed_data": {
+      "action_selected": "produce",
+      "confidence": 0.8,
+      "action_parameters": {
+        "output_type": "pheromone",
+        "concentration": 1.0
+      },
+      "total_actions": 169,
+      "case_transformations": 79
+    }
+  },
+  "duration": 1.0
+}

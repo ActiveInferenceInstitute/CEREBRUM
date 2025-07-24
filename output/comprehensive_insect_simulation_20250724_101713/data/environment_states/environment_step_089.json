@@ -1,0 +1,22 @@
+{
+  "step": 89,
+  "timestamp": 1753377493.4793959,
+  "insect_positions": {
+    "Fruit_Fly": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  "environment_conditions": {
+    "temperature": 24.53164626685578,
+    "humidity": 44.43958205187154,
+    "light_intensity": 786.1123274438173,
+    "food_availability": 0.6701919558730037
+  },
+  "social_context": {
+    "nearby_insects": 2,
+    "communication_signals": 0,
+    "colony_activity": 0.40871622495878357
+  }
+}

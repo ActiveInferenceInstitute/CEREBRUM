@@ -1,0 +1,68 @@
+{
+  "step": 35,
+  "insect_id": "Fruit_Fly",
+  "timestamp": 1753377453.581478,
+  "behavior_type": "idle",
+  "duration": 1.0,
+  "success": false,
+  "energy_cost": 0.01,
+  "context": {
+    "step": 35,
+    "insect_id": "Fruit_Fly",
+    "timestamp": 1753377453.5760953,
+    "case": "ACC",
+    "behavioral_state": "idle",
+    "position": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "sensory_data": {
+      "visual": [
+        -0.18032803762501798,
+        1.3092322243899397,
+        -0.005144200457814277,
+        -1.5804923545239158,
+        0.17023244750283942,
+        0.07093460831201848,
+        -1.721879946189773,
+        -0.05176541702188937,
+        1.8180832148274688,
+        -0.7891644367685642
+      ],
+      "olfactory": [
+        -0.16162299109383998,
+        -0.7895192734601936,
+        0.9180076135755596,
+        0.08088196551529056,
+        -0.48240725849551463
+      ],
+      "pheromonal": [
+        1.4180716187412363,
+        0.8996153061869135,
+        -1.673781523351545
+      ],
+      "mechanosensory": [
+        -0.18576300319778494,
+        0.10665907682181423,
+        -0.5479503144919687,
+        -1.2677757698839656
+      ]
+    },
+    "processed_data": {
+      "action_selected": "observe",
+      "confidence": 0.7,
+      "action_parameters": {
+        "focus": "sensory_input",
+        "duration": 1.0
+      },
+      "total_actions": 71,
+      "case_transformations": 25
+    }
+  },
+  "performance_metrics": {
+    "confidence": 0.0,
+    "action_accuracy": 0.722651489861733,
+    "efficiency": 0.8217124092176272
+  }
+}

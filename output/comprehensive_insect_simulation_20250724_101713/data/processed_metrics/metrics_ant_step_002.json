@@ -1,0 +1,24 @@
+{
+  "step": 2,
+  "insect_id": "Ant",
+  "timestamp": 1753377433.7354243,
+  "performance_metrics": {
+    "confidence": 0.0,
+    "action_accuracy": 0.7970882148196756,
+    "energy_efficiency": 0.932530797252853,
+    "learning_rate": 0.01,
+    "memory_utilization": 0.46122416040918046
+  },
+  "behavioral_metrics": {
+    "behavior_duration": 1.0,
+    "behavior_success": false,
+    "energy_cost": 0.01,
+    "information_gain": 0.3783393168561284
+  },
+  "case_metrics": {
+    "case_type": "NOM",
+    "case_effectiveness": 0.0,
+    "case_transitions": 0,
+    "case_appropriateness": 0.8433341063631463
+  }
+}

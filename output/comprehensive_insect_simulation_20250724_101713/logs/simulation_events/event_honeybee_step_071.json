@@ -1,0 +1,77 @@
+{
+  "step": 71,
+  "insect_id": "Honeybee",
+  "timestamp": 1753377473.7730098,
+  "event_type": "simulation_step",
+  "case": "LOC",
+  "behavioral_state": "idle",
+  "position": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "performance": {
+    "confidence": 0.0,
+    "action": "unknown",
+    "total_actions": 143
+  },
+  "context": {
+    "step": 71,
+    "insect_id": "Honeybee",
+    "timestamp": 1753377473.7671516,
+    "case": "LOC",
+    "behavioral_state": "idle",
+    "position": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "sensory_data": {
+      "visual": [
+        0.4930899014692328,
+        -0.8718448343463201,
+        1.7903442548426425,
+        0.26276455864023407,
+        0.5643521525831606,
+        -1.3828349795719257,
+        1.8201304868837485,
+        -0.28696961384505937,
+        -0.18122651911028528,
+        -0.09185430302707717
+      ],
+      "olfactory": [
+        1.3228956017749158,
+        1.5522293061956909,
+        -1.6497116639691465,
+        -0.6413616636178966,
+        -0.6859489223419436
+      ],
+      "pheromonal": [
+        -0.537057877612012,
+        -0.02002366832888334,
+        -0.8912886552433762
+      ],
+      "mechanosensory": [
+        -0.41850280576410687,
+        0.7262837960646902,
+        0.09691208181075357,
+        -1.6323711446266105
+      ]
+    },
+    "processed_data": {
+      "action_selected": "navigate",
+      "confidence": 0.9,
+      "action_parameters": {
+        "target": "home",
+        "method": "path_integration"
+      },
+      "total_actions": 143,
+      "case_transformations": 51
+    }
+  },
+  "metadata": {
+    "simulation_step": 71,
+    "insect_type": "Honeybee",
+    "neural_activity_level": 0.699667221359349
+  }
+}

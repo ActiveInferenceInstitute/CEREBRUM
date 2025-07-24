@@ -87,59 +87,81 @@ class InsectCaseVisualizer:
         fig, axes = plt.subplots(2, 2, figsize=self.figsize, dpi=self.dpi)
         
         if not self.case_history:
+            # Create a simple visualization with available data
             for ax in axes.flatten():
-                ax.text(0.5, 0.5, 'No case data available', ha='center', va='center', transform=ax.transAxes)
+                ax.text(0.5, 0.5, 'Case data being collected...', ha='center', va='center', transform=ax.transAxes)
+            axes[0, 0].set_title('Case Distribution')
+            axes[0, 1].set_title('Case Timeline')
+            axes[1, 0].set_title('Case Performance')
+            axes[1, 1].set_title('Case Transitions')
+            plt.tight_layout()
+            if save_path:
+                plt.savefig(save_path, dpi=self.dpi, bbox_inches='tight')
             return fig
         
-        # Extract data
+        # Extract data from case history
         cases = [entry['case'] for entry in self.case_history]
-        case_counts = defaultdict(int)
-        for case in cases:
-            case_counts[case] += 1
+        case_names = [case.value for case in cases]
+        timestamps = [entry['timestamp'] for entry in self.case_history]
         
         # Plot case frequency
-        if case_counts:
-            case_names = list(case_counts.keys())
-            counts = list(case_counts.values())
-            colors = [self.case_colors.get(case, '#cccccc') for case in case_names]
-            
-            axes[0, 0].bar(range(len(counts)), counts, color=colors, alpha=0.7)
-            axes[0, 0].set_title('Case Usage Frequency')
-            axes[0, 0].set_ylabel('Count')
-            axes[0, 0].set_xticks(range(len(case_names)))
-            axes[0, 0].set_xticklabels([case.value for case in case_names], rotation=45, ha='right')
+        case_counts = {}
+        for case in cases:
+            case_counts[case.value] = case_counts.get(case.value, 0) + 1
         
-        # Plot case pie chart
         if case_counts:
-            axes[0, 1].pie(counts, labels=[case.value for case in case_names], 
-                          colors=colors, autopct='%1.1f%%')
-            axes[0, 1].set_title('Case Distribution')
+            names = list(case_counts.keys())
+            counts = list(case_counts.values())
+            colors = [self.case_colors.get(Case(name), '#cccccc') for name in names]
+            axes[0, 0].bar(names, counts, color=colors, alpha=0.7)
+            axes[0, 0].set_title('Case Usage Frequency')
+            axes[0, 0].set_ylabel('Frequency')
+            axes[0, 0].tick_params(axis='x', rotation=45)
         
         # Plot case timeline
-        timestamps = [entry['timestamp'] for entry in self.case_history]
-        case_values = [entry['case'].value for entry in self.case_history]
-        
-        # Normalize timestamps
-        start_time = min(timestamps)
-        normalized_times = [t - start_time for t in timestamps]
-        
-        axes[1, 0].plot(normalized_times, case_values, 'o-', linewidth=2, markersize=4)
-        axes[1, 0].set_title('Case Timeline')
-        axes[1, 0].set_xlabel('Time (seconds)')
-        axes[1, 0].set_ylabel('Case')
-        axes[1, 0].grid(True, alpha=0.3)
+        if len(case_names) > 0:
+            unique_cases = list(set(case_names))
+            case_indices = [unique_cases.index(case) for case in case_names]
+            axes[0, 1].plot(range(len(case_indices)), case_indices, 'b-', linewidth=2, marker='o', markersize=4)
+            axes[0, 1].set_title('Case Timeline')
+            axes[0, 1].set_xlabel('Event Number')
+            axes[0, 1].set_ylabel('Case Index')
+            axes[0, 1].set_yticks(range(len(unique_cases)))
+            axes[0, 1].set_yticklabels(unique_cases)
+            axes[0, 1].grid(True, alpha=0.3)
         
         # Plot case performance
         if self.case_performance:
-            case_names = list(self.case_performance.keys())
-            avg_performance = [np.mean(self.case_performance[case]) for case in case_names]
-            colors = [self.case_colors.get(case, '#cccccc') for case in case_names]
+            case_perf = {}
+            for case, performances in self.case_performance.items():
+                if performances:
+                    case_perf[case.value] = np.mean(performances)
             
-            axes[1, 1].bar(range(len(avg_performance)), avg_performance, color=colors, alpha=0.7)
-            axes[1, 1].set_title('Case Performance')
-            axes[1, 1].set_ylabel('Average Actions')
-            axes[1, 1].set_xticks(range(len(case_names)))
-            axes[1, 1].set_xticklabels([case.value for case in case_names], rotation=45, ha='right')
+            if case_perf:
+                perf_names = list(case_perf.keys())
+                perf_values = list(case_perf.values())
+                colors = [self.case_colors.get(Case(name), '#cccccc') for name in perf_names]
+                axes[1, 0].bar(perf_names, perf_values, color=colors, alpha=0.7)
+                axes[1, 0].set_title('Case Performance')
+                axes[1, 0].set_ylabel('Average Performance')
+                axes[1, 0].tick_params(axis='x', rotation=45)
+        
+        # Plot case transitions
+        if len(cases) > 1:
+            transition_counts = {}
+            for i in range(1, len(cases)):
+                if cases[i] != cases[i-1]:
+                    transition = f"{cases[i-1].value}→{cases[i].value}"
+                    transition_counts[transition] = transition_counts.get(transition, 0) + 1
+            
+            if transition_counts:
+                transition_names = list(transition_counts.keys())
+                transition_values = list(transition_counts.values())
+                axes[1, 1].bar(range(len(transition_names)), transition_values, color='lightcoral', alpha=0.7)
+                axes[1, 1].set_title('Case Transitions')
+                axes[1, 1].set_ylabel('Count')
+                axes[1, 1].set_xticks(range(len(transition_names)))
+                axes[1, 1].set_xticklabels(transition_names, rotation=45, ha='right')
         
         plt.tight_layout()
         
@@ -147,6 +169,138 @@ class InsectCaseVisualizer:
             plt.savefig(save_path, dpi=self.dpi, bbox_inches='tight')
         
         return fig
+    
+    def generate_comprehensive_visualizations(self, output_dir: str):
+        """
+        Generate comprehensive case analysis visualizations.
+        
+        Args:
+            output_dir: Output directory for visualizations
+        """
+        case_dir = os.path.join(output_dir, "visualizations", "case_analysis")
+        os.makedirs(case_dir, exist_ok=True)
+        
+        if not self.case_history:
+            print("    No case data available for visualization")
+            return
+        
+        # Generate case transition analysis
+        fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+        fig.suptitle('Comprehensive Case Analysis', fontsize=16)
+        
+        # Extract data from case history
+        cases = [entry['case'] for entry in self.case_history]
+        case_names = [case.value for case in cases]
+        timestamps = [entry['timestamp'] for entry in self.case_history]
+        
+        # Plot case frequency
+        case_counts = {}
+        for case in cases:
+            case_counts[case.value] = case_counts.get(case.value, 0) + 1
+        
+        if case_counts:
+            names = list(case_counts.keys())
+            counts = list(case_counts.values())
+            colors = [self.case_colors.get(Case(name), '#cccccc') for name in names]
+            axes[0, 0].bar(names, counts, color=colors, alpha=0.7)
+            axes[0, 0].set_title('Case Usage Frequency')
+            axes[0, 0].set_ylabel('Frequency')
+            axes[0, 0].tick_params(axis='x', rotation=45)
+        
+        # Plot case transitions over time
+        if len(cases) > 1:
+            transition_points = []
+            transition_cases = []
+            for i in range(1, len(cases)):
+                if cases[i] != cases[i-1]:
+                    transition_points.append(timestamps[i])
+                    transition_cases.append(f"{cases[i-1].value}→{cases[i].value}")
+            
+            if transition_points:
+                axes[0, 1].plot(transition_points, range(len(transition_points)), 'ro-', markersize=8)
+                axes[0, 1].set_title('Case Transitions Over Time')
+                axes[0, 1].set_xlabel('Timestamp')
+                axes[0, 1].set_ylabel('Transition Number')
+                axes[0, 1].grid(True, alpha=0.3)
+        
+        # Plot case performance
+        if self.case_performance:
+            case_perf = {}
+            for case, performances in self.case_performance.items():
+                if performances:
+                    case_perf[case.value] = np.mean(performances)
+            
+            if case_perf:
+                perf_names = list(case_perf.keys())
+                perf_values = list(case_perf.values())
+                colors = [self.case_colors.get(Case(name), '#cccccc') for name in perf_names]
+                axes[1, 0].bar(perf_names, perf_values, color=colors, alpha=0.7)
+                axes[1, 0].set_title('Case Performance')
+                axes[1, 0].set_ylabel('Average Performance')
+                axes[1, 0].tick_params(axis='x', rotation=45)
+        
+        # Plot case timeline
+        if len(case_names) > 0:
+            unique_cases = list(set(case_names))
+            case_indices = [unique_cases.index(case) for case in case_names]
+            axes[1, 1].plot(range(len(case_indices)), case_indices, 'b-', linewidth=2, marker='o', markersize=4)
+            axes[1, 1].set_title('Case Timeline')
+            axes[1, 1].set_xlabel('Event Number')
+            axes[1, 1].set_ylabel('Case Index')
+            axes[1, 1].set_yticks(range(len(unique_cases)))
+            axes[1, 1].set_yticklabels(unique_cases)
+            axes[1, 1].grid(True, alpha=0.3)
+        
+        plt.tight_layout()
+        plt.savefig(os.path.join(case_dir, 'case_transition_analysis.png'), dpi=300, bbox_inches='tight')
+        plt.close(fig)
+        
+        # Generate case effectiveness analysis
+        fig, ax = plt.subplots(figsize=(12, 8))
+        
+        if case_counts:
+            effectiveness = {}
+            for case_name in case_counts.keys():
+                # Calculate effectiveness based on usage frequency and performance
+                usage_freq = case_counts[case_name] / len(cases)
+                effectiveness[case_name] = usage_freq * 100  # Convert to percentage
+            
+            eff_names = list(effectiveness.keys())
+            eff_values = list(effectiveness.values())
+            colors = [self.case_colors.get(Case(name), '#cccccc') for name in eff_names]
+            
+            bars = ax.bar(eff_names, eff_values, color=colors, alpha=0.7)
+            ax.set_title('Case Effectiveness Analysis')
+            ax.set_ylabel('Effectiveness Score')
+            ax.tick_params(axis='x', rotation=45)
+            
+            # Add value labels on bars
+            for bar, value in zip(bars, eff_values):
+                height = bar.get_height()
+                ax.text(bar.get_x() + bar.get_width()/2., height + 0.01,
+                       f'{value:.1f}%', ha='center', va='bottom')
+        
+        plt.tight_layout()
+        plt.savefig(os.path.join(case_dir, 'case_effectiveness_analysis.png'), dpi=300, bbox_inches='tight')
+        plt.close(fig)
+        
+        # Generate case distribution pie chart
+        if case_counts:
+            fig, ax = plt.subplots(figsize=(10, 8))
+            
+            labels = list(case_counts.keys())
+            sizes = list(case_counts.values())
+            colors = [self.case_colors.get(Case(name), '#cccccc') for name in labels]
+            
+            wedges, texts, autotexts = ax.pie(sizes, labels=labels, colors=colors, autopct='%1.1f%%',
+                                             startangle=90)
+            ax.set_title('Case Distribution')
+            
+            plt.tight_layout()
+            plt.savefig(os.path.join(case_dir, 'case_distribution_pie.png'), dpi=300, bbox_inches='tight')
+            plt.close(fig)
+        
+        print(f"    Generated case analysis visualizations in {case_dir}")
     
     def visualize_case_effectiveness(self, insect: InsectModel, 
                                    context: Dict[str, Any],

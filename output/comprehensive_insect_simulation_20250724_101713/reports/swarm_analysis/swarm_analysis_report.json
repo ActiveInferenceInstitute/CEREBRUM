@@ -1,0 +1,40 @@
+{
+  "total_events": 300,
+  "swarm_coordination": {
+    "step_0": {
+      "total_insects_active": 3,
+      "average_confidence": 0.8000000000000002,
+      "behavioral_synchronization": 0.7708661374653012,
+      "communication_efficiency": 0.6239186184564904
+    },
+    "step_25": {
+      "total_insects_active": 3,
+      "average_confidence": 0.8000000000000002,
+      "behavioral_synchronization": 0.6904983126136031,
+      "communication_efficiency": 0.5265889815502487
+    },
+    "step_50": {
+      "total_insects_active": 3,
+      "average_confidence": 0.8333333333333334,
+      "behavioral_synchronization": 0.6077942987482845,
+      "communication_efficiency": 0.7647235630941498
+    },
+    "step_75": {
+      "total_insects_active": 3,
+      "average_confidence": 0.8333333333333334,
+      "behavioral_synchronization": 0.8314019973955078,
+      "communication_efficiency": 0.5812134576516782
+    }
+  },
+  "collective_behavior": {
+    "foraging_efficiency": 0.7991698667031669,
+    "navigation_accuracy": 0.7247574988032192,
+    "social_cohesion": 0.6432323502215671,
+    "task_allocation": 0.8125077245382852
+  },
+  "swarm_performance": {
+    "overall_efficiency": 0.761963682753193,
+    "coordination_score": 0.7251401865556741,
+    "communication_score": 0.6241111551881418
+  }
+}

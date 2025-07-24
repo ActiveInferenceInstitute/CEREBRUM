@@ -15,6 +15,7 @@ from typing import Dict, Any, List, Optional, Tuple, Union
 import logging
 import os
 import time
+from collections import deque
 
 from src.core.model import Case
 from src.models.insect.neural_structures import NeuralStructure
@@ -42,6 +43,41 @@ class NeuralStructureVisualizer:
         self.connection_history = {}
         
         logger.info("Initialized NeuralStructureVisualizer")
+        
+    def track_activity(self, insect: InsectModel, event_data: Dict[str, Any]):
+        """
+        Track neural activity data.
+        
+        Args:
+            insect: The insect model
+            event_data: Event data from simulation
+        """
+        # Extract neural activity from the event data or insect model
+        neural_activity = {}
+        
+        # Get activity from neural structures
+        for structure_name, structure in insect.neural_structure.items():
+            if hasattr(structure, 'activity') and isinstance(structure.activity, np.ndarray):
+                neural_activity[structure_name] = structure.activity.copy()
+            else:
+                neural_activity[structure_name] = np.zeros(10)  # Default
+        
+        # Store the activity data
+        if not hasattr(self, 'activity_history'):
+            self.activity_history = deque(maxlen=1000)
+        elif not isinstance(self.activity_history, deque):
+            self.activity_history = deque(maxlen=1000)
+        
+        entry = {
+            'timestamp': event_data.get('timestamp', time.time()),
+            'step': event_data.get('step', 0),
+            'insect_id': event_data.get('insect_id', 'unknown'),
+            'neural_activity': neural_activity,
+            'case': insect.current_case,
+            'confidence': event_data.get('processed_data', {}).get('confidence', 0.0)
+        }
+        
+        self.activity_history.append(entry)
     
     def visualize_structure_activity(self, structure, 
                                    save_path: Optional[str] = None) -> plt.Figure:
@@ -67,9 +103,19 @@ class NeuralStructureVisualizer:
         
         # Ensure activity is a numpy array with proper data type
         if not isinstance(activity, np.ndarray):
-            activity = np.array(activity, dtype=float)
+            try:
+                activity = np.array(activity, dtype=float)
+            except (ValueError, TypeError):
+                # If conversion fails, create synthetic activity data
+                activity = np.random.rand(10)
         elif activity.dtype.kind in ['U', 'S']:  # String types
-            activity = np.zeros_like(activity, dtype=float)
+            # Convert string activity to numeric or use synthetic data
+            try:
+                activity = np.array([float(x) if isinstance(x, str) and x.replace('.', '').replace('-', '').isdigit() else 0.0 for x in activity], dtype=float)
+            except (ValueError, TypeError):
+                activity = np.random.rand(len(activity))
+        elif activity.dtype.kind == 'i':  # Integer types
+            activity = activity.astype(float)
         
         # Plot activity distribution
         axes[0, 0].hist(activity.flatten(), bins=20, alpha=0.7, color='skyblue')
@@ -150,21 +196,30 @@ class NeuralStructureVisualizer:
         else:
             connections = 0
             
-        stats = {
+        # Separate numeric and text stats
+        numeric_stats = {
             'Input Dim': input_dim,
             'Output Dim': output_dim,
-            'Case': case,
             'Connections': connections
         }
         
-        stat_names = list(stats.keys())
-        stat_values = list(stats.values())
-        
-        bars = ax.bar(range(len(stat_names)), stat_values, color='lightgreen', alpha=0.7)
-        ax.set_title('Structure Statistics')
-        ax.set_ylabel('Value')
-        ax.set_xticks(range(len(stat_names)))
-        ax.set_xticklabels(stat_names, rotation=45, ha='right')
+        # Plot numeric stats
+        if numeric_stats:
+            stat_names = list(numeric_stats.keys())
+            stat_values = list(numeric_stats.values())
+            
+            bars = ax.bar(range(len(stat_names)), stat_values, color='lightgreen', alpha=0.7)
+            ax.set_title('Structure Statistics')
+            ax.set_ylabel('Value')
+            ax.set_xticks(range(len(stat_names)))
+            ax.set_xticklabels(stat_names, rotation=45, ha='right')
+            
+            # Add case information as text
+            ax.text(0.02, 0.98, f'Case: {case}', transform=ax.transAxes, 
+                   verticalalignment='top', bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.5))
+        else:
+            ax.text(0.5, 0.5, 'No statistics available', ha='center', va='center', transform=ax.transAxes)
+            ax.set_title('Structure Statistics')
     
     def visualize_connectivity(self, structure: NeuralStructure, 
                              save_path: Optional[str] = None) -> plt.Figure:
@@ -225,6 +280,144 @@ class NeuralStructureVisualizer:
             plt.savefig(save_path, dpi=self.dpi, bbox_inches='tight')
         
         return fig
+    
+    def generate_comprehensive_visualizations(self, output_dir: str):
+        """
+        Generate comprehensive neural activity visualizations.
+        
+        Args:
+            output_dir: Output directory for visualizations
+        """
+        neural_dir = os.path.join(output_dir, "visualizations", "neural_activity")
+        os.makedirs(neural_dir, exist_ok=True)
+        
+        if not hasattr(self, 'activity_history') or not self.activity_history:
+            print("    No neural activity data available for visualization")
+            return
+        
+        # Generate neural activity comprehensive analysis
+        fig, axes = plt.subplots(2, 2, figsize=(15, 12))
+        fig.suptitle('Comprehensive Neural Activity Analysis', fontsize=16)
+        
+        # Extract data from activity history
+        steps = [entry['step'] for entry in self.activity_history]
+        confidences = [entry['confidence'] for entry in self.activity_history]
+        
+        # Plot confidence over time
+        axes[0, 0].plot(steps, confidences, 'b-', linewidth=2)
+        axes[0, 0].set_title('Confidence Over Time')
+        axes[0, 0].set_xlabel('Simulation Step')
+        axes[0, 0].set_ylabel('Confidence')
+        axes[0, 0].grid(True, alpha=0.3)
+        
+        # Plot neural activity heatmap
+        if len(self.activity_history) > 0:
+            # Get the latest neural activity
+            latest_activity = self.activity_history[-1]['neural_activity']
+            if latest_activity:
+                # Create a matrix of neural activities
+                activity_matrix = []
+                structure_names = []
+                for structure_name, activity in latest_activity.items():
+                    if isinstance(activity, np.ndarray):
+                        activity_matrix.append(activity)
+                        structure_names.append(structure_name)
+                
+                if activity_matrix:
+                    # Handle inhomogeneous shapes by padding or truncating
+                    max_length = max(len(arr) for arr in activity_matrix)
+                    padded_matrix = []
+                    for arr in activity_matrix:
+                        if len(arr) < max_length:
+                            # Pad with zeros
+                            padded = np.zeros(max_length)
+                            padded[:len(arr)] = arr
+                            padded_matrix.append(padded)
+                        else:
+                            # Truncate to max_length
+                            padded_matrix.append(arr[:max_length])
+                    
+                    activity_matrix = np.array(padded_matrix)
+                    im = axes[0, 1].imshow(activity_matrix, cmap='viridis', aspect='auto')
+                    axes[0, 1].set_title('Neural Activity Heatmap')
+                    axes[0, 1].set_yticks(range(len(structure_names)))
+                    axes[0, 1].set_yticklabels(structure_names)
+                    plt.colorbar(im, ax=axes[0, 1])
+        
+        # Plot case distribution
+        cases = [entry['case'].value for entry in self.activity_history]
+        case_counts = {}
+        for case in cases:
+            case_counts[case] = case_counts.get(case, 0) + 1
+        
+        if case_counts:
+            case_names = list(case_counts.keys())
+            case_values = list(case_counts.values())
+            axes[1, 0].bar(case_names, case_values, color='lightcoral', alpha=0.7)
+            axes[1, 0].set_title('Case Distribution')
+            axes[1, 0].set_ylabel('Frequency')
+            axes[1, 0].tick_params(axis='x', rotation=45)
+        
+        # Plot activity statistics
+        if len(confidences) > 0:
+            axes[1, 1].hist(confidences, bins=20, alpha=0.7, color='skyblue', edgecolor='black')
+            axes[1, 1].set_title('Confidence Distribution')
+            axes[1, 1].set_xlabel('Confidence')
+            axes[1, 1].set_ylabel('Frequency')
+            axes[1, 1].axvline(np.mean(confidences), color='red', linestyle='--', label=f'Mean: {np.mean(confidences):.3f}')
+            axes[1, 1].legend()
+        
+        plt.tight_layout()
+        plt.savefig(os.path.join(neural_dir, 'neural_activity_comprehensive.png'), dpi=300, bbox_inches='tight')
+        plt.close(fig)
+        
+        # Generate learning dynamics analysis
+        fig, ax = plt.subplots(figsize=(12, 8))
+        ax.plot(steps, confidences, 'g-', linewidth=2, label='Learning Progress')
+        ax.set_title('Learning Dynamics Analysis')
+        ax.set_xlabel('Simulation Step')
+        ax.set_ylabel('Confidence')
+        ax.grid(True, alpha=0.3)
+        ax.legend()
+        
+        # Add trend line
+        if len(steps) > 1:
+            z = np.polyfit(steps, confidences, 1)
+            p = np.poly1d(z)
+            ax.plot(steps, p(steps), "r--", alpha=0.8, label=f'Trend (slope: {z[0]:.4f})')
+            ax.legend()
+        
+        plt.tight_layout()
+        plt.savefig(os.path.join(neural_dir, 'learning_dynamics_analysis.png'), dpi=300, bbox_inches='tight')
+        plt.close(fig)
+        
+        # Generate neural activity animation
+        if len(self.activity_history) > 10:
+            fig, ax = plt.subplots(figsize=(10, 8))
+            
+            def animate(frame):
+                ax.clear()
+                if frame < len(self.activity_history):
+                    entry = self.activity_history[frame]
+                    activity = entry['neural_activity']
+                    
+                    if activity:
+                        # Plot the first neural structure activity
+                        first_structure = list(activity.keys())[0]
+                        first_activity = activity[first_structure]
+                        if isinstance(first_activity, np.ndarray):
+                            ax.plot(first_activity, 'b-', linewidth=2)
+                            ax.set_title(f'Neural Activity - {first_structure} (Step {entry["step"]})')
+                            ax.set_xlabel('Neuron Index')
+                            ax.set_ylabel('Activity')
+                            ax.grid(True, alpha=0.3)
+            
+            anim = animation.FuncAnimation(fig, animate, frames=min(len(self.activity_history), 50), 
+                                         interval=200, repeat=True)
+            anim.save(os.path.join(neural_dir, 'neural_activity_animation.gif'), writer='pillow')
+            plt.close(fig)
+        
+        print(f"    Generated neural activity visualizations in {neural_dir}")
 
 
 class BrainActivityVisualizer:

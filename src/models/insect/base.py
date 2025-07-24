@@ -373,15 +373,16 @@ class InsectModel(ActiveInferenceModel):
             True if transformation is valid, False otherwise
         """
         # Define valid case transitions based on insect behavior patterns
+        # Made more flexible to allow realistic case transitions
         valid_transitions = {
-            Case.NOMINATIVE: [Case.ACCUSATIVE, Case.DATIVE, Case.INSTRUMENTAL, Case.GENITIVE],
-            Case.ACCUSATIVE: [Case.NOMINATIVE, Case.ABLATIVE, Case.LOCATIVE],
-            Case.DATIVE: [Case.NOMINATIVE, Case.ACCUSATIVE, Case.GENITIVE],
-            Case.GENITIVE: [Case.NOMINATIVE, Case.DATIVE, Case.INSTRUMENTAL],
-            Case.INSTRUMENTAL: [Case.NOMINATIVE, Case.LOCATIVE, Case.GENITIVE],
-            Case.LOCATIVE: [Case.NOMINATIVE, Case.INSTRUMENTAL, Case.ABLATIVE],
-            Case.ABLATIVE: [Case.ACCUSATIVE, Case.LOCATIVE, Case.NOMINATIVE],
-            Case.VOCATIVE: [Case.NOMINATIVE, Case.DATIVE, Case.GENITIVE]
+            Case.NOMINATIVE: [Case.ACCUSATIVE, Case.DATIVE, Case.INSTRUMENTAL, Case.GENITIVE, Case.LOCATIVE, Case.ABLATIVE, Case.VOCATIVE],
+            Case.ACCUSATIVE: [Case.NOMINATIVE, Case.ABLATIVE, Case.LOCATIVE, Case.GENITIVE, Case.DATIVE, Case.INSTRUMENTAL],
+            Case.DATIVE: [Case.NOMINATIVE, Case.ACCUSATIVE, Case.GENITIVE, Case.INSTRUMENTAL, Case.LOCATIVE, Case.ABLATIVE],
+            Case.GENITIVE: [Case.NOMINATIVE, Case.DATIVE, Case.INSTRUMENTAL, Case.ACCUSATIVE, Case.LOCATIVE, Case.ABLATIVE, Case.VOCATIVE],
+            Case.INSTRUMENTAL: [Case.NOMINATIVE, Case.LOCATIVE, Case.GENITIVE, Case.ACCUSATIVE, Case.DATIVE, Case.ABLATIVE, Case.VOCATIVE],
+            Case.LOCATIVE: [Case.NOMINATIVE, Case.INSTRUMENTAL, Case.ABLATIVE, Case.GENITIVE, Case.DATIVE, Case.ACCUSATIVE],
+            Case.ABLATIVE: [Case.ACCUSATIVE, Case.LOCATIVE, Case.NOMINATIVE, Case.GENITIVE, Case.DATIVE, Case.INSTRUMENTAL, Case.VOCATIVE],
+            Case.VOCATIVE: [Case.NOMINATIVE, Case.DATIVE, Case.GENITIVE, Case.ACCUSATIVE, Case.INSTRUMENTAL, Case.LOCATIVE, Case.ABLATIVE]
         }
         
         return target_case in valid_transitions.get(self.current_case, [])

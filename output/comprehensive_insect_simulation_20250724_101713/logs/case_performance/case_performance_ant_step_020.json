@@ -1,0 +1,67 @@
+{
+  "step": 20,
+  "insect_id": "Ant",
+  "timestamp": 1753377433.960604,
+  "case": "NOM",
+  "performance_metrics": {
+    "case": "NOM",
+    "performance": 0.0,
+    "total_actions": 41,
+    "success_rate": 0.3
+  },
+  "context": {
+    "step": 20,
+    "insect_id": "Ant",
+    "timestamp": 1753377433.9572222,
+    "case": "NOM",
+    "behavioral_state": "idle",
+    "position": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "sensory_data": {
+      "visual": [
+        -0.37443526430353347,
+        -0.35240659969791094,
+        -1.3519129775132948,
+        -1.434558151224901,
+        0.8619534503715749,
+        -0.35802420763343923,
+        0.41417937206463834,
+        1.1694581678288938,
+        0.5435270657904896,
+        -0.7846776377131547
+      ],
+      "olfactory": [
+        -0.734213123206987,
+        -1.9117269538239532,
+        -0.001972726520216554,
+        0.47307768698185015,
+        -0.7165435134616047
+      ],
+      "pheromonal": [
+        -0.03379176607623797,
+        -0.00932673307580682,
+        0.8333437424220079
+      ],
+      "mechanosensory": [
+        0.2944495585001169,
+        -0.7885914218054447,
+        0.0928803372521531,
+        0.429410720684973
+      ]
+    },
+    "processed_data": {
+      "action_selected": "explore",
+      "confidence": 0.8,
+      "action_parameters": {
+        "direction": "forward",
+        "speed": 1.0
+      },
+      "total_actions": 41,
+      "case_transformations": 0
+    }
+  },
+  "duration": 1.0
+}

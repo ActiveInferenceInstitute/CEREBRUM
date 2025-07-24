@@ -1,0 +1,40 @@
+{
+  "total_events": 300,
+  "average_confidence": 0.8133333333333334,
+  "max_confidence": 0.9,
+  "min_confidence": 0.7,
+  "confidence_std": 0.0618241233033047,
+  "success_rate": 1.0,
+  "insect_performance": {
+    "Fruit_Fly": {
+      "total_events": 100,
+      "average_confidence": 0.8,
+      "max_confidence": 0.9,
+      "min_confidence": 0.7,
+      "confidence_std": 0.06324555320336761,
+      "success_rate": 1.0,
+      "energy_efficiency": 0.8063756578276522,
+      "learning_rate": 0.03584671172048662
+    },
+    "Ant": {
+      "total_events": 100,
+      "average_confidence": 0.82,
+      "max_confidence": 0.9,
+      "min_confidence": 0.8,
+      "confidence_std": 0.03999999999999999,
+      "success_rate": 1.0,
+      "energy_efficiency": 0.9435285579166124,
+      "learning_rate": 0.027616373756808768
+    },
+    "Honeybee": {
+      "total_events": 100,
+      "average_confidence": 0.82,
+      "max_confidence": 0.9,
+      "min_confidence": 0.7,
+      "confidence_std": 0.07483314773547885,
+      "success_rate": 1.0,
+      "energy_efficiency": 0.7771215258488341,
+      "learning_rate": 0.018583630577460545
+    }
+  }
+}

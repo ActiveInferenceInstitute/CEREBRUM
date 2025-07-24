@@ -1,0 +1,56 @@
+{
+  "simulation_info": {
+    "name": "comprehensive_insect_simulation",
+    "timestamp": "20250724_101713",
+    "start_time": "2025-07-24T10:18:13.598033",
+    "directory": "/home/trim/Documents/GitHub/CEREBRUM/output/comprehensive_insect_simulation_20250724_101713"
+  },
+  "directory_structure": {
+    "logs": "Simulation events, case performance, and behavioral data",
+    "visualizations": "All generated plots and charts",
+    "data": "Raw and processed simulation data",
+    "reports": "Analysis reports and summaries"
+  },
+  "summary_data": {
+    "simulation_info": {
+      "name": "comprehensive_insect_simulation",
+      "timestamp": "20250724_101813",
+      "start_time": "2025-07-24T10:17:13.667742",
+      "directory": "/home/trim/Documents/GitHub/CEREBRUM/output/comprehensive_insect_simulation_20250724_101713"
+    },
+    "directory_structure": {
+      "logs": "Simulation events, case performance, and behavioral data",
+      "visualizations": "All generated plots and charts",
+      "data": "Raw and processed simulation data",
+      "reports": "Analysis reports and summaries"
+    },
+    "summary_data": {
+      "simulation_steps": 100,
+      "total_insects": 3,
+      "total_events": 300,
+      "total_visualizations": 9,
+      "insect_types": [
+        "Honeybee",
+        "Ant",
+        "Fruit_Fly"
+      ],
+      "simulation_duration": 59.92995262145996,
+      "case_transitions": {
+        "NOM": 63,
+        "LOC": 80,
+        "INS": 78,
+        "ACC": 40,
+        "GEN": 39
+      },
+      "behavioral_states": {
+        "idle": 300
+      },
+      "performance_metrics": {
+        "average_confidence": 0.8133333333333334,
+        "max_confidence": 0.9,
+        "min_confidence": 0.7,
+        "confidence_std": 0.0618241233033047
+      }
+    }
+  }
+}

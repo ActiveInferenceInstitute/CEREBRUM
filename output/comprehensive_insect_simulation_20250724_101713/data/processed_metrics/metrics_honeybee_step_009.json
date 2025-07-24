@@ -1,0 +1,24 @@
+{
+  "step": 9,
+  "insect_id": "Honeybee",
+  "timestamp": 1753377433.814053,
+  "performance_metrics": {
+    "confidence": 0.0,
+    "action_accuracy": 0.8436496872471722,
+    "energy_efficiency": 0.8869574940955022,
+    "learning_rate": 0.01,
+    "memory_utilization": 0.3011080225336728
+  },
+  "behavioral_metrics": {
+    "behavior_duration": 1.0,
+    "behavior_success": false,
+    "energy_cost": 0.01,
+    "information_gain": 0.4082202950534015
+  },
+  "case_metrics": {
+    "case_type": "NOM",
+    "case_effectiveness": 0.0,
+    "case_transitions": 0,
+    "case_appropriateness": 0.8576498401054559
+  }
+}
