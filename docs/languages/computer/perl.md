@@ -127,6 +127,7 @@ print "Words: ", join(", ", @words), "\n";
 ```
 
 *Mermaid Diagram: Regex Substitution Flow*
+
 ```mermaid
 graph TD
     InputText[ABL/ACC: $text] --> MatchOp{VOC: =~ s/lazy/energetic/g};
@@ -216,12 +217,12 @@ print "Counter value: $current_val\n";
 
 Directly modeling CEREBRUM cases in Perl is uncommon. Roles are inferred from:
 
-1.  **Sigils**: Indicate basic type (`$`, `@`, `%`).
-2.  **Syntax**: Assignment (`=`), subroutine calls (`&sub()` or `sub()`), method calls (`->`), regex operators (`=~`).
-3.  **Context**: How values are used (scalar vs list context).
-4.  **Built-ins**: Functions like `map`, `grep`, `split` imply ABL sources and INS operations.
-5.  **References**: Passing references (`\`) allows modification of originals (ACC/DAT role for referenced variable).
-6.  **Comments**: Explaining the intended roles of variables and arguments.
+1. **Sigils**: Indicate basic type (`$`, `@`, `%`).
+2. **Syntax**: Assignment (`=`), subroutine calls (`&sub()` or `sub()`), method calls (`->`), regex operators (`=~`).
+3. **Context**: How values are used (scalar vs list context).
+4. **Built-ins**: Functions like `map`, `grep`, `split` imply ABL sources and INS operations.
+5. **References**: Passing references (`\`) allows modification of originals (ACC/DAT role for referenced variable).
+6. **Comments**: Explaining the intended roles of variables and arguments.
 
 Frameworks like Moose/Moo provide more structured OOP, potentially making roles clearer through attribute definitions (`has 'attr' => (is => 'rw')` implies ACC/DAT, `is => 'ro'` implies GEN).
 
@@ -237,10 +238,415 @@ Perl's flexible, context-sensitive, and regex-centric nature provides diverse ma
 
 While Perl's TMTOWTDI philosophy can sometimes obscure strict roles compared to more rigid languages, its powerful operators and built-ins often clearly imply the case relationships involved in common text processing and scripting tasks.
 
-## 6. References
+## 6. Advanced CEREBRUM Implementation
 
-1.  Schwartz, R. L., foy, b., & Phoenix, T. (2016). *Learning Perl* (7th ed.). O'Reilly Media.
-2.  Christiansen, T., foy, b., & Wall, L. (2012). *Programming Perl* (4th ed.). O'Reilly Media.
-3.  Perl Documentation. (https://perldoc.perl.org/)
-4.  CPAN - Comprehensive Perl Archive Network. (https://www.cpan.org/)
-5.  Moose Manual. (https://metacpan.org/pod/Moose::Manual) 
+### Moose-Based Case System
+
+```perl
+package CerebrumCase;
+use Moose;
+use Moose::Util::TypeConstraints;
+use namespace::autoclean;
+
+# Define case type constraint
+enum 'CaseRole' => [qw(nom acc dat gen ins abl loc voc)];
+
+# Case precision modifiers
+our %CASE_PRECISION = (
+    nom => 1.5,
+    acc => 1.2,
+    dat => 1.3,
+    gen => 1.0,
+    ins => 0.8,
+    abl => 1.1,
+    loc => 0.9,
+    voc => 2.0,
+);
+
+# Valid transitions
+our %VALID_TRANSITIONS = (
+    nom => [qw(acc gen)],
+    acc => [qw(gen dat)],
+    abl => [qw(nom)],
+    loc => [qw(abl)],
+);
+
+# Attributes
+has 'base' => (
+    is       => 'ro',
+    isa      => 'Any',
+    required => 1,
+);
+
+has 'case_role' => (
+    is      => 'rw',
+    isa     => 'CaseRole',
+    default => 'nom',
+);
+
+has 'precision' => (
+    is      => 'rw',
+    isa     => 'Num',
+    default => 1.0,
+);
+
+has 'history' => (
+    is      => 'ro',
+    isa     => 'ArrayRef',
+    default => sub { [] },
+    traits  => ['Array'],
+    handles => {
+        add_history => 'push',
+        get_history => 'elements',
+    },
+);
+
+# Methods
+sub effective_precision {
+    my $self = shift;
+    return $self->precision * ($CASE_PRECISION{$self->case_role} // 1.0);
+}
+
+sub transform_to {
+    my ($self, $target_case) = @_;
+    
+    my $valid = $VALID_TRANSITIONS{$self->case_role} // [];
+    unless (grep { $_ eq $target_case } @$valid) {
+        die "Invalid transition: " . $self->case_role . " -> $target_case";
+    }
+    
+    $self->add_history({
+        from => $self->case_role,
+        to   => $target_case,
+        time => time(),
+    });
+    
+    $self->case_role($target_case);
+    return $self;
+}
+
+sub to_string {
+    my $self = shift;
+    return sprintf("<%s>[%s](p=%.2f)", 
+        $self->base, 
+        uc($self->case_role), 
+        $self->effective_precision);
+}
+
+__PACKAGE__->meta->make_immutable;
+
+# Usage example
+package main;
+use strict;
+use warnings;
+
+my $agent = CerebrumCase->new(base => 'Processor', case_role => 'nom');
+print $agent->to_string, "\n";  # <Processor>[NOM](p=1.50)
+
+$agent->transform_to('acc');
+print $agent->to_string, "\n";  # <Processor>[ACC](p=1.20)
+```
+
+### Active Inference Implementation
+
+```perl
+package ActiveInferenceAgent;
+use Moose;
+use namespace::autoclean;
+
+has 'belief_mean' => (
+    is      => 'rw',
+    isa     => 'Num',
+    default => 0.0,
+);
+
+has 'belief_precision' => (
+    is      => 'rw',
+    isa     => 'Num',
+    default => 1.0,
+);
+
+has 'case_role' => (
+    is      => 'rw',
+    isa     => 'Str',
+    default => 'nom',
+);
+
+# Case precision modifiers
+my %CASE_PRECISION = (
+    nom => 1.5,
+    acc => 1.2,
+    dat => 1.3,
+    gen => 1.0,
+    ins => 0.8,
+    abl => 1.1,
+    loc => 0.9,
+    voc => 2.0,
+);
+
+# Bayesian belief update with case-aware precision
+sub update {
+    my ($self, $observation, $obs_precision) = @_;
+    
+    my $case_mod = $CASE_PRECISION{$self->case_role} // 1.0;
+    my $adjusted_precision = $obs_precision * $case_mod;
+    
+    my $total_precision = $self->belief_precision + $adjusted_precision;
+    my $posterior_mean = ($self->belief_precision * $self->belief_mean + 
+                          $adjusted_precision * $observation) / $total_precision;
+    
+    $self->belief_mean($posterior_mean);
+    $self->belief_precision($total_precision);
+    
+    return $self;
+}
+
+# Calculate variational free energy
+sub free_energy {
+    my ($self, $observation) = @_;
+    
+    my $case_mod = $CASE_PRECISION{$self->case_role} // 1.0;
+    my $eff_precision = $self->belief_precision * $case_mod;
+    
+    my $pred_error = ($observation - $self->belief_mean) ** 2;
+    return $pred_error * $eff_precision / 2.0;
+}
+
+# Predict next observation
+sub predict {
+    my $self = shift;
+    return $self->belief_mean;
+}
+
+# Select action to minimize expected free energy
+sub select_action {
+    my ($self, @possible_observations) = @_;
+    
+    my $best_obs;
+    my $min_fe = 'inf';
+    
+    for my $obs (@possible_observations) {
+        my $fe = $self->free_energy($obs);
+        if ($fe < $min_fe) {
+            $min_fe = $fe;
+            $best_obs = $obs;
+        }
+    }
+    
+    return ($best_obs, $min_fe);
+}
+
+sub to_string {
+    my $self = shift;
+    return sprintf("Agent[mean=%.3f, precision=%.3f, case=%s]",
+        $self->belief_mean,
+        $self->belief_precision,
+        $self->case_role);
+}
+
+__PACKAGE__->meta->make_immutable;
+
+# Usage
+package main;
+use strict;
+use warnings;
+
+my $agent = ActiveInferenceAgent->new(
+    belief_mean => 5.0,
+    belief_precision => 1.0,
+    case_role => 'nom',
+);
+
+print "Initial: ", $agent->to_string, "\n";
+
+$agent->update(6.0, 0.5);
+print "After update: ", $agent->to_string, "\n";
+
+my ($best, $fe) = $agent->select_action(4, 5, 6, 7);
+print "Best action: observe $best (FE=$fe)\n";
+```
+
+### Case-Aware Regex Operations
+
+```perl
+package CaseRegex;
+use strict;
+use warnings;
+use Exporter 'import';
+our @EXPORT_OK = qw(case_match case_substitute case_transform);
+
+# Apply regex match with case metadata
+sub case_match {
+    my ($text, $pattern, $case_role) = @_;
+    $case_role //= 'gen';
+    
+    my @captures = ($text =~ $pattern);
+    
+    return {
+        matched   => scalar(@captures) > 0,
+        captures  => \@captures,
+        case_role => $case_role,  # GEN for source text
+        pattern_role => 'ins',    # Regex is INS tool
+    };
+}
+
+# Apply regex substitution with case tracking
+sub case_substitute {
+    my ($text_ref, $pattern, $replacement, $case_role) = @_;
+    $case_role //= 'acc';
+    
+    my $count = ($$text_ref =~ s/$pattern/$replacement/g);
+    
+    return {
+        count        => $count,
+        text_case    => $case_role,  # ACC for modified text
+        pattern_role => 'ins',
+        replacement_role => 'gen',   # Replacement is GEN source
+    };
+}
+
+# Transform text through case-aware pipeline
+sub case_transform {
+    my ($text, @transforms) = @_;
+    
+    my @history;
+    for my $t (@transforms) {
+        my ($pattern, $replacement, $case) = @$t;
+        $case //= 'acc';
+        
+        my $before = $text;
+        $text =~ s/$pattern/$replacement/g;
+        
+        push @history, {
+            before => $before,
+            after  => $text,
+            case   => $case,
+        };
+    }
+    
+    return ($text, \@history);
+}
+
+# Usage example
+package main;
+use strict;
+use warnings;
+
+my $text = "The quick brown fox jumps over the lazy dog.";
+
+# Match with case tracking
+my $result = CaseRegex::case_match($text, qr/(\w+)\s+fox/, 'abl');
+print "Match result: ", $result->{matched} ? "found" : "not found", "\n";
+print "Capture: $result->{captures}[0]\n" if $result->{matched};
+
+# Substitution with case tracking
+my $modified = $text;
+my $sub_result = CaseRegex::case_substitute(\$modified, qr/lazy/, 'energetic');
+print "Modified ($sub_result->{count} changes): $modified\n";
+
+# Pipeline transformation
+my ($final, $history) = CaseRegex::case_transform($text, 
+    [qr/quick/, 'slow', 'acc'],
+    [qr/brown/, 'white', 'acc'],
+    [qr/lazy/, 'busy', 'acc'],
+);
+print "Final: $final\n";
+```
+
+### Case-Based Data Processing
+
+```perl
+package CaseProcessor;
+use strict;
+use warnings;
+use List::Util qw(reduce sum);
+
+# Process data with explicit case roles
+sub process_with_cases {
+    my ($source_data, $transform_fn, $case_config) = @_;
+    
+    # Source is ABL
+    my @source = @$source_data;
+    
+    # Transform is INS
+    my @results = map { $transform_fn->($_) } @source;
+    
+    # Results are GEN
+    return {
+        source_case   => 'abl',
+        transform_case => 'ins',
+        result_case    => 'gen',
+        data          => \@results,
+    };
+}
+
+# Aggregate with case semantics
+sub aggregate_with_cases {
+    my ($data, $agg_fn) = @_;
+    
+    return {
+        source_case => 'abl',
+        tool_case   => 'ins',
+        result_case => 'nom',
+        value       => $agg_fn->(@$data),
+    };
+}
+
+# Example pipeline
+package main;
+use strict;
+use warnings;
+
+my @numbers = (1, 2, 3, 4, 5);
+
+# Transform: square each number
+my $squared = CaseProcessor::process_with_cases(
+    \@numbers,
+    sub { $_[0] ** 2 },
+);
+print "Squared (case: $squared->{result_case}): @{$squared->{data}}\n";
+
+# Aggregate: sum the squares
+my $total = CaseProcessor::aggregate_with_cases(
+    $squared->{data},
+    sub { List::Util::sum(@_) },
+);
+print "Sum (case: $total->{result_case}): $total->{value}\n";
+```
+
+## 7. Mermaid Diagram: Perl Case Flow
+
+```mermaid
+graph TD
+    subgraph "Perl Case Operations"
+        Source["@data\n[ABL: Source]"]
+        Transform["map { ... }\n[INS: Tool]"]
+        Result["@result\n[GEN: Derived]"]
+        Assign["$var = ...\n[DAT: Target]"]
+    end
+    
+    Source --> Transform
+    Transform --> Result
+    Result --> Assign
+    
+    subgraph "Regex Flow"
+        Text["$text\n[ABL/ACC]"]
+        Pattern["qr/.../\n[INS]"]
+        Match["=~ m//\n[VOC]"]
+        Capture["$1, $2\n[GEN]"]
+    end
+    
+    Text --> Match
+    Pattern --> Match
+    Match --> Capture
+```
+
+## 8. References
+
+1. Schwartz, R. L., foy, b., & Phoenix, T. (2016). *Learning Perl* (7th ed.). O'Reilly Media.
+2. Christiansen, T., foy, b., & Wall, L. (2012). *Programming Perl* (4th ed.). O'Reilly Media.
+3. Perl Documentation. (<https://perldoc.perl.org/>)
+4. CPAN - Comprehensive Perl Archive Network. (<https://www.cpan.org/>)
+5. Moose Manual. (<https://metacpan.org/pod/Moose::Manual>)
+6. Friston, K. (2010). The free-energy principle. Nature Reviews Neuroscience.
+7. Stevan Little et al. (2023). Moose: A Modern Object System for Perl. CPAN.

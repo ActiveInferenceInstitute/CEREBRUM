@@ -172,6 +172,7 @@ echo "\nItem Name: " . htmlspecialchars($itemName); // VOC echo, GEN access
 ```
 
 *Mermaid Diagram: Simplified PHP Web Request Flow*
+
 ```mermaid
 graph LR
     ClientRequest[Client Browser] -->|HTTP GET/POST (ABL)| WebServer{Web Server (Apache/Nginx)};
@@ -191,12 +192,12 @@ graph LR
 
 Case roles in PHP are primarily inferred from syntax and context:
 
-1.  **Variable Usage**: Assignment (`=`), modification (`++`, `+=`), function/method calls determine NOM, ACC, DAT, GEN roles.
-2.  **Function/Method Signatures**: Parameter types (by value, by reference `&`), return types indicate ACC, DAT, GEN roles.
-3.  **Object Interaction**: `new` creates NOM, `->` invokes INS methods on NOM/ACC objects or accesses GEN properties.
-4.  **Array Syntax**: `[]` for access (GEN) or assignment (ACC/DAT).
-5.  **Superglobals**: Direct access to `$_GET`, `$_POST`, etc., represents ABL sources.
-6.  **Control Structures**: `if`, `foreach`, `while` act as INS mechanisms controlling flow based on GEN conditions or iterating over ABL/GEN sources.
+1. **Variable Usage**: Assignment (`=`), modification (`++`, `+=`), function/method calls determine NOM, ACC, DAT, GEN roles.
+2. **Function/Method Signatures**: Parameter types (by value, by reference `&`), return types indicate ACC, DAT, GEN roles.
+3. **Object Interaction**: `new` creates NOM, `->` invokes INS methods on NOM/ACC objects or accesses GEN properties.
+4. **Array Syntax**: `[]` for access (GEN) or assignment (ACC/DAT).
+5. **Superglobals**: Direct access to `$_GET`, `$_POST`, etc., represents ABL sources.
+6. **Control Structures**: `if`, `foreach`, `while` act as INS mechanisms controlling flow based on GEN conditions or iterating over ABL/GEN sources.
 
 ```php
 <?php
@@ -237,9 +238,393 @@ PHP's blend of procedural and object-oriented features within a web-centric envi
 
 While dynamic typing can sometimes obscure intent compared to statically typed languages, PHP's syntax generally provides sufficient cues to infer the case roles of participants in operations, particularly within the context of handling web requests and generating responses.
 
-## 6. References
+## 6. Advanced CEREBRUM Implementation
 
-1.  PHP Manual. (https://www.php.net/manual/en/)
-2.  Sklar, D., & Trachtenberg, A. (2014). PHP Cookbook: Solutions & Examples for PHP Programmers. O'Reilly Media.
-3.  PHP The Right Way. (https://phptherightway.com/)
-4.  PSR Standards (PHP Standards Recommendations). (https://www.php-fig.org/psr/) 
+### Case-Bearing Entity Classes
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace Cerebrum;
+
+/**
+ * Case role enumeration
+ */
+enum CaseRole: string
+{
+    case NOM = 'Nominative';
+    case ACC = 'Accusative';
+    case DAT = 'Dative';
+    case GEN = 'Genitive';
+    case INS = 'Instrumental';
+    case ABL = 'Ablative';
+    case LOC = 'Locative';
+    case VOC = 'Vocative';
+    
+    public function precision(): float
+    {
+        return match($this) {
+            self::NOM => 1.5,
+            self::ACC => 1.2,
+            self::DAT => 1.3,
+            self::GEN => 1.0,
+            self::INS => 0.8,
+            self::ABL => 1.1,
+            self::LOC => 0.9,
+            self::VOC => 2.0,
+        };
+    }
+}
+
+/**
+ * Transition record
+ */
+readonly class Transition
+{
+    public function __construct(
+        public CaseRole $from,
+        public CaseRole $to,
+        public \DateTimeImmutable $timestamp,
+    ) {}
+}
+
+/**
+ * Case-bearing entity interface
+ */
+interface CaseBearerInterface
+{
+    public function getCase(): CaseRole;
+    public function getBase(): mixed;
+    public function effectivePrecision(): float;
+    public function transformTo(CaseRole $target): self;
+}
+
+/**
+ * Generic case-bearing entity
+ */
+class CaseEntity implements CaseBearerInterface
+{
+    private const array VALID_TRANSITIONS = [
+        'NOM' => ['ACC', 'GEN'],
+        'ACC' => ['GEN', 'DAT'],
+        'ABL' => ['NOM'],
+        'LOC' => ['ABL'],
+    ];
+    
+    /** @var Transition[] */
+    private array $history = [];
+    
+    public function __construct(
+        private mixed $base,
+        private CaseRole $case = CaseRole::NOM,
+        private float $precision = 1.0,
+    ) {}
+    
+    public function getCase(): CaseRole
+    {
+        return $this->case;
+    }
+    
+    public function getBase(): mixed
+    {
+        return $this->base;
+    }
+    
+    public function effectivePrecision(): float
+    {
+        return $this->precision * $this->case->precision();
+    }
+    
+    public function transformTo(CaseRole $target): self
+    {
+        $validTargets = self::VALID_TRANSITIONS[$this->case->name] ?? [];
+        
+        if (!in_array($target->name, $validTargets, true)) {
+            throw new \InvalidArgumentException(
+                "Invalid transition: {$this->case->name} -> {$target->name}"
+            );
+        }
+        
+        $new = clone $this;
+        $new->history[] = new Transition($this->case, $target, new \DateTimeImmutable());
+        $new->case = $target;
+        
+        return $new;
+    }
+    
+    /** @return Transition[] */
+    public function getHistory(): array
+    {
+        return $this->history;
+    }
+}
+```
+
+### Active Inference Implementation
+
+```php
+<?php
+
+namespace Cerebrum\ActiveInference;
+
+/**
+ * Belief state for Active Inference
+ */
+class BeliefState
+{
+    public function __construct(
+        public float $mean = 0.0,
+        public float $precision = 1.0,
+    ) {}
+    
+    public function variance(): float
+    {
+        return 1.0 / $this->precision;
+    }
+    
+    public function update(float $observation, float $obsPrecision): self
+    {
+        $totalPrecision = $this->precision + $obsPrecision;
+        $newMean = ($this->precision * $this->mean + $obsPrecision * $observation) / $totalPrecision;
+        
+        return new self($newMean, $totalPrecision);
+    }
+}
+
+/**
+ * Active Inference agent with case-aware precision
+ */
+class ActiveInferenceAgent
+{
+    private BeliefState $belief;
+    
+    public function __construct(
+        private CaseEntity $entity,
+        float $initialMean = 0.0,
+    ) {
+        $this->belief = new BeliefState($initialMean, 1.0);
+    }
+    
+    public function observe(float $observation, float $baseObsPrecision = 1.0): void
+    {
+        $adjustedPrecision = $baseObsPrecision * $this->entity->effectivePrecision();
+        $this->belief = $this->belief->update($observation, $adjustedPrecision);
+    }
+    
+    public function freeEnergy(float $observation): float
+    {
+        $predError = $observation - $this->belief->mean;
+        $effPrecision = $this->belief->precision * $this->entity->effectivePrecision();
+        
+        return ($predError ** 2 * $effPrecision) / 2.0;
+    }
+    
+    public function predict(): float
+    {
+        return $this->belief->mean;
+    }
+    
+    /**
+     * @param float[] $possibleObservations
+     * @return array{observation: float, freeEnergy: float}
+     */
+    public function selectAction(array $possibleObservations): array
+    {
+        $best = ['observation' => 0.0, 'freeEnergy' => PHP_FLOAT_MAX];
+        
+        foreach ($possibleObservations as $obs) {
+            $fe = $this->freeEnergy($obs);
+            if ($fe < $best['freeEnergy']) {
+                $best = ['observation' => $obs, 'freeEnergy' => $fe];
+            }
+        }
+        
+        return $best;
+    }
+    
+    public function getEntity(): CaseEntity
+    {
+        return $this->entity;
+    }
+    
+    public function getBelief(): BeliefState
+    {
+        return $this->belief;
+    }
+}
+```
+
+### PSR-15 Case-Aware Middleware
+
+```php
+<?php
+
+namespace Cerebrum\Http;
+
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
+
+/**
+ * Middleware that annotates requests with case semantics
+ */
+class CaseAnnotationMiddleware implements MiddlewareInterface
+{
+    public const ATTR_CASE_CONTEXT = 'cerebrum.case_context';
+    
+    public function process(
+        ServerRequestInterface $request,
+        RequestHandlerInterface $handler
+    ): ResponseInterface {
+        // Request arrives as ABL (source of data)
+        $context = new CaseContext(CaseRole::ABL);
+        
+        // Parse query parameters as GEN sources
+        foreach ($request->getQueryParams() as $key => $value) {
+            $context->addParameter(
+                new CaseEntity($value, CaseRole::GEN),
+                $key
+            );
+        }
+        
+        // Parse body parameters as GEN sources
+        $body = $request->getParsedBody() ?? [];
+        foreach ($body as $key => $value) {
+            $context->addParameter(
+                new CaseEntity($value, CaseRole::GEN),
+                $key
+            );
+        }
+        
+        // Handler will act as INS tool
+        $context->setRole(CaseRole::INS);
+        
+        $request = $request->withAttribute(self::ATTR_CASE_CONTEXT, $context);
+        
+        // VOC: Invoke handler
+        $response = $handler->handle($request);
+        
+        // Response becomes NOM (result)
+        $context->setRole(CaseRole::NOM);
+        
+        return $response;
+    }
+}
+
+/**
+ * Case context container
+ */
+class CaseContext
+{
+    /** @var array<string, CaseEntity> */
+    private array $parameters = [];
+    
+    public function __construct(
+        private CaseRole $role,
+    ) {}
+    
+    public function addParameter(CaseEntity $entity, string $key): void
+    {
+        $this->parameters[$key] = $entity;
+    }
+    
+    public function getParameter(string $key): ?CaseEntity
+    {
+        return $this->parameters[$key] ?? null;
+    }
+    
+    public function setRole(CaseRole $role): void
+    {
+        $this->role = $role;
+    }
+    
+    public function getRole(): CaseRole
+    {
+        return $this->role;
+    }
+    
+    public function totalPrecision(): float
+    {
+        $total = $this->role->precision();
+        foreach ($this->parameters as $entity) {
+            $total += $entity->effectivePrecision();
+        }
+        return $total;
+    }
+}
+```
+
+### Usage Example
+
+```php
+<?php
+
+use Cerebrum\CaseEntity;
+use Cerebrum\CaseRole;
+use Cerebrum\ActiveInference\ActiveInferenceAgent;
+
+// Create case-bearing entities
+$processor = new CaseEntity('DataProcessor', CaseRole::NOM);
+echo "Processor case: " . $processor->getCase()->name . "\n";
+echo "Effective precision: " . $processor->effectivePrecision() . "\n";
+
+// Transform case
+try {
+    $processorAsAcc = $processor->transformTo(CaseRole::ACC);
+    echo "Transformed to: " . $processorAsAcc->getCase()->name . "\n";
+} catch (\InvalidArgumentException $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+}
+
+// Active Inference agent
+$agent = new ActiveInferenceAgent($processor, 5.0);
+echo "Initial prediction: " . $agent->predict() . "\n";
+
+// Observe
+$agent->observe(6.0, 0.5);
+echo "After observation: " . $agent->predict() . "\n";
+
+// Select action
+$result = $agent->selectAction([4.0, 5.0, 6.0, 7.0]);
+echo "Best action: observe " . $result['observation'] . 
+     " (FE=" . number_format($result['freeEnergy'], 4) . ")\n";
+```
+
+## 7. Mermaid Diagram: PHP Case Architecture
+
+```mermaid
+graph TD
+    subgraph "Request Flow"
+        Client["Client\n[ABL: Source]"]
+        Request["$_GET/$_POST\n[ABL: Superglobals]"]
+        Handler["Controller\n[INS: Handler]"]
+        Response["Response\n[NOM: Result]"]
+    end
+    
+    Client -->|"HTTP"| Request
+    Request -->|"Parameters [GEN]"| Handler
+    Handler -->|"Process"| Response
+    
+    subgraph "OOP Cases"
+        Class["class\n[LOC: Blueprint]"]
+        Object["$obj\n[NOM: Instance]"]
+        Method["method()\n[INS: Tool]"]
+        Property["->prop\n[GEN: Attribute]"]
+    end
+    
+    Class -->|"new"| Object
+    Object -->|"VOC"| Method
+    Object --> Property
+```
+
+## 8. References
+
+1. PHP Manual. (<https://www.php.net/manual/en/>)
+2. Sklar, D., & Trachtenberg, A. (2014). PHP Cookbook: Solutions & Examples for PHP Programmers. O'Reilly Media.
+3. PHP The Right Way. (<https://phptherightway.com/>)
+4. PSR Standards (PHP Standards Recommendations). (<https://www.php-fig.org/psr/>)
+5. Friston, K. (2010). The free-energy principle. Nature Reviews Neuroscience.
+6. Lockhart, J. (2015). Modern PHP: New Features and Good Practices. O'Reilly Media.

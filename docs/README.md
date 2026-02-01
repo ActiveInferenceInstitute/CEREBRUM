@@ -21,6 +21,7 @@ This documentation is organized as follows:
 - **[Language Nuance Handling](language_nuance_handling.md)**: Explanation of how CEREBRUM handles linguistic nuances
 
 ### Contributing Guides
+
 - **[Technical Contributions](contributing_technical.md)**: Guide for developers and technical contributors
 - **[Research Contributions](contributing_research.md)**: Guide for researchers and academic contributors
 - **[Documentation Contributions](contributing_documentation.md)**: Guide for documentation and educational content contributors
@@ -64,6 +65,7 @@ To get started with CEREBRUM:
 CEREBRUM is an open-source project and welcomes contributions from researchers, developers, and enthusiasts at all levels of experience. We offer diverse contribution opportunities:
 
 ### Contribution Categories
+
 - **Research**: Theoretical development, empirical testing, mathematical refinements
 - **Technical**: Core development, language implementations, testing, optimization
 - **Documentation**: Educational content, API documentation, tutorials, use cases
@@ -71,6 +73,7 @@ CEREBRUM is an open-source project and welcomes contributions from researchers, 
 - **Community**: Organizing events, mentoring, content creation, support
 
 ### Where to Start
+
 - Browse our [GitHub Issues](https://github.com/ActiveInferenceInstitute/CEREBRUM/issues) for tagged opportunities
 - Explore the [Implementation Roadmap](implementation_roadmap.md) for phase-specific contributions
 - Check our comprehensive contribution guides:
@@ -82,15 +85,15 @@ For specific contribution ideas aligned with the current development phase, see 
 
 ## License
 
-CEREBRUM is released under the MIT License - see the [LICENSE](../LICENSE) file in the root directory for details.
+CEREBRUM is released under the [CC BY-NC-ND 4.0](../LICENSE) license.
 
 ## Contact
 
 For questions or feedback, please contact:
 
-- Daniel Ari Friedman: daniel@activeinference.institute
-- Active Inference Institute: info@activeinference.institute
+- Daniel Ari Friedman: <daniel@activeinference.institute>
+- Active Inference Institute: <info@activeinference.institute>
 
 ## Acknowledgments
 
-CEREBRUM is a project of the Active Inference Institute. We acknowledge the contributions of the active inference community and the theoretical foundations from cognitive science and linguistics that have made this work possible. 
+CEREBRUM is a project of the Active Inference Institute. We acknowledge the contributions of the active inference community and the theoretical foundations from cognitive science and linguistics that have made this work possible.

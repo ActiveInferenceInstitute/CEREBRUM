@@ -6,18 +6,10 @@ Defines fundamental structures for linguistic case modeling
 
 import uuid
 import logging
-from enum import Enum
 
-# Define Case enum for the linguistic cases
-class Case(Enum):
-    NOMINATIVE = "NOM"
-    ACCUSATIVE = "ACC"
-    DATIVE = "DAT"
-    GENITIVE = "GEN"
-    INSTRUMENTAL = "INS"
-    LOCATIVE = "LOC"
-    ABLATIVE = "ABL"
-    VOCATIVE = "VOC"
+# Re-export Case from src.core.model for unified identity
+# This ensures all imports of Case refer to the same enum class
+from src.core.model import Case
 
 class Model:
     """Base Model class for all CEREBRUM models."""

@@ -200,9 +200,429 @@ Lisp's core features provide strong analogies for CEREBRUM cases:
 
 Lisp's homoiconicity and powerful metaprogramming could allow for deeply integrated CEREBRUM case systems, potentially manipulating case roles directly within the code structure via macros.
 
-## 6. References
+## 6. Advanced Implementation: Macro-Based Case System
+
+Lisp's macro system enables creating a domain-specific language for case management:
+
+```lisp
+;;; CEREBRUM Case System for Common Lisp
+;;; Provides macro-based case transformations and role checking
+
+(defpackage :cerebrum
+  (:use :common-lisp)
+  (:export #:defcase-entity #:with-case #:case-role #:transform-case
+           #:in-role #:case-dispatch #:case-chain
+           +nom+ +acc+ +gen+ +dat+ +ins+ +loc+ +abl+ +voc+))
+
+(in-package :cerebrum)
+
+;;; Case Symbols
+(defconstant +nom+ :nominative "Nominative - Active agent")
+(defconstant +acc+ :accusative "Accusative - Patient/target")
+(defconstant +gen+ :genitive "Genitive - Source/possessor")
+(defconstant +dat+ :dative "Dative - Recipient")
+(defconstant +ins+ :instrumental "Instrumental - Tool/method")
+(defconstant +loc+ :locative "Locative - Context/location")
+(defconstant +abl+ :ablative "Ablative - Origin")
+(defconstant +voc+ :vocative "Vocative - Direct address")
+
+;;; Case Entity Structure
+(defstruct (case-entity (:conc-name ce-))
+  "A CEREBRUM entity with case role and metadata."
+  base      ; Underlying object
+  case      ; Current case role
+  history   ; Transformation history
+  precision ; Active Inference precision weight
+  metadata) ; Additional properties
+
+;;; Macro for defining case-aware entities
+(defmacro defcase-entity (name base &key (case +nom+) (precision 1.0) metadata)
+  "Define a named case-bearing entity."
+  `(defparameter ,name
+     (make-case-entity 
+      :base ,base
+      :case ,case
+      :history (list (cons ,case (get-universal-time)))
+      :precision ,precision
+      :metadata ,metadata)))
+
+;;; Case transformation with history tracking
+(defun transform-case (entity target-case &key (reason "transformation"))
+  "Transform entity to a new case role, recording history."
+  (let ((new-entity (copy-case-entity entity)))
+    (setf (ce-history new-entity)
+          (cons (list target-case 
+                      (get-universal-time) 
+                      reason
+                      (ce-case entity))
+                (ce-history entity)))
+    (setf (ce-case new-entity) target-case)
+    new-entity))
+
+;;; Macro for with-case context
+(defmacro with-case ((entity case-role) &body body)
+  "Execute body with entity temporarily in specified case role."
+  (let ((original-case (gensym "ORIGINAL-CASE")))
+    `(let ((,original-case (ce-case ,entity)))
+       (unwind-protect
+         (progn
+           (setf (ce-case ,entity) ,case-role)
+           ,@body)
+         (setf (ce-case ,entity) ,original-case)))))
+
+;;; Case role checking predicate
+(defun in-role-p (entity expected-case)
+  "Check if entity is in the expected case role."
+  (eql (ce-case entity) expected-case))
+
+;;; Macro for role assertion
+(defmacro in-role (entity expected-case &body body)
+  "Assert entity is in expected role, then execute body."
+  `(progn
+     (assert (in-role-p ,entity ,expected-case)
+             (,entity ,expected-case)
+             "Entity ~A expected to be in ~A but is in ~A"
+             (ce-base ,entity) ,expected-case (ce-case ,entity))
+     ,@body))
+
+;;; Case-based dispatch macro
+(defmacro case-dispatch (entity &body clauses)
+  "Dispatch based on entity's current case role."
+  `(case (ce-case ,entity)
+     ,@clauses
+     (otherwise (error "Unhandled case: ~A" (ce-case ,entity)))))
+
+;;; Case chaining macro for pipelines
+(defmacro case-chain (entity &rest transformations)
+  "Chain multiple case transformations.
+   Each transformation is (case-role function-or-body)."
+  (if (null transformations)
+      entity
+      (destructuring-bind ((target-case . body) . rest) transformations
+        `(let ((result (transform-case ,entity ,target-case)))
+           (progn ,@body)
+           (case-chain result ,@rest)))))
+
+;;; Example usage
+(defcase-entity *model-a* 
+  "NeuralNetwork-A" 
+  :case +nom+ 
+  :precision 0.9
+  :metadata '(:type :transformer :layers 12))
+
+(defcase-entity *data-batch*
+  '(1.0 2.0 3.0 4.0)
+  :case +acc+
+  :precision 0.8)
+
+;; Process with case checking
+(defun process-batch (agent patient)
+  "Process data with proper case role verification."
+  (in-role agent +nom+
+    (in-role patient +acc+
+      (format t "~A[NOM] processing ~A[ACC]~%"
+              (ce-base agent)
+              (ce-base patient))
+      ;; Transform result to genitive (source of output)
+      (transform-case 
+       (make-case-entity :base (list 'result (ce-base patient))
+                         :case +gen+
+                         :precision (* (ce-precision agent) 
+                                      (ce-precision patient)))
+       +gen+
+       :reason "output-generation"))))
+
+;; Execute
+(process-batch *model-a* *data-batch*)
+```
+
+## 7. CLOS-Based Case Entity Hierarchy
+
+Using CLOS for a more sophisticated type hierarchy:
+
+```lisp
+;;; CLOS-based CEREBRUM implementation
+(defclass cerebrum-entity ()
+  ((base :accessor entity-base :initarg :base :documentation "Underlying object")
+   (case-role :accessor entity-case :initarg :case :initform :nominative)
+   (precision :accessor entity-precision :initarg :precision :initform 1.0)
+   (history :accessor entity-history :initform nil)
+   (constraints :accessor entity-constraints :initarg :constraints :initform nil))
+  (:documentation "Base class for CEREBRUM case-bearing entities"))
+
+;;; Case-specific subclasses (optional, for strong typing)
+(defclass nominative-entity (cerebrum-entity) ()
+  (:default-initargs :case :nominative))
+
+(defclass accusative-entity (cerebrum-entity) ()
+  (:default-initargs :case :accusative))
+
+(defclass instrumental-entity (cerebrum-entity) ()
+  (:default-initargs :case :instrumental))
+
+;;; Generic functions for case operations
+(defgeneric transform-to (entity target-case &key reason)
+  (:documentation "Transform entity to target case role"))
+
+(defmethod transform-to ((entity cerebrum-entity) target-case &key (reason "transform"))
+  "Generic transformation with history tracking."
+  (let ((new-entity (make-instance (class-of entity)
+                                   :base (entity-base entity)
+                                   :case target-case
+                                   :precision (entity-precision entity)
+                                   :constraints (entity-constraints entity))))
+    (setf (entity-history new-entity)
+          (cons (list :from (entity-case entity)
+                      :to target-case
+                      :time (get-universal-time)
+                      :reason reason)
+                (entity-history entity)))
+    new-entity))
+
+;;; Case-aware generic functions
+(defgeneric process-as-agent (entity target)
+  (:documentation "Process target when entity is in nominative role"))
+
+(defmethod process-as-agent ((agent nominative-entity) (target accusative-entity))
+  "Nominative agent processes accusative target."
+  (format t "Agent ~A acting on patient ~A~%"
+          (entity-base agent)
+          (entity-base target))
+  ;; Return result as genitive (source of output)
+  (make-instance 'cerebrum-entity
+                 :base (list 'result-of (entity-base agent) (entity-base target))
+                 :case :genitive
+                 :precision (* (entity-precision agent) 
+                              (entity-precision target))))
+
+;;; Method combination for case-aware dispatch
+(defgeneric interact (a b)
+  (:documentation "Interaction between two case-bearing entities"))
+
+(defmethod interact :around ((a cerebrum-entity) (b cerebrum-entity))
+  "Logging wrapper for all interactions."
+  (format t "~&Interaction: ~A[~A] with ~A[~A]~%"
+          (entity-base a) (entity-case a)
+          (entity-base b) (entity-case b))
+  (call-next-method))
+
+(defmethod interact ((agent cerebrum-entity) (patient cerebrum-entity))
+  "Default interaction based on case roles."
+  (case (entity-case agent)
+    (:nominative
+     (case (entity-case patient)
+       (:accusative 
+        (format t "  -> Processing~%")
+        (make-instance 'cerebrum-entity
+                       :base (list 'processed (entity-base patient))
+                       :case :genitive))
+       (:dative
+        (format t "  -> Transferring to~%")
+        patient)
+       (otherwise
+        (format t "  -> Unknown interaction~%"))))
+    (:instrumental
+     (format t "  -> Using as tool~%")
+     (make-instance 'cerebrum-entity
+                    :base (list 'tool-result (entity-base agent))
+                    :case :genitive))
+    (otherwise
+     (error "Agent must be [NOM] or [INS]"))))
+
+;;; Usage example
+(let ((model (make-instance 'nominative-entity 
+                           :base "GPTModel" 
+                           :precision 0.95))
+      (data (make-instance 'accusative-entity 
+                          :base '(input-tokens) 
+                          :precision 0.8))
+      (algorithm (make-instance 'instrumental-entity 
+                               :base "BeamSearch"
+                               :precision 0.99)))
+  
+  ;; Model processes data
+  (interact model data)
+  
+  ;; Algorithm used as tool
+  (interact algorithm data))
+```
+
+## 8. Homoiconic Case Transformations
+
+Leveraging Lisp's code-as-data for case manipulation:
+
+```lisp
+;;; Code transformation based on case roles
+(defun annotate-expression (expr)
+  "Annotate S-expression with case information."
+  (typecase expr
+    (list
+     (when expr
+       (let ((operator (first expr))
+             (operands (rest expr)))
+         (list* :expr
+                (list :operator operator :case :vocative)
+                (mapcar (lambda (op i)
+                          (list :operand op 
+                                :position i
+                                :case (if (= i 0) :accusative :accusative)))
+                        operands
+                        (loop for i from 0 below (length operands) collect i))))))
+    (symbol (list :symbol expr :case :nominative))
+    (number (list :literal expr :case :genitive))))
+
+;; Example
+(annotate-expression '(+ 1 2 3))
+;; => (:EXPR (:OPERATOR + :CASE :VOCATIVE) 
+;;           (:OPERAND 1 :POSITION 0 :CASE :ACCUSATIVE)
+;;           (:OPERAND 2 :POSITION 1 :CASE :ACCUSATIVE)
+;;           (:OPERAND 3 :POSITION 2 :CASE :ACCUSATIVE))
+
+;;; Macro for case-aware evaluation
+(defmacro with-case-tracking (&body body)
+  "Execute body while tracking case transformations."
+  `(let ((*case-trace* nil))
+     (declare (special *case-trace*))
+     (flet ((trace-case (entity from-case to-case)
+              (push (list :entity entity :from from-case :to to-case 
+                         :time (get-universal-time))
+                    *case-trace*)))
+       (declare (ignorable #'trace-case))
+       (values (progn ,@body)
+               (reverse *case-trace*)))))
+```
+
+## 9. Active Inference Integration
+
+Connecting case roles to Active Inference precision dynamics:
+
+```lisp
+;;; Active Inference Case Dynamics
+(defclass active-inference-entity (cerebrum-entity)
+  ((beliefs :accessor entity-beliefs :initarg :beliefs :initform nil)
+   (prior-precision :accessor entity-prior-precision :initform 1.0)
+   (likelihood-precision :accessor entity-likelihood-precision :initform 1.0)
+   (free-energy :accessor entity-free-energy :initform 0.0))
+  (:documentation "CEREBRUM entity with Active Inference properties"))
+
+(defgeneric update-beliefs (entity observation)
+  (:documentation "Update beliefs based on observation"))
+
+(defmethod update-beliefs ((entity active-inference-entity) observation)
+  "Bayesian belief update with precision weighting."
+  (let* ((prior (entity-beliefs entity))
+         (prior-prec (entity-prior-precision entity))
+         (obs-prec (entity-likelihood-precision entity))
+         ;; Precision-weighted update
+         (posterior (if prior
+                       (/ (+ (* prior-prec prior)
+                             (* obs-prec observation))
+                          (+ prior-prec obs-prec))
+                       observation)))
+    (setf (entity-beliefs entity) posterior)
+    (setf (entity-free-energy entity)
+          (abs (- observation posterior)))
+    entity))
+
+;;; Case role affects precision dynamics
+(defmethod update-beliefs :before ((entity active-inference-entity) observation)
+  "Adjust precision based on case role."
+  (case (entity-case entity)
+    (:nominative
+     ;; Active agent: high prior precision
+     (setf (entity-prior-precision entity) 
+           (* 1.5 (entity-prior-precision entity))))
+    (:accusative
+     ;; Patient: high likelihood precision (receptive to input)
+     (setf (entity-likelihood-precision entity)
+           (* 1.5 (entity-likelihood-precision entity))))
+    (:genitive
+     ;; Source: maintain precision
+     )
+    (:dative
+     ;; Recipient: balanced precision
+     (setf (entity-prior-precision entity) 1.0)
+     (setf (entity-likelihood-precision entity) 1.0))))
+
+;;; Example: Predictive processing with case roles
+(defun predictive-process (predictor target)
+  "Predictor[NOM] generates predictions, Target[ACC] receives updates."
+  (assert (eql (entity-case predictor) :nominative))
+  (assert (eql (entity-case target) :accusative))
+  
+  ;; Predictor generates prediction
+  (let ((prediction (entity-beliefs predictor)))
+    (format t "Prediction from ~A: ~A~%" 
+            (entity-base predictor) prediction)
+    
+    ;; Target updates based on prediction (as observation)
+    (update-beliefs target prediction)
+    
+    ;; Calculate prediction error
+    (let ((error (entity-free-energy target)))
+      (format t "Prediction error at ~A: ~A~%"
+              (entity-base target) error)
+      
+      ;; Return updated target as genitive (source of result)
+      (transform-to target :genitive :reason "prediction-received"))))
+```
+
+## 10. Functional Composition and Case Chains
+
+High-order case transformations using functional composition:
+
+```lisp
+;;; Functional case transformation pipeline
+(defun case-functor (target-case)
+  "Return a function that transforms entities to target case."
+  (lambda (entity)
+    (transform-to entity target-case)))
+
+(defun compose-case-chain (&rest case-transformations)
+  "Compose multiple case transformations into a single function."
+  (reduce (lambda (f g)
+            (lambda (entity) (funcall g (funcall f entity))))
+          case-transformations
+          :initial-value #'identity))
+
+;;; Pipeline macro
+(defmacro -> (initial-entity &rest transformations)
+  "Threading macro for case transformations."
+  (if transformations
+      (let ((first-transform (first transformations)))
+        `(-> (,(first first-transform) ,initial-entity ,@(rest first-transform))
+             ,@(rest transformations)))
+      initial-entity))
+
+;;; Example pipeline
+(let ((data (make-instance 'cerebrum-entity :base "RawData" :case :genitive)))
+  ;; Chain: GEN -> ACC -> process -> GEN
+  (-> data
+      (transform-to :accusative :reason "prepare-for-processing")
+      (transform-to :nominative :reason "activate")
+      (transform-to :genitive :reason "produce-output")))
+```
+
+## 11. Conclusion
+
+Lisp's unique features provide exceptional support for CEREBRUM case systems:
+
+1. **Homoiconicity**: Code-as-data enables case annotation of expressions themselves.
+2. **Macros**: Create domain-specific case languages with compile-time case checking.
+3. **CLOS**: Full OOP with multiple dispatch enables rich case-based method selection.
+4. **Condition System**: Handle case role violations gracefully.
+5. **Higher-Order Functions**: Compose case transformations functionally.
+6. **Dynamic Typing**: Flexible runtime case role changes.
+
+The combination of S-expressions, macros, and CLOS provides perhaps the most natural environment for implementing sophisticated CEREBRUM case systems among programming languages.
+
+## 12. References
 
 1. Graham, P. (1996). ANSI Common Lisp. Prentice Hall.
 2. Seibel, P. (2005). Practical Common Lisp. Apress.
 3. Steele Jr., G. L. (1990). Common Lisp the Language (2nd ed.). Digital Press.
-4. Keene, S. E. (1989). Object-Oriented Programming in Common Lisp: A Programmer's Guide to CLOS. Addison-Wesley. 
+4. Keene, S. E. (1989). Object-Oriented Programming in Common Lisp: A Programmer's Guide to CLOS. Addison-Wesley.
+5. Norvig, P. (1992). Paradigms of Artificial Intelligence Programming. Morgan Kaufmann.
+6. Friston, K. (2010). The free-energy principle: a unified brain theory? Nature Reviews Neuroscience.
+7. Abelson, H. & Sussman, G. J. (1996). Structure and Interpretation of Computer Programs. MIT Press.
+8. Kiczales, G., des Rivieres, J., & Bobrow, D. G. (1991). The Art of the Metaobject Protocol. MIT Press.

@@ -38,6 +38,7 @@ def example_function():
 ## X.5 Additional Tables
 
 **Table SX.1: Supplemental Data**
+
 | Parameter | Value | Description |
 |-----------|-------|-------------|
 | Param 1   | 0.75  | Description of parameter 1 |
@@ -47,8 +48,8 @@ def example_function():
 
 Include any supplement-specific references here.
 
-%% Notes:
-%% 1. Replace "X" with the supplement number
-%% 2. Replace "Supplemental Title" with an appropriate title
-%% 3. Update section numbers (X.1, X.2, etc.) to match the supplement number
-%% 4. Save as Supplement_X_Short_Title.md 
+<!-- Template Notes:
+1. Replace "X" with the supplement number
+2. Replace "Supplemental Title" with an appropriate title
+3. Update section numbers (X.1, X.2, etc.) to match the supplement number
+4. Save as Supplement_X_Short_Title.md -->

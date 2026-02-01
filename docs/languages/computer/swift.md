@@ -381,9 +381,342 @@ Swift provides a modern and safe environment for mapping CEREBRUM cases:
 
 Swift's focus on safety and expressiveness, combined with protocols and generics, allows for creating type-safe and potentially compile-time-checked implementations of CEREBRUM case systems.
 
-## 6. References
+## 6. Advanced CEREBRUM Implementation
 
-1. Apple Inc. (2023). The Swift Programming Language (Swift 5.7). (https://docs.swift.org/swift-book/)
-2. Hegarty, P. (2021). Developing Apps for iOS (CS193p). Stanford University. (https://cs193p.sites.stanford.edu/)
-3. Apple Inc. (2023). Swift Standard Library Documentation. (https://developer.apple.com/documentation/swift/swift_standard_library/)
-4. Swift Evolution Proposals. (https://github.com/apple/swift-evolution) 
+### Case Precision and Active Inference
+
+```swift
+import Foundation
+
+// Case roles with precision modifiers for Active Inference
+enum CaseRole: String, CaseIterable {
+    case nom = "Nominative"
+    case acc = "Accusative"
+    case dat = "Dative"
+    case gen = "Genitive"
+    case ins = "Instrumental"
+    case abl = "Ablative"
+    case loc = "Locative"
+    case voc = "Vocative"
+    
+    // Precision modifier for Active Inference
+    var precision: Double {
+        switch self {
+        case .nom: return 1.5
+        case .acc: return 1.2
+        case .dat: return 1.3
+        case .gen: return 1.0
+        case .ins: return 0.8
+        case .abl: return 1.1
+        case .loc: return 0.9
+        case .voc: return 2.0
+        }
+    }
+    
+    // Valid transition targets
+    var validTransitions: [CaseRole] {
+        switch self {
+        case .nom: return [.acc, .gen]
+        case .acc: return [.gen, .dat]
+        case .abl: return [.nom]
+        case .loc: return [.abl]
+        default: return []
+        }
+    }
+    
+    func canTransition(to target: CaseRole) -> Bool {
+        validTransitions.contains(target)
+    }
+}
+
+// Transition record for history tracking
+struct CaseTransition: CustomStringConvertible {
+    let from: CaseRole
+    let to: CaseRole
+    let timestamp: Date
+    
+    var description: String {
+        "\(from.rawValue) → \(to.rawValue)"
+    }
+}
+
+// Protocol for case-bearing entities
+protocol CaseBearing {
+    associatedtype BaseType
+    var base: BaseType { get }
+    var caseRole: CaseRole { get }
+    var precision: Double { get }
+    var history: [CaseTransition] { get }
+    
+    func effectivePrecision() -> Double
+    func transformTo(_ target: CaseRole) throws -> Self
+}
+
+// Errors for case operations
+enum CaseError: Error {
+    case invalidTransition(from: CaseRole, to: CaseRole)
+}
+
+// Generic case-bearing entity
+struct CaseEntity<T>: CaseBearing {
+    let base: T
+    private(set) var caseRole: CaseRole
+    private(set) var precision: Double
+    private(set) var history: [CaseTransition]
+    
+    init(_ base: T, role: CaseRole = .nom, precision: Double = 1.0) {
+        self.base = base
+        self.caseRole = role
+        self.precision = precision
+        self.history = []
+    }
+    
+    func effectivePrecision() -> Double {
+        precision * caseRole.precision
+    }
+    
+    func transformTo(_ target: CaseRole) throws -> CaseEntity<T> {
+        guard caseRole.canTransition(to: target) else {
+            throw CaseError.invalidTransition(from: caseRole, to: target)
+        }
+        
+        var newEntity = CaseEntity(base, role: target, precision: precision)
+        newEntity.history = history + [CaseTransition(from: caseRole, to: target, timestamp: Date())]
+        return newEntity
+    }
+}
+```
+
+### Active Inference Agent
+
+```swift
+import Foundation
+
+// Belief state for Active Inference
+struct BeliefState {
+    var mean: Double
+    var precision: Double
+    
+    var variance: Double { 1.0 / precision }
+    
+    func update(observation: Double, obsPrecision: Double) -> BeliefState {
+        let totalPrecision = precision + obsPrecision
+        let newMean = (precision * mean + obsPrecision * observation) / totalPrecision
+        return BeliefState(mean: newMean, precision: totalPrecision)
+    }
+}
+
+// Active Inference agent with case-aware processing
+class ActiveInferenceAgent<T> {
+    private var entity: CaseEntity<T>
+    private var belief: BeliefState
+    
+    init(entity: CaseEntity<T>, initialMean: Double = 0.0) {
+        self.entity = entity
+        self.belief = BeliefState(mean: initialMean, precision: 1.0)
+    }
+    
+    // Observe with case-adjusted precision
+    func observe(_ observation: Double, basePrecision: Double = 1.0) {
+        let adjustedPrecision = basePrecision * entity.effectivePrecision()
+        belief = belief.update(observation: observation, obsPrecision: adjustedPrecision)
+    }
+    
+    // Predict current state
+    func predict() -> Double {
+        belief.mean
+    }
+    
+    // Calculate free energy (prediction error cost)
+    func freeEnergy(observation: Double) -> Double {
+        let predError = observation - belief.mean
+        let effPrecision = belief.precision * entity.effectivePrecision()
+        return (predError * predError * effPrecision) / 2.0
+    }
+    
+    // Select action minimizing expected free energy
+    func selectAction(from possibilities: [Double]) -> (observation: Double, freeEnergy: Double)? {
+        guard !possibilities.isEmpty else { return nil }
+        
+        return possibilities
+            .map { ($0, freeEnergy(observation: $0)) }
+            .min { $0.1 < $1.1 }
+    }
+    
+    // Transform entity case
+    func transformCase(to target: CaseRole) throws {
+        entity = try entity.transformTo(target)
+    }
+    
+    // Access current state
+    var currentEntity: CaseEntity<T> { entity }
+    var currentBelief: BeliefState { belief }
+}
+```
+
+### Combine Framework Integration
+
+```swift
+import Foundation
+import Combine
+
+// Case-aware publisher wrapper
+struct CasePublisher<Upstream: Publisher>: Publisher {
+    typealias Output = CaseEntity<Upstream.Output>
+    typealias Failure = Upstream.Failure
+    
+    let upstream: Upstream
+    let caseRole: CaseRole
+    
+    func receive<S>(subscriber: S) where S: Subscriber, 
+        Failure == S.Failure, 
+        Output == S.Input {
+        upstream
+            .map { CaseEntity($0, role: caseRole) }
+            .receive(subscriber: subscriber)
+    }
+}
+
+extension Publisher {
+    // Wrap values in case entities
+    func withCase(_ role: CaseRole) -> CasePublisher<Self> {
+        CasePublisher(upstream: self, caseRole: role)
+    }
+}
+
+// Case-aware subscriber
+class CaseSubscriber<Input>: Subscriber {
+    typealias Input = CaseEntity<Input>
+    typealias Failure = Never
+    
+    let expectedRole: CaseRole
+    let handler: (CaseEntity<Input>) -> Void
+    
+    init(expecting role: CaseRole, handler: @escaping (CaseEntity<Input>) -> Void) {
+        self.expectedRole = role
+        self.handler = handler
+    }
+    
+    func receive(subscription: Subscription) {
+        subscription.request(.unlimited)
+    }
+    
+    func receive(_ input: CaseEntity<Input>) -> Subscribers.Demand {
+        if input.caseRole == expectedRole {
+            handler(input)
+        } else {
+            print("Warning: Expected \(expectedRole), got \(input.caseRole)")
+        }
+        return .none
+    }
+    
+    func receive(completion: Subscribers.Completion<Never>) {
+        print("Stream completed")
+    }
+}
+
+// Usage example
+func demonstrateCombine() {
+    let numbers = [1, 2, 3, 4, 5]
+    var cancellables = Set<AnyCancellable>()
+    
+    // Create case-aware stream
+    numbers.publisher
+        .withCase(.abl)  // Source data
+        .map { entity -> CaseEntity<Int> in
+            // Transform to ACC (being processed)
+            let newValue = entity.base * 2
+            return CaseEntity(newValue, role: .acc)
+        }
+        .sink { entity in
+            print("Received [\(entity.caseRole)]: \(entity.base)")
+        }
+        .store(in: &cancellables)
+}
+```
+
+### SwiftUI Case-Aware View Model
+
+```swift
+import Foundation
+import Combine
+
+// Observable case-bearing view model
+class CaseViewModel<T>: ObservableObject {
+    @Published private(set) var entity: CaseEntity<T>
+    @Published private(set) var beliefState: BeliefState
+    
+    private var agent: ActiveInferenceAgent<T>
+    
+    init(base: T, initialRole: CaseRole = .nom) {
+        let entity = CaseEntity(base, role: initialRole)
+        self.entity = entity
+        self.beliefState = BeliefState(mean: 0, precision: 1)
+        self.agent = ActiveInferenceAgent(entity: entity)
+    }
+    
+    func observe(_ value: Double) {
+        agent.observe(value)
+        beliefState = agent.currentBelief
+    }
+    
+    func transformCase(to role: CaseRole) {
+        do {
+            try agent.transformCase(to: role)
+            entity = agent.currentEntity
+        } catch {
+            print("Transform failed: \(error)")
+        }
+    }
+    
+    var prediction: Double {
+        agent.predict()
+    }
+    
+    var effectivePrecision: Double {
+        entity.effectivePrecision()
+    }
+}
+```
+
+## 7. Mermaid Diagram: Swift Case Architecture
+
+```mermaid
+graph TD
+    subgraph "Type System"
+        Struct["struct\n[LOC: Value Type]"]
+        Class["class\n[LOC: Ref Type]"]
+        Enum["enum\n[LOC: Cases]"]
+        Protocol["protocol\n[INS: Contract]"]
+    end
+    
+    Protocol -->|"conformance"| Struct
+    Protocol -->|"conformance"| Class
+    
+    subgraph "Case Flow"
+        Source["Optional?\n[ABL/GEN]"]
+        Entity["Entity\n[NOM/ACC]"]
+        Result["Result\n[NOM/GEN]"]
+    end
+    
+    Source -->|"unwrap"| Entity
+    Entity -->|"transform"| Result
+    
+    subgraph "Concurrency"
+        Task["Task\n[INS: Async]"]
+        Actor["actor\n[LOC: Isolation]"]
+        Await["await\n[VOC: Suspend]"]
+    end
+    
+    Task --> Await
+    Actor --> Task
+```
+
+## 8. References
+
+1. Apple Inc. (2023). The Swift Programming Language (Swift 5.9). (<https://docs.swift.org/swift-book/>)
+2. Hegarty, P. (2023). Developing Apps for iOS (CS193p). Stanford University.
+3. Apple Inc. (2023). Swift Standard Library Documentation.
+4. Swift Evolution Proposals. (<https://github.com/apple/swift-evolution>)
+5. Friston, K. (2010). The free-energy principle. Nature Reviews Neuroscience.
+6. Apple Inc. (2023). Combine Framework Documentation.

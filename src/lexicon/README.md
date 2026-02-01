@@ -18,17 +18,20 @@ LEXICON processes text through a pipeline that:
 LEXICON is part of the CEREBRUM project. To use it:
 
 1. Clone the repository:
+
    ```
    git clone https://github.com/cerebrum/cerebrum.git
    cd cerebrum
    ```
 
-2. Install dependencies:
+2. Install dependencies (using [uv](https://docs.astral.sh/uv/)):
+
    ```
-   pip install -r requirements.txt
+   uv pip install -e .
    ```
 
 3. Set up your OpenRouter API key:
+
    ```
    export OPENROUTER_API_KEY=your_api_key_here
    ```
@@ -51,11 +54,13 @@ python3 src/lexicon/run.py --batch
 ```
 
 **Output Directory**: LEXICON automatically creates timestamped output directories under `output/lexicon/` in the project root. Each run creates:
+
 - `output/lexicon/lexicon_YYYYMMDD_HHMMSS/` for single text processing
 - `output/lexicon/filename_YYYYMMDD_HHMMSS/` for file processing
 - `output/lexicon/batch_process_YYYYMMDD_HHMMSS/` for batch processing
 
 Each output directory contains:
+
 - `input/` - Copy of input files
 - `logs/` - Processing logs
 - `cache/` - Cached data for performance
@@ -88,6 +93,7 @@ edges = graph["edges"]
 LEXICON automatically generates comprehensive visualizations of the knowledge graphs:
 
 **Static Visualizations**:
+
 - `graph_visualization.png` - Complete knowledge graph layout
 - `case_distribution.png` - Distribution of grammatical cases
 - `entity_network.png` - Entity relationship network
@@ -95,17 +101,20 @@ LEXICON automatically generates comprehensive visualizations of the knowledge gr
 - `entity_claim_relationships.png` - Bipartite entity-claim graph
 
 **Animated Visualizations**:
+
 - `graph_construction.gif` - Animated graph building process
 - `case_evolution.gif` - Case assignment progression
 - `polarity_animation.gif` - Polarity distribution changes
 
 **Entity Neighborhoods**:
+
 - Individual visualizations for each entity's local neighborhood
 - Connection maps showing entity relationships
 
 **Requirements**: Visualizations require `matplotlib`, `networkx`, `numpy`, and `imageio`. Install with:
+
 ```bash
-pip install matplotlib networkx numpy imageio
+uv pip install matplotlib networkx numpy imageio
 ```
 
 ## Examples

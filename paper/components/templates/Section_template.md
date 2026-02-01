@@ -5,6 +5,7 @@
 This is example text for a section template. Replace this with the actual content of your section.
 
 #### Key Points to Cover in This Section
+
 - Point 1
 - Point 2
 - Point 3
@@ -18,6 +19,7 @@ Reference figures using pandoc-crossref syntax: @fig:figX. Make sure to referenc
 ### Tables
 
 **Table X: Example Table Title**
+
 | Column 1 | Column 2 | Column 3 |
 |----------|----------|----------|
 | Data 1   | Data 2   | Data 3   |
@@ -35,9 +37,9 @@ $$
 
 Reference equations by their tag number: As shown in equation (X), the free energy...
 
-%% Notes:
-%% 1. Replace "Section Title" with your actual section title
-%% 2. Start with level 2 headers (##) for main sections
-%% 3. Use level 3 headers (###) for subsections
-%% 4. Update figure and equation references to use the correct numbers
-%% 5. Save the file with the appropriate numeric prefix (e.g., 9_section_title.md) 
+<!-- Template Notes:
+1. Replace "Section Title" with your actual section title
+2. Start with level 2 headers (##) for main sections
+3. Use level 3 headers (###) for subsections
+4. Update figure and equation references to use the correct numbers
+5. Save the file with the appropriate numeric prefix (e.g., 9_section_title.md) -->

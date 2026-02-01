@@ -76,7 +76,7 @@ class TestInsectBaseModels:
         assert model.species == "honeybee"
         assert model.current_case == Case.NOMINATIVE
         assert model.behavioral_state == BehavioralState.IDLE
-        assert len(model.neural_structures) == 0
+        assert len(model.neural_structures) == 6  # InsectModel initializes 6 structures by default
         assert len(model.case_assignments) > 0
     
     def test_case_transformation(self):

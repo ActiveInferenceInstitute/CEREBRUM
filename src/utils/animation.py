@@ -9,10 +9,34 @@ import logging
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
-import imageio
-from imageio import imread, imwrite, mimsave
 import shutil
 from PIL import Image
+
+# imageio is an optional dependency (part of 'lexicon' extras)
+# Functions that need it will import lazily with helpful error messages
+_imageio = None
+_imread = None
+_imwrite = None
+_mimsave = None
+
+
+def _ensure_imageio():
+    """Lazy-load imageio and its functions. Raises ImportError with helpful message if not installed."""
+    global _imageio, _imread, _imwrite, _mimsave
+    if _imageio is None:
+        try:
+            import imageio
+            from imageio import imread, imwrite, mimsave
+            _imageio = imageio
+            _imread = imread
+            _imwrite = imwrite
+            _mimsave = mimsave
+        except ImportError:
+            raise ImportError(
+                "imageio is required for animation utilities but is not installed. "
+                "Install it with: uv pip install -e '.[lexicon]' or pip install imageio"
+            )
+    return _imageio, _imread, _imwrite, _mimsave
 
 # Setup logging
 logger = logging.getLogger("cerebrum-animation")
@@ -107,6 +131,9 @@ def save_animation(animation, output_path, fps=5, dpi=100, writer='pillow', **kw
         True if the animation was saved successfully, False otherwise
     """
     try:
+        # Ensure imageio is available (lazy load)
+        _, imread, imwrite, mimsave = _ensure_imageio()
+        
         # Create directory if it doesn't exist
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         
@@ -345,6 +372,9 @@ def save_frames_as_gif(frames, output_path, fps=5, loop=0):
         True if the GIF was saved successfully, False otherwise
     """
     try:
+        # Ensure imageio is available (lazy load)
+        _, imread, imwrite, mimsave = _ensure_imageio()
+        
         logger.info(f"Saving {len(frames)} frames as GIF to {output_path}")
         
         # Create directory if it doesn't exist

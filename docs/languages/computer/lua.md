@@ -152,6 +152,7 @@ print("v4 (v1 + v2 via +): x=" .. v4.x .. ", y=" .. v4.y)
 ```
 
 *Mermaid Diagram: Method Call Flow (`v1:add(v2)`)*
+
 ```mermaid
 graph TD
     Call[VOC: v1:add(v2)] --> LookupAdd{Lookup 'add' in v1's metatable (__index -> Vector)};
@@ -196,12 +197,12 @@ mymod.greet("Lua User")
 
 Case roles in Lua are inferred primarily from:
 
-1.  **Table Usage**: Tables act as LOC containers. Access (`.`, `[]`) is GEN, assignment to keys makes the table ACC/DAT.
-2.  **Function Calls**: Standard function calls (`func(args)`) are VOC on INS functions with ACC/GEN args.
-3.  **Method Calls**: Colon syntax (`obj:method(args)`) implies a VOC call where `obj` is the NOM/ACC instance (implicit first argument `self`).
-4.  **Metatables**: `setmetatable` applies INS behaviors (__index, __add, etc.) to LOC tables.
-5.  **`local` Keyword**: Defines variables within the current LOC scope.
-6.  **Iteration**: `pairs`/`ipairs` act as INS iterators over ABL source tables.
+1. **Table Usage**: Tables act as LOC containers. Access (`.`, `[]`) is GEN, assignment to keys makes the table ACC/DAT.
+2. **Function Calls**: Standard function calls (`func(args)`) are VOC on INS functions with ACC/GEN args.
+3. **Method Calls**: Colon syntax (`obj:method(args)`) implies a VOC call where `obj` is the NOM/ACC instance (implicit first argument `self`).
+4. **Metatables**: `setmetatable` applies INS behaviors (__index,__add, etc.) to LOC tables.
+5. **`local` Keyword**: Defines variables within the current LOC scope.
+6. **Iteration**: `pairs`/`ipairs` act as INS iterators over ABL source tables.
 
 Explicit CEREBRUM modeling isn't idiomatic. Comments are the main way to clarify intent.
 
@@ -218,9 +219,376 @@ Lua's simplicity, centered around tables and functions, provides clear mappings 
 
 The prototype-based nature derived from metatables allows flexible modeling where an object's behavior (**INS**) can be dynamically associated or changed.
 
-## 6. References
+## 6. Advanced CEREBRUM Implementation
 
-1.  Ierusalimschy, R. (2016). *Programming in Lua* (4th ed.). Lua.org.
-2.  Lua 5.4 Reference Manual. (https://www.lua.org/manual/5.4/)
-3.  Lua-Users Wiki. (http://lua-users.org/wiki/)
-4.  Roberto Ierusalimschy's Papers/Talks on Lua Design. (Accessible via Lua.org or his homepage) 
+### Case-Enforcing Metatables
+
+```lua
+-- CEREBRUM Case System Implementation in Lua
+local CaseSystem = {}
+CaseSystem.__index = CaseSystem
+
+-- Case enumeration
+local Case = {
+    NOM = "NOM",  -- Nominative: Active agent
+    ACC = "ACC",  -- Accusative: Patient/target
+    DAT = "DAT",  -- Dative: Recipient
+    GEN = "GEN",  -- Genitive: Source/possessor
+    INS = "INS",  -- Instrumental: Tool/means
+    ABL = "ABL",  -- Ablative: Origin
+    LOC = "LOC",  -- Locative: Location/context
+    VOC = "VOC"   -- Vocative: Direct address
+}
+
+-- Precision modifiers per case (Active Inference)
+local CasePrecision = {
+    [Case.NOM] = 1.5,
+    [Case.ACC] = 1.2,
+    [Case.DAT] = 1.3,
+    [Case.GEN] = 1.0,
+    [Case.INS] = 0.8,
+    [Case.ABL] = 1.1,
+    [Case.LOC] = 0.9,
+    [Case.VOC] = 2.0
+}
+
+-- Create a case-bearing entity
+function CaseSystem.new(base, case, precision)
+    local self = setmetatable({}, CaseSystem)
+    self._base = base
+    self._case = case or Case.NOM
+    self._precision = precision or 1.0
+    self._history = {}
+    return self
+end
+
+-- Case transformation with validation
+local ValidTransitions = {
+    [Case.NOM] = {Case.ACC, Case.GEN},
+    [Case.ACC] = {Case.GEN, Case.DAT},
+    [Case.ABL] = {Case.NOM},
+    [Case.LOC] = {Case.ABL}
+}
+
+function CaseSystem:transform_to(target_case)
+    local valid = ValidTransitions[self._case]
+    if valid then
+        for _, v in ipairs(valid) do
+            if v == target_case then
+                table.insert(self._history, {
+                    from = self._case,
+                    to = target_case,
+                    time = os.time()
+                })
+                self._case = target_case
+                return self
+            end
+        end
+    end
+    error(string.format("Invalid transition: %s -> %s", self._case, target_case))
+end
+
+-- Get current case
+function CaseSystem:get_case()
+    return self._case
+end
+
+-- Get base value
+function CaseSystem:get_base()
+    return self._base
+end
+
+-- Get effective precision (case-adjusted)
+function CaseSystem:effective_precision()
+    return self._precision * (CasePrecision[self._case] or 1.0)
+end
+
+-- Metatable for pretty printing
+function CaseSystem:__tostring()
+    return string.format("<%s>[%s](p=%.2f)", 
+        tostring(self._base), 
+        self._case, 
+        self:effective_precision())
+end
+
+-- Usage example
+local agent = CaseSystem.new("Processor", Case.NOM, 1.0)
+local patient = CaseSystem.new("Data", Case.ACC, 0.9)
+print("Agent:", agent)
+print("Patient:", patient)
+```
+
+### Coroutines as Case Transitions
+
+```lua
+-- Case transformation as coroutine-based state machine
+local function case_machine(initial_case)
+    local current = initial_case
+    local history = {}
+    
+    while true do
+        -- Yield current state, receive action
+        local action, target = coroutine.yield(current)
+        
+        if action == "transition" then
+            table.insert(history, {from = current, to = target})
+            current = target
+        elseif action == "history" then
+            coroutine.yield(history)
+        elseif action == "stop" then
+            return current
+        end
+    end
+end
+
+-- Create and use case state machine
+local function create_case_entity(name, initial_case)
+    local co = coroutine.create(case_machine)
+    local _, state = coroutine.resume(co, initial_case)
+    
+    return {
+        name = name,
+        _co = co,
+        
+        -- Get current case
+        current = function(self)
+            return state
+        end,
+        
+        -- Transform to new case
+        transform = function(self, new_case)
+            local success, result = coroutine.resume(self._co, "transition", new_case)
+            if success then
+                state = result
+                return self
+            else
+                error("Transformation failed: " .. tostring(result))
+            end
+        end,
+        
+        -- Get transformation history
+        history = function(self)
+            local _, h = coroutine.resume(self._co, "history")
+            return h
+        end
+    }
+end
+
+-- Example workflow
+local entity = create_case_entity("Model", Case.NOM)
+print("Initial:", entity:current())  -- NOM
+
+entity:transform(Case.ACC)
+print("After transform:", entity:current())  -- ACC
+
+entity:transform(Case.GEN)
+print("After second transform:", entity:current())  -- GEN
+
+for i, h in ipairs(entity:history()) do
+    print(string.format("Transition %d: %s -> %s", i, h.from, h.to))
+end
+```
+
+### Active Inference Implementation
+
+```lua
+-- Active Inference Model in Lua
+local ActiveInference = {}
+ActiveInference.__index = ActiveInference
+
+function ActiveInference.new(initial_belief, precision, case)
+    local self = setmetatable({}, ActiveInference)
+    self.belief = {
+        mean = initial_belief,
+        precision = precision
+    }
+    self.case = case or Case.NOM
+    return self
+end
+
+-- Bayesian belief update
+function ActiveInference:update(observation, obs_precision)
+    local case_mod = CasePrecision[self.case] or 1.0
+    local adjusted_precision = obs_precision * case_mod
+    
+    local total_precision = self.belief.precision + adjusted_precision
+    local posterior_mean = 
+        (self.belief.precision * self.belief.mean + 
+         adjusted_precision * observation) / total_precision
+    
+    self.belief.mean = posterior_mean
+    self.belief.precision = total_precision
+    
+    return self
+end
+
+-- Calculate variational free energy
+function ActiveInference:free_energy(observation)
+    local case_mod = CasePrecision[self.case] or 1.0
+    local eff_precision = self.belief.precision * case_mod
+    
+    local pred_error = (observation - self.belief.mean) ^ 2
+    return pred_error * eff_precision / 2
+end
+
+-- Predict next observation
+function ActiveInference:predict()
+    return self.belief.mean
+end
+
+-- Select action to minimize expected free energy
+function ActiveInference:select_action(possible_observations)
+    local best_obs, min_fe = nil, math.huge
+    
+    for _, obs in ipairs(possible_observations) do
+        local fe = self:free_energy(obs)
+        if fe < min_fe then
+            min_fe = fe
+            best_obs = obs
+        end
+    end
+    
+    return best_obs, min_fe
+end
+
+-- Example usage
+local model = ActiveInference.new(5.0, 1.0, Case.NOM)
+print(string.format("Initial belief: mean=%.2f, precision=%.2f", 
+    model.belief.mean, model.belief.precision))
+
+model:update(6.0, 0.5)
+print(string.format("After update: mean=%.2f, precision=%.2f", 
+    model.belief.mean, model.belief.precision))
+
+local fe = model:free_energy(5.5)
+print(string.format("Free energy at 5.5: %.4f", fe))
+
+local best, min_fe = model:select_action({4.0, 5.0, 6.0, 7.0})
+print(string.format("Best action: observe %.1f (FE=%.4f)", best, min_fe))
+```
+
+### Message Passing with Case Roles
+
+```lua
+-- Actor-like message passing with explicit case roles
+local Actor = {}
+Actor.__index = Actor
+
+function Actor.new(name)
+    local self = setmetatable({}, Actor)
+    self.name = name
+    self.inbox = {}
+    self.handlers = {}
+    return self
+end
+
+function Actor:register_handler(message_type, handler)
+    self.handlers[message_type] = handler
+end
+
+function Actor:send(target, message_type, payload, case_role)
+    -- Message with explicit case marking
+    local msg = {
+        from = self,
+        from_case = Case.NOM,  -- Sender is always NOM
+        to_case = case_role or Case.DAT,  -- Recipient role
+        type = message_type,
+        payload = payload,
+        timestamp = os.time()
+    }
+    table.insert(target.inbox, msg)
+    return msg
+end
+
+function Actor:process()
+    for _, msg in ipairs(self.inbox) do
+        local handler = self.handlers[msg.type]
+        if handler then
+            -- Execute with case context
+            handler(self, msg)
+        end
+    end
+    self.inbox = {}
+end
+
+-- Example multi-actor system
+local processor = Actor.new("Processor")
+local database = Actor.new("Database")
+local client = Actor.new("Client")
+
+processor:register_handler("process", function(self, msg)
+    print(string.format("[%s][%s] received from [%s][%s]: %s",
+        self.name, msg.to_case, msg.from.name, msg.from_case, 
+        msg.payload))
+    
+    -- Forward result to client as GEN (derived output)
+    self:send(msg.from, "result", "processed_" .. msg.payload, Case.GEN)
+end)
+
+client:register_handler("result", function(self, msg)
+    print(string.format("[%s] received result [%s]: %s",
+        self.name, msg.to_case, msg.payload))
+end)
+
+-- Workflow
+client:send(processor, "process", "raw_data", Case.ACC)  -- Data as ACC
+processor:process()
+client:process()
+```
+
+## 7. Functional Composition with Case Awareness
+
+```lua
+-- Composable case-aware functions
+local function compose(...)
+    local fns = {...}
+    return function(x)
+        local result = x
+        for _, fn in ipairs(fns) do
+            result = fn(result)
+        end
+        return result
+    end
+end
+
+-- Case-preserving map operation
+local function case_map(fn)
+    return function(entity)
+        local new_base = fn(entity:get_base())
+        return CaseSystem.new(new_base, entity:get_case(), entity._precision)
+    end
+end
+
+-- Case-transforming operation
+local function case_transform(target_case)
+    return function(entity)
+        local clone = CaseSystem.new(
+            entity:get_base(), 
+            entity:get_case(), 
+            entity._precision
+        )
+        return clone:transform_to(target_case)
+    end
+end
+
+-- Pipeline example
+local pipeline = compose(
+    case_map(function(x) return x * 2 end),
+    case_transform(Case.ACC),
+    case_map(function(x) return x + 5 end),
+    case_transform(Case.GEN)
+)
+
+local input = CaseSystem.new(10, Case.NOM)
+local output = pipeline(input)
+print("Pipeline result:", output)
+```
+
+## 8. References
+
+1. Ierusalimschy, R. (2016). *Programming in Lua* (4th ed.). Lua.org.
+2. Lua 5.4 Reference Manual. (<https://www.lua.org/manual/5.4/>)
+3. Lua-Users Wiki. (<http://lua-users.org/wiki/>)
+4. Roberto Ierusalimschy's Papers/Talks on Lua Design. (Accessible via Lua.org)
+5. Friston, K. (2010). The free-energy principle. Nature Reviews Neuroscience.
+6. Hewitt, C., et al. (1973). A Universal Modular ACTOR Formalism. IJCAI.

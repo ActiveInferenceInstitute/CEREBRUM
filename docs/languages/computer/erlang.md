@@ -223,9 +223,385 @@ Erlang maps CEREBRUM cases through its unique concurrency and functional feature
 
 While lacking explicit syntax for cases, Erlang's core design principles for building robust, concurrent systems align well with modeling distinct roles and interactions between computational entities, mirroring the relationships CEREBRUM aims to capture.
 
-## 6. References
+## 6. Advanced CEREBRUM Implementation
+
+### Case-Bearing Records with OTP
+
+```erlang
+-module(case_entity).
+-export([new/3, transform/2, effective_precision/1, info/1]).
+
+%% Case enumeration
+-define(CASES, #{
+    nom => #{name => <<"Nominative">>, precision => 1.5},
+    acc => #{name => <<"Accusative">>, precision => 1.2},
+    dat => #{name => <<"Dative">>, precision => 1.3},
+    gen => #{name => <<"Genitive">>, precision => 1.0},
+    ins => #{name => <<"Instrumental">>, precision => 0.8},
+    abl => #{name => <<"Ablative">>, precision => 1.1},
+    loc => #{name => <<"Locative">>, precision => 0.9},
+    voc => #{name => <<"Vocative">>, precision => 2.0}
+}).
+
+%% Valid transitions
+-define(VALID_TRANSITIONS, #{
+    nom => [acc, gen],
+    acc => [gen, dat],
+    abl => [nom],
+    loc => [abl]
+}).
+
+%% Record definition
+-record(case_entity, {
+    base :: any(),
+    case_role :: atom(),
+    precision :: float(),
+    history :: list()
+}).
+
+%% Create new case entity
+new(Base, CaseRole, Precision) ->
+    #case_entity{
+        base = Base,
+        case_role = CaseRole,
+        precision = Precision,
+        history = []
+    }.
+
+%% Transform to new case (with validation)
+transform(Entity = #case_entity{case_role = Current, history = History}, TargetCase) ->
+    ValidTransitions = maps:get(Current, ?VALID_TRANSITIONS, []),
+    case lists:member(TargetCase, ValidTransitions) of
+        true ->
+            Entity#case_entity{
+                case_role = TargetCase,
+                history = [{Current, TargetCase, erlang:timestamp()} | History]
+            };
+        false ->
+            {error, {invalid_transition, Current, TargetCase}}
+    end.
+
+%% Calculate effective precision
+effective_precision(#case_entity{case_role = Role, precision = BasePrecision}) ->
+    CaseData = maps:get(Role, ?CASES, #{precision => 1.0}),
+    CasePrecision = maps:get(precision, CaseData),
+    BasePrecision * CasePrecision.
+
+%% Get entity info
+info(#case_entity{base = Base, case_role = Role} = Entity) ->
+    EffPrec = effective_precision(Entity),
+    io_lib:format("~p [~p](p=~.2f)", [Base, Role, EffPrec]).
+```
+
+### Gen_Server with Case State
+
+```erlang
+-module(case_server).
+-behaviour(gen_server).
+
+-export([start_link/2, get_case/1, transform/2, update_belief/3]).
+-export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2]).
+
+-record(state, {
+    entity :: case_entity:case_entity(),
+    belief_mean :: float(),
+    belief_precision :: float()
+}).
+
+%% API Functions
+
+%% Start a case-bearing server (VOC spawn)
+start_link(Name, InitialCase) ->
+    gen_server:start_link({local, Name}, ?MODULE, [Name, InitialCase], []).
+
+%% Get current case (VOC call)
+get_case(Name) ->
+    gen_server:call(Name, get_case).
+
+%% Transform to new case (VOC call, server is DAT recipient)
+transform(Name, TargetCase) ->
+    gen_server:call(Name, {transform, TargetCase}).
+
+%% Update belief with observation (VOC call)
+update_belief(Name, Observation, ObsPrecision) ->
+    gen_server:call(Name, {update_belief, Observation, ObsPrecision}).
+
+%% Gen_Server Callbacks
+
+init([Name, InitialCase]) ->
+    Entity = case_entity:new(Name, InitialCase, 1.0),
+    {ok, #state{
+        entity = Entity,
+        belief_mean = 0.0,
+        belief_precision = 1.0
+    }}.
+
+handle_call(get_case, _From, State = #state{entity = Entity}) ->
+    Info = case_entity:info(Entity),
+    {reply, {ok, Info}, State};
+
+handle_call({transform, TargetCase}, _From, State = #state{entity = Entity}) ->
+    case case_entity:transform(Entity, TargetCase) of
+        {error, Reason} ->
+            {reply, {error, Reason}, State};
+        NewEntity ->
+            {reply, ok, State#state{entity = NewEntity}}
+    end;
+
+handle_call({update_belief, Observation, ObsPrecision}, _From, 
+            State = #state{entity = Entity, 
+                          belief_mean = Mean, 
+                          belief_precision = Precision}) ->
+    %% Get case-specific precision modifier
+    EffPrec = case_entity:effective_precision(Entity),
+    AdjustedPrecision = ObsPrecision * (EffPrec / Precision),
+    
+    %% Bayesian update
+    TotalPrecision = Precision + AdjustedPrecision,
+    PosteriorMean = (Precision * Mean + AdjustedPrecision * Observation) / TotalPrecision,
+    
+    NewState = State#state{
+        belief_mean = PosteriorMean,
+        belief_precision = TotalPrecision
+    },
+    {reply, {ok, PosteriorMean, TotalPrecision}, NewState};
+
+handle_call(_Request, _From, State) ->
+    {reply, {error, unknown_request}, State}.
+
+handle_cast(_Msg, State) ->
+    {noreply, State}.
+
+handle_info(_Info, State) ->
+    {noreply, State}.
+
+terminate(_Reason, _State) ->
+    ok.
+```
+
+### Active Inference Agent Process
+
+```erlang
+-module(active_inference_agent).
+-behaviour(gen_statem).
+
+-export([start_link/3, observe/2, predict/1, select_action/2, get_state/1]).
+-export([init/1, callback_mode/0, handle_event/4, terminate/3]).
+
+-record(agent_state, {
+    name :: atom(),
+    case_role :: atom(),
+    belief_mean :: float(),
+    belief_precision :: float(),
+    observations :: list()
+}).
+
+%% API
+
+start_link(Name, InitialMean, CaseRole) ->
+    gen_statem:start_link({local, Name}, ?MODULE, 
+                          [Name, InitialMean, CaseRole], []).
+
+observe(Name, Observation) ->
+    gen_statem:call(Name, {observe, Observation}).
+
+predict(Name) ->
+    gen_statem:call(Name, predict).
+
+select_action(Name, PossibleObservations) ->
+    gen_statem:call(Name, {select_action, PossibleObservations}).
+
+get_state(Name) ->
+    gen_statem:call(Name, get_state).
+
+%% Callbacks
+
+init([Name, InitialMean, CaseRole]) ->
+    State = #agent_state{
+        name = Name,
+        case_role = CaseRole,
+        belief_mean = InitialMean,
+        belief_precision = 1.0,
+        observations = []
+    },
+    {ok, active, State}.
+
+callback_mode() ->
+    handle_event_function.
+
+handle_event({call, From}, {observe, Observation}, _StateName,
+             State = #agent_state{case_role = Role,
+                                  belief_mean = Mean,
+                                  belief_precision = Precision,
+                                  observations = Obs}) ->
+    %% Get case precision modifier
+    CasePrecisions = #{nom => 1.5, acc => 1.2, dat => 1.3, 
+                       gen => 1.0, ins => 0.8, voc => 2.0},
+    CaseMod = maps:get(Role, CasePrecisions, 1.0),
+    
+    %% Bayesian update with case-aware precision
+    ObsPrecision = 0.5 * CaseMod,
+    TotalPrecision = Precision + ObsPrecision,
+    NewMean = (Precision * Mean + ObsPrecision * Observation) / TotalPrecision,
+    
+    NewState = State#agent_state{
+        belief_mean = NewMean,
+        belief_precision = TotalPrecision,
+        observations = [Observation | Obs]
+    },
+    {keep_state, NewState, [{reply, From, {ok, NewMean, TotalPrecision}}]};
+
+handle_event({call, From}, predict, _StateName,
+             State = #agent_state{belief_mean = Mean}) ->
+    {keep_state, State, [{reply, From, {ok, Mean}}]};
+
+handle_event({call, From}, {select_action, Observations}, _StateName,
+             State = #agent_state{belief_mean = Mean, 
+                                  belief_precision = Precision,
+                                  case_role = Role}) ->
+    %% Calculate free energy for each possible observation
+    CasePrecisions = #{nom => 1.5, acc => 1.2, dat => 1.3,
+                       gen => 1.0, ins => 0.8, voc => 2.0},
+    CaseMod = maps:get(Role, CasePrecisions, 1.0),
+    EffPrecision = Precision * CaseMod,
+    
+    FreeEnergies = lists:map(fun(Obs) ->
+        PredError = math:pow(Obs - Mean, 2),
+        FE = PredError * EffPrecision / 2,
+        {Obs, FE}
+    end, Observations),
+    
+    %% Select observation with minimum free energy
+    {BestObs, MinFE} = lists:foldl(fun({O, FE}, {_BO, BFE}) when FE < BFE ->
+        {O, FE};
+    (_, Acc) -> Acc
+    end, {undefined, infinity}, FreeEnergies),
+    
+    {keep_state, State, [{reply, From, {ok, BestObs, MinFE}}]};
+
+handle_event({call, From}, get_state, _StateName, State) ->
+    {keep_state, State, [{reply, From, {ok, State}}]};
+
+handle_event(_EventType, _EventContent, _StateName, State) ->
+    {keep_state, State}.
+
+terminate(_Reason, _StateName, _State) ->
+    ok.
+```
+
+### Supervision Tree for Case Entities
+
+```erlang
+-module(case_supervisor).
+-behaviour(supervisor).
+
+-export([start_link/0, start_agent/3, stop_agent/1]).
+-export([init/1]).
+
+start_link() ->
+    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+
+start_agent(Name, InitialMean, CaseRole) ->
+    ChildSpec = #{
+        id => Name,
+        start => {active_inference_agent, start_link, [Name, InitialMean, CaseRole]},
+        restart => transient,
+        type => worker
+    },
+    supervisor:start_child(?MODULE, ChildSpec).
+
+stop_agent(Name) ->
+    supervisor:terminate_child(?MODULE, Name),
+    supervisor:delete_child(?MODULE, Name).
+
+init([]) ->
+    SupFlags = #{
+        strategy => one_for_one,
+        intensity => 5,
+        period => 10
+    },
+    {ok, {SupFlags, []}}.
+
+%% Example usage:
+%% case_supervisor:start_link().
+%% case_supervisor:start_agent(agent1, 5.0, nom).
+%% active_inference_agent:observe(agent1, 6.0).
+%% active_inference_agent:predict(agent1).
+%% active_inference_agent:select_action(agent1, [4.0, 5.0, 6.0, 7.0]).
+```
+
+### Message Protocol with Case Roles
+
+```erlang
+-module(case_protocol).
+-export([send_with_case/4, receive_with_case/0]).
+
+%% Send message with explicit case tagging
+%% Sender is ABL, Target is DAT, Message is ACC
+send_with_case(Target, MessageType, Payload, CaseRole) ->
+    Message = #{
+        from => {self(), abl},           %% Sender is ABL source
+        to_case => CaseRole,             %% Recipient role
+        type => MessageType,
+        payload => Payload,
+        timestamp => erlang:timestamp()
+    },
+    Target ! {case_message, Message}.
+
+%% Receive with case-aware pattern matching
+receive_with_case() ->
+    receive
+        {case_message, #{from := {Pid, abl},
+                         to_case := dat,
+                         type := Type,
+                         payload := Payload}} ->
+            %% DAT: We are receiving data
+            io:format("Received [DAT] from ~p: ~p~n", [Pid, Payload]),
+            {ok, Type, Payload};
+            
+        {case_message, #{from := {Pid, abl},
+                         to_case := acc,
+                         type := Type,
+                         payload := Payload}} ->
+            %% ACC: We are target of action
+            io:format("Acting on [ACC] from ~p: ~p~n", [Pid, Payload]),
+            {process, Type, Payload};
+            
+        {case_message, Msg} ->
+            io:format("Unknown case message: ~p~n", [Msg]),
+            {unknown, Msg}
+    after 5000 ->
+        {error, timeout}
+    end.
+```
+
+## 7. Mermaid Diagram: OTP Case Architecture
+
+```mermaid
+graph TD
+    subgraph "Case Supervision Tree"
+        Sup["case_supervisor\n[INS: Supervisor]"]
+        Agent1["agent1\n[NOM: Active]"]
+        Agent2["agent2\n[ACC: Patient]"]
+        Agent3["agent3\n[INS: Tool]"]
+    end
+    
+    Sup --> Agent1
+    Sup --> Agent2
+    Sup --> Agent3
+    
+    subgraph "Message Flow"
+        Client["Client Process\n[NOM/ABL]"]
+        Client -->|"observe/2 [VOC]"| Agent1
+        Agent1 -->|"{ok, Mean} [GEN]"| Client
+    end
+```
+
+## 8. References
 
 1. Armstrong, J. (2013). Programming Erlang: Software for a Concurrent World (2nd ed.). Pragmatic Bookshelf.
 2. Cesarini, F., & Thompson, S. (2009). Erlang Programming. O'Reilly Media.
-3. Erlang Documentation. (https://www.erlang.org/docs)
-4. Learn You Some Erlang for Great Good! (http://learnyousomeerlang.com/) 
+3. Erlang Documentation. (<https://www.erlang.org/docs>)
+4. Learn You Some Erlang for Great Good! (<http://learnyousomeerlang.com/>)
+5. Friston, K. (2010). The free-energy principle. Nature Reviews Neuroscience.
+6. Logan, M., Merritt, E., & Carlsson, R. (2010). Erlang and OTP in Action. Manning Publications.

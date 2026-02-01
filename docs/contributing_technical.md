@@ -106,19 +106,28 @@ This guide provides detailed information for developers and technical contributo
 
 ### Development Environment Setup
 
+We use [uv](https://docs.astral.sh/uv/) for fast, reliable Python dependency management.
+
 1. **Fork and Clone**
+
    ```bash
    git clone https://github.com/yourusername/CEREBRUM.git
    cd CEREBRUM
    ```
 
-2. **Install Dependencies**
+2. **Install uv** (if not already installed)
+
+   ```bash
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   ```
+
+3. **Install Dependencies**
+
    ```bash
    # Python implementation
-   python -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   pip install -r requirements-dev.txt
+   uv venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   uv pip install -e ".[dev]"
    
    # JavaScript implementation
    cd implementations/js
@@ -129,8 +138,8 @@ This guide provides detailed information for developers and technical contributo
    cargo build
    ```
 
-3. **Configure Environment**
-   - Set up pre-commit hooks
+4. **Configure Environment**
+   - Set up pre-commit hooks: `pre-commit install`
    - Configure linting and formatting tools
    - Set up testing environment
 
@@ -142,6 +151,7 @@ This guide provides detailed information for developers and technical contributo
    - Contact maintainers about unlisted improvement ideas
 
 2. **Create a Branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -161,24 +171,28 @@ This guide provides detailed information for developers and technical contributo
 ### Code Standards
 
 #### General Guidelines
+
 - Write clear, documented code
 - Follow language-specific style guides
 - Include appropriate tests
 - Ensure backward compatibility or document breaking changes
 
 #### Python Guidelines
+
 - Follow PEP 8 style guidelines
 - Use type hints wherever possible
 - Document functions and classes with docstrings
 - Maintain 80% or higher test coverage
 
 #### JavaScript Guidelines
+
 - Follow ESLint configuration
 - Use TypeScript for type safety
 - Document with JSDoc comments
 - Create Jest tests for components
 
 #### Rust Guidelines
+
 - Follow Rust API guidelines
 - Use Cargo formatting standards
 - Document all public interfaces
@@ -238,5 +252,6 @@ For general contribution guidelines, please refer to the main [CONTRIBUTING.md](
 - **Technical Blog**: Updates and deep dives on the development blog
 
 For specific technical questions, please contact:
-- Technical Lead: tech@activeinference.org
-- Developer Relations: devrel@activeinference.institute 
+
+- Technical Lead: <tech@activeinference.org>
+- Developer Relations: <devrel@activeinference.institute>

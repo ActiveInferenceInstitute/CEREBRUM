@@ -7,7 +7,7 @@ from matplotlib import animation
 from unittest.mock import MagicMock
 from typing import Dict, List, Tuple
 
-from src.models.base import Case
+from src.core.model import Case
 from src.core.neural_network import NeuralNetworkModel
 from src.utils.visualization import plot_case_linguistic_context
 from src.tests.pomdp.visualizers import Visualizer
@@ -1941,7 +1941,7 @@ def test_vocative_case(nn_classification_data, case_definitions):
         # Use first i segments for this evaluation round
         segment_end = i * test_segment_size
         X_segment = X[:segment_end]
-        y_segment = y[:segment_end]
+        y_segment = y_one_hot[:segment_end]
         
         # Evaluate model on this segment
         segment_eval = model.evaluate(X_segment, y_segment)
@@ -2028,8 +2028,8 @@ def test_vocative_case(nn_classification_data, case_definitions):
         
         # Update prediction scatter plot
         current_segment_end = segment_sizes[frame]
-        X_current = X_test[:current_segment_end]
-        y_current = y_test[:current_segment_end]
+        X_current = X[:current_segment_end]
+        y_current = y_one_hot[:current_segment_end]
         predictions_current = model.predict(X_current)
         
         if y_current.shape[1] == 1:
@@ -2758,9 +2758,10 @@ def test_instrumental_case(nn_regression_data, case_definitions):
     indices = np.random.permutation(len(X))
     test_size = min(50, len(X) // 5)
     train_indices = indices[test_size:]
-    
+    test_indices = indices[:test_size]
+
     X_train, y_train = X[train_indices], y[train_indices]
-    X_test, y_test = X[test_size:], y[test_size:]
+    X_test, y_test = X[test_indices], y[test_indices]
     
     for hidden_dims in hidden_configs:
         # Create model

@@ -130,6 +130,7 @@ PipelineDemo.run(5) # Output: Pipeline result for 5: 12
 ```
 
 *Mermaid Diagram: Pipe Operator Flow*
+
 ```mermaid
 graph LR
     Start[ABL/GEN: start_value] --> Pipe1{VOC: |> increment()};
@@ -210,11 +211,11 @@ end
 
 Elixir's functional nature and emphasis on pattern matching make roles quite clear:
 
-1.  **Pattern Matching**: The core mechanism. LHS defines the DAT target pattern, RHS provides the GEN source. Used in assignment, `case`, `receive`, and function heads.
-2.  **Function Definitions**: Multiple clauses with patterns act as specific INS tools selected based on matching ACC/GEN arguments.
-3.  **Immutability**: Variables are bindings (NOM/DAT) to values (GEN). Rebinding creates a new binding, not modification.
-4.  **Pipe Operator (`|>`):** Explicitly shows data flow where the result (NOM/GEN) becomes the first argument (ACC/GEN) of the next function (INS).
-5.  **Process Communication**: `spawn` creates NOM processes. `send` directs ACC/GEN messages to DAT target PIDs. `receive` pattern matches (INS) on incoming ACC messages.
+1. **Pattern Matching**: The core mechanism. LHS defines the DAT target pattern, RHS provides the GEN source. Used in assignment, `case`, `receive`, and function heads.
+2. **Function Definitions**: Multiple clauses with patterns act as specific INS tools selected based on matching ACC/GEN arguments.
+3. **Immutability**: Variables are bindings (NOM/DAT) to values (GEN). Rebinding creates a new binding, not modification.
+4. **Pipe Operator (`|>`):** Explicitly shows data flow where the result (NOM/GEN) becomes the first argument (ACC/GEN) of the next function (INS).
+5. **Process Communication**: `spawn` creates NOM processes. `send` directs ACC/GEN messages to DAT target PIDs. `receive` pattern matches (INS) on incoming ACC messages.
 
 Explicit CEREBRUM modeling is not typical. Roles are inherent in the functional style, pattern matching, and process interactions.
 
@@ -230,10 +231,412 @@ Elixir's functional and concurrent paradigms provide strong and often explicit m
 
 Elixir's design emphasizes clarity and explicitness in data transformation and process interaction, making case roles relatively straightforward to identify within its core constructs.
 
-## 6. References
+## 6. Advanced CEREBRUM Implementation
 
-1.  Thomas, D. (2018). *Programming Elixir 1.6: Functional |> Concurrent |> Pragmatic |> Fun*. Pragmatic Bookshelf.
-2.  Valim, J. (Creator of Elixir) - Various talks and blog posts.
-3.  Elixir Language Official Website & Documentation. (https://elixir-lang.org/)
-4.  Cesarini, F., & Vinoski, S. (2019). *Designing for Scalability with Erlang/OTP*. O'Reilly Media. (Relevant for OTP concepts used in Elixir).
-5.  Elixir School. (https://elixirschool.com/) 
+### Case-Bearing Struct
+
+```elixir
+defmodule Cerebrum.Case do
+  @moduledoc """
+  Case role definitions with precision modifiers.
+  """
+  
+  @type t :: :nom | :acc | :dat | :gen | :ins | :abl | :loc | :voc
+  
+  @precision %{
+    nom: 1.5,
+    acc: 1.2,
+    dat: 1.3,
+    gen: 1.0,
+    ins: 0.8,
+    abl: 1.1,
+    loc: 0.9,
+    voc: 2.0
+  }
+  
+  @valid_transitions %{
+    nom: [:acc, :gen],
+    acc: [:gen, :dat],
+    abl: [:nom],
+    loc: [:abl]
+  }
+  
+  def precision(case_role), do: Map.get(@precision, case_role, 1.0)
+  def valid_transitions(case_role), do: Map.get(@valid_transitions, case_role, [])
+  
+  def valid_transition?(from, to) do
+    to in valid_transitions(from)
+  end
+end
+
+defmodule Cerebrum.Entity do
+  @moduledoc """
+  A case-bearing entity struct.
+  """
+  
+  alias Cerebrum.Case
+  
+  defstruct [:base, :case_role, :precision, :history]
+  
+  @type t :: %__MODULE__{
+    base: any(),
+    case_role: Case.t(),
+    precision: float(),
+    history: [map()]
+  }
+  
+  def new(base, case_role \\ :nom, precision \\ 1.0) do
+    %__MODULE__{
+      base: base,
+      case_role: case_role,
+      precision: precision,
+      history: []
+    }
+  end
+  
+  def effective_precision(%__MODULE__{case_role: role, precision: p}) do
+    p * Case.precision(role)
+  end
+  
+  def transform(%__MODULE__{case_role: from} = entity, to) do
+    if Case.valid_transition?(from, to) do
+      transition = %{from: from, to: to, timestamp: DateTime.utc_now()}
+      {:ok, %{entity | 
+        case_role: to, 
+        history: [transition | entity.history]
+      }}
+    else
+      {:error, {:invalid_transition, from, to}}
+    end
+  end
+end
+```
+
+### Active Inference Agent (GenServer)
+
+```elixir
+defmodule Cerebrum.ActiveInference.Agent do
+  @moduledoc """
+  Active Inference agent as a GenServer process.
+  """
+  
+  use GenServer
+  
+  alias Cerebrum.Entity
+  
+  defstruct [:entity, :belief_mean, :belief_precision]
+  
+  # Client API
+  
+  def start_link(opts) do
+    base = Keyword.fetch!(opts, :base)
+    case_role = Keyword.get(opts, :case_role, :nom)
+    initial_mean = Keyword.get(opts, :initial_mean, 0.0)
+    
+    initial_state = %__MODULE__{
+      entity: Entity.new(base, case_role),
+      belief_mean: initial_mean,
+      belief_precision: 1.0
+    }
+    
+    GenServer.start_link(__MODULE__, initial_state, opts)
+  end
+  
+  def observe(pid, observation, obs_precision \\ 1.0) do
+    GenServer.call(pid, {:observe, observation, obs_precision})
+  end
+  
+  def predict(pid) do
+    GenServer.call(pid, :predict)
+  end
+  
+  def free_energy(pid, observation) do
+    GenServer.call(pid, {:free_energy, observation})
+  end
+  
+  def select_action(pid, possible_observations) do
+    GenServer.call(pid, {:select_action, possible_observations})
+  end
+  
+  def transform_case(pid, target_case) do
+    GenServer.call(pid, {:transform_case, target_case})
+  end
+  
+  def get_state(pid) do
+    GenServer.call(pid, :get_state)
+  end
+  
+  # Server callbacks
+  
+  @impl true
+  def init(state) do
+    {:ok, state}
+  end
+  
+  @impl true
+  def handle_call({:observe, observation, obs_precision}, _from, state) do
+    # Calculate case-adjusted precision
+    eff_precision = Entity.effective_precision(state.entity)
+    adjusted_precision = obs_precision * eff_precision
+    
+    # Bayesian update
+    total_precision = state.belief_precision + adjusted_precision
+    new_mean = (state.belief_precision * state.belief_mean + 
+                adjusted_precision * observation) / total_precision
+    
+    new_state = %{state | 
+      belief_mean: new_mean, 
+      belief_precision: total_precision
+    }
+    
+    {:reply, {:ok, new_mean}, new_state}
+  end
+  
+  @impl true
+  def handle_call(:predict, _from, state) do
+    {:reply, state.belief_mean, state}
+  end
+  
+  @impl true
+  def handle_call({:free_energy, observation}, _from, state) do
+    pred_error = observation - state.belief_mean
+    eff_precision = state.belief_precision * Entity.effective_precision(state.entity)
+    fe = (pred_error * pred_error * eff_precision) / 2.0
+    {:reply, fe, state}
+  end
+  
+  @impl true
+  def handle_call({:select_action, possible_observations}, _from, state) do
+    eff_precision = Entity.effective_precision(state.entity)
+    
+    result = Enum.reduce(possible_observations, {nil, :infinity}, fn obs, {best, min_fe} ->
+      pred_error = obs - state.belief_mean
+      fe = (pred_error * pred_error * state.belief_precision * eff_precision) / 2.0
+      
+      if fe < min_fe do
+        {obs, fe}
+      else
+        {best, min_fe}
+      end
+    end)
+    
+    {:reply, result, state}
+  end
+  
+  @impl true
+  def handle_call({:transform_case, target_case}, _from, state) do
+    case Entity.transform(state.entity, target_case) do
+      {:ok, new_entity} ->
+        {:reply, :ok, %{state | entity: new_entity}}
+      {:error, reason} ->
+        {:reply, {:error, reason}, state}
+    end
+  end
+  
+  @impl true
+  def handle_call(:get_state, _from, state) do
+    {:reply, state, state}
+  end
+end
+```
+
+### Supervision Tree for Case Entities
+
+```elixir
+defmodule Cerebrum.Supervisor do
+  @moduledoc """
+  Supervisor for case-bearing agents.
+  """
+  
+  use Supervisor
+  
+  def start_link(init_arg) do
+    Supervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
+  end
+  
+  @impl true
+  def init(_init_arg) do
+    children = [
+      # Registry for named agents
+      {Registry, keys: :unique, name: Cerebrum.AgentRegistry},
+      
+      # DynamicSupervisor for agents
+      {DynamicSupervisor, name: Cerebrum.AgentSupervisor, strategy: :one_for_one}
+    ]
+    
+    Supervisor.init(children, strategy: :one_for_all)
+  end
+  
+  def start_agent(name, opts) do
+    opts = Keyword.put(opts, :name, via_tuple(name))
+    DynamicSupervisor.start_child(
+      Cerebrum.AgentSupervisor,
+      {Cerebrum.ActiveInference.Agent, opts}
+    )
+  end
+  
+  def stop_agent(name) do
+    case Registry.lookup(Cerebrum.AgentRegistry, name) do
+      [{pid, _}] -> DynamicSupervisor.terminate_child(Cerebrum.AgentSupervisor, pid)
+      [] -> {:error, :not_found}
+    end
+  end
+  
+  defp via_tuple(name) do
+    {:via, Registry, {Cerebrum.AgentRegistry, name}}
+  end
+end
+```
+
+### Pipe-Based Case Transformations
+
+```elixir
+defmodule Cerebrum.Pipeline do
+  @moduledoc """
+  Case-aware pipeline operations using the pipe operator.
+  """
+  
+  alias Cerebrum.Entity
+  
+  @doc """
+  Create a pipeline from an initial value with case role.
+  """
+  def create(value, case_role \\ :abl) do
+    {:ok, Entity.new(value, case_role)}
+  end
+  
+  @doc """
+  Transform the base value while tracking case flow.
+  """
+  def map({:ok, %Entity{base: base} = entity}, func, target_case) do
+    with {:ok, transformed} <- Entity.transform(entity, target_case) do
+      {:ok, %{transformed | base: func.(base)}}
+    end
+  end
+  
+  def map({:error, _} = error, _func, _case), do: error
+  
+  @doc """
+  Finalize pipeline and extract result.
+  """
+  def finalize({:ok, %Entity{base: base, case_role: role, history: history}}) do
+    %{
+      result: base,
+      final_case: role,
+      transitions: length(history)
+    }
+  end
+  
+  def finalize({:error, reason}), do: {:error, reason}
+end
+
+# Usage example
+# Cerebrum.Pipeline.create(5, :abl)
+# |> Cerebrum.Pipeline.map(&(&1 + 1), :nom)
+# |> Cerebrum.Pipeline.map(&(&1 * 2), :acc)
+# |> Cerebrum.Pipeline.finalize()
+```
+
+### Message Protocol with Case Semantics
+
+```elixir
+defmodule Cerebrum.Protocol do
+  @moduledoc """
+  Message protocol with explicit case roles.
+  """
+  
+  defmodule Message do
+    @enforce_keys [:sender_role, :receiver_role, :content]
+    defstruct [:sender_role, :receiver_role, :content, :timestamp]
+    
+    @type t :: %__MODULE__{
+      sender_role: Cerebrum.Case.t(),
+      receiver_role: Cerebrum.Case.t(),
+      content: any(),
+      timestamp: DateTime.t()
+    }
+  end
+  
+  @doc """
+  Create a case-annotated message.
+  """
+  def create_message(content, sender_role \\ :abl, receiver_role \\ :dat) do
+    %Message{
+      sender_role: sender_role,
+      receiver_role: receiver_role,
+      content: content,
+      timestamp: DateTime.utc_now()
+    }
+  end
+  
+  @doc """
+  Send a case-tagged message to a process.
+  """
+  def send_message(pid, content, sender_role, receiver_role) do
+    msg = create_message(content, sender_role, receiver_role)
+    send(pid, {:case_message, msg})
+    :ok
+  end
+  
+  @doc """
+  Receive and validate case message.
+  """
+  defmacro receive_case(expected_receiver_role, do: block) do
+    quote do
+      receive do
+        {:case_message, %Message{receiver_role: role} = msg} 
+          when role == unquote(expected_receiver_role) ->
+          var!(message) = msg
+          unquote(block)
+          
+        {:case_message, %Message{receiver_role: unexpected}} ->
+          {:error, {:role_mismatch, expected: unquote(expected_receiver_role), got: unexpected}}
+      after
+        5000 -> {:error, :timeout}
+      end
+    end
+  end
+end
+```
+
+## 7. Mermaid Diagram: Elixir Case Architecture
+
+```mermaid
+graph TD
+    subgraph "OTP Patterns"
+        Supervisor["Supervisor\n[LOC: Container]"]
+        GenServer["GenServer\n[NOM: Agent]"]
+        Agent["Agent\n[LOC: State]"]
+    end
+    
+    Supervisor -->|"supervises"| GenServer
+    Supervisor -->|"supervises"| Agent
+    
+    subgraph "Message Flow"
+        Sender["Process A\n[ABL: Sender]"]
+        Message["Message\n[ACC: Content]"]
+        Receiver["Process B\n[DAT: Receiver]"]
+    end
+    
+    Sender -->|"send/2 [VOC]"| Message
+    Message -->|"receive [VOC]"| Receiver
+    
+    subgraph "Pipe Operator"
+        Input["Input\n[ABL/GEN]"]
+        Func1["func1\n[INS]"]
+        Func2["func2\n[INS]"]
+        Output["Result\n[NOM/DAT]"]
+    end
+    
+    Input -->|"|>"| Func1 -->|"|>"| Func2 --> Output
+```
+
+## 8. References
+
+1. Thomas, D. (2018). *Programming Elixir 1.6: Functional |> Concurrent |> Pragmatic |> Fun*. Pragmatic Bookshelf.
+2. Valim, J. (Creator of Elixir) - Various talks and blog posts.
+3. Elixir Language Official Website & Documentation. (<https://elixir-lang.org/>)
+4. Cesarini, F., & Vinoski, S. (2019). *Designing for Scalability with Erlang/OTP*. O'Reilly Media.
+5. Elixir School. (<https://elixirschool.com/>)
+6. Friston, K. (2010). The free-energy principle. Nature Reviews Neuroscience.
+7. Juric, S. (2019). Elixir in Action. Manning Publications.

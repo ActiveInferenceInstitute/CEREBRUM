@@ -33,41 +33,51 @@ Choose the implementation language that best suits your project and follow the c
 
 ### Python Implementation
 
+We use [uv](https://docs.astral.sh/uv/) for fast, reliable Python dependency management.
+
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/ActiveInferenceInstitute/CEREBRUM.git
    cd CEREBRUM
    ```
 
-2. Create a virtual environment:
+2. Install uv (if not already installed):
+
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
 
-3. Install dependencies:
+3. Create a virtual environment and install dependencies:
+
    ```bash
-   pip install -r requirements.txt
+   uv venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   uv pip install -e .
    ```
 
 4. Install the development version:
+
    ```bash
-   pip install -e .
+   uv pip install -e ".[dev]"
    ```
 
 ### JavaScript Implementation
 
 1. Navigate to the JavaScript implementation:
+
    ```bash
    cd implementations/js
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Build the library:
+
    ```bash
    npm run build
    ```
@@ -75,11 +85,13 @@ Choose the implementation language that best suits your project and follow the c
 ### Rust Implementation
 
 1. Navigate to the Rust implementation:
+
    ```bash
    cd implementations/rust
    ```
 
 2. Build the library:
+
    ```bash
    cargo build
    ```
@@ -248,6 +260,7 @@ When working with CEREBRUM, keep these key components in mind:
 ### 1. GenerativeModel
 
 The base class for all CEREBRUM models, providing:
+
 - Parameter management
 - State tracking
 - Case transformation capabilities
@@ -256,6 +269,7 @@ The base class for all CEREBRUM models, providing:
 ### 2. Case
 
 Represents a linguistic case with:
+
 - Name and abbreviation
 - Parameter access patterns
 - Interface requirements
@@ -264,6 +278,7 @@ Represents a linguistic case with:
 ### 3. ModelRegistry
 
 Manages model instances:
+
 - Registers models with initial cases
 - Provides model lookup
 - Tracks model relationships
@@ -272,6 +287,7 @@ Manages model instances:
 ### 4. Transformation Engine
 
 Handles case transformations:
+
 - Validates transformation validity
 - Optimizes transformations
 - Applies transformations
@@ -292,6 +308,7 @@ A typical development workflow with CEREBRUM includes:
 If you're interested in contributing to CEREBRUM, we welcome contributions across a wide spectrum of activities:
 
 ### Research Contributions
+
 - **Theoretical Development**
   - Extending the mathematical framework
   - Proposing novel case structures
@@ -303,6 +320,7 @@ If you're interested in contributing to CEREBRUM, we welcome contributions acros
   - Creating validation datasets
 
 ### Technical Contributions
+
 - **Core Framework Development**
   - Implementing new model components
   - Optimizing existing implementations
@@ -314,6 +332,7 @@ If you're interested in contributing to CEREBRUM, we welcome contributions acros
   - Developing specialized variants
 
 ### Documentation & Examples
+
 - **Educational Content**
   - Creating tutorials and guides
   - Developing learning resources
@@ -350,12 +369,14 @@ After building your first model, explore these advanced topics:
 ### Common Issues
 
 1. **Case transformation errors**: Ensure your model supports the target case
+
    ```python
    # Check supported cases
    print(f"Supported cases: {[case.abbreviation for case in model.supported_cases]}")
    ```
 
 2. **Prediction/update errors**: Check that you've implemented the appropriate methods for each case
+
    ```python
    # Debug case-specific method dispatch
    print(f"Current case: {model.current_case.abbreviation}")
@@ -364,6 +385,7 @@ After building your first model, explore these advanced topics:
    ```
 
 3. **Registry errors**: Verify that your model is properly registered with the correct initial case
+
    ```python
    # Verify model registration
    registered_model = registry.get_model(model.model_id)
@@ -374,4 +396,4 @@ After building your first model, explore these advanced topics:
 
 - Check the [GitHub Issues](https://github.com/ActiveInferenceInstitute/CEREBRUM/issues) for known problems
 - Join the [community discussion forum](https://github.com/ActiveInferenceInstitute/CEREBRUM/discussions)
-- Review the detailed documentation in the `docs/` directory 
+- Review the detailed documentation in the `docs/` directory

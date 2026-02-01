@@ -238,14 +238,499 @@ Implement mechanisms for emphasis or focus inspired by particles like こそ (*k
 
 Japanese, with its particle-based system, provides CEREBRUM with valuable models for:
 
-1.  **Explicit Relational Marking**: Demonstrates how grammatical functions can be clearly marked externally.
-2.  **Topic vs. Subject Distinction**: Offers a robust linguistic parallel for separating discourse context/focus from grammatical agency.
-3.  **Locative Nuance**: Highlights the functional difference between static location and location of action.
-4.  **Focus/Emphasis Particles**: Suggests mechanisms for dynamically altering the salience or priority of components.
+1. **Explicit Relational Marking**: Demonstrates how grammatical functions can be clearly marked externally.
+2. **Topic vs. Subject Distinction**: Offers a robust linguistic parallel for separating discourse context/focus from grammatical agency.
+3. **Locative Nuance**: Highlights the functional difference between static location and location of action.
+4. **Focus/Emphasis Particles**: Suggests mechanisms for dynamically altering the salience or priority of components.
 
 The Japanese system strongly supports the CEREBRUM concept of representing relationships explicitly. The topic/subject distinction is particularly relevant for managing context and information flow in complex CEREBRUM implementations.
 
-## 9. References
+## 9. Deep CEREBRUM Implementation
+
+### Complete Topic-Subject Context Manager
+
+```python
+from enum import Enum, auto
+from dataclasses import dataclass, field
+from typing import Optional, Dict, Any, Callable, List
+from contextlib import contextmanager
+
+class JapaneseParticle(Enum):
+    """Japanese particles mapped to CEREBRUM concepts"""
+    GA = auto()    # が - Subject marker
+    WO = auto()    # を - Object marker
+    NI = auto()    # に - Dative/Locative (static)
+    DE = auto()    # で - Instrumental/Locative (dynamic)
+    NO = auto()    # の - Genitive
+    KARA = auto()  # から - Ablative (source)
+    MADE = auto()  # まで - Terminative
+    E = auto()     # へ - Direction
+    TO = auto()    # と - Comitative
+    WA = auto()    # は - Topic marker
+    MO = auto()    # も - Additive
+
+class CerebrumCase(Enum):
+    NOM = auto()
+    ACC = auto()
+    DAT = auto()
+    GEN = auto()
+    INS = auto()
+    LOC = auto()
+    ABL = auto()
+    VOC = auto()
+
+# Extended for Japanese-specific features
+class JapaneseLocativeType(Enum):
+    STATIC = auto()   # に (ni) - existence, destination
+    DYNAMIC = auto()  # で (de) - action location
+
+@dataclass
+class JapaneseCaseEntity:
+    """
+    CEREBRUM entity with Japanese particle-inspired case marking.
+    """
+    name: str
+    base: Any
+    particle: Optional[JapaneseParticle] = None
+    cerebrum_case: Optional[CerebrumCase] = None
+    locative_type: Optional[JapaneseLocativeType] = None
+    is_topic: bool = False
+    emphasis: float = 1.0  # こそ-inspired emphasis
+    precision: float = 1.0  # Active Inference precision
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    
+    def as_particle(self, particle: JapaneseParticle) -> 'JapaneseCaseEntity':
+        """Transform entity with specified particle marking"""
+        new_entity = JapaneseCaseEntity(
+            name=self.name,
+            base=self.base,
+            particle=particle,
+            locative_type=self.locative_type,
+            is_topic=self.is_topic,
+            emphasis=self.emphasis,
+            precision=self.precision,
+            metadata=self.metadata.copy()
+        )
+        # Map particle to CEREBRUM case
+        new_entity.cerebrum_case = self._particle_to_case(particle)
+        return new_entity
+    
+    def _particle_to_case(self, particle: JapaneseParticle) -> CerebrumCase:
+        """Map Japanese particle to CEREBRUM case"""
+        mapping = {
+            JapaneseParticle.GA: CerebrumCase.NOM,
+            JapaneseParticle.WO: CerebrumCase.ACC,
+            JapaneseParticle.NI: CerebrumCase.DAT,  # or LOC
+            JapaneseParticle.DE: CerebrumCase.INS,  # or LOC
+            JapaneseParticle.NO: CerebrumCase.GEN,
+            JapaneseParticle.KARA: CerebrumCase.ABL,
+            JapaneseParticle.E: CerebrumCase.DAT,
+        }
+        return mapping.get(particle, CerebrumCase.NOM)
+    
+    def as_topic(self) -> 'JapaneseCaseEntity':
+        """Mark entity as topic (は marking)"""
+        new_entity = JapaneseCaseEntity(
+            name=self.name,
+            base=self.base,
+            particle=JapaneseParticle.WA,
+            cerebrum_case=self.cerebrum_case,
+            locative_type=self.locative_type,
+            is_topic=True,
+            emphasis=self.emphasis,
+            precision=self.precision,
+            metadata=self.metadata.copy()
+        )
+        return new_entity
+    
+    def with_emphasis(self, level: float = 2.0) -> 'JapaneseCaseEntity':
+        """Add emphasis (こそ-inspired)"""
+        new_entity = JapaneseCaseEntity(
+            name=self.name,
+            base=self.base,
+            particle=self.particle,
+            cerebrum_case=self.cerebrum_case,
+            locative_type=self.locative_type,
+            is_topic=self.is_topic,
+            emphasis=level,
+            precision=self.precision * level,  # Emphasis increases precision
+            metadata=self.metadata.copy()
+        )
+        return new_entity
+    
+    def __repr__(self):
+        particle_str = self.particle.name if self.particle else "∅"
+        topic_str = "[TOPIC]" if self.is_topic else ""
+        return f"{self.name}({particle_str}){topic_str}"
+
+
+class JapaneseTopicContextManager:
+    """
+    Context manager implementing Japanese topic (は) vs subject (が) distinction.
+    
+    This models how Japanese organizes information with:
+    - Topic (は): What we're talking about (old/given information)
+    - Subject (が): Who/what is performing action (new information)
+    """
+    
+    def __init__(self):
+        self._topic_stack: List[JapaneseCaseEntity] = []
+        self._current_sentence = None
+        self.operation_log: List[Dict] = []
+    
+    @property
+    def current_topic(self) -> Optional[JapaneseCaseEntity]:
+        return self._topic_stack[-1] if self._topic_stack else None
+    
+    @contextmanager
+    def topic(self, entity: JapaneseCaseEntity):
+        """
+        Set entity as topic (は context).
+        
+        In Japanese:
+        象は鼻が長い (Zō wa hana ga nagai)
+        "As for elephants, [their] nose is long"
+        
+        The elephant is the topic (context frame),
+        the nose is the subject within that context.
+        """
+        topic_entity = entity.as_topic() if not entity.is_topic else entity
+        self._topic_stack.append(topic_entity)
+        try:
+            yield topic_entity
+        finally:
+            self._topic_stack.pop()
+    
+    def execute(self, subject: JapaneseCaseEntity, 
+                predicate: Callable, 
+                *args, **kwargs) -> Any:
+        """
+        Execute predicate with subject as grammatical subject (が).
+        
+        If there's an active topic, the subject operates within that context.
+        """
+        # Subject should have が marking
+        subject_marked = subject.as_particle(JapaneseParticle.GA)
+        
+        log_entry = {
+            "topic": self.current_topic,
+            "subject": subject_marked,
+            "predicate": predicate.__name__ if hasattr(predicate, '__name__') else str(predicate),
+            "args": args
+        }
+        self.operation_log.append(log_entry)
+        
+        # Execute with context awareness
+        if self.current_topic:
+            # Subject operates within topic context
+            # This models: Topic は Subject が Verb
+            return predicate(subject_marked, self.current_topic, *args, **kwargs)
+        else:
+            # No topic, subject is primary agent
+            return predicate(subject_marked, *args, **kwargs)
+
+
+class JapaneseLocativeHandler:
+    """
+    Handles the に (ni) vs で (de) locative distinction.
+    
+    に (ni): Static location or destination
+       - 東京にいる (Tōkyō ni iru) - "I am in Tokyo"
+       - 東京に行く (Tōkyō ni iku) - "I go to Tokyo"
+    
+    で (de): Location of action
+       - 東京で働く (Tōkyō de hataraku) - "I work in Tokyo"
+    """
+    
+    def __init__(self, location: JapaneseCaseEntity):
+        self.location = location
+    
+    def static(self) -> JapaneseCaseEntity:
+        """Location for existence or destination (に)"""
+        return JapaneseCaseEntity(
+            name=self.location.name,
+            base=self.location.base,
+            particle=JapaneseParticle.NI,
+            cerebrum_case=CerebrumCase.LOC,
+            locative_type=JapaneseLocativeType.STATIC,
+            precision=self.location.precision,
+            metadata={**self.location.metadata, "locative_role": "existence_or_destination"}
+        )
+    
+    def dynamic(self) -> JapaneseCaseEntity:
+        """Location for action (で)"""
+        return JapaneseCaseEntity(
+            name=self.location.name,
+            base=self.location.base,
+            particle=JapaneseParticle.DE,
+            cerebrum_case=CerebrumCase.LOC,
+            locative_type=JapaneseLocativeType.DYNAMIC,
+            precision=self.location.precision,
+            metadata={**self.location.metadata, "locative_role": "action_location"}
+        )
+
+
+# Complete example usage
+def example_japanese_cerebrum():
+    """Demonstrates Japanese-inspired CEREBRUM processing"""
+    
+    # Create entities
+    model = JapaneseCaseEntity(name="Model", base="NeuralNetwork")
+    data = JapaneseCaseEntity(name="Data", base=[1, 2, 3, 4])
+    server = JapaneseCaseEntity(name="Server", base="gpu-server-01")
+    user = JapaneseCaseEntity(name="User", base="researcher")
+    
+    # Initialize context manager
+    ctx = JapaneseTopicContextManager()
+    
+    # Example 1: Simple subject-predicate
+    # モデルがデータを処理する (Model ga data wo shori suru)
+    # "The model processes data"
+    def process(subject, *args):
+        print(f"{subject} processes {args}")
+        return f"processed by {subject.name}"
+    
+    result1 = ctx.execute(model, process, data.as_particle(JapaneseParticle.WO))
+    
+    # Example 2: With topic context
+    # モデルはデータが大きい (Model wa data ga ōkii)
+    # "As for the model, the data is large"
+    def is_large(subject, topic, *args):
+        print(f"Within context of {topic}: {subject} is large")
+        return f"{subject.name} is large in {topic.name} context"
+    
+    with ctx.topic(model):
+        result2 = ctx.execute(data, is_large)
+    
+    # Example 3: Locative distinction
+    # サーバーにモデルがある (Server ni model ga aru) - static
+    # サーバーでモデルが動く (Server de model ga ugoku) - dynamic
+    
+    loc_handler = JapaneseLocativeHandler(server)
+    
+    def exist_in(subject, location):
+        print(f"{subject} exists in {location}")
+    
+    def run_in(subject, location):
+        print(f"{subject} runs in {location}")
+    
+    # Static: Model exists in server
+    exist_in(model.as_particle(JapaneseParticle.GA), loc_handler.static())
+    
+    # Dynamic: Model runs in server  
+    run_in(model.as_particle(JapaneseParticle.GA), loc_handler.dynamic())
+    
+    # Example 4: Emphasis with こそ-inspired precision boost
+    critical_data = data.with_emphasis(2.0)
+    print(f"Critical data precision: {critical_data.precision}")
+
+example_japanese_cerebrum()
+```
+
+### Active Inference Topic-Focus Model
+
+```python
+class ActiveInferenceTopicModel:
+    """
+    Models the は/が distinction using Active Inference precision dynamics.
+    
+    Topic (は): High prior precision - expected, predictable
+    Subject (が): High sensory precision - new, salient information
+    """
+    
+    def __init__(self):
+        self.topic_prior_precision = 2.0  # Topics are expected
+        self.subject_sensory_precision = 2.0  # Subjects bring new info
+        self.default_precision = 1.0
+    
+    def calculate_precision(self, entity: JapaneseCaseEntity) -> Dict[str, float]:
+        """
+        Calculate precision weights based on particle marking.
+        
+        Topics (は): Increase prior precision (expected information)
+        Subjects (が): Increase sensory precision (new information)
+        """
+        prior_precision = self.default_precision
+        sensory_precision = self.default_precision
+        
+        if entity.is_topic or entity.particle == JapaneseParticle.WA:
+            # Topic: high prior precision, stable expected context
+            prior_precision = self.topic_prior_precision
+            sensory_precision = self.default_precision * 0.8  # Lower sensory
+            
+        elif entity.particle == JapaneseParticle.GA:
+            # Subject: high sensory precision, new/salient information
+            prior_precision = self.default_precision * 0.8  # Lower prior
+            sensory_precision = self.subject_sensory_precision
+        
+        # Apply emphasis multiplier
+        prior_precision *= entity.emphasis
+        sensory_precision *= entity.emphasis
+        
+        return {
+            "prior_precision": prior_precision,
+            "sensory_precision": sensory_precision,
+            "total_precision": (prior_precision + sensory_precision) / 2
+        }
+    
+    def information_gain(self, topic: Optional[JapaneseCaseEntity],
+                         subject: JapaneseCaseEntity) -> float:
+        """
+        Calculate information gain from subject given topic context.
+        
+        Models the linguistic intuition that:
+        - Topics establish what we already know (low information gain)
+        - Subjects provide what's new (high information gain)
+        """
+        if topic:
+            topic_precision = self.calculate_precision(topic)
+            subject_precision = self.calculate_precision(subject)
+            
+            # Information gain is higher when sensory precision dominates
+            return (subject_precision["sensory_precision"] / 
+                    (topic_precision["prior_precision"] + 1))
+        else:
+            # No topic context: subject is both topic and focus
+            return self.calculate_precision(subject)["sensory_precision"]
+
+
+# Usage
+ai_model = ActiveInferenceTopicModel()
+
+# 象は鼻が長い - "As for elephants, nose is long"
+elephant = JapaneseCaseEntity("Elephant", "elephant").as_topic()
+nose = JapaneseCaseEntity("Nose", "nose").as_particle(JapaneseParticle.GA)
+
+info_gain = ai_model.information_gain(elephant, nose)
+print(f"Information from 'nose is long' in elephant context: {info_gain}")
+# High value: new information about nose
+
+# 象が大きい - "Elephant is big" (no topic, elephant as both topic and subject)
+info_gain2 = ai_model.information_gain(None, elephant.as_particle(JapaneseParticle.GA))
+print(f"Information from 'elephant is big' (no topic): {info_gain2}")
+```
+
+### Particle-Case Transformation Pipeline
+
+```python
+class JapaneseCEREBRUMPipeline:
+    """
+    Complete processing pipeline with Japanese particle-case mappings.
+    """
+    
+    def __init__(self):
+        self.ctx = JapaneseTopicContextManager()
+        self.ai_model = ActiveInferenceTopicModel()
+    
+    def process_sentence(self, sentence_spec: Dict) -> Dict[str, Any]:
+        """
+        Process a sentence specification with proper particle marking.
+        
+        sentence_spec should contain:
+        - topic: optional topic entity
+        - subject: subject entity
+        - object: optional object entity
+        - predicate: action to perform
+        """
+        result = {"particles": [], "info_gain": 0, "output": None}
+        
+        topic = sentence_spec.get("topic")
+        subject = sentence_spec["subject"]
+        obj = sentence_spec.get("object")
+        predicate = sentence_spec.get("predicate", lambda x: x)
+        
+        # Apply particle marking
+        subject_marked = subject.as_particle(JapaneseParticle.GA)
+        result["particles"].append(("subject", "が"))
+        
+        if obj:
+            obj_marked = obj.as_particle(JapaneseParticle.WO)
+            result["particles"].append(("object", "を"))
+        else:
+            obj_marked = None
+        
+        # Calculate information dynamics
+        result["info_gain"] = self.ai_model.information_gain(topic, subject_marked)
+        
+        # Execute with or without topic
+        if topic:
+            with self.ctx.topic(topic):
+                if obj_marked:
+                    result["output"] = predicate(subject_marked.base, obj_marked.base)
+                else:
+                    result["output"] = predicate(subject_marked.base)
+        else:
+            if obj_marked:
+                result["output"] = predicate(subject_marked.base, obj_marked.base)
+            else:
+                result["output"] = predicate(subject_marked.base)
+        
+        return result
+    
+    def create_transitive_sentence(self, 
+                                    agent: JapaneseCaseEntity,
+                                    patient: JapaneseCaseEntity,
+                                    verb: Callable,
+                                    topic: Optional[JapaneseCaseEntity] = None) -> str:
+        """
+        Create a transitive sentence with proper case marking.
+        
+        Pattern: (Topic は) Agent が Patient を Verb
+        """
+        parts = []
+        
+        if topic:
+            parts.append(f"{topic.name}は")  # Topic with は
+        
+        parts.append(f"{agent.name}が")      # Agent with が
+        parts.append(f"{patient.name}を")    # Patient with を
+        parts.append(verb.__name__ if hasattr(verb, '__name__') else "Verb")
+        
+        return " ".join(parts)
+
+
+# Complete example
+pipeline = JapaneseCEREBRUMPipeline()
+
+model = JapaneseCaseEntity("モデル", "NeuralNet")
+data = JapaneseCaseEntity("データ", [1, 2, 3])
+system = JapaneseCaseEntity("システム", "MainSystem")
+
+# Process: システムは モデルが データを 処理する
+# "As for the system, the model processes data"
+result = pipeline.process_sentence({
+    "topic": system,
+    "subject": model,
+    "object": data,
+    "predicate": lambda agent, patient: f"{agent} processed {patient}"
+})
+
+print(f"Output: {result['output']}")
+print(f"Information gain: {result['info_gain']:.2f}")
+print(f"Particles used: {result['particles']}")
+```
+
+## 10. Category Theory Perspective
+
+Japanese particles can be viewed as morphisms in a category of grammatical relations:
+
+```
+Topic (は) establishes a context functor:
+  Context[Entity] → FramedEntity
+
+Subject (が) marks the primary morphism source:
+  Agent → Process
+
+Object (を) marks the morphism target:
+  Process → Patient
+
+The composition follows Japanese word order (SOV):
+  Topic[Agent] →が Process[Agent, Patient] ←を Patient
+```
+
+This perspective aligns with CEREBRUM's view of cases as functorial transformations on model spaces.
+
+## 11. References
 
 1. Shibatani, Masayoshi. The Languages of Japan. Cambridge University Press, 1990.
 2. Tsujimura, Natsuko. An Introduction to Japanese Linguistics. Wiley-Blackwell, 2013.
@@ -254,4 +739,6 @@ The Japanese system strongly supports the CEREBRUM concept of representing relat
 5. Makino, Seiichi and Michio Tsutsui. A Dictionary of Basic Japanese Grammar. The Japan Times, 1986.
 6. Hasegawa, Yoko. The Routledge Course in Japanese Translation. Routledge, 2011.
 7. Iwasaki, Shoichi. Japanese. John Benjamins Publishing, 2013.
-8. Martin, Samuel E. A Reference Grammar of Japanese. University of Hawaii Press, 1975. 
+8. Martin, Samuel E. A Reference Grammar of Japanese. University of Hawaii Press, 1975.
+9. Friston, K. (2010). The free-energy principle: a unified brain theory? Nature Reviews Neuroscience.
+10. Kuno, S. & Kaburaki, E. (1977). Empathy and Syntax. Linguistic Inquiry.
