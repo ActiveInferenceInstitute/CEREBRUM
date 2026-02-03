@@ -182,9 +182,11 @@ class PheromonalCase:
             threshold = self.concentration_thresholds.get(signal.pheromone_type, 0.1)
             specificity = self.receptor_specificities.get(signal.pheromone_type, 0.8)
             
-            # Apply volatility decay
+            # Apply volatility decay with numerical stability
             time_elapsed = signal.timestamp - self._get_current_time()
-            decayed_concentration = signal.concentration * np.exp(-volatility * time_elapsed)
+            # Clip exponent to prevent overflow
+            exponent = np.clip(-volatility * time_elapsed, -700, 700)
+            decayed_concentration = signal.concentration * np.exp(exponent)
             
             # Check if signal is above threshold
             if decayed_concentration < threshold:

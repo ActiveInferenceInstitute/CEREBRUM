@@ -778,9 +778,6 @@ def test_nominative_case(nn_regression_data, case_definitions):
             f.write(f"4. [Learning Animation](learning_animation.gif)\n")
     
     logger.info(f"Completed NOMINATIVE case test with visualizations in {case_dir}")
-    
-    # Return the model for potential further testing
-    return model
 
 def test_accusative_case(nn_regression_data, case_definitions):
     """Test for ACCUSATIVE case: Model as object of training or evaluation."""
@@ -1062,9 +1059,6 @@ def test_accusative_case(nn_regression_data, case_definitions):
         f.write("rather than its active role in generating predictions.")
     
     logger.info(f"Completed ACCUSATIVE case test with visualizations in {case_dir}")
-    
-    # Return the model for potential further testing
-    return model
 
 def test_genitive_case(nn_regression_data, case_definitions):
     """Test for GENITIVE case: Model as source of outputs."""
@@ -1274,9 +1268,6 @@ def test_genitive_case(nn_regression_data, case_definitions):
         f.write(f"5. [Final Layer Activations](final_activations.png)\n")
     
     logger.info(f"Completed GENITIVE case test with visualizations in {case_dir}")
-    
-    # Return the model for potential further testing
-    return model
 
 def test_locative_case(nn_classification_data, case_definitions):
     """Test for LOCATIVE case: Model as internal representational space."""
@@ -1400,7 +1391,10 @@ def test_locative_case(nn_classification_data, case_definitions):
     
     ax.set_title(f"Model Predictions in {Case.LOCATIVE.value} Case")
     ax.grid(True, linestyle='--', alpha=0.6)
-    ax.legend()
+    # Only add legend if there are labeled artists
+    handles, labels = ax.get_legend_handles_labels()
+    if handles:
+        ax.legend()
     fig.tight_layout()
     fig.savefig(prediction_path)
     plt.close(fig)
@@ -1546,9 +1540,6 @@ def test_locative_case(nn_classification_data, case_definitions):
         f.write(f"5. [Activation Patterns for Specific Samples](sample_activations.png)\n")
     
     logger.info(f"Completed LOCATIVE case test with visualizations in {case_dir}")
-    
-    # Return the model for potential further testing
-    return model
 
 def test_ablative_case(nn_regression_data, case_definitions):
     """Test for ABLATIVE case: Model as source of errors and gradients."""
@@ -1763,9 +1754,6 @@ def test_ablative_case(nn_regression_data, case_definitions):
         f.write(f"5. [Gradient Magnitudes per Layer](gradient_magnitudes.png)\n")
     
     logger.info(f"Completed ABLATIVE case test with visualizations in {case_dir}")
-    
-    # Return the model for potential further testing
-    return model
 
 def test_vocative_case(nn_classification_data, case_definitions):
     """Test for VOCATIVE case: Model as interactive interface."""
@@ -1889,7 +1877,10 @@ def test_vocative_case(nn_classification_data, case_definitions):
     
     ax.set_title(f"Model Predictions in {Case.VOCATIVE.value} Case")
     ax.grid(True, linestyle='--', alpha=0.6)
-    ax.legend()
+    # Only add legend if there are labeled artists
+    handles, labels = ax.get_legend_handles_labels()
+    if handles:
+        ax.legend()
     fig.tight_layout()
     fig.savefig(prediction_path)
     plt.close(fig)
@@ -2094,9 +2085,6 @@ def test_vocative_case(nn_classification_data, case_definitions):
         f.write("The model's response is based on the input data, rather than its active role in generating predictions.")
     
     logger.info(f"Completed VOCATIVE case test with visualizations in {case_dir}")
-    
-    # Return the model for potential further testing
-    return model
 
 def test_dative_case(nn_regression_data, case_definitions):
     """Test for DATIVE case: Model as recipient of inputs."""
@@ -2544,9 +2532,6 @@ def test_dative_case(nn_regression_data, case_definitions):
         f.write(f"5. [Input Processing Animation](input_processing_animation.gif)\n")
     
     logger.info(f"Completed DATIVE case test with visualizations in {case_dir}")
-    
-    # Return the model for potential further testing
-    return model
 
 def test_instrumental_case(nn_regression_data, case_definitions):
     """Test for INSTRUMENTAL case: Model as method/tool for computation."""
@@ -2676,15 +2661,15 @@ def test_instrumental_case(nn_regression_data, case_definitions):
             axs[i].set_ylabel("Source Neuron")
             plt.colorbar(im, ax=axs[i], label="Weight Value")
         else:  # For small matrices, plot each value
-            # Create a coordinate grid
-            x, y = np.meshgrid(range(w.shape[1]), range(w.shape[0]))
+            # Create a coordinate grid (use mesh_x/mesh_y to avoid shadowing X, y)
+            mesh_x, mesh_y = np.meshgrid(range(w.shape[1]), range(w.shape[0]))
             # Flatten for scatter plot
-            x = x.flatten()
-            y = y.flatten()
+            mesh_x = mesh_x.flatten()
+            mesh_y = mesh_y.flatten()
             w_flat = w.flatten()
             
             # Use scatter with size proportional to absolute weight
-            scatter = axs[i].scatter(x, y, s=np.abs(w_flat)*100 + 20, c=w_flat, cmap='coolwarm', 
+            scatter = axs[i].scatter(mesh_x, mesh_y, s=np.abs(w_flat)*100 + 20, c=w_flat, cmap='coolwarm', 
                                   alpha=0.7, edgecolors='k')
             axs[i].set_title(f"{layer_name} Weight Matrix ({w.shape[0]}×{w.shape[1]})")
             axs[i].set_xticks(range(w.shape[1]))
@@ -2703,27 +2688,28 @@ def test_instrumental_case(nn_regression_data, case_definitions):
     fig, axs = plt.subplots(2, 2, figsize=(14, 10))
     
     # 1. Activation Function
-    x = np.linspace(-5, 5, 100)
+    # Use act_x, act_y to avoid shadowing the test data variables X, y
+    act_x = np.linspace(-5, 5, 100)
     if model.activation == 'tanh':
-        y = np.tanh(x)
-        y_deriv = 1 - np.tanh(x)**2
+        act_y = np.tanh(act_x)
+        act_y_deriv = 1 - np.tanh(act_x)**2
     elif model.activation == 'relu':
-        y = np.maximum(0, x)
-        y_deriv = np.where(x > 0, 1, 0)
+        act_y = np.maximum(0, act_x)
+        act_y_deriv = np.where(act_x > 0, 1, 0)
     elif model.activation == 'sigmoid':
-        y = 1 / (1 + np.exp(-x))
-        y_deriv = y * (1 - y)
+        act_y = 1 / (1 + np.exp(-act_x))
+        act_y_deriv = act_y * (1 - act_y)
     else:
-        y = x  # Linear
-        y_deriv = np.ones_like(x)
+        act_y = act_x  # Linear
+        act_y_deriv = np.ones_like(act_x)
     
-    axs[0, 0].plot(x, y, 'b-', linewidth=2)
+    axs[0, 0].plot(act_x, act_y, 'b-', linewidth=2)
     axs[0, 0].set_title(f"{model.activation.capitalize()} Activation Function")
     axs[0, 0].set_xlabel("Input")
     axs[0, 0].set_ylabel("Output")
     axs[0, 0].grid(True, linestyle='--', alpha=0.6)
     
-    axs[0, 1].plot(x, y_deriv, 'r-', linewidth=2)
+    axs[0, 1].plot(act_x, act_y_deriv, 'r-', linewidth=2)
     axs[0, 1].set_title(f"{model.activation.capitalize()} Activation Derivative")
     axs[0, 1].set_xlabel("Input")
     axs[0, 1].set_ylabel("Derivative")
@@ -2929,9 +2915,6 @@ def test_instrumental_case(nn_regression_data, case_definitions):
         f.write(f"5. [Computation Animation](computation_animation.gif)\n")
     
     logger.info(f"Completed INSTRUMENTAL case test with visualizations in {case_dir}")
-    
-    # Return the model for potential further testing
-    return model
 
 def run_all_case_tests():
     """Run all case tests and generate overview visualization."""

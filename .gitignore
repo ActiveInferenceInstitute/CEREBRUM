@@ -173,3 +173,11 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 /node_modules
+
+# CEREBRUM specific
+output/
+coverage_html_report/
+paper/output/*.pdf
+paper/output/*.html
+paper/output/*.png
+src/tests/pytest_run.log

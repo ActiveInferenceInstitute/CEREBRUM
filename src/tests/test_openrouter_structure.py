@@ -31,10 +31,9 @@ def test_imports():
             quick_chat
         )
         print("✅ All OpenRouter classes imported successfully")
-        return True
     except Exception as e:
         print(f"❌ Import failed: {e}")
-        return False
+        assert False, f"Import failed: {e}"
 
 def test_class_definitions():
     """Test that all required classes are defined with correct methods."""
@@ -49,8 +48,8 @@ def test_class_definitions():
         Conversation
     )
     
-    # Test OpenRouterConfig
-    config = OpenRouterConfig()
+    # Test OpenRouterConfig (with test key to avoid API key requirement)
+    config = OpenRouterConfig(api_key="test_key_for_structure_test")
     assert hasattr(config, 'api_key')
     assert hasattr(config, 'default_model')
     assert hasattr(config, 'temperature')
@@ -117,8 +116,7 @@ def test_class_definitions():
         
     except Exception as e:
         print(f"❌ Conversation class test failed: {e}")
-    
-    return True
+        assert False, f"Conversation class test failed: {e}"
 
 def test_method_signatures():
     """Test that all required methods have correct signatures."""
@@ -149,11 +147,8 @@ def test_method_signatures():
     
     missing_methods = [method for method in required_methods if method not in method_names]
     
-    if missing_methods:
-        print(f"❌ Missing methods: {missing_methods}")
-        return False
-    else:
-        print("✅ All required methods are present")
+    assert not missing_methods, f"Missing methods: {missing_methods}"
+    print("✅ All required methods are present")
     
     # Test method signatures
     try:
@@ -173,9 +168,7 @@ def test_method_signatures():
         
     except Exception as e:
         print(f"❌ Method signature test failed: {e}")
-        return False
-    
-    return True
+        assert False, f"Method signature test failed: {e}"
 
 def test_analysis_engine():
     """Test the analysis engine structure."""
@@ -214,17 +207,12 @@ def test_analysis_engine():
         
         missing_methods = [method for method in required_engine_methods if method not in method_names]
         
-        if missing_methods:
-            print(f"❌ Missing analysis engine methods: {missing_methods}")
-            return False
-        else:
-            print("✅ All required analysis engine methods are present")
+        assert not missing_methods, f"Missing analysis engine methods: {missing_methods}"
+        print("✅ All required analysis engine methods are present")
         
     except Exception as e:
         print(f"❌ Analysis engine test failed: {e}")
-        return False
-    
-    return True
+        assert False, f"Analysis engine test failed: {e}"
 
 def test_configuration_options():
     """Test configuration options and defaults."""
@@ -281,8 +269,6 @@ def test_configuration_options():
     assert circuit_config.failure_threshold == 10
     assert circuit_config.recovery_timeout == 120
     print("✅ Circuit breaker configuration works correctly")
-    
-    return True
 
 def test_quick_chat_function():
     """Test the quick_chat convenience function."""
@@ -300,8 +286,6 @@ def test_quick_chat_function():
     # Test default parameter
     assert sig.parameters['model'].default == "openai/gpt-3.5-turbo"
     print("✅ quick_chat default model is correct")
-    
-    return True
 
 def test_error_handling_structure():
     """Test error handling structure."""
@@ -323,8 +307,6 @@ def test_error_handling_structure():
     assert retry_config.max_retries == 3
     assert retry_config.base_delay == 1.0
     print("✅ Error handling structure is correct")
-    
-    return True
 
 def main():
     """Run all structure tests."""

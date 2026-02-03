@@ -319,12 +319,15 @@ class NeuralNetworkModel(Model):
         # Process through hidden layers
         for i in range(len(self.hidden_dims)):
             z = np.dot(current_activation, self.weights[i]) + self.biases[i]
+            # Clip to prevent overflow in activation function
+            z = np.clip(z, -500, 500)
             current_activation = self._activation_function(z)
             activations.append(current_activation)
         
         # Output layer
         z_out = np.dot(current_activation, self.weights[-1]) + self.biases[-1]
-        output = z_out  # Linear activation for output layer by default
+        # Clip output to prevent extreme values
+        output = np.clip(z_out, -1e10, 1e10)  # Linear activation for output layer by default
         activations.append(output)
         
         return output, activations
@@ -344,26 +347,30 @@ class NeuralNetworkModel(Model):
         # Forward pass
         outputs, activations = self.forward(inputs)
         
-        # Compute loss (mean squared error)
-        loss = np.mean((outputs - targets) ** 2)
+        # Compute loss (mean squared error) with numerical stability
+        diff = np.clip(outputs - targets, -1e10, 1e10)  # Prevent extreme values
+        loss = np.mean(diff ** 2)
         
         # Initialize gradients
         weight_grads = [np.zeros_like(w) for w in self.weights]
         bias_grads = [np.zeros_like(b) for b in self.biases]
         
-        # Output layer gradient
-        delta = outputs - targets  # Gradient of MSE
+        # Output layer gradient with clipping
+        delta = np.clip(diff, -1e5, 1e5)  # Gradient clipping for stability
         
         # Backpropagate through layers
         for layer in reversed(range(len(self.weights))):
-            # Gradient for weights
-            weight_grads[layer] = np.dot(activations[layer].T, delta)
+            # Gradient for weights with clipping
+            grad = np.dot(activations[layer].T, delta)
+            weight_grads[layer] = np.clip(grad, -1e5, 1e5)
             # Gradient for biases
-            bias_grads[layer] = np.sum(delta, axis=0)
+            bias_grads[layer] = np.clip(np.sum(delta, axis=0), -1e5, 1e5)
             
             # Propagate error to previous layer (if not at input layer)
             if layer > 0:
                 delta = np.dot(delta, self.weights[layer].T)
+                # Clip delta to prevent overflow
+                delta = np.clip(delta, -1e5, 1e5)
                 # Apply derivative of activation function
                 delta = delta * self._activation_derivative(activations[layer])
         
@@ -372,8 +379,8 @@ class NeuralNetworkModel(Model):
             self.weights[i] -= learning_rate * weight_grads[i]
             self.biases[i] -= learning_rate * bias_grads[i]
         
-        # Record loss
-        self.loss_history.append(loss)
+        # Record loss (use inf-safe value)
+        self.loss_history.append(float(np.clip(loss, 0, 1e10)))
         self.training_examples_seen += len(inputs)
         
         return {

@@ -986,9 +986,6 @@ def test_nominative_case(pomdp_test_data, case_definitions):
         f.write(f"6. [Belief Animation](belief_animation.gif)\n")
     
     logger.info(f"Completed NOMINATIVE case test with visualizations in {case_dir}")
-    
-    # Return the model for potential further testing
-    return model
 
 def test_accusative_case(pomdp_test_data, case_definitions):
     """Test for ACCUSATIVE case: Model as object of evaluation."""
@@ -1363,9 +1360,6 @@ def test_accusative_case(pomdp_test_data, case_definitions):
         f.write(f"5. [Evaluation Summary](evaluation_summary.png)\n")
     
     logger.info(f"Completed ACCUSATIVE case test with visualizations in {case_dir}")
-    
-    # Return the model for potential further testing
-    return model
 
 def test_dative_case(pomdp_test_data, case_definitions):
     """Test for DATIVE case: Model as recipient of observations."""
@@ -1496,7 +1490,7 @@ def test_dative_case(pomdp_test_data, case_definitions):
     cbar = fig.colorbar(scatter, cax=cbar_ax)
     cbar.set_label('Observation Likelihood p(o|s)')
     
-    plt.tight_layout(rect=[0, 0, 0.9, 1])
+    # Note: Skip tight_layout as it conflicts with colorbar placement
     fig.savefig(obs_reception_path)
     plt.close(fig)
     
@@ -1704,9 +1698,6 @@ def test_dative_case(pomdp_test_data, case_definitions):
         f.write(f"5. [Observation Reception Animation](observation_reception_animation.gif)\n")
     
     logger.info(f"Completed DATIVE case test with visualizations in {case_dir}")
-    
-    # Return the model for potential further testing
-    return model
 
 def test_genitive_case(pomdp_test_data, case_definitions):
     """Test for GENITIVE case: Model as source/generator of beliefs."""
@@ -2177,9 +2168,6 @@ def test_genitive_case(pomdp_test_data, case_definitions):
         f.write(f"7. [Belief Generation Animation](belief_generation_animation.gif)\n")
     
     logger.info(f"Completed GENITIVE case test with visualizations in {case_dir}")
-    
-    # Return the model for potential further testing
-    return model
 
 def test_instrumental_case(pomdp_test_data, case_definitions):
     """Test for INSTRUMENTAL case: Model as computational method."""
@@ -2671,10 +2659,8 @@ def test_instrumental_case(pomdp_test_data, case_definitions):
         f.write(f"4. [Method Comparison](method_comparison.png)\n")
         f.write(f"5. [Computational Process Animation](computational_process_animation.gif)\n")
     
+    plt.close(fig)
     logger.info(f"Completed INSTRUMENTAL case test with visualizations in {case_dir}")
-    
-    # Return the model for potential further testing
-    return model
 
 def test_locative_case(pomdp_test_data, case_definitions):
     """Test for LOCATIVE case: Model as location in inference space."""
@@ -2830,8 +2816,6 @@ def test_locative_case(pomdp_test_data, case_definitions):
     anim.save(animation_path, writer='pillow', fps=5, dpi=100)
     plt.close(fig)
     logger.info(f"Created parameter space animation: {animation_path}")
-    
-    return model
 
 def test_ablative_case(pomdp_test_data, case_definitions):
     """Test for ABLATIVE case: Model as source of uncertainty."""
@@ -3070,8 +3054,6 @@ def test_ablative_case(pomdp_test_data, case_definitions):
         anim.save(animation_path, writer='pillow', fps=2, dpi=100)
         plt.close(fig)
         logger.info(f"Created uncertainty propagation animation: {animation_path}")
-    
-    return model
 
 def test_vocative_case(pomdp_test_data, case_definitions):
     """Test for VOCATIVE case: Model as communication channel."""
@@ -3315,8 +3297,6 @@ def test_vocative_case(pomdp_test_data, case_definitions):
     anim.save(animation_path, writer='pillow', fps=1, dpi=100)
     plt.close(fig)
     logger.info(f"Created component communication animation: {animation_path}")
-    
-    return model
 
 def run_all_case_tests(output_dir: str = OUTPUT_DIR, specific_case: Optional[str] = None) -> Dict[Case, POMDPModel]:
     """

@@ -119,4 +119,165 @@ class DataGenerator:
         if X.shape[0] != y.shape[0]:
             raise ValueError(f"X and y must have same number of samples: {X.shape[0]} vs {y.shape[0]}")
             
-        return X, y 
+        return X, y
+    
+    @staticmethod
+    def classification_data(
+        n_samples: int = 100,
+        n_features: int = 2,
+        n_classes: int = 2,
+        class_sep: float = 1.0,
+        random_seed: Optional[int] = 42
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Generate classification data with specified parameters.
+        
+        Args:
+            n_samples: Number of data points to generate
+            n_features: Number of features per sample
+            n_classes: Number of classes
+            class_sep: Separation between class centers
+            random_seed: Random seed for reproducibility
+            
+        Returns:
+            X: Feature array, shape (n_samples, n_features)
+            y: Class labels, shape (n_samples,)
+        """
+        if random_seed is not None:
+            np.random.seed(random_seed)
+            
+        samples_per_class = n_samples // n_classes
+        X_list = []
+        y_list = []
+        
+        for class_idx in range(n_classes):
+            # Generate class center
+            center = np.zeros(n_features)
+            center[class_idx % n_features] = class_sep * class_idx
+            
+            # Generate samples around center
+            samples = np.random.randn(samples_per_class, n_features) + center
+            X_list.append(samples)
+            y_list.append(np.full(samples_per_class, class_idx))
+        
+        X = np.vstack(X_list)
+        y = np.hstack(y_list)
+        
+        # Shuffle
+        indices = np.random.permutation(len(y))
+        return X[indices], y[indices]
+    
+    @staticmethod
+    def multivariate_data(
+        n_samples: int = 100,
+        n_features: int = 3,
+        n_outputs: int = 1,
+        noise_level: float = 0.1,
+        random_seed: Optional[int] = 42
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Generate multivariate regression data.
+        
+        Args:
+            n_samples: Number of data points to generate
+            n_features: Number of input features
+            n_outputs: Number of output dimensions
+            noise_level: Standard deviation of noise to add
+            random_seed: Random seed for reproducibility
+            
+        Returns:
+            X: Feature array, shape (n_samples, n_features)
+            y: Target array, shape (n_samples, n_outputs) or (n_samples,) if n_outputs=1
+        """
+        if random_seed is not None:
+            np.random.seed(random_seed)
+            
+        # Generate random features
+        X = np.random.randn(n_samples, n_features)
+        
+        # Generate random weights
+        weights = np.random.randn(n_features, n_outputs)
+        
+        # Generate targets
+        y = X @ weights + np.random.randn(n_samples, n_outputs) * noise_level
+        
+        if n_outputs == 1:
+            y = y.flatten()
+            
+        return X, y
+    
+    @staticmethod
+    def time_series_data(
+        n_samples: int = 100,
+        n_features: int = 1,
+        trend: float = 0.1,
+        seasonality_period: int = 12,
+        seasonality_amplitude: float = 1.0,
+        noise_level: float = 0.5,
+        random_seed: Optional[int] = 42
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Generate time series data with trend and seasonality.
+        
+        Args:
+            n_samples: Number of time steps
+            n_features: Number of features (multivariate time series)
+            trend: Linear trend coefficient
+            seasonality_period: Period of seasonal component
+            seasonality_amplitude: Amplitude of seasonal component
+            noise_level: Standard deviation of noise
+            random_seed: Random seed for reproducibility
+            
+        Returns:
+            t: Time indices, shape (n_samples,)
+            y: Time series values, shape (n_samples, n_features) or (n_samples,)
+        """
+        if random_seed is not None:
+            np.random.seed(random_seed)
+            
+        t = np.arange(n_samples)
+        
+        # Generate components for each feature
+        y_list = []
+        for _ in range(n_features):
+            # Trend + Seasonality + Noise
+            y_feature = (
+                trend * t +
+                seasonality_amplitude * np.sin(2 * np.pi * t / seasonality_period) +
+                np.random.randn(n_samples) * noise_level
+            )
+            y_list.append(y_feature)
+        
+        if n_features == 1:
+            return t, y_list[0]
+        else:
+            return t, np.column_stack(y_list)
+    
+    @staticmethod
+    def split_data(
+        X: np.ndarray,
+        y: np.ndarray,
+        test_size: float = 0.2,
+        random_seed: Optional[int] = 42
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """Split data into training and test sets.
+        
+        Args:
+            X: Feature array
+            y: Target array
+            test_size: Fraction of data to use for testing (0.0 to 1.0)
+            random_seed: Random seed for reproducibility
+            
+        Returns:
+            X_train, X_test, y_train, y_test
+        """
+        if random_seed is not None:
+            np.random.seed(random_seed)
+            
+        n_samples = len(X)
+        n_test = int(n_samples * test_size)
+        
+        # Shuffle indices
+        indices = np.random.permutation(n_samples)
+        
+        test_indices = indices[:n_test]
+        train_indices = indices[n_test:]
+        
+        return X[train_indices], X[test_indices], y[train_indices], y[test_indices] 

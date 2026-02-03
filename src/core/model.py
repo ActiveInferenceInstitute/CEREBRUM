@@ -122,6 +122,55 @@ class Model:
         # To be implemented by subclasses based on their specific generative models
         raise NotImplementedError("Subclasses must implement free_energy()")
     
+    def predict(self, data: Any = None) -> Any:
+        """
+        Make a prediction with the model.
+        
+        Args:
+            data: Input data for prediction
+            
+        Returns:
+            Model prediction (type depends on subclass implementation)
+        """
+        raise NotImplementedError("Subclasses must implement predict()")
+    
+    def get_state(self) -> Dict[str, Any]:
+        """
+        Get the current state of the model.
+        
+        Returns:
+            Dictionary containing model state information
+        """
+        return {
+            "id": self.id,
+            "name": self.name,
+            "case": self._case.value,
+            "prior_case": self._prior_case.value if self._prior_case else None,
+            "case_history_length": len(self._case_history),
+            "num_connections": len(self.connections),
+            "precision": self.get_precision(),
+            "parameters": dict(self.parameters),
+        }
+    
+    def set_parameters(self, parameters: Dict[str, Any]) -> None:
+        """
+        Update model parameters.
+        
+        Args:
+            parameters: Dictionary of parameter names to values
+        """
+        self.parameters.update(parameters)
+        logging.info(f"Model '{self.name}': Updated parameters: {list(parameters.keys())}")
+    
+    def get_case_history(self) -> List[Tuple[Case, Case]]:
+        """
+        Get the history of case transformations.
+        
+        Returns:
+            List of (old_case, new_case) tuples
+        """
+        return list(self._case_history)
+    
     def update(self, data: Any = None) -> Dict[str, Any]:
         """
         Update the model based on data and current case.
@@ -152,38 +201,38 @@ class Model:
         
         return {"status": "error", "message": f"Unknown case {self._case}"}
     
-    # Case-specific update methods to be implemented by subclasses
+    # Case-specific update methods with default implementations
     def _update_nominative(self, data: Any) -> Dict[str, Any]:
-        """Update for NOMINATIVE case: model as active agent generating predictions"""
-        raise NotImplementedError()
+        """Update for NOMINATIVE case: model as active agent generating predictions."""
+        return {"status": "success", "case": "nominative", "data_received": data is not None}
     
     def _update_accusative(self, data: Any) -> Dict[str, Any]:
-        """Update for ACCUSATIVE case: model as object receiving updates"""
-        raise NotImplementedError()
+        """Update for ACCUSATIVE case: model as object receiving updates."""
+        return {"status": "success", "case": "accusative", "data_received": data is not None}
     
     def _update_genitive(self, data: Any) -> Dict[str, Any]:
-        """Update for GENITIVE case: model as source/generator of outputs"""
-        raise NotImplementedError()
+        """Update for GENITIVE case: model as source/generator of outputs."""
+        return {"status": "success", "case": "genitive", "data_received": data is not None}
     
     def _update_dative(self, data: Any) -> Dict[str, Any]:
-        """Update for DATIVE case: model as recipient of data flows"""
-        raise NotImplementedError()
+        """Update for DATIVE case: model as recipient of data flows."""
+        return {"status": "success", "case": "dative", "data_received": data is not None}
     
     def _update_instrumental(self, data: Any) -> Dict[str, Any]:
-        """Update for INSTRUMENTAL case: model as method/tool"""
-        raise NotImplementedError()
+        """Update for INSTRUMENTAL case: model as method/tool."""
+        return {"status": "success", "case": "instrumental", "data_received": data is not None}
     
     def _update_locative(self, data: Any) -> Dict[str, Any]:
-        """Update for LOCATIVE case: model as context"""
-        raise NotImplementedError()
+        """Update for LOCATIVE case: model as context."""
+        return {"status": "success", "case": "locative", "data_received": data is not None}
     
     def _update_ablative(self, data: Any) -> Dict[str, Any]:
-        """Update for ABLATIVE case: model as origin/cause"""
-        raise NotImplementedError()
+        """Update for ABLATIVE case: model as origin/cause."""
+        return {"status": "success", "case": "ablative", "data_received": data is not None}
     
     def _update_vocative(self, data: Any) -> Dict[str, Any]:
-        """Update for VOCATIVE case: model as addressable entity"""
-        raise NotImplementedError()
+        """Update for VOCATIVE case: model as addressable entity."""
+        return {"status": "success", "case": "vocative", "data_received": data is not None}
     
     def __repr__(self):
         """String representation of the model"""

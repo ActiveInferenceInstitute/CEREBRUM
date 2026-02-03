@@ -147,7 +147,7 @@ If you use CEREBRUM in your research, please cite:
 
 ## License
 
-[CC BY-NC-ND 4.0](../LICENSE)
+[CC BY-NC-ND 4.0](LICENSE)
 
 ## Acknowledgements
 

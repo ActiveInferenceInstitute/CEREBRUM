@@ -121,12 +121,16 @@ class TestModel:
             model.free_energy()
     
     @pytest.mark.parametrize("case_to_test", list(Case))
-    def test_model_update_dispatch_abstract(self, case_to_test):
-        """Test that update dispatches correctly and case methods raise NotImplementedError."""
+    def test_model_update_dispatch_default(self, case_to_test):
+        """Test that update dispatches correctly and returns default success responses."""
         model = Model()
         model.case = case_to_test
-        with pytest.raises(NotImplementedError):
-            model.update(data="test_data")
+        result = model.update(data="test_data")
+        # Base Model now provides default implementations
+        assert result["status"] == "success"
+        # Case names are lowercase in default response (nominative, accusative, etc.)
+        assert result["case"] == case_to_test.name.lower()
+        assert result["data_received"] is True
     
     def test_model_repr(self):
         """Test the __repr__ method."""
@@ -145,4 +149,63 @@ class TestModel:
         assert model1.id != model2.id
         
         # Test our custom equality check from test_utils
-        assert_models_equal(model1, model2) 
+        assert_models_equal(model1, model2)
+    
+    def test_model_get_state(self):
+        """Test the get_state method returns correct state dictionary."""
+        params = {"learning_rate": 0.01}
+        model = Model(name="StateTestModel", parameters=params)
+        state = model.get_state()
+        
+        assert state["id"] == model.id
+        assert state["name"] == "StateTestModel"
+        assert state["case"] == "NOM"
+        assert state["prior_case"] is None
+        assert state["case_history_length"] == 0
+        assert state["num_connections"] == 0
+        assert state["precision"] == 1.0
+        assert state["parameters"] == params
+        
+        # After case change
+        model.case = Case.DATIVE
+        state = model.get_state()
+        assert state["case"] == "DAT"
+        assert state["prior_case"] == "NOM"
+        assert state["case_history_length"] == 1
+    
+    def test_model_set_parameters(self):
+        """Test the set_parameters method updates parameters correctly."""
+        model = Model(name="ParamModel", parameters={"a": 1})
+        assert model.parameters == {"a": 1}
+        
+        model.set_parameters({"b": 2, "c": 3})
+        assert model.parameters == {"a": 1, "b": 2, "c": 3}
+        
+        model.set_parameters({"a": 10})  # Override existing
+        assert model.parameters["a"] == 10
+    
+    def test_model_get_case_history(self):
+        """Test the get_case_history method returns history correctly."""
+        model = Model()
+        assert model.get_case_history() == []
+        
+        model.case = Case.ACCUSATIVE
+        history = model.get_case_history()
+        assert len(history) == 1
+        assert history[0] == (Case.NOMINATIVE, Case.ACCUSATIVE)
+        
+        model.case = Case.GENITIVE
+        history = model.get_case_history()
+        assert len(history) == 2
+        assert history[1] == (Case.ACCUSATIVE, Case.GENITIVE)
+        
+        # Verify it returns a copy
+        returned_history = model.get_case_history()
+        returned_history.append(("test", "test"))
+        assert len(model.get_case_history()) == 2
+    
+    def test_model_predict_abstract(self):
+        """Test that predict raises NotImplementedError in base class."""
+        model = Model()
+        with pytest.raises(NotImplementedError):
+            model.predict(data="test") 

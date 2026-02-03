@@ -8,6 +8,7 @@ Submodules:
     - visualization: Plotting and visualization
     - animation: Animation utilities (requires imageio)
     - markdown: Markdown processing utilities
+    - path_utils: Output directory management
 """
 
 __all__ = [
@@ -18,6 +19,8 @@ __all__ = [
     'save_frames_as_gif',
     'create_linear_regression_animation',
     'ensure_scalar',
+    'get_output_dir',
+    'save_plot',
     # Markdown utilities available via src.utils.markdown
 ]
 
@@ -36,4 +39,7 @@ def __getattr__(name):
     elif name in ('save_animation', 'save_frames_as_gif', 'create_linear_regression_animation', 'ensure_scalar'):
         from . import animation
         return getattr(animation, name)
+    elif name in ('get_output_dir', 'save_plot'):
+        from . import path_utils
+        return getattr(path_utils, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
