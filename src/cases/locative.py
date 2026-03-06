@@ -26,15 +26,7 @@ class LocativeCase:
     
     @staticmethod
     def apply(model: Model) -> Model:
-        """
-        Apply locative case configuration to a model.
-        
-        Args:
-            model: The model to configure for locative case
-            
-        Returns:
-            The configured model
-        """
+        """Apply locative case to model, configuring it as a context or container."""
         model.case = Case.LOCATIVE
         
         # Locative-specific: track entities within this context
@@ -46,19 +38,7 @@ class LocativeCase:
     
     @staticmethod
     def process_update(model: Model, data: Any) -> Dict[str, Any]:
-        """
-        Process an update in the locative case.
-        
-        Locative updates involve managing context or containing
-        other entities/operations.
-        
-        Args:
-            model: The model being updated
-            data: The update data
-            
-        Returns:
-            Update result dictionary with context state
-        """
+        """Process a locative-case update, reporting environmental context and contained entities."""
         if hasattr(model, '_update_locative') and callable(getattr(model, '_update_locative')):
             return model._update_locative(data)
         
@@ -78,18 +58,7 @@ class LocativeCase:
     
     @staticmethod
     def calculate_free_energy(model: Model) -> float:
-        """
-        Calculate free energy for locative case.
-        
-        In the locative case, free energy relates to the stability
-        and coherence of the context being provided.
-        
-        Args:
-            model: The model to calculate free energy for
-            
-        Returns:
-            The calculated free energy
-        """
+        """Calculate free energy as precision-weighted instability: (1 - context_stability) * PRECISION."""
         default_fe = 1.0
         
         # Locative: measure context stability
@@ -106,15 +75,7 @@ class LocativeCase:
     
     @staticmethod
     def get_parameters(model: Model) -> Dict[str, Any]:
-        """
-        Get parameters relevant to locative case.
-        
-        Args:
-            model: The model to get parameters from
-            
-        Returns:
-            Dictionary of locative case parameters
-        """
+        """Return locative-relevant parameters: context_type, max_capacity, isolation_level, context_persistence."""
         params = {
             "context_type": model.parameters.get("context_type", "environment"),
             "max_capacity": model.parameters.get("max_capacity", 100),
@@ -125,19 +86,9 @@ class LocativeCase:
         return params
     
     @staticmethod
-    def add_to_context(context: Model, entity: Any, 
+    def add_to_context(context: Model, entity: Any,
                        metadata: Optional[Dict] = None) -> bool:
-        """
-        Add an entity to the locative context.
-        
-        Args:
-            context: The locative context model
-            entity: The entity to add
-            metadata: Optional metadata about the entity
-            
-        Returns:
-            True if entity was added successfully
-        """
+        """Add entity to context's _locative_contents, respecting max_capacity. Returns False if at capacity."""
         if not hasattr(context, '_locative_contents'):
             context._locative_contents = []
         
@@ -157,16 +108,7 @@ class LocativeCase:
     
     @staticmethod
     def remove_from_context(context: Model, entity: Any) -> bool:
-        """
-        Remove an entity from the locative context.
-        
-        Args:
-            context: The locative context model
-            entity: The entity to remove
-            
-        Returns:
-            True if entity was removed
-        """
+        """Remove entity from context's _locative_contents. Returns True if an entry was removed."""
         if not hasattr(context, '_locative_contents'):
             return False
         
@@ -184,15 +126,7 @@ class LocativeCase:
     
     @staticmethod
     def get_context_contents(context: Model) -> List[Any]:
-        """
-        Get all entities within the locative context.
-        
-        Args:
-            context: The locative context model
-            
-        Returns:
-            List of entities in the context
-        """
+        """Return all entities currently held in context's _locative_contents."""
         if not hasattr(context, '_locative_contents'):
             return []
         

@@ -25,15 +25,7 @@ class AccusativeCase:
 
     @staticmethod
     def apply(model: Model) -> Model:
-        """
-        Apply accusative case configuration to a model.
-        
-        Args:
-            model: The model to configure for accusative case
-            
-        Returns:
-            The configured model
-        """
+        """Apply accusative case to model, configuring it as an object receiving updates."""
         # Set the case through the model's case property
         model.case = Case.ACCUSATIVE
         
@@ -45,18 +37,7 @@ class AccusativeCase:
     
     @staticmethod
     def process_update(model: Model, data: Any) -> Dict[str, Any]:
-        """
-        Process an update in the accusative case.
-        
-        This handles updates to the model's parameters or state.
-        
-        Args:
-            model: The model being updated
-            data: The update data
-            
-        Returns:
-            Update result dictionary
-        """
+        """Process an accusative-case update, applying parameter changes from data dict."""
         # Call the model's internal accusative update method if it exists
         if hasattr(model, '_update_accusative') and callable(getattr(model, '_update_accusative')):
             return model._update_accusative(data)
@@ -83,18 +64,7 @@ class AccusativeCase:
     
     @staticmethod
     def calculate_free_energy(model: Model) -> float:
-        """
-        Calculate free energy for accusative case.
-        
-        In the accusative case, free energy often relates to divergence
-        between current and predicted sensory states.
-        
-        Args:
-            model: The model to calculate free energy for
-            
-        Returns:
-            The calculated free energy
-        """
+        """Calculate free energy as divergence between predicted_sensory and actual_sensory."""
         # Default implementation - models should override this
         # Accusative case typically has higher precision for sensory prediction errors
         default_fe = 0.5
@@ -118,19 +88,9 @@ class AccusativeCase:
         return default_fe
     
     @staticmethod
-    def accept_updates(model: Model, updates: Dict[str, Any], 
+    def accept_updates(model: Model, updates: Dict[str, Any],
                       validation_func: Optional[Callable] = None) -> Dict[str, Any]:
-        """
-        Accept and validate updates to model parameters.
-        
-        Args:
-            model: The model to update
-            updates: Dictionary of parameter updates
-            validation_func: Optional function to validate updates
-            
-        Returns:
-            Dictionary with update results
-        """
+        """Apply parameter updates to model, optionally validating each via validation_func(param, value)."""
         result = {
             "accepted": [],
             "rejected": [],

@@ -26,15 +26,7 @@ class InstrumentalCase:
     
     @staticmethod
     def apply(model: Model) -> Model:
-        """
-        Apply instrumental case configuration to a model.
-        
-        Args:
-            model: The model to configure for instrumental case
-            
-        Returns:
-            The configured model
-        """
+        """Apply instrumental case to model, configuring it as a tool or mechanism."""
         model.case = Case.INSTRUMENTAL
         
         # Instrumental-specific: ensure model has operation capabilities
@@ -46,19 +38,7 @@ class InstrumentalCase:
     
     @staticmethod
     def process_update(model: Model, data: Any) -> Dict[str, Any]:
-        """
-        Process an update in the instrumental case.
-        
-        Instrumental updates involve performing operations or transformations
-        on behalf of other models.
-        
-        Args:
-            model: The model being updated
-            data: The update data
-            
-        Returns:
-            Update result dictionary with operation results
-        """
+        """Process an instrumental-case update, executing transformations on behalf of other models."""
         if hasattr(model, '_update_instrumental') and callable(getattr(model, '_update_instrumental')):
             return model._update_instrumental(data)
         
@@ -78,18 +58,7 @@ class InstrumentalCase:
     
     @staticmethod
     def calculate_free_energy(model: Model) -> float:
-        """
-        Calculate free energy for instrumental case.
-        
-        In the instrumental case, free energy relates to the efficiency
-        and accuracy of the tool's operation.
-        
-        Args:
-            model: The model to calculate free energy for
-            
-        Returns:
-            The calculated free energy
-        """
+        """Calculate free energy as precision-weighted absolute error between operation_cost and expected_cost."""
         default_fe = 1.0
         
         # Instrumental: measure operation efficiency
@@ -109,15 +78,7 @@ class InstrumentalCase:
     
     @staticmethod
     def get_parameters(model: Model) -> Dict[str, Any]:
-        """
-        Get parameters relevant to instrumental case.
-        
-        Args:
-            model: The model to get parameters from
-            
-        Returns:
-            Dictionary of instrumental case parameters
-        """
+        """Return instrumental-relevant parameters: operation_mode, efficiency_threshold, max_operations, reusable."""
         params = {
             "operation_mode": model.parameters.get("operation_mode", "transform"),
             "efficiency_threshold": model.parameters.get("efficiency_threshold", 0.9),
@@ -128,20 +89,9 @@ class InstrumentalCase:
         return params
     
     @staticmethod
-    def execute_operation(model: Model, operation: str, 
+    def execute_operation(model: Model, operation: str,
                          input_data: Any, **kwargs) -> Any:
-        """
-        Execute an operation using the instrumental model.
-        
-        Args:
-            model: The instrumental model (tool)
-            operation: Name of the operation to perform
-            input_data: Data to operate on
-            **kwargs: Additional operation parameters
-            
-        Returns:
-            Result of the operation
-        """
+        """Invoke a named operation method on the model, returning None if the operation is absent."""
         if hasattr(model, operation) and callable(getattr(model, operation)):
             op_func = getattr(model, operation)
             result = op_func(input_data, **kwargs)
@@ -152,16 +102,9 @@ class InstrumentalCase:
             return None
     
     @staticmethod
-    def register_operation(model: Model, name: str, 
+    def register_operation(model: Model, name: str,
                           func: Callable) -> None:
-        """
-        Register a new operation on an instrumental model.
-        
-        Args:
-            model: The model to register the operation on
-            name: Name of the operation
-            func: The operation function
-        """
+        """Register func as a named operation on model, storing it in _instrument_operations and as an attribute."""
         if not hasattr(model, '_instrument_operations'):
             model._instrument_operations = {}
         

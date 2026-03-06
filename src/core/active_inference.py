@@ -167,7 +167,35 @@ class ActiveInferenceModel(Model):
         if precision_focus == "likelihood":
             # Nominative case: Emphasize precision of generative mapping (copy to avoid mutation)
             self.likelihood_precision = self.likelihood_precision * self.get_precision(self._case)
-        
+        elif precision_focus == "parameters":
+            # Accusative case: Emphasize parameter update reception precision
+            self.prior_precision = self.prior_precision * self.get_precision(self._case)
+        elif precision_focus == "outputs":
+            # Genitive case: Emphasize output/generative diversity
+            self.posterior_precision = self.posterior_precision * self.get_precision(self._case)
+        elif precision_focus == "inputs":
+            # Dative case: Tune input sensitivity (lower precision = more receptive)
+            self.likelihood_precision = self.likelihood_precision * self.get_precision(self._case)
+        elif precision_focus == "operations":
+            # Instrumental case: Balanced operational precision across both mappings
+            scale = self.get_precision(self._case)
+            self.likelihood_precision = self.likelihood_precision * scale
+            self.prior_precision = self.prior_precision * scale
+        elif precision_focus == "contexts":
+            # Locative case: Contextual precision on posterior
+            self.posterior_precision = self.posterior_precision * self.get_precision(self._case)
+        elif precision_focus == "historical":
+            # Ablative case: Historical/source reference via prior precision
+            self.prior_precision = self.prior_precision * self.get_precision(self._case)
+        elif precision_focus == "identity":
+            # Vocative case: Strong identity focus on prior
+            self.prior_precision = self.prior_precision * self.get_precision(self._case)
+        else:
+            logger.debug(
+                "No precision adjustment defined for precision_focus=%r in case %s",
+                precision_focus, self._case
+            )
+
         # Record the transformation in history
         self.belief_history.append({
             "from_case": self._prior_case,

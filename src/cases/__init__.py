@@ -26,7 +26,7 @@ from .case_manager import CaseManager
 from .animal_cases import AnimalCaseManager
 
 # Re-export Case enum from core for convenience
-from src.core.model import Case
+from ..core.model import Case
 
 __all__ = [
     'Case',

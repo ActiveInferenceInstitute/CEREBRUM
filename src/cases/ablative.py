@@ -27,15 +27,7 @@ class AblativeCase:
     
     @staticmethod
     def apply(model: Model) -> Model:
-        """
-        Apply ablative case configuration to a model.
-        
-        Args:
-            model: The model to configure for ablative case
-            
-        Returns:
-            The configured model
-        """
+        """Apply ablative case to model, designating it as an origin or starting point."""
         model.case = Case.ABLATIVE
         
         # Ablative-specific: track what has originated from this model
@@ -47,19 +39,7 @@ class AblativeCase:
     
     @staticmethod
     def process_update(model: Model, data: Any) -> Dict[str, Any]:
-        """
-        Process an update in the ablative case.
-        
-        Ablative updates involve emitting or originating data/state
-        for other processes to consume.
-        
-        Args:
-            model: The model being updated
-            data: The update data
-            
-        Returns:
-            Update result dictionary with emission data
-        """
+        """Process an ablative-case update, emitting state or data from this origin model."""
         if hasattr(model, '_update_ablative') and callable(getattr(model, '_update_ablative')):
             return model._update_ablative(data)
         
@@ -79,18 +59,7 @@ class AblativeCase:
     
     @staticmethod
     def calculate_free_energy(model: Model) -> float:
-        """
-        Calculate free energy for ablative case.
-        
-        In the ablative case, free energy relates to the consistency
-        of what originates from the source.
-        
-        Args:
-            model: The model to calculate free energy for
-            
-        Returns:
-            The calculated free energy
-        """
+        """Calculate free energy as precision-weighted variance across recent _ablative_emissions."""
         default_fe = 1.0
         
         # Ablative: measure consistency of emissions
@@ -108,15 +77,7 @@ class AblativeCase:
     
     @staticmethod
     def get_parameters(model: Model) -> Dict[str, Any]:
-        """
-        Get parameters relevant to ablative case.
-        
-        Args:
-            model: The model to get parameters from
-            
-        Returns:
-            Dictionary of ablative case parameters
-        """
+        """Return ablative-relevant parameters: emission_rate, origin_tracking, max_emissions, emission_precision."""
         params = {
             "emission_rate": model.parameters.get("emission_rate", 1.0),
             "origin_tracking": model.parameters.get("origin_tracking", True),
@@ -127,19 +88,9 @@ class AblativeCase:
         return params
     
     @staticmethod
-    def emit_to(source: Model, target: Model, 
+    def emit_to(source: Model, target: Model,
                payload: Optional[Any] = None) -> Dict[str, Any]:
-        """
-        Emit data from ablative source to a target.
-        
-        Args:
-            source: The ablative source model
-            target: The receiving model
-            payload: Optional data to emit (uses source state if None)
-            
-        Returns:
-            Dictionary describing the emission
-        """
+        """Emit payload (defaulting to source state or parameters) from source to target, recording the emission."""
         if payload is None:
             if hasattr(source, 'current_state'):
                 payload = source.current_state

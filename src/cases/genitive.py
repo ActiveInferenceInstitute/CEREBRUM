@@ -26,15 +26,7 @@ class GenitiveCase:
     
     @staticmethod
     def apply(model: Model) -> Model:
-        """
-        Apply genitive case configuration to a model.
-        
-        Args:
-            model: The model to configure for genitive case
-            
-        Returns:
-            The configured model
-        """
+        """Apply genitive case to model, designating it as a source of information or derivation."""
         model.case = Case.GENITIVE
         
         # Genitive-specific: ensure model can provide parameters/state
@@ -46,19 +38,7 @@ class GenitiveCase:
     
     @staticmethod
     def process_update(model: Model, data: Any) -> Dict[str, Any]:
-        """
-        Process an update in the genitive case.
-        
-        Genitive updates typically involve exporting or deriving information
-        for other models to consume.
-        
-        Args:
-            model: The model being updated
-            data: The update data
-            
-        Returns:
-            Update result dictionary with exported data
-        """
+        """Process a genitive-case update, exporting parameters and derived state for consumers."""
         if hasattr(model, '_update_genitive') and callable(getattr(model, '_update_genitive')):
             return model._update_genitive(data)
         
@@ -78,18 +58,7 @@ class GenitiveCase:
     
     @staticmethod
     def calculate_free_energy(model: Model) -> float:
-        """
-        Calculate free energy for genitive case.
-        
-        In the genitive case, free energy relates to the coherence
-        and quality of information being provided as a source.
-        
-        Args:
-            model: The model to calculate free energy for
-            
-        Returns:
-            The calculated free energy
-        """
+        """Calculate free energy as precision-weighted divergence between parameters and expected_parameters."""
         default_fe = 1.0
         
         # Genitive: measure consistency of exported information
@@ -116,15 +85,7 @@ class GenitiveCase:
     
     @staticmethod
     def get_parameters(model: Model) -> Dict[str, Any]:
-        """
-        Get parameters relevant to genitive case.
-        
-        Args:
-            model: The model to get parameters from
-            
-        Returns:
-            Dictionary of genitive case parameters
-        """
+        """Return genitive-relevant parameters: export_precision, derivation_depth, inheritance_mode, provenance_tracking."""
         params = {
             "export_precision": model.parameters.get("export_precision", 1.0),
             "derivation_depth": model.parameters.get("derivation_depth", 2),
@@ -135,21 +96,9 @@ class GenitiveCase:
         return params
     
     @staticmethod
-    def derive_from(source: Model, target: Model, 
+    def derive_from(source: Model, target: Model,
                    attributes: Optional[List[str]] = None) -> Dict[str, Any]:
-        """
-        Derive information from source model to target model.
-        
-        This is a key genitive operation: transferring/inheriting data.
-        
-        Args:
-            source: The genitive source model
-            target: The receiving model
-            attributes: Optional list of specific attributes to derive
-            
-        Returns:
-            Dictionary of derived information
-        """
+        """Copy specified attributes (default: parameters/configuration/state) from source to a result dict."""
         derived = {}
         
         if attributes is None:

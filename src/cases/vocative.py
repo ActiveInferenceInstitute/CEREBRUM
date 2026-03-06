@@ -27,15 +27,7 @@ class VocativeCase:
     
     @staticmethod
     def apply(model: Model) -> Model:
-        """
-        Apply vocative case configuration to a model.
-        
-        Args:
-            model: The model to configure for vocative case
-            
-        Returns:
-            The configured model
-        """
+        """Apply vocative case to model, marking it as the target of direct invocation."""
         model.case = Case.VOCATIVE
         
         # Vocative-specific: track invocations
@@ -47,18 +39,7 @@ class VocativeCase:
     
     @staticmethod
     def process_update(model: Model, data: Any) -> Dict[str, Any]:
-        """
-        Process an update in the vocative case.
-        
-        Vocative updates involve responding to direct address or invocation.
-        
-        Args:
-            model: The model being updated
-            data: The update data
-            
-        Returns:
-            Update result dictionary with response
-        """
+        """Process a vocative-case update, recording the invocation and issuing an immediate response."""
         if hasattr(model, '_update_vocative') and callable(getattr(model, '_update_vocative')):
             return model._update_vocative(data)
         
@@ -83,18 +64,7 @@ class VocativeCase:
     
     @staticmethod
     def calculate_free_energy(model: Model) -> float:
-        """
-        Calculate free energy for vocative case.
-        
-        In the vocative case, free energy relates to the quality
-        and timeliness of response to direct addressing.
-        
-        Args:
-            model: The model to calculate free energy for
-            
-        Returns:
-            The calculated free energy
-        """
+        """Calculate free energy as response_latency * PRECISION; high latency is costly for vocative."""
         default_fe = 1.0
         
         # Vocative: highest precision means errors are costly
@@ -111,15 +81,7 @@ class VocativeCase:
     
     @staticmethod
     def get_parameters(model: Model) -> Dict[str, Any]:
-        """
-        Get parameters relevant to vocative case.
-        
-        Args:
-            model: The model to get parameters from
-            
-        Returns:
-            Dictionary of vocative case parameters
-        """
+        """Return vocative-relevant parameters: response_timeout, priority_level, acknowledgment_required, attention_threshold."""
         params = {
             "response_timeout": model.parameters.get("response_timeout", 1.0),
             "priority_level": model.parameters.get("priority_level", "high"),
@@ -131,16 +93,7 @@ class VocativeCase:
     
     @staticmethod
     def invoke(model: Model, invocation: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Directly invoke a model in vocative case.
-        
-        Args:
-            model: The model to invoke
-            invocation: The invocation data
-            
-        Returns:
-            Response from the model
-        """
+        """Directly invoke model, recording the call and returning an acknowledged response with model.respond output."""
         # Record the invocation
         if hasattr(model, '_vocative_invocations'):
             model._vocative_invocations.append(invocation)
@@ -164,16 +117,7 @@ class VocativeCase:
     
     @staticmethod
     def broadcast(models: List[Model], message: Any) -> List[Dict[str, Any]]:
-        """
-        Broadcast a message to multiple models (multi-vocative).
-        
-        Args:
-            models: List of models to address
-            message: The message to broadcast
-            
-        Returns:
-            List of responses from all models
-        """
+        """Invoke all models with message as a broadcast, returning each model's response."""
         responses = []
         
         for model in models:
@@ -189,16 +133,7 @@ class VocativeCase:
     
     @staticmethod
     def get_invocation_history(model: Model, limit: int = 10) -> List[Dict]:
-        """
-        Get recent invocation history for a model.
-        
-        Args:
-            model: The model to get history for
-            limit: Maximum number of invocations to return
-            
-        Returns:
-            List of recent invocations
-        """
+        """Return the most recent `limit` entries from model's _vocative_invocations list."""
         if not hasattr(model, '_vocative_invocations'):
             return []
         

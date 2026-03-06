@@ -12,8 +12,8 @@ import logging
 from dataclasses import dataclass, field
 from enum import Enum
 
-from src.core.active_inference import ActiveInferenceModel
-from src.core.model import Case
+from ...core.active_inference import ActiveInferenceModel
+from ...core.model import Case
 
 logger = logging.getLogger(__name__)
 
@@ -325,41 +325,22 @@ class InsectModel(ActiveInferenceModel):
         return behavioral_modules
     
     def transform_case(self, target_case: Case) -> bool:
-        """
-        Transform the model to a different case configuration.
-        
-        Args:
-            target_case: The target case to transform to
-            
-        Returns:
-            True if transformation was successful, False otherwise
-        """
+        """Transform model to a different case. Returns False if transition is invalid."""
         if target_case == self.case:
             return True
-        
-        try:
-            # Validate case transformation
-            if not self._validate_case_transformation(target_case):
-                logger.warning(f"Invalid case transformation: {self.case} -> {target_case}")
-                return False
-            
-            # Update precision parameters for the new case
-            self._update_precision_for_case(target_case)
-            
-            # Update neural structure priorities
-            self._update_neural_priorities(target_case)
-            
-            # Record transformation
-            old_case = self.case
-            self.case = target_case
-            self.performance_metrics['case_transformations'] += 1
-            
-            logger.info(f"Transformed case: {old_case} -> {target_case}")
-            return True
-            
-        except Exception as e:
-            logger.error(f"Error during case transformation: {e}")
+        if not self._validate_case_transformation(target_case):
+            logger.warning(f"Invalid case transformation: {self.case} -> {target_case}")
             return False
+        old_case = self.case
+        self.case = target_case  # triggers _apply_case_transformation via parent setter
+        self.performance_metrics['case_transformations'] += 1
+        logger.info(f"Transformed case: {old_case} -> {target_case}")
+        return True
+
+    def _apply_case_transformation(self):
+        """Override: apply parent transformations then update insect neural priorities."""
+        super()._apply_case_transformation()
+        self._update_neural_priorities(self._case)
     
     def _validate_case_transformation(self, target_case: Case) -> bool:
         """
@@ -746,26 +727,27 @@ class InsectActiveInferenceModel(InsectModel):
         Args:
             observations: Current observations
         """
-        try:
-            n_env = len(self.beliefs['environmental_state'])
-            n_int = len(self.beliefs['internal_state'])
+        n_env = len(self.beliefs['environmental_state'])
+        n_int = len(self.beliefs['internal_state'])
+        obs_len = len(observations)
 
-            # Update environmental state beliefs
+        if obs_len >= n_env:
             self.beliefs['environmental_state'] = (
                 0.9 * self.beliefs['environmental_state'] +
                 0.1 * observations[:n_env]
             )
-
-            # Update internal state beliefs
-            self.beliefs['internal_state'] = (
-                0.8 * self.beliefs['internal_state'] +
-                0.2 * observations[n_env:n_env + n_int]
+            obs_int = observations[n_env:n_env + n_int]
+            if len(obs_int) == n_int:
+                self.beliefs['internal_state'] = (
+                    0.8 * self.beliefs['internal_state'] +
+                    0.2 * obs_int
+                )
+        elif obs_len > 0:
+            self.beliefs['environmental_state'][:obs_len] = (
+                0.9 * self.beliefs['environmental_state'][:obs_len] +
+                0.1 * observations
             )
-            
-            logger.debug("Updated beliefs through active inference")
-            
-        except Exception as e:
-            logger.error(f"Error updating beliefs: {e}")
+        logger.debug("Updated beliefs through active inference")
     
     def select_actions(self) -> List[Action]:
         """

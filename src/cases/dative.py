@@ -25,15 +25,7 @@ class DativeCase:
 
     @staticmethod
     def apply(model: Model) -> Model:
-        """
-        Apply dative case configuration to a model.
-        
-        Args:
-            model: The model to configure for dative case
-            
-        Returns:
-            The configured model
-        """
+        """Apply dative case to model, configuring it as a recipient of data flows."""
         # Set the case through the model's case property
         model.case = Case.DATIVE
         
@@ -45,18 +37,7 @@ class DativeCase:
     
     @staticmethod
     def process_update(model: Model, data: Any) -> Dict[str, Any]:
-        """
-        Process an update in the dative case.
-        
-        This handles receipt of data from external sources.
-        
-        Args:
-            model: The model being updated
-            data: The update data
-            
-        Returns:
-            Update result dictionary
-        """
+        """Process a dative-case update, routing received data to goal, sensory, or message slots."""
         # Call the model's internal dative update method if it exists
         if hasattr(model, '_update_dative') and callable(getattr(model, '_update_dative')):
             return model._update_dative(data)
@@ -101,18 +82,7 @@ class DativeCase:
     
     @staticmethod
     def calculate_free_energy(model: Model) -> float:
-        """
-        Calculate free energy for dative case.
-        
-        In the dative case, free energy often relates to the divergence
-        between expected and actual received data.
-        
-        Args:
-            model: The model to calculate free energy for
-            
-        Returns:
-            The calculated free energy
-        """
+        """Calculate free energy as divergence between expected_data and received_data."""
         # Default implementation - models should override this
         default_fe = 0.3
         
@@ -136,17 +106,7 @@ class DativeCase:
     
     @staticmethod
     def receive_data(model: Model, data: Any, data_type: str = "general") -> Dict[str, Any]:
-        """
-        Process incoming data to a model in the dative case.
-        
-        Args:
-            model: The model receiving data
-            data: The data being received
-            data_type: Type of data being received
-            
-        Returns:
-            Dictionary with receiving results
-        """
+        """Route incoming data to the appropriate model slot based on data_type (goal/perception/command/general)."""
         result = {
             "status": "received",
             "data_type": data_type
