@@ -10,8 +10,6 @@ from typing import Dict, Tuple, Optional
 from src.core.model import Case
 from src.core.active_inference import ActiveInferenceModel
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # Set the output directory for visualizations

@@ -18,10 +18,7 @@ from tests.pomdp.test_cases import (
     test_vocative_case
 )
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, 
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger("POMDP-Tests")
+logger = logging.getLogger(__name__)
 
 def generate_test_data() -> Dict[str, Any]:
     """

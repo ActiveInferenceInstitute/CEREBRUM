@@ -6,6 +6,7 @@ using the CEREBRUM case framework and active inference principles.
 """
 
 from typing import Dict, Any, Optional, List
+import time
 import numpy as np
 import logging
 from dataclasses import dataclass, field
@@ -79,7 +80,7 @@ class InsectModel(ActiveInferenceModel):
         """
         # Initialize with default parameters for active inference
         default_parameters = {
-            'transition_matrix': np.eye(5),  # 5 behavioral states
+            'transition_matrix': np.stack([np.eye(5)] * 3, axis=1),  # shape (5, n_actions=3, 5)
             'observation_matrix': np.eye(5),
             'n_states': 5,
             'n_actions': 3,
@@ -481,7 +482,6 @@ class InsectModel(ActiveInferenceModel):
         Returns:
             Processed sensory information
         """
-        import time
         start_time = time.time()
         
         try:
@@ -531,7 +531,6 @@ class InsectModel(ActiveInferenceModel):
         Returns:
             Selected action
         """
-        import time
         start_time = time.time()
         
         try:
@@ -800,16 +799,19 @@ class InsectActiveInferenceModel(InsectModel):
             observations: Current observations
         """
         try:
+            n_env = len(self.beliefs['environmental_state'])
+            n_int = len(self.beliefs['internal_state'])
+
             # Update environmental state beliefs
             self.beliefs['environmental_state'] = (
-                0.9 * self.beliefs['environmental_state'] + 
-                0.1 * observations[:10]  # Assuming first 10 dimensions are environmental
+                0.9 * self.beliefs['environmental_state'] +
+                0.1 * observations[:n_env]
             )
-            
+
             # Update internal state beliefs
             self.beliefs['internal_state'] = (
-                0.8 * self.beliefs['internal_state'] + 
-                0.2 * observations[10:15]  # Assuming next 5 dimensions are internal
+                0.8 * self.beliefs['internal_state'] +
+                0.2 * observations[n_env:n_env + n_int]
             )
             
             logger.debug("Updated beliefs through active inference")

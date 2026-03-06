@@ -64,7 +64,7 @@ class TestInsectBaseModels:
         )
         
         assert model.species == "honeybee"
-        assert model.current_case == Case.NOMINATIVE
+        assert model.case == Case.NOMINATIVE
         assert model.behavioral_state == BehavioralState.IDLE
         assert len(model.neural_structures) == 6  # InsectModel initializes 6 structures by default
         assert len(model.case_assignments) > 0
@@ -76,12 +76,12 @@ class TestInsectBaseModels:
         # Test valid transformation
         success = model.transform_case(Case.ACCUSATIVE)
         assert success
-        assert model.current_case == Case.ACCUSATIVE
+        assert model.case == Case.ACCUSATIVE
         
         # Test invalid transformation
         success = model.transform_case(Case.VOCATIVE)
         assert not success
-        assert model.current_case == Case.ACCUSATIVE  # Should remain unchanged
+        assert model.case == Case.ACCUSATIVE  # Should remain unchanged
     
     def test_sensory_processing(self):
         """Test sensory input processing."""

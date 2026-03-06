@@ -165,8 +165,8 @@ class ActiveInferenceModel(Model):
         precision_focus = self._case_configurations[self._case]["precision_focus"]
         
         if precision_focus == "likelihood":
-            # Nominative case: Emphasize precision of generative mapping
-            self.likelihood_precision *= self.get_precision(self._case)
+            # Nominative case: Emphasize precision of generative mapping (copy to avoid mutation)
+            self.likelihood_precision = self.likelihood_precision * self.get_precision(self._case)
         
         # Record the transformation in history
         self.belief_history.append({
@@ -272,9 +272,12 @@ class ActiveInferenceModel(Model):
             if len(observation) == len(self.posterior_means):
                 self.posterior_means = (1 - learning_rate) * self.posterior_means + learning_rate * observation
             else:
-                # Just store the observation as prediction error
-                pass
-            
+                return {
+                    "status": "error",
+                    "message": f"Observation dimension {len(observation)} does not match "
+                               f"posterior dimension {len(self.posterior_means)}",
+                }
+
             logger.debug(f"Simplified posterior update: {np.round(self.posterior_means, 3)}")
             return {"status": "success", "method": "simplified"}
         
@@ -423,7 +426,7 @@ class ActiveInferenceModel(Model):
         # This could be reports, analyses, derived models, etc.
         
         # Generate multiple samples from the posterior for output diversity
-        n_samples = 5 if data is None else data.get("n_samples", 5)
+        n_samples = 5 if (data is None or not isinstance(data, dict)) else data.get("n_samples", 5)
         
         # Convert posterior precision to covariance for sampling
         posterior_cov = np.linalg.inv(self.posterior_precision)
@@ -594,9 +597,10 @@ class ActiveInferenceModel(Model):
                     "case": "ABLATIVE"
                 }
         
+        logger.warning("_update_ablative: received unsupported data type %s; expected None or str", type(data).__name__)
         return {
             "status": "error",
-            "message": "Invalid query for ABLATIVE case",
+            "message": f"Invalid query for ABLATIVE case: expected None or str, got {type(data).__name__}",
             "case": "ABLATIVE"
         }
     

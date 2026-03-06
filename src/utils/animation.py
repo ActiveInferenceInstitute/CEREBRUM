@@ -39,7 +39,7 @@ def _ensure_imageio():
     return _imageio, _imread, _imwrite, _mimsave
 
 # Setup logging
-logger = logging.getLogger("cerebrum-animation")
+logger = logging.getLogger(__name__)
 
 def ensure_scalar(value):
     """

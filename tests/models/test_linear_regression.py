@@ -28,10 +28,7 @@ import logging
 import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend for headless environments
 
-# Setup logging
-logging.basicConfig(level=logging.INFO, 
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger('cerebrum-regression-tests')
+logger = logging.getLogger(__name__)
 
 # Define required dependencies
 REQUIRED_PACKAGES = [

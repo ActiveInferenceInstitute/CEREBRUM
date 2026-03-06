@@ -105,8 +105,8 @@ class NominativeCase:
                 # Otherwise, return a binary match/no-match
                 else:
                     return 0.0 if goal == current else 1.0
-            except Exception as e:
-                logger.warning(f"Error calculating nominative free energy: {e}")
+            except (AttributeError, TypeError, ValueError) as e:
+                logger.warning(f"Error calculating free energy: {e}")
                 return default_fe
                 
         return default_fe

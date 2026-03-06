@@ -13,4 +13,4 @@ from .graph.assembler import GraphAssembler as GraphAssembler
 
 __version__ = "0.1.0"
 __author__ = "CEREBRUM Team"
-__license__ = "MIT" 
+__license__ = "CC BY-NC-ND 4.0"

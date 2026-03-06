@@ -101,8 +101,8 @@ class LocativeCase:
                 stability = model.context_stability
                 # Higher stability = lower free energy
                 return (1.0 - stability) * LocativeCase.PRECISION
-            except Exception as e:
-                logger.warning(f"Error calculating locative free energy: {e}")
+            except (AttributeError, TypeError, ValueError) as e:
+                logger.warning(f"Error calculating free energy: {e}")
                 return default_fe
         
         return default_fe

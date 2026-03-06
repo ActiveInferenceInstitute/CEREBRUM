@@ -67,5 +67,3 @@ __all__ = [
     'FruitFlyModel'
 ]
 
-__version__ = "0.1.0"
-__author__ = "CEREBRUM Development Team" 

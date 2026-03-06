@@ -14,7 +14,7 @@ from scipy import stats
 from .base import Model, Case
 
 # Setup logging
-logger = logging.getLogger("cerebrum-linear-regression")
+logger = logging.getLogger(__name__)
 
 class LinearRegressionModel(Model):
     """Linear regression model with linguistic case functionality."""
@@ -206,14 +206,19 @@ class LinearRegressionModel(Model):
             
             if data is None:
                 return {"error": "No data provided for confidence interval"}
-                
-            # For simplicity, use a fixed variance estimate
-            # In practice, this would use the residual variance and leverage
-            sigma = 1.0
-            t_value = stats.t.ppf((1 + confidence) / 2, 100 - 2)
-            
+
+            # Use residual std and sample size from fitted data when available
+            X_buf, y_buf = self.data_buffer.get('X'), self.data_buffer.get('y')
+            if X_buf is not None and y_buf is not None:
+                n = len(y_buf)
+                residuals = y_buf - self._model.predict(X_buf)
+                sigma = np.std(residuals, ddof=2) if n > 2 else 1.0
+            else:
+                n, sigma = 100, 1.0
+            t_value = stats.t.ppf((1 + confidence) / 2, max(n - 2, 1))
+
             prediction = self.predict(data)
-            margin = t_value * sigma / np.sqrt(100)
+            margin = t_value * sigma / np.sqrt(n)
             
             response["prediction"] = prediction
             response["lower_bound"] = prediction - margin

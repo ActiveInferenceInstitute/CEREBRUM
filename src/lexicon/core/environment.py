@@ -298,22 +298,6 @@ def setup_environment_logging() -> None:
         category=Warning
     )
     
-    # Suppress CUDA warnings if PyTorch is available
-    try:
-        import torch  # noqa: F401
-        warnings.filterwarnings(
-            "ignore", 
-            message="CUDA initialization: CUDA unknown error",
-            category=UserWarning
-        )
-        warnings.filterwarnings(
-            "ignore", 
-            message="`torch.cuda.amp.autocast(args...)` is deprecated",
-            category=FutureWarning
-        )
-    except ImportError:
-        pass
-    
     # Suppress matplotlib backend warnings
     try:
         import matplotlib

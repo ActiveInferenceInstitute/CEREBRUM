@@ -93,9 +93,9 @@ class TestVisualizeCausalMechanism:
         causes = ["Temperature", "Pressure"]
         effects = ["Volume", "Reaction Rate"]
         relationships = [
-            ("Temperature", "Volume", "positive"),
-            ("Pressure", "Volume", "negative"),
-            ("Temperature", "Reaction Rate", "positive"),
+            (0, 0, 5, "positive"),
+            (1, 0, 3, "negative"),
+            (0, 1, 7, "positive"),
         ]
         try:
             fig = visualize_causal_mechanism(causes, effects, relationships)
@@ -109,7 +109,7 @@ class TestVisualizeCausalMechanism:
     def test_saves_to_file(self):
         causes = ["A"]
         effects = ["B"]
-        relationships = [("A", "B", "causes")]
+        relationships = [(0, 0, 5, "causes")]
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
             path = f.name
         try:

@@ -87,13 +87,8 @@ class CaseManager:
         Returns:
             The transformed model
         """
-        if target_case in self.case_handlers:
-            handler = self.case_handlers[target_case]
-            return handler.apply(model)
-        else:
-            # Fall back to basic transformation
-            model.case = target_case
-            return model
+        handler = self.case_handlers[target_case]
+        return handler.apply(model)
     
     def create_relationship(self, source: Model, target: Model, 
                            relationship_type: str) -> Tuple[Model, Model]:
@@ -134,7 +129,9 @@ class CaseManager:
             logger.info(f"Created {relationship_type} relationship from {source.name} to {target.name}")
         else:
             logger.warning(f"Unknown relationship type: {relationship_type}")
-        
+            raise ValueError(f"Unknown relationship type: {relationship_type!r}. "
+                             f"Valid types: {list(transformations.keys())}")
+
         return source, target
     
     def process_update(self, model: Model, data: Any) -> Dict[str, Any]:
@@ -149,14 +146,8 @@ class CaseManager:
             Update result dictionary
         """
         case = model.case
-        if case in self.case_handlers:
-            handler = self.case_handlers[case]
-            return handler.process_update(model, data)
-        else:
-            # Fall back to model's default update method
-            if hasattr(model, 'update') and callable(model.update):
-                return model.update(data)
-            return {"status": "error", "message": f"No handler for case {case}"}
+        handler = self.case_handlers[case]
+        return handler.process_update(model, data)
     
     def get_models_by_case(self, case: Case) -> List[Model]:
         """
@@ -206,14 +197,12 @@ class CaseManager:
             The calculated free energy
         """
         case = model.case
-        if case in self.case_handlers:
-            handler = self.case_handlers[case]
-            if hasattr(handler, 'calculate_free_energy'):
-                return handler.calculate_free_energy(model)
-        
-        # Fall back to model's free_energy method
+        handler = self.case_handlers[case]
+        if hasattr(handler, 'calculate_free_energy'):
+            return handler.calculate_free_energy(model)
+
+        # Fall back to model's free_energy method if handler has no calculate_free_energy
         if hasattr(model, 'free_energy') and callable(model.free_energy):
             return model.free_energy()
-        
-        # Default fallback
-        return 1.0 
+
+        return 1.0

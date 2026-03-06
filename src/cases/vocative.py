@@ -6,6 +6,7 @@ where a model is directly addressed, invoked, or activated.
 """
 
 from typing import Dict, Any, List
+import time
 import logging
 
 from ..core.model import Model, Case
@@ -71,7 +72,7 @@ class VocativeCase:
         if hasattr(model, '_vocative_invocations'):
             model._vocative_invocations.append({
                 "data": data,
-                "timestamp": None  # Would use datetime in production
+                "timestamp": time.time()
             })
         
         # Vocative behavior: immediate response
@@ -102,8 +103,8 @@ class VocativeCase:
                 latency = model.response_latency
                 # High latency = high free energy (bad for vocative)
                 return latency * VocativeCase.PRECISION
-            except Exception as e:
-                logger.warning(f"Error calculating vocative free energy: {e}")
+            except (AttributeError, TypeError, ValueError) as e:
+                logger.warning(f"Error calculating free energy: {e}")
                 return default_fe
         
         return default_fe

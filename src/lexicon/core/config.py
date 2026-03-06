@@ -95,27 +95,3 @@ def get_default_config() -> LexiconConfig:
         config.log_level = os.environ["LEXICON_LOG_LEVEL"]
     
     return config
-
-
-# OpenRouter model selection for different LEXICON tasks
-LEXICON_OPENROUTER_CONFIG = {
-    "api_key": os.getenv("OPENROUTER_API_KEY"),
-    "base_url": "https://openrouter.ai/api/v1",
-    "default_models": {
-        "case_declension": "anthropic/claude-3.5-sonnet",
-        "paraphrase": "openai/gpt-4o-mini", 
-        "entity_extraction": "anthropic/claude-3.5-sonnet",
-        "graph_assembly": "openai/gpt-4o-mini",
-        "active_learning": "openai/gpt-4o"
-    },
-    "fallback_strategy": "auto_router",
-    "retry_config": {
-        "max_retries": 3,
-        "base_delay": 1.0,
-        "max_delay": 30.0
-    },
-    "circuit_breaker": {
-        "failure_threshold": 5,
-        "recovery_timeout": 60
-    }
-} 

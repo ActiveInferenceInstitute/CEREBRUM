@@ -108,8 +108,8 @@ class GenitiveCase:
                             if isinstance(actual, (int, float)) and isinstance(exp, (int, float)):
                                 divergence += (actual - exp) ** 2
                     return divergence * GenitiveCase.PRECISION
-            except Exception as e:
-                logger.warning(f"Error calculating genitive free energy: {e}")
+            except (AttributeError, TypeError, ValueError) as e:
+                logger.warning(f"Error calculating free energy: {e}")
                 return default_fe
         
         return default_fe

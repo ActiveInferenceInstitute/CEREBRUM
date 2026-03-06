@@ -12,8 +12,6 @@ from src.utils.visualization import plot_case_linguistic_context
 from tests.pomdp.visualizers import Visualizer
 from sklearn.decomposition import PCA
 
-# Configure logging for tests
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Define a constant for the output directory

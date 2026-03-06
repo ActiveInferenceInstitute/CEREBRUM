@@ -103,8 +103,8 @@ class AblativeCase:
                 if all(isinstance(e, (int, float)) for e in emissions):
                     variance = np.var(emissions)
                     return variance * AblativeCase.PRECISION
-            except Exception as e:
-                logger.warning(f"Error calculating ablative free energy: {e}")
+            except (AttributeError, TypeError, ValueError) as e:
+                logger.warning(f"Error calculating free energy: {e}")
                 return default_fe
         
         return default_fe

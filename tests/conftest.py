@@ -14,8 +14,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 @pytest.fixture(scope="session")
 def logger():
     """Return a configured logger for use in tests."""
-    log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(level=logging.DEBUG, format=log_format)
     return logging.getLogger("cerebrum-tests")
 
 # Common model parameters fixtures

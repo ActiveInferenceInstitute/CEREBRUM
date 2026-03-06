@@ -16,7 +16,7 @@ from pathlib import Path
 from ..models.base import Model, Case
 
 # Setup logging
-logger = logging.getLogger("cerebrum-model-registry")
+logger = logging.getLogger(__name__)
 
 @dataclass
 class ModelMetadata:
