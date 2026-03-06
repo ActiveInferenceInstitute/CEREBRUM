@@ -21,19 +21,16 @@ import os
 import sys
 import logging
 import argparse
-from pathlib import Path
 import glob
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 from reportlab.lib.pagesizes import A3
 from reportlab.pdfgen import canvas
-from reportlab.lib import colors
 from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, Frame
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-import numpy as np
 
 # Configure logging
 logging.basicConfig(

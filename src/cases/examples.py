@@ -7,7 +7,6 @@ apply different cases and use the case management functionality.
 
 import numpy as np
 import logging
-from typing import Dict, Any, List
 
 from ..core.model import Model, Case
 from ..examples.animal_agent import AnimalAgent

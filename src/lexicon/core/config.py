@@ -5,7 +5,7 @@ Configuration settings for LEXICON and OpenRouter integration.
 """
 
 import os
-from typing import Dict, Any, Optional
+from typing import Dict, Optional
 from dataclasses import dataclass, field
 from pathlib import Path
 import json

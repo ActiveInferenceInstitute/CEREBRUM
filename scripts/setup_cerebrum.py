@@ -9,7 +9,6 @@ import sys
 import subprocess
 import logging
 from pathlib import Path
-from typing import List, Dict, Any
 import argparse
 
 def setup_logging(verbose: bool = False) -> logging.Logger:
@@ -46,7 +45,7 @@ def check_dependencies() -> bool:
             print(f"❌ {package} is missing")
     
     if missing:
-        print(f"\n📦 Install missing packages with: pip install {' '.join(missing)}")
+        print(f"\n📦 Install missing packages with: uv pip install {' '.join(missing)}")
         return False
     
     return True
@@ -89,7 +88,7 @@ def setup_pre_commit() -> bool:
         
     except subprocess.CalledProcessError as e:
         logger.error(f"Failed to setup pre-commit: {e}")
-        print("⚠️  Pre-commit setup failed (install with: pip install pre-commit)")
+        print("⚠️  Pre-commit setup failed (install with: uv pip install pre-commit)")
         return False
 
 def run_basic_tests() -> bool:
@@ -181,7 +180,7 @@ def create_output_directories() -> bool:
         'output',
         'output/model_registry',
         'output/test_results',
-        'src/tests/output'
+        'tests/output'
     ]
     
     for dir_path in directories:
@@ -270,7 +269,7 @@ def run_setup(args: argparse.Namespace) -> bool:
     if success:
         print("🎉 CEREBRUM setup completed successfully!")
         print("\nNext steps:")
-        print("  - Run full tests: python -m pytest src/tests/")
+        print("  - Run full tests: python -m pytest tests/")
         print("  - Try examples: cd src/examples && python linear_regression_example.py")
         print("  - Read docs: docs/getting_started.md")
     else:

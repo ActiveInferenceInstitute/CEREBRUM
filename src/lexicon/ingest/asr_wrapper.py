@@ -9,7 +9,7 @@ import subprocess
 import json
 import tempfile
 from pathlib import Path
-from typing import Optional, Union, Dict, Any, List
+from typing import Optional, Union, Dict, List
 import logging
 
 logger = logging.getLogger("lexicon.ingest.asr")

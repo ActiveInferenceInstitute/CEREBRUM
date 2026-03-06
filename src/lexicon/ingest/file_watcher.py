@@ -4,12 +4,10 @@ LEXICON File Watcher
 Monitors directories for new files to process.
 """
 
-import os
 import time
 import threading
 from pathlib import Path
-from typing import Dict, List, Callable, Optional, Set
-from datetime import datetime
+from typing import Dict, List, Callable, Set
 import logging
 
 logger = logging.getLogger("lexicon.ingest.file_watcher")

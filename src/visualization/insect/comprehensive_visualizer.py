@@ -8,20 +8,13 @@ visualization directories with comprehensive analysis and animations.
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from matplotlib.patches import Circle, Rectangle, Polygon, Arrow
-from matplotlib.collections import LineCollection
+from matplotlib.patches import Circle
 import seaborn as sns
 import networkx as nx
-from typing import Dict, Any, List, Optional, Tuple, Union
-import logging
+from typing import Dict, Any
 import os
-import time
-import json
-from collections import defaultdict, deque
-from datetime import datetime
+from collections import defaultdict
 
-from src.core.model import Case
-from src.models.insect.base import BehavioralState
 
 
 class ComprehensiveVisualizer:

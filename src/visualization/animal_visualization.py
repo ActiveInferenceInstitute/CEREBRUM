@@ -7,14 +7,8 @@ state, environment, and navigation behavior.
 
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle, Wedge, Arrow
+from matplotlib.patches import Circle, Wedge
 from typing import Dict, Any, List, Optional, Tuple, Union
-import io
-from PIL import Image
-import logging
-import os
-import time
-import sys
 
 # Handle imports
 from ..core.model import Case
@@ -610,7 +604,6 @@ def visualize_animal_cases(animal: AnimalAgent) -> Dict[str, plt.Figure]:
             elif case == Case.LOCATIVE:
                 # For LOCATIVE, show spatial context
                 # Create polar plot for relative positions
-                from matplotlib.projections import PolarAxes
                 ax2 = fig.add_subplot(122, projection='polar')
                 
                 # Add obstacles in polar coordinates

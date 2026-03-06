@@ -84,7 +84,7 @@ class SwarmCase(Case):
 **Timeline**: Week 2
 
 ```python
-# src/tests/insect/test_base.py
+# tests/insect/test_base.py
 class TestInsectModels(unittest.TestCase):
     """Test suite for insect models."""
     

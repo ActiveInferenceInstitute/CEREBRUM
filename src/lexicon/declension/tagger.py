@@ -7,19 +7,17 @@ Applies CEREBRUM's 8-case linguistic system to text segments.
 import re
 import time
 import json
-from typing import List, Dict, Any, Optional, Tuple, Set, Union
+from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
-import logging
 from datetime import datetime
 
 from ..core.config import LexiconConfig
 from ..core.logging import get_logger, LoggingTimer
-from ..core.exceptions import ProcessingError, ModelError
 from ..nlp.preprocessor import ProcessedSegment
 from .rules import CaseRules
 from .openrouter_client import declension_prompt, extract_declensions
 
-from src.llm.OpenRouter import OpenRouterClient, OpenRouterConfig
+from src.llm.OpenRouter import OpenRouterClient
 
 
 @dataclass

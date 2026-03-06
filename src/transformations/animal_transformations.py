@@ -6,13 +6,13 @@ implementing the case-based model framework for navigating entities.
 """
 
 import numpy as np
-from typing import Dict, Any, List, Optional, Tuple, Union
+from typing import Dict, Any, List, Tuple
 import logging
 from copy import deepcopy
 
-from ..core.model import Model, Case
+from ..core.model import Case
 from ..examples.animal_agent import AnimalAgent
-from .case_transformations import transform_case, revert_case
+from .case_transformations import transform_case
 
 def transform_to_goal_seeker(animal: AnimalAgent) -> AnimalAgent:
     """

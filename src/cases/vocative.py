@@ -5,8 +5,7 @@ This module provides specialized methods for handling the vocative case,
 where a model is directly addressed, invoked, or activated.
 """
 
-from typing import Dict, Any, Optional, List, Tuple, Union, Callable
-import numpy as np
+from typing import Dict, Any, List
 import logging
 
 from ..core.model import Model, Case

@@ -5,8 +5,7 @@ This module provides specialized methods for handling the instrumental case,
 where a model serves as a tool or mechanism for performing operations.
 """
 
-from typing import Dict, Any, Optional, List, Tuple, Union, Callable
-import numpy as np
+from typing import Dict, Any, Callable
 import logging
 
 from ..core.model import Model, Case

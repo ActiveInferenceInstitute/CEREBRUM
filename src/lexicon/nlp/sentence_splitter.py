@@ -5,12 +5,10 @@ Provides sentence boundary detection for the LEXICON pipeline.
 """
 
 import re
-from typing import List, Dict, Any, Optional
-import logging
+from typing import List
 
 from ..core.config import LexiconConfig
 from ..core.logging import get_logger
-from ..core.exceptions import ProcessingError
 
 try:
     import spacy

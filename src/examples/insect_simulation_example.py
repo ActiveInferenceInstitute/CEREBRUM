@@ -13,37 +13,24 @@ import os
 import json
 from datetime import datetime
 from typing import Dict, Any, List
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 
 from src.models.insect.base import (
     InsectModel, 
-    InsectActiveInferenceModel, 
     BehavioralState, 
     SensoryInput, 
     Action
 )
-from src.models.insect.neural_structures import (
-    MushroomBody,
-    CentralComplex,
-    AntennalLobe,
-    OpticLobe,
-    SubesophagealGanglion,
-    VentralNerveCord
-)
 from src.models.insect.cases.pheromonal import (
-    PheromonalCase,
-    PheromoneType,
-    ChemicalSignal
+    PheromonalCase
 )
 from src.models.insect.cases.swarm import (
     SwarmCase,
-    SwarmBehavior,
     SwarmMember
 )
 from src.models.insect.cases.metamorphic import (
     MetamorphicCase,
-    DevelopmentalStage,
-    DevelopmentalState
+    DevelopmentalStage
 )
 from src.models.insect.cases.caste import (
     CasteCase,

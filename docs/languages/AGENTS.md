@@ -159,9 +159,9 @@ These files serve a dual purpose:
 
 These language analyses inform:
 
-1. **`src/core/transformations.py`** - Case transformation logic
-2. **`src/models/case_entity.py`** - Entity case representation
-3. **`src/active_inference/`** - Precision and belief update mechanisms
+1. **`src/transformations/case_transformations.py`** - Case transformation logic
+2. **`src/models/case_definitions.py`** - Entity case representation
+3. **`src/core/active_inference.py`** - Precision and belief update mechanisms
 4. **`tests/`** - Validation against linguistic expectations
 
 ## Contributing

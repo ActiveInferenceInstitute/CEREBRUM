@@ -4,7 +4,7 @@ Tests for the core calculus operations defined in
 """
 
 import pytest
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any
 
 # Adjust the import path based on your project structure 
 from beyond_cerebrum.src.operations.calculus import unify, project, compose, apply

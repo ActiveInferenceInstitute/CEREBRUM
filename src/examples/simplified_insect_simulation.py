@@ -12,14 +12,12 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')  # Use non-interactive backend
 import matplotlib.pyplot as plt
-from typing import List, Dict, Any
-from datetime import datetime
 
 # Add the project root to the path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from src.models.insect.species import HoneybeeModel, AntModel, FruitFlyModel
-from src.models.insect.base import BehavioralState, SensoryInput
+from src.models.insect.base import SensoryInput
 from src.visualization.insect import InsectSimulationLogger, CasePerformanceLogger, BehavioralLogger
 from src.utils.output_organizer import SimulationOutputOrganizer
 from src.analysis.simulation_assessment import SimulationEffectivenessAnalyzer

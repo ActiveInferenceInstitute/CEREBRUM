@@ -5,7 +5,7 @@ This module implements the [CAST] caste case for social insect caste systems,
 including caste determination, role specialization, and caste-specific behaviors.
 """
 
-from typing import Dict, Any, Optional, List, Tuple
+from typing import Dict, Any, Optional, List
 import numpy as np
 import logging
 from dataclasses import dataclass, field

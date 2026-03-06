@@ -1,7 +1,6 @@
-from typing import Dict, Any, Optional, List, Callable, Tuple, Union
+from typing import Dict, Any, List, Tuple
 import numpy as np
 import logging
-import time
 
 from src.core.model import Model, Case
 

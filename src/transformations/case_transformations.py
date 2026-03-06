@@ -5,8 +5,7 @@ This module provides functions for transforming models between different cases,
 as well as utilities for managing case relationships between multiple models.
 """
 
-from typing import Dict, Any, List, Optional, Tuple, Union
-import numpy as np
+from typing import Dict, Any, List, Optional, Tuple
 
 from src.core.model import Model, Case
 

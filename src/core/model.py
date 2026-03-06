@@ -1,6 +1,5 @@
-import numpy as np
 from enum import Enum
-from typing import Dict, Any, Optional, List, Callable, Tuple, Union
+from typing import Dict, Any, Optional, List, Tuple
 import uuid
 import logging
 

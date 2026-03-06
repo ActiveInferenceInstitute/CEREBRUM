@@ -7,7 +7,6 @@ import re
 import time
 from typing import Dict, Any, List, Optional, Union
 from datetime import datetime
-import requests
 from requests.exceptions import RequestException
 
 

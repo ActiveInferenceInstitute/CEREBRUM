@@ -10,10 +10,10 @@ Also requires the Graphviz system package to be installed:
 
 import graphviz
 import os
-from typing import TypeVar, Generic, Any, Optional
+from typing import TypeVar, Any
 
 # Import necessary structures (adjust path as needed)
-from ..formalisms.structures import Tree, TreeNode, Graph, GraphNode, GraphEdge
+from ..formalisms.structures import Tree, TreeNode, Graph
 
 # Generic type variables used in structures
 NodeData = TypeVar('NodeData')

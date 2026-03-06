@@ -26,9 +26,6 @@ import asyncio
 from .OpenRouter.openrouter import (
     OpenRouterClient, 
     OpenRouterConfig, 
-    RetryConfig, 
-    CircuitBreakerConfig,
-    Conversation,
     quick_chat
 )
 from .openrouter_analysis_engine import OpenRouterAnalysisEngine
@@ -415,8 +412,8 @@ def example_analysis_engine():
     print("🔬 ANALYSIS ENGINE")
     print("="*60)
     
-    # Mock config for testing
-    class MockConfig:
+    # Config adapter for the analysis engine
+    class ExampleConfig:
         def __init__(self):
             self.api_key = get_api_key()
             self.model = get_model_name()
@@ -424,7 +421,7 @@ def example_analysis_engine():
             self.temperature = model_config["temperature"]
             self.max_tokens = model_config["max_tokens"]
     
-    config = MockConfig()
+    config = ExampleConfig()
     
     # Initialize analysis engine
     engine = OpenRouterAnalysisEngine(config, "example_analysis")

@@ -10,6 +10,7 @@ Executable scripts for running tests and examples as thin orchestrators.
 | ------ | ------- |
 | `run_all_tests.py` | Main test runner |
 | `run_all_examples.py` | Example orchestrator |
+| `run_tests.py` | Configurable test runner (module/coverage) |
 | `test_all_cases.py` | Case transformation tests |
 
 ## Usage

@@ -1,0 +1,170 @@
+{
+  "assessments": {
+    "convention_outlier": 42,
+    "error_consistency": 38
+  },
+  "findings": [
+    {
+      "dimension": "convention_outlier",
+      "identifier": "case_class_protocol_divergence",
+      "summary": "Case handler classes follow inconsistent protocols across sibling modules: NominativeCase and AccusativeCase lack PRECISION and VALID_TRANSITIONS class constants present in AblativeCase, LocativeCase, GenitiveCase, InstrumentalCase, and VocativeCase.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/nominative.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/accusative.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/ablative.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/locative.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/instrumental.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/vocative.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/genitive.py"
+      ],
+      "evidence": [
+        "AblativeCase (line 24): `PRECISION = 1.1`, LocativeCase (line 24): `PRECISION = 0.9`, GenitiveCase (line 24): `PRECISION = 1.0`, InstrumentalCase (line 24): `PRECISION = 0.8`, VocativeCase (line 24): `PRECISION = 2.0` — but NominativeCase and AccusativeCase have no PRECISION constant.",
+        "AblativeCase (line 27): `VALID_TRANSITIONS = [Case.NOMINATIVE]`, LocativeCase (line 27): `VALID_TRANSITIONS = [Case.ABLATIVE]` — neither NominativeCase, AccusativeCase, InstrumentalCase, GenitiveCase, VocativeCase, nor DativeCase define this attribute.",
+        "AccusativeCase exposes two extra static methods not present on any other case class: `accept_updates` (line 117) and NominativeCase has no analogue. InstrumentalCase uniquely adds `execute_operation` (line 130) and `register_operation` (line 154). DativeCase lacks `get_parameters`, which is present on six of eight sibling classes."
+      ],
+      "suggestion": "Define a shared abstract base class or Protocol for all case handlers, declaring required class-level constants (PRECISION, VALID_TRANSITIONS) and a standard method surface (apply, process_update, calculate_free_energy, get_parameters). Each case module must then satisfy the protocol, eliminating the per-class drift.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "convention_outlier",
+      "identifier": "case_manager_partial_handler_registry",
+      "summary": "CaseManager.case_handlers only registers NominativeCase and AccusativeCase, silently falling back to bare model.case assignment for the other six cases, contradicting the pattern established by the full eight-case class hierarchy.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/case_manager.py"
+      ],
+      "evidence": [
+        "Lines 28–32 of case_manager.py: `self.case_handlers = { Case.NOMINATIVE: NominativeCase, Case.ACCUSATIVE: AccusativeCase, # Add other cases as they're implemented }` — the comment acknowledges the gap, but the remaining six case handler classes exist and are exported from `__init__.py`.",
+        "Lines 77–83: `transform_case` falls through to `model.case = target_case` for all non-registered cases, bypassing the handler classes entirely.",
+        "Lines 139–146: `process_update` similarly falls back to `model.update(data)` for unregistered cases, meaning DativeCase, GenitiveCase, InstrumentalCase, AblativeCase, LocativeCase, and VocativeCase handlers are dead code from the manager's perspective."
+      ],
+      "suggestion": "Populate case_handlers with all eight case classes at construction time. If a case class is not yet production-ready, mark it explicitly with a feature flag rather than leaving the registry empty and silently bypassing the handler layer.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "convention_outlier",
+      "identifier": "insect_model_duplicate_case_tracking",
+      "summary": "InsectModel introduces a redundant `self.current_case` attribute (line 92 of base.py) alongside the inherited `Model._case` / `Model.case` property, creating two parallel case-tracking fields that can diverge silently.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/insect/base.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py"
+      ],
+      "evidence": [
+        "InsectModel.__init__ line 92: `self.current_case = initial_case` — a plain instance attribute set directly, not via `Model.case` setter.",
+        "InsectModel internally reads `self.current_case` throughout (lines 337, 343, 353-354, 388, 584, 701), while `Model.case` property is backed by `self._case`. The two can differ if only one is updated.",
+        "Model.case setter (model.py lines 60-73) maintains `_case_history` and calls `_apply_case_transformation`; bypassing it with `self.current_case` skips both side-effects."
+      ],
+      "suggestion": "Remove `self.current_case` from InsectModel and route all reads/writes through the inherited `self.case` property. If additional case-transition logic is needed, override `_apply_case_transformation` rather than maintaining a parallel field.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "convention_outlier",
+      "identifier": "module_level_logging_basicconfig_in_library_code",
+      "summary": "src/core/model.py calls logging.basicConfig at module import time, which is a global side-effect that pollutes the root logger for any consumer of the library.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py"
+      ],
+      "evidence": [
+        "model.py line 8: `logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')` executes unconditionally on import.",
+        "active_inference.py (line 8) correctly uses `logger = logging.getLogger(__name__)` without calling basicConfig. The root module establishes a contradictory pattern that every downstream importer inherits."
+      ],
+      "suggestion": "Remove the `logging.basicConfig` call from model.py. Add `logger = logging.getLogger(__name__)` and let the application entry point configure the root handler. All 57 importers of model.py currently receive the misconfigured root handler on first import.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "convention_outlier",
+      "identifier": "logging_namespace_inconsistency_in_cases",
+      "summary": "Case modules mix bare `logging.warning/logging.info` calls with the module-level `logger` pattern used elsewhere in the project, creating two different logging namespaces within the same package.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/nominative.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/accusative.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/instrumental.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/ablative.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/case_manager.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/insect/base.py"
+      ],
+      "evidence": [
+        "nominative.py line 40: `logging.info(...)`, line 107: `logging.warning(...)` — uses the root logger.",
+        "accusative.py line 39: `logging.info(...)`, line 76: `logging.info(...)`, line 111: `logging.warning(...)` — same pattern.",
+        "insect/base.py line 17: `logger = logging.getLogger(__name__)`, line 118: `logger.info(...)` — uses named module logger.",
+        "active_inference.py line 8: `logger = logging.getLogger(__name__)` — uses named module logger. No case module defines a named logger despite emitting many log messages."
+      ],
+      "suggestion": "Add `logger = logging.getLogger(__name__)` at module level in each case module and replace all bare `logging.X` calls with `logger.X`. This gives per-module filtering granularity and is consistent with the rest of the codebase.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "error_consistency",
+      "identifier": "bare_exception_swallow_in_calculate_free_energy",
+      "summary": "All eight case handler calculate_free_energy methods catch bare Exception, log a warning, and return a hardcoded default float — silently swallowing all errors including programming mistakes, with no way for callers to distinguish a computed result from a fallback.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/nominative.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/accusative.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/ablative.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/genitive.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/instrumental.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/locative.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/vocative.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/dative.py"
+      ],
+      "evidence": [
+        "nominative.py lines 96-108: `try: ... except Exception as e: logging.warning(...); return default_fe` — default_fe=1.0.",
+        "accusative.py lines 99-112: identical pattern — default_fe=0.5.",
+        "ablative.py lines 95-106: identical pattern — default_fe=1.0 but uses `AblativeCase.PRECISION` multiplier before the exception, so the default does not reflect the same scale.",
+        "All eight case files follow this identical catch-and-return-default pattern, meaning AttributeError on a missing attribute, TypeError from a bad numpy operation, and MemoryError from a large array all produce the same silent warning log and identical numeric return.",
+        "CaseManager.calculate_free_energy (case_manager.py lines 185-206) has no exception handling at all, so if free_energy() raises NotImplementedError from the base Model, it propagates uncaught — inconsistent with the swallowing pattern in every case class."
+      ],
+      "suggestion": "Narrow the catch to expected numeric/attribute errors (e.g., `except (AttributeError, ValueError, np.linalg.LinAlgError)`). Return a sentinel such as `float('nan')` or a typed Result so callers can detect the fallback. For `CaseManager.calculate_free_energy`, add a catch for `NotImplementedError` to match the handler behaviour, or document the inconsistency explicitly.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "error_consistency",
+      "identifier": "mixed_error_strategy_core_vs_lexicon",
+      "summary": "The core subsystem raises generic built-in exceptions (NotImplementedError, ValueError, TypeError, RuntimeError) while the lexicon subsystem maintains a full typed exception hierarchy (LexiconError → ConfigurationError, APIError, ProcessingError, etc.), with no bridging at subsystem boundaries.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/linear_regression.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/lexicon/core/exceptions.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/lexicon/core/engine.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/llm/OpenRouter/openrouter.py"
+      ],
+      "evidence": [
+        "model.py lines 123, 135: raises bare `NotImplementedError` with no custom exception type.",
+        "linear_regression.py lines 69, 80, 160: raises bare `ValueError` strings.",
+        "src/llm/OpenRouter/openrouter.py lines 212, 252: raises bare `Exception(\"Circuit breaker is OPEN...\")` — the most degenerate possible error type.",
+        "lexicon/core/exceptions.py: defines 12 typed exception classes (LexiconError, ConfigurationError, APIError, ModelError, InputError, GraphError, StorageError, ProcessingError, RateLimitError, AuthenticationError, TimeoutError, ParsingError).",
+        "lexicon/core/engine.py line 154: raises `ValueError` inside the lexicon subsystem rather than `ConfigurationError`, breaching its own hierarchy.",
+        "src/llm/ollama/client.py lines 158-165: raises `OllamaConnectionError` and `OllamaError` (a third, separate error hierarchy not visible in lexicon/core/exceptions.py)."
+      ],
+      "suggestion": "Define a top-level `CerebrumError` hierarchy for the core subsystem mirroring what lexicon already has. Retire bare `Exception(...)` raises in the LLM layer; map them into the appropriate hierarchy. At lexicon/core/engine.py:154, replace `ValueError` with `ConfigurationError` to stay consistent with the declared hierarchy.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "error_consistency",
+      "identifier": "silent_none_return_on_failed_operation",
+      "summary": "InstrumentalCase.execute_operation returns None when the requested operation is not found on the model, instead of raising an error, creating a silent failure mode.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/instrumental.py"
+      ],
+      "evidence": [
+        "instrumental.py lines 144-151: `if hasattr(model, operation) and callable(getattr(model, operation)): ... return result` / `else: logging.warning(...); return None` — callers receive None with no indication that the operation was not found.",
+        "This contrasts with model.py lines 123, 135 which raise NotImplementedError for unimplemented interface methods — the two failure modes for a missing capability are inconsistent within the same framework."
+      ],
+      "suggestion": "Raise a specific error (e.g., `AttributeError` or a custom `OperationNotFoundError`) instead of returning None. If None-return is required for backward compatibility, at minimum raise in strict mode and document the silent-failure contract explicitly.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "error_consistency",
+      "identifier": "visualization_animated_graph_silent_error_swallow",
+      "summary": "src/lexicon/visualization/animated_graph.py swallows at least six distinct Exception catches with only a log.error or log.warning and no propagation, meaning animation generation failures are invisible to callers.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/lexicon/visualization/animated_graph.py"
+      ],
+      "evidence": [
+        "Lines 50-51: `except Exception as e: logger.error(f\"Failed to create graph construction animation: {e}\")` — function returns None.",
+        "Lines 58-59, 66-67, 179-180, 271-272, 319-320, 342-343: all follow the same catch-and-log pattern with no re-raise.",
+        "Callers cannot distinguish a successfully produced animation from a silently failed one without inspecting side-effects (presence of output files)."
+      ],
+      "suggestion": "Either re-raise after logging (`raise`) or return a typed result/success indicator that callers can check. Where failure is expected and recoverable, document it explicitly rather than silently returning None.",
+      "confidence": "medium"
+    }
+  ]
+}

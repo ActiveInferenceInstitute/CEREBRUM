@@ -10,8 +10,7 @@ import shutil
 import time
 import json
 from datetime import datetime
-from typing import Dict, List, Any, Optional
-from pathlib import Path
+from typing import Dict, Any
 
 from .path_utils import get_output_dir
 

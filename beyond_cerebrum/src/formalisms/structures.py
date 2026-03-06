@@ -7,8 +7,7 @@ linguistic information, based on the types defined in `types.py`.
 (Specification Section 2.2)
 """
 
-from typing import TypeVar, Generic, List, Dict, Optional, Any, Type
-from .types import SyntacticLabel, SemanticConcept # Example imports, adjust as needed
+from typing import TypeVar, Generic, List, Dict, Optional, Any
 
 # --- Type Variables --- 
 NodeType = TypeVar('NodeType')

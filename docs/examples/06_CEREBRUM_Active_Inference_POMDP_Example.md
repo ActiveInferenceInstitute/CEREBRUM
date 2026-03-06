@@ -1,6 +1,6 @@
 # CEREBRUM Example: Active Inference with POMDPs
 
-This document provides an example of applying the CEREBRUM framework to understand Active Inference agents modeled as Partially Observable Markov Decision Processes (POMDPs), as demonstrated in `src/tests/test_active_inference_pomdp.py`.
+This document provides an example of applying the CEREBRUM framework to understand Active Inference agents modeled as Partially Observable Markov Decision Processes (POMDPs), as demonstrated in `tests/core/test_active_inference_pomdp.py`.
 
 ## Introduction to Active Inference and POMDPs
 
@@ -83,7 +83,7 @@ The test suite implements these cases by:
 2.  **Defining Cases:** Creates specific linguistic interpretations and associated data/parameters for each CEREBRUM case (e.g., assigning specific goals or initial beliefs relevant to the case).
 3.  **Instantiating the Model:** Creates `POMDPModel` instances, potentially tailored for each case.
 4.  **Running Simulations:** Executes action-perception cycles, updating beliefs.
-5.  **Generating Visualizations:** Creates plots and animations specific to each case, stored in `src/tests/output/active_inference_pomdp/`. These visualizations directly illustrate the perspective offered by that case:
+5.  **Generating Visualizations:** Creates plots and animations specific to each case, stored in `tests/output/active_inference_pomdp/`. These visualizations directly illustrate the perspective offered by that case:
     - Belief state evolution (bar charts, often animated) - ACCUSATIVE, LOCATIVE
     - State/Observation trajectories - NOMINATIVE, DATIVE
     - Entropy/KL Divergence plots - GENITIVE

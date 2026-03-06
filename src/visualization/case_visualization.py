@@ -9,9 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import networkx as nx
-from typing import Dict, List, Any, Optional, Tuple, Union, Callable
-import io
-from PIL import Image
+from typing import List, Tuple
 
 from src.core.model import Model, Case
 

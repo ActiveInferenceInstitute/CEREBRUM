@@ -7,7 +7,6 @@ This script will regenerate all GIF animations that might be blank or corrupted.
 import os
 import sys
 import logging
-import importlib
 import numpy as np
 import shutil
 from pathlib import Path
@@ -88,8 +87,7 @@ def ensure_consistent_folders(output_dir, case_dict):
 def regenerate_animations():
     """Regenerate all GIF animations for linear regression cases"""
     # Import necessary modules (after paths are set up)
-    from src.models.base import Case
-    from src.tests.linear_regression_cases import (
+    from tests.models.linear_regression_cases import (
         test_vocative_case,
         test_nominative_case,
         test_accusative_case,
@@ -121,7 +119,7 @@ def regenerate_animations():
     # Define output directory
     output_dir = os.path.join(
         Path(__file__).parent.parent.parent, 
-        "src/tests/output/linear_regression"
+        "tests/output/linear_regression"
     )
     
     # Make sure output directory exists
@@ -254,7 +252,7 @@ def ensure_consistent_animation_paths():
     # Get list of all test case files
     case_files_dir = os.path.join(
         Path(__file__).parent.parent, 
-        "tests/linear_regression_cases"
+        "tests/models/linear_regression_cases"
     )
     
     # Get all _case.py files

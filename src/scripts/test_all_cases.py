@@ -10,7 +10,7 @@ import os
 import sys
 import logging
 import argparse
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 import matplotlib.pyplot as plt
 from datetime import datetime
 
@@ -20,10 +20,10 @@ parent_dir = os.path.dirname(current_dir)
 if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
-from src.core.model import Model, Case
-from src.tests.test_active_inference_pomdp import run_all_case_tests as run_pomdp_tests
-from src.tests.test_neural_network import run_all_case_tests as run_nn_tests
-from src.tests.test_linear_regression import run_all_case_tests as run_linear_tests
+from src.core.model import Case
+from tests.core.test_active_inference_pomdp import run_all_case_tests as run_pomdp_tests
+from tests.core.test_neural_network import run_all_case_tests as run_nn_tests
+from tests.models.test_linear_regression import run_all_case_tests as run_linear_tests
 from src.visualization.case_comparison import CaseComparisonVisualizer
 
 # Configure logging

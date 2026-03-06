@@ -9,7 +9,7 @@ Note: Implementing significant category theory machinery in Python can be comple
 Consider using existing libraries or focusing on conceptual mapping first.
 """
 
-from typing import TypeVar, Generic, Callable, Any, List
+from typing import TypeVar, Generic, Any, List
 from abc import ABC, abstractmethod
 
 # --- Basic Type Variables ---

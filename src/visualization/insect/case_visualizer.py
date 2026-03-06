@@ -7,18 +7,14 @@ including case transitions, effectiveness analysis, and case relevance tracking.
 
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from matplotlib.patches import Circle, Rectangle, Polygon
-from matplotlib.collections import LineCollection
-import seaborn as sns
-from typing import Dict, Any, List, Optional, Tuple, Union
+from typing import Dict, Any, Optional, Tuple
 import logging
 import os
 import time
 from collections import defaultdict, deque
 
 from src.core.model import Case
-from src.models.insect.base import InsectModel, BehavioralState
+from src.models.insect.base import InsectModel
 
 logger = logging.getLogger(__name__)
 

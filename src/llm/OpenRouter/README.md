@@ -260,7 +260,7 @@ python examples/openrouter_benchmark.py
 
 3. **Install Dependencies:**
    ```bash
-   pip install aiohttp requests
+   uv pip install aiohttp requests
    ```
 
 ## Architecture
@@ -295,7 +295,7 @@ logging.basicConfig(level=logging.INFO)
 
 - **Documentation:** This README and inline code documentation
 - **Examples:** See `examples/` directory for usage patterns
-- **Tests:** Reference `tests/test_openrouter_consolidated.py` for all capabilities
+- **Tests:** Reference `tests/llm/test_openrouter_functionality.py` for all capabilities
 - **OpenRouter API:** [Official Documentation](https://openrouter.ai/docs)
 
 ## Contributing

@@ -7,20 +7,18 @@ Generates micro-paraphrases for text segments.
 import time
 import json
 import os
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
-import logging
 import hashlib
 import re # Added missing import
 
 from ..core.config import LexiconConfig
 from ..core.logging import get_logger, LoggingTimer
-from ..core.exceptions import ProcessingError, ModelError
 from ..declension.tagger import CasedSegment
 from .prompt_templates import get_paraphrase_prompt, get_quality_prompt
 from .cache import get_cache, save_to_cache
 
-from src.llm.OpenRouter import OpenRouterClient, OpenRouterConfig
+from src.llm.OpenRouter import OpenRouterClient
 
 
 @dataclass

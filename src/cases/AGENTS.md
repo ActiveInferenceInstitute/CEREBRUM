@@ -24,7 +24,7 @@ The `cases/` module implements the eight linguistic cases used in CEREBRUM.
 | `CaseManager` | `case_manager.py` | Orchestrates case state transitions |
 | `NominativeCase` | `nominative.py` | Agent/Subject case implementation |
 | `AccusativeCase` | `accusative.py` | Patient/Object case implementation |
-| `AnimalCaseManager` | `animal_case_manager.py` | Specialized for animal models |
+| `AnimalCases` | `animal_cases.py` | Animal-specific case implementations |
 
 ## Key Exports
 
@@ -32,7 +32,7 @@ The `cases/` module implements the eight linguistic cases used in CEREBRUM.
 from src.cases import (
     Case, CaseManager, NominativeCase, AccusativeCase,
     DativeCase, GenitiveCase, InstrumentalCase, LocativeCase,
-    AblativeCase, VocativeCase, AnimalCaseManager
+    AblativeCase, VocativeCase
 )
 ```
 

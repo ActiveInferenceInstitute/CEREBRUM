@@ -1,0 +1,219 @@
+{
+  "assessments": {
+    "abstraction_fitness": 42,
+    "ai_generated_debt": 31,
+    "design_coherence": 44
+  },
+  "findings": [
+    {
+      "dimension": "abstraction_fitness",
+      "identifier": "case_handler_passthrough_nominative",
+      "summary": "NominativeCase.apply() is a pure passthrough that only sets model.case and logs; it adds no policy over the base setter.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/nominative.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/case_manager.py"
+      ],
+      "evidence": [
+        "NominativeCase.apply() (nominative.py:23-41) sets model.case = Case.NOMINATIVE and calls logging.info, nothing more.",
+        "CaseManager.transform_case() (case_manager.py:66-83) calls handler.apply(model) for NOMINATIVE/ACCUSATIVE, then falls back to model.case = target_case for all other cases — making the handler path equivalent to the fallback for the two cases that do have handlers.",
+        "CaseManager only registers handlers for NOMINATIVE and ACCUSATIVE (case_manager.py:28-32); all other cases fall through to the bare assignment, making the handler registry a half-implemented abstraction layer."
+      ],
+      "suggestion": "Either complete all eight case handlers so the registry carries real policy, or collapse the handler registry entirely and route all case-setting through the model's own setter, removing the extra indirection.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "abstraction_fitness",
+      "identifier": "dual_config_objects_lexicon",
+      "summary": "src/lexicon/core/config.py defines two parallel configuration representations (LexiconConfig dataclass and LEXICON_OPENROUTER_CONFIG dict) that overlap in content.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/lexicon/core/config.py"
+      ],
+      "evidence": [
+        "LexiconConfig dataclass (config.py:77-142) stores base_api_url, default_model, fallback_models, retry config implicitly through timeout_seconds.",
+        "LEXICON_OPENROUTER_CONFIG plain dict (config.py:164-184) re-declares base_url, default_models per-task, retry_config with max_retries/base_delay/max_delay, and circuit_breaker — none of which appear in LexiconConfig.",
+        "Both objects are module-level; callers must know which representation to use, leading to implicit parameter bag duplication."
+      ],
+      "suggestion": "Merge retry_config and circuit_breaker fields into LexiconConfig and remove the LEXICON_OPENROUTER_CONFIG dict; expose a single typed config object to all consumers.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "abstraction_fitness",
+      "identifier": "neural_structure_dict_bag",
+      "summary": "Neural structures in InsectModel are stored as plain dicts with heterogeneous keys rather than typed objects, creating an implicit parameter bag pattern.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/insect/base.py"
+      ],
+      "evidence": [
+        "_initialize_neural_structures() (base.py:120-210) builds dicts with keys 'type', 'activity', 'learning_rate', 'memory_capacity', 'case_assignment', 'connections', 'spatial_map', 'heading_direction', 'odor_responses', 'motion_detection', 'color_processing', 'motor_commands', 'rhythm_generators' — each structure having a different key set.",
+        "_update_neural_priorities() (base.py:446-474) must check both hasattr(structure, 'priority') and isinstance(structure, dict) to handle whichever form a structure takes, proving the dict bag causes defensive branching downstream.",
+        "process_sensory_input() (base.py:476-524) calls structure.process_input() on dict objects that have no such method, meaning the code will raise AttributeError at runtime on every sensory input call."
+      ],
+      "suggestion": "Introduce a NeuralStructure dataclass or Protocol with typed fields (activity, case_assignment, connections) and a process_input method; replace dict construction with typed instantiation.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "abstraction_fitness",
+      "identifier": "insect_model_duplicate_case_tracking",
+      "summary": "InsectModel maintains its own self.current_case alongside the inherited self._case from Model, creating two parallel case-tracking mechanisms.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/insect/base.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py"
+      ],
+      "evidence": [
+        "InsectModel.transform_case() (base.py:327-363) updates self.current_case but never calls super().case setter, so self._case (from Model) diverges from self.current_case immediately after the first transform.",
+        "InsectModel._select_action_by_case() (base.py:563-585) branches on self.current_case, while Model.update() (model.py:174-202) branches on self._case — two dispatch tables reading from two different attributes that can hold different values.",
+        "InsectModel.__init__ sets self.current_case = initial_case (base.py:92) and also calls super().__init__() which defaults self._case to Case.NOMINATIVE (model.py:41), meaning they start in sync only by accident."
+      ],
+      "suggestion": "Remove self.current_case entirely; override the case property setter in InsectModel to run the precision/priority updates, and read self.case everywhere.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "identifier": "restating_comments_model_update",
+      "summary": "Case-specific _update_* methods in Model and ActiveInferenceModel have docstrings and inline comments that restate what the method name already communicates.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/active_inference.py"
+      ],
+      "evidence": [
+        "model.py:205 _update_nominative docstring: 'Update for NOMINATIVE case: model as active agent generating predictions.' — identical information is in the Case enum comment and the method name.",
+        "active_inference.py:395 _update_nominative inline comment: '# Generate predictions without observations' above a call to self.likelihood(self.posterior_means) — the code expresses this unambiguously.",
+        "active_inference.py:418-428 _update_accusative: comment '# In ACCUSATIVE case, the model receives parameter updates' precedes two lines that call update_posterior, which communicates the same thing.",
+        "active_inference.py:479-480: '# In INSTRUMENTAL case, model serves as a computational tool' echoes the docstring on the same method from three lines earlier."
+      ],
+      "suggestion": "Remove inline comments that mirror the method name or the docstring. Keep only comments that explain non-obvious decisions (e.g., why learning_rate is 0.1, why samples=5).",
+      "confidence": "high"
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "identifier": "placeholder_stub_bodies",
+      "summary": "InsectActiveInferenceModel implements core active-inference methods as stubs returning zeros or random values, while carrying full docstrings implying real behavior.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/insect/base.py"
+      ],
+      "evidence": [
+        "_predict_observations() (base.py:787-795): full docstring, body is 'return np.zeros(10)  # Placeholder'.",
+        "_compute_expected_free_energy() (base.py:851-862): two-paragraph docstring explaining forward models and belief propagation, body returns 'np.random.rand(5) * 0.5' with comment '# Placeholder: random expected free energy values'.",
+        "beliefs dict (base.py:745-748): three entries all marked '# Placeholder'.",
+        "self.expected_free_energy = np.zeros(5)  # Placeholder (base.py:752)."
+      ],
+      "suggestion": "Either implement the methods or mark the class explicitly as abstract/NotImplemented so callers cannot instantiate it expecting correct free energy semantics.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "identifier": "noisy_entry_exit_logging",
+      "summary": "Fine-grained info-level logging on routine operations (initialization, parameter updates, state changes) floods the log with implementation details rather than domain events.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/active_inference.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/insect/base.py"
+      ],
+      "evidence": [
+        "model.py:72 logs every case change at INFO with model name, id, old and new value — emitted on every model.case assignment.",
+        "model.py:163 logs every set_parameters() call with the key list at INFO.",
+        "active_inference.py:94 logs 'Initialized ActiveInferenceModel ...' at INFO in __init__.",
+        "base.py:118 logs 'Initialized {species} model with case {initial_case}' at INFO.",
+        "base.py:358 logs 'Transformed case: {old} -> {target}' at INFO, duplicating the model.py:72 log that fires through the inherited setter path.",
+        "active_inference.py:319 and 343 log posterior update values at DEBUG on every single Bayesian update step.",
+        "logging.basicConfig is called at module import level in src/core/model.py:8, overriding any logging configuration set by callers."
+      ],
+      "suggestion": "Downgrade routine per-object lifecycle events (init, parameter set, single case change) to DEBUG. Reserve INFO for domain-significant events. Remove the module-level basicConfig call from model.py.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "identifier": "dead_precision_update_branches",
+      "summary": "_apply_case_transformation in ActiveInferenceModel has four elif branches that execute pass with a comment, making them structurally identical dead code.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/active_inference.py"
+      ],
+      "evidence": [
+        "active_inference.py:171-179: precision_focus branches for 'parameters', 'inputs', and 'outputs' all resolve to pass with a comment stating what 'will be handled' elsewhere.",
+        "Only the 'likelihood' branch (nominative) runs actual code (multiplies likelihood_precision). The other three branches exist solely to look structurally complete.",
+        "This is a pattern of defensive scaffolding — empty branches written to suggest symmetry rather than encode behavior."
+      ],
+      "suggestion": "Remove the empty elif branches. If they are intended future extension points, raise NotImplementedError or use a TODO comment at the top of the method rather than empty conditional arms.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "identifier": "call_signature_mismatch_instrumental",
+      "summary": "_update_instrumental calls self.update_posterior(observations, learning_rate) with two arguments, but update_posterior only accepts one.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/active_inference.py"
+      ],
+      "evidence": [
+        "update_posterior signature (active_inference.py:265): def update_posterior(self, observation: np.ndarray) -> Dict[str, Any] — one parameter.",
+        "_update_instrumental (active_inference.py:515): self.update_posterior(observations, learning_rate) passes learning_rate as a second positional argument.",
+        "This would raise TypeError at runtime whenever the INSTRUMENTAL case invert path is exercised."
+      ],
+      "suggestion": "Add learning_rate as an optional parameter to update_posterior and wire it into the simplified update path, or remove the argument from the _update_instrumental call.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "design_coherence",
+      "identifier": "update_method_if_chain_not_dispatch",
+      "summary": "Model.update() uses an eight-arm if/elif chain to dispatch to case methods rather than a data-driven dispatch table, despite a data-driven table already existing in InsectModel._select_action_by_case().",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/insect/base.py"
+      ],
+      "evidence": [
+        "model.py:185-202: eight elif branches, each doing self._update_{casename}(data) — structurally a dispatch table written as a conditional chain.",
+        "base.py:573-585: InsectModel._select_action_by_case() correctly uses a dict {Case.X: self._select_x_action} and a .get() lookup — the same pattern the parent class could use.",
+        "The inconsistency means new cases require edits in two places in different styles."
+      ],
+      "suggestion": "Replace the if/elif chain in Model.update() with a dict dispatch table keyed on Case values, consistent with the pattern already used in InsectModel.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "design_coherence",
+      "identifier": "insect_active_inference_three_level_hierarchy",
+      "summary": "The three-level class chain Model -> ActiveInferenceModel -> InsectModel -> InsectActiveInferenceModel adds depth without clear separation of responsibilities at each layer.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/active_inference.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/insect/base.py"
+      ],
+      "evidence": [
+        "InsectModel extends ActiveInferenceModel which extends Model. InsectActiveInferenceModel then extends InsectModel, creating four inheritance levels.",
+        "InsectActiveInferenceModel introduces compute_free_energy() and update_beliefs() — but ActiveInferenceModel (two levels up) already implements free_energy() and update_posterior() for the same concepts.",
+        "InsectModel.__init__ hard-codes n_states=5 default_parameters (base.py:81-87), bypassing ActiveInferenceModel's prior_means/prior_precision constructor parameters that exist for exactly this purpose.",
+        "The fourth level (InsectActiveInferenceModel) re-declares a 'beliefs' dict that duplicates the posterior_means/posterior_precision already managed by the grandparent class."
+      ],
+      "suggestion": "Flatten to two levels: a domain-agnostic ActiveInferenceModel base and a species-parameterized InsectModel. Move active-inference extensions into the base class rather than into a fourth subclass.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "design_coherence",
+      "identifier": "valid_transitions_all_to_all",
+      "summary": "_validate_case_transformation defines a transition graph where every case can reach every other case, making the validation trivially vacuous.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/insect/base.py"
+      ],
+      "evidence": [
+        "base.py:377-387: every Case key maps to a list containing all seven other Cases.",
+        "A comment at base.py:376 states 'Made more flexible to allow realistic case transitions' — indicating the constraint was previously tighter and was loosened to pass tests rather than to model domain structure.",
+        "The function always returns True for any (current_case, target_case) pair, making it dead validation code that adds call overhead without enforcement."
+      ],
+      "suggestion": "Either define a meaningful sparse transition graph that encodes real insect behavioral constraints, or remove the validation function and the try/except wrapping in transform_case() if all transitions are valid by design.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "design_coherence",
+      "identifier": "configure_torch_in_lexicon_config",
+      "summary": "src/lexicon/core/config.py mixes configuration data with a DeviceContext runtime utility and torch environment setup, violating single-responsibility.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/lexicon/core/config.py"
+      ],
+      "evidence": [
+        "config.py:27-73 defines configure_torch_environment() and DeviceContext — both are runtime device management concerns unrelated to configuration persistence.",
+        "config.py:14-24 suppresses two PyTorch CUDA warnings at module import time, meaning any module importing LexiconConfig silently alters the global warning filter.",
+        "LexiconConfig itself (lines 77-142) does not reference torch at all, confirming the torch utilities are colocated by accident rather than design."
+      ],
+      "suggestion": "Move configure_torch_environment and DeviceContext to a src/lexicon/core/device.py module. Move warning suppression into that module or into application entry points, not a config import.",
+      "confidence": "high"
+    }
+  ]
+}

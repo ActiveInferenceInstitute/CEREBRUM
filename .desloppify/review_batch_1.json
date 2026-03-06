@@ -1,0 +1,207 @@
+{
+  "assessments": {
+    "cross_module_architecture": 28,
+    "package_organization": 35,
+    "dependency_health": 42
+  },
+  "findings": [
+    {
+      "dimension": "cross_module_architecture",
+      "id": "dual_model_class_identity_split",
+      "summary": "Two distinct Model classes exist at src/core/model.py and src/models/base.py with incompatible signatures, creating a permanent identity fork in the codebase",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/base.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/__init__.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/__init__.py"
+      ],
+      "evidence": [
+        "src/core/model.py defines Model.__init__(self, name=None, parameters=None) with full case dispatch logic, precision weights, connections list, and _case_configurations dict",
+        "src/models/base.py defines a separate Model.__init__(self, name: str, case: Case = Case.NOMINATIVE) with a data_buffer dict and no precision or connections attributes",
+        "src/models/base.py re-exports Case from src.core.model (line 12: 'from src.core.model import Case') but redefines Model, meaning Model in src.models is NOT a subclass of Model in src.core",
+        "src/__init__.py exposes Model from src.core (via 'from .core import Model'), while src/models/__init__.py exposes a different Model from src.models.base",
+        "src/models/linear_regression.py inherits from src.models.base.Model (via 'from .base import Model'), so LinearRegressionModel is completely disjoint from the core Model hierarchy",
+        "src/models/insect/base.py imports ActiveInferenceModel from src.core.active_inference (which inherits core Model) but imports Case from src.core.model directly, bypassing models.base entirely"
+      ],
+      "suggestion": "Collapse src/models/base.py into src/core/model.py. The lightweight Model in models/base.py should either be deleted and replaced with a direct import of src.core.model.Model, or merged by extending core Model. All subclasses currently under src/models/ should inherit from the single canonical Model in src.core.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "cross_module_architecture",
+      "id": "case_enum_re_exported_from_three_sites",
+      "summary": "The Case enum is re-exported independently from src.core.model, src.cases.__init__, src.models.base, and src.models.__init__, creating four parallel import paths for the same object",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/__init__.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/base.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/__init__.py"
+      ],
+      "evidence": [
+        "src/core/model.py: canonical definition of Case",
+        "src/models/base.py line 12: 're-exports Case from src.core.model for unified identity' but this comment is misleading since it makes a second canonical path",
+        "src/models/__init__.py line 6: 'from .base import Model, Case' — exposes Case through models package",
+        "src/cases/__init__.py line 29: 'from src.core.model import Case' — third re-export site",
+        "Consumers across 32 files use inconsistent import paths (some import from src.core.model directly, some from src.models, some from src.cases), confirmed by grep count showing 32 files importing from src.core.model alone"
+      ],
+      "suggestion": "Define Case once in src/core/model.py. Remove the re-export from src/models/base.py and src/cases/__init__.py. Consumers should import Case from a single documented location (src.core or src directly via src.__init__).",
+      "confidence": "high"
+    },
+    {
+      "dimension": "cross_module_architecture",
+      "id": "god_module_core_model_high_blast_radius",
+      "summary": "src/core/model.py has 57 importers including modules from cases, models, transformations, visualization, and examples — any change to it causes cascading breakage across the entire codebase",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/insect/cases/swarm.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/visualization/insect/case_visualizer.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/transformations/case_transformations.py"
+      ],
+      "evidence": [
+        "57 importer count (from blind packet) is the highest in the repo by a wide margin",
+        "Modules from at least 6 distinct subsystems (cases, models, transformations, visualization, examples, scripts) all reach directly into src.core.model",
+        "Insect case modules (swarm, caste, substrate, pheromonal, metamorphic, stigmergic) each import Case from src.core.model with absolute path — meaning a leaf-layer domain module has a hard coupling to the core kernel",
+        "src/core/model.py line 8 calls logging.basicConfig at module import time, which is a global side effect executed on first import across all 57 dependents"
+      ],
+      "suggestion": "Extract Case enum into a dedicated src/core/case.py with zero dependencies. This decouples the enum (needed everywhere) from Model (needed in fewer places), reducing the blast radius of each file independently.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "cross_module_architecture",
+      "id": "import_time_logging_basicconfig_side_effect",
+      "summary": "src/core/model.py calls logging.basicConfig() at module import time, which is a global side effect that mutates the root logger for every process that imports any CEREBRUM module",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py"
+      ],
+      "evidence": [
+        "src/core/model.py line 8: 'logging.basicConfig(level=logging.INFO, format=...)' is executed unconditionally at module scope",
+        "This file has 57 importers, meaning this side effect fires on first import in every consumer process",
+        "At least 15 other files also call logging.basicConfig at module or function scope, creating unpredictable handler stacking depending on import order"
+      ],
+      "suggestion": "Remove logging.basicConfig from module scope in src/core/model.py and all other library modules. Move any logging configuration into an explicit setup function callable by application entry points only (scripts, examples, tests). Library code should use logging.getLogger(__name__) without configuring the root handler.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "cross_module_architecture",
+      "id": "beyond_cerebrum_shadow_package_boundary_unclear",
+      "summary": "beyond_cerebrum/ is a parallel top-level source tree with its own src/, formalisms, and operations modules but has no documented integration boundary with the main src/ package",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/beyond_cerebrum/src/formalisms/structures.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/beyond_cerebrum/__init__.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/pyproject.toml"
+      ],
+      "evidence": [
+        "beyond_cerebrum/ mirrors the structure of src/ with its own src/analysis, src/formalisms, src/operations, src/visualization subdirectories",
+        "pyproject.toml hatch.build.targets.wheel packages=['src'] — beyond_cerebrum is not included in the wheel, making its relationship to the distributed package undefined",
+        "No imports found from beyond_cerebrum into src/ or vice versa (grep returned zero matches), meaning the two trees are entirely decoupled at runtime but structurally parallel — suggests duplication or a future integration that has not been formalized",
+        "beyond_cerebrum/src/formalisms/structures.py defines FeatureStructure and graph primitives that parallel functionality in src/lexicon/graph/assembler.py, indicating potential cross-package concept duplication"
+      ],
+      "suggestion": "Either formally integrate beyond_cerebrum as a src subpackage (e.g., src/formalisms/) with explicit boundary docs, or move it to a completely separate repository. Add it to pyproject.toml packages list if it is meant to be distributed. The current layout creates navigability confusion and undefined distribution scope.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "package_organization",
+      "id": "models_package_defines_competing_base_class",
+      "summary": "src/models/ is supposed to be a domain model layer but contains a base.py that redefines the framework-level Model class, creating an ambiguous layer identity",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/base.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/__init__.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py"
+      ],
+      "evidence": [
+        "src/models/__init__.py exports Model and Case alongside domain classes (CaseDefinitions, LinearRegressionModel), blurring whether src.models is an application-domain layer or a core infrastructure layer",
+        "src/models/base.py has a docstring 'Base Model and Case Definitions for CEREBRUM / Defines fundamental structures for linguistic case modeling' which is the same claim made by src/core/model.py",
+        "A caller importing from src.models gets a fundamentally different Model than one importing from src.core, with no type relationship between them"
+      ],
+      "suggestion": "Remove src/models/base.py entirely. src/models/__init__.py should import Model from src.core, not re-export a locally-defined shadow. The models package should contain only concrete model implementations that extend src.core.Model.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "package_organization",
+      "id": "examples_scattered_across_two_locations",
+      "summary": "Example scripts exist in both src/examples/ (10 files) and src/lexicon/examples/ (2 files), with no navigational signposting between them",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/examples/insect_simulation_example.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/examples/comprehensive_insect_simulation.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/lexicon/examples/basic_usage.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/lexicon/examples/process_file.py"
+      ],
+      "evidence": [
+        "src/examples/ contains at minimum: animal_agent.py, comprehensive_insect_simulation.py, environment.py, hvac_system.py, insect_simulation_example.py, insect_visualization_example.py, simplified_insect_simulation.py, streamlined_animal_agent.py, thermostat.py — nine example files in one flat directory with mixed concerns",
+        "src/lexicon/examples/ holds additional examples (basic_usage.py, process_file.py) scoped to the lexicon subsystem but living in a different location than src/examples/",
+        "src/examples/insect_simulation_example.py imports from src.models.insect.* with absolute paths, meaning it is tightly affinity-coupled to src.models but placed outside it"
+      ],
+      "suggestion": "Consolidate examples under a single top-level examples/ directory outside src/ (not installable), or create domain-scoped example directories co-located with each subsystem. Remove src/examples from the installable wheel package — examples should not be in the distributable src/ tree.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "package_organization",
+      "id": "visualization_split_between_src_visualization_and_src_lexicon_visualization",
+      "summary": "Visualization code is split across src/visualization/ and src/lexicon/visualization/ with overlapping responsibilities and no shared base",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/visualization/__init__.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/visualization/insect/neural_visualizer.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/lexicon/visualization/graph_visualizer.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/lexicon/visualization/animated_graph.py"
+      ],
+      "evidence": [
+        "src/visualization/ contains 13 files including insect-specific animation, behavior, case, and neural visualizers",
+        "src/lexicon/visualization/ contains 5 files including graph_visualizer.py, animated_graph.py, interactive_graph_visualizer.py — all graph-visualization utilities that share matplotlib/networkx/plotly as rendering dependencies with src/visualization/",
+        "Both trees import networkx independently (confirmed by grep across both paths), indicating no shared visualization utility layer",
+        "imageio is used in both src/utils/animation.py and src/lexicon/visualization/animated_graph.py without a shared animation helper"
+      ],
+      "suggestion": "Create a single src/visualization/base.py with shared rendering utilities. Move lexicon-specific graph views into src/visualization/lexicon/ or keep them in src/lexicon/visualization/ but extract a shared src/visualization/common/ that both import from, eliminating the duplicate dependency surface.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "dependency_health",
+      "id": "torch_pulled_as_implicit_runtime_dep_not_declared",
+      "summary": "src/lexicon/core/config.py imports torch at runtime inside a function but torch is not listed in any pyproject.toml dependency group, making the implicit dependency undeclared",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/lexicon/core/config.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/pyproject.toml"
+      ],
+      "evidence": [
+        "src/lexicon/core/config.py lines 37-52: configure_torch_environment() imports torch inside the function body and calls torch.cuda.is_available(), torch.cuda.empty_cache(), torch.cuda.get_device_name()",
+        "pyproject.toml lists no torch in dependencies, dev, lexicon, llm, or all extras",
+        "src/lexicon/core/environment.py also imports torch (confirmed by grep: 'Found 2 files: src/lexicon/core/environment.py, src/lexicon/core/config.py')",
+        "src/lexicon/core/config.py has 25 importers (second highest in the repo per blind packet), meaning torch is implicitly required by 25 modules without any declared dependency"
+      ],
+      "suggestion": "Either add torch as an optional dependency in pyproject.toml under a new 'torch' or 'gpu' extras group and guard all torch imports with try/except ImportError, or remove the torch dependency from the lexicon core and implement device selection using a lighter-weight path that degrades gracefully without torch.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "dependency_health",
+      "id": "scikit_learn_in_dev_extras_but_used_in_core_model",
+      "summary": "scikit-learn is declared only in the dev optional extras group but is imported in src/models/linear_regression.py which is part of the main installable package",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/pyproject.toml",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/linear_regression.py"
+      ],
+      "evidence": [
+        "pyproject.toml line 44: 'scikit-learn>=1.3.0' appears under [project.optional-dependencies] dev, not under core dependencies",
+        "src/models/linear_regression.py lines 10-11: 'from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error' and 'from sklearn.linear_model import LinearRegression' are unconditional top-level imports",
+        "src/models/__init__.py line 8: 'from .linear_regression import LinearRegressionModel' — this causes sklearn to be imported at package initialization time whenever src.models is imported",
+        "A user who installs cerebrum without the dev extras will get an ImportError on 'import src.models'"
+      ],
+      "suggestion": "Move scikit-learn to the core dependencies list in pyproject.toml, or move LinearRegressionModel to an optional subpackage (e.g., src/models/contrib/linear_regression.py) that is not imported in src/models/__init__.py. If sklearn is truly optional, guard the import in linear_regression.py with try/except and add a dedicated 'ml' extras group.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "dependency_health",
+      "id": "multiple_http_client_libs_for_llm_integration",
+      "summary": "The llm extras group declares both aiohttp and requests as dependencies, and the openrouter client likely uses one or both alongside the openai SDK, indicating redundant HTTP client pull",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/pyproject.toml",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/llm/OpenRouter/openrouter.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/llm/llm_utils.py"
+      ],
+      "evidence": [
+        "pyproject.toml lines 53-56: llm extras declares openai>=1.0.0, python-dotenv>=1.0.0, aiohttp>=3.8.0, requests>=2.28.0",
+        "openai>=1.0.0 bundles httpx as its HTTP transport layer, meaning three separate HTTP client libraries (requests, aiohttp, httpx via openai) are pulled into the llm extras",
+        "aiohttp and requests serve the same purpose (synchronous and async HTTP) and are both heavy dependencies; having both alongside an SDK that already bundles its own transport is redundant"
+      ],
+      "suggestion": "Audit src/llm/ to determine which HTTP calls actually use requests vs aiohttp vs openai's internal transport. Consolidate to the minimum set: if all LLM calls go through the openai SDK, drop both requests and aiohttp from the llm extras. If direct HTTP calls are needed, pick one library and standardize on it.",
+      "confidence": "medium"
+    }
+  ]
+}

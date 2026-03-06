@@ -6,7 +6,7 @@ Provides visualization functions for LEXICON knowledge graphs.
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union
+from typing import Dict, List, Any
 
 # Configure matplotlib to use non-GUI backend for headless environments
 import matplotlib
@@ -31,9 +31,9 @@ class GraphVisualizer:
             bool: True if all dependencies are available, False otherwise
         """
         try:
-            import matplotlib
-            import networkx
-            import numpy
+            import matplotlib  # noqa: F401
+            import networkx  # noqa: F401
+            import numpy  # noqa: F401
             return True
         except ImportError as e:
             logger.warning(f"Visualization dependencies missing: {e}")
@@ -133,7 +133,6 @@ class GraphVisualizer:
         try:
             import matplotlib.pyplot as plt
             import networkx as nx
-            import numpy as np
             
             # Create graph
             G = nx.Graph()
@@ -240,7 +239,6 @@ class GraphVisualizer:
         """
         try:
             import matplotlib.pyplot as plt
-            import numpy as np
             
             # Extract cases
             cases = {}
@@ -289,7 +287,6 @@ class GraphVisualizer:
         try:
             import matplotlib.pyplot as plt
             import networkx as nx
-            import numpy as np
             
             # Create graph with only entity nodes
             G = nx.Graph()
@@ -385,7 +382,6 @@ class GraphVisualizer:
         """
         try:
             import matplotlib.pyplot as plt
-            import numpy as np
             
             # Extract claims and their polarities
             claims = [n for n in graph_data["nodes"] if n.get("type") == "claim"]
@@ -432,7 +428,6 @@ class GraphVisualizer:
         try:
             import matplotlib.pyplot as plt
             import networkx as nx
-            import numpy as np
             
             # Create bipartite graph
             G = nx.Graph()

@@ -9,7 +9,7 @@ import json
 import pickle
 import os
 from datetime import datetime
-from typing import Dict, Any, Optional, List, Union, Type
+from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, asdict, field
 from pathlib import Path
 

@@ -11,7 +11,6 @@ from datetime import datetime
 import json
 
 # Assuming structures and types are defined elsewhere
-from ..formalisms.structures import SemanticGraph, AbstractStructure
 from ..formalisms.types import LexicalItem, SemanticConcept
 
 # --- Data Structures for Logging --- 

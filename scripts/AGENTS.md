@@ -23,4 +23,4 @@ Core business logic lives in `src/utils/markdown/` and other modules.
 ## Testing
 
 Scripts delegate to tested library code.
-Integration tests for scripts belong in `src/tests/`.
+Integration tests for scripts belong in `tests/`.

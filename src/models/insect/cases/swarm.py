@@ -5,7 +5,7 @@ This module implements the [SWARM] case for collective behavior and swarm intell
 in insects, including emergent behaviors, collective decision making, and swarm dynamics.
 """
 
-from typing import Dict, Any, Optional, List, Tuple, Set
+from typing import Dict, Any, Optional, List
 import numpy as np
 import logging
 from dataclasses import dataclass, field

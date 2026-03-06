@@ -300,7 +300,6 @@ def save_animation(animation, output_path, fps=5, dpi=100, writer='pillow', **kw
                 
                 if frames:
                     # Save directly from frames if we have them
-                    import imageio.plugins.ffmpeg
                     mimsave(mp4_path, frames, fps=fps, codec='libx264', quality=7)
                 else:
                     # Use animation.save with ffmpeg

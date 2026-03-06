@@ -5,7 +5,7 @@ This module provides the foundational classes for insect cognitive models
 using the CEREBRUM case framework and active inference principles.
 """
 
-from typing import Dict, Any, Optional, List, Union, Tuple
+from typing import Dict, Any, Optional, List
 import numpy as np
 import logging
 from dataclasses import dataclass, field

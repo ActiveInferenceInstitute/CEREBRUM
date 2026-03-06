@@ -4,11 +4,10 @@ Visualization Module for CEREBRUM
 Provides utilities for creating visualizations of regression models and cases
 """
 
-import os
 import logging
 import numpy as np
 import matplotlib.pyplot as plt
-from typing import Tuple, Optional, Dict
+from typing import Tuple, Optional
 from matplotlib.figure import Figure
 
 from src.models.base import Case

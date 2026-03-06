@@ -5,12 +5,10 @@ Resolves entity references across text segments.
 """
 
 import re
-from typing import List, Dict, Any, Optional, Set, Tuple
-import logging
+from typing import List
 
 from ..core.config import LexiconConfig
 from ..core.logging import get_logger, LoggingTimer
-from ..core.exceptions import ProcessingError
 from ..nlp.preprocessor import ProcessedSegment
 
 try:

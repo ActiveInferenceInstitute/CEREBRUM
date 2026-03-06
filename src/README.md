@@ -35,7 +35,6 @@ from src.analysis import SimulationEffectivenessAnalyzer
 | `llm/`             | LLM integration (OpenRouter) | `OpenRouterClient`, `OpenRouterConfig`                                           |
 | `visualization/`   | Advanced visualization       | `plot_model_state`, `CaseComparisonVisualizer`                                   |
 | `examples/`        | Runnable examples            | Example scripts and demos                                                        |
-| `tests/`           | Unit and integration tests   | 235+ tests                                                                       |
 | `scripts/`         | Executable utilities         | `run_tests`, `run_examples`                                                      |
 
 ## Module Dependencies
@@ -55,14 +54,15 @@ lexicon/ (depends on core/)
 
 ## Testing
 
-Run all tests:
+Tests are located at the top-level `tests/` directory (253 tests).
 
 ```bash
-python -m pytest src/tests/ -v
+# Run all tests
+python -m pytest tests/ -v
 ```
 
 Run specific module tests:
 
 ```bash
-python -m pytest src/tests/test_model.py -v
+python -m pytest tests/core/test_model.py -v
 ```

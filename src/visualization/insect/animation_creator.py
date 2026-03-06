@@ -8,16 +8,12 @@ including individual insect animations and swarm dynamics animations.
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from matplotlib.patches import Circle, Arrow, Rectangle, Polygon
-from matplotlib.collections import LineCollection
-from typing import Dict, Any, List, Optional, Tuple, Union
+from matplotlib.patches import Circle
+from typing import Dict, Any, List, Optional, Tuple
 import logging
-import os
-import time
-from collections import deque
 
 from src.core.model import Case
-from src.models.insect.base import InsectModel, BehavioralState
+from src.models.insect.base import BehavioralState
 
 logger = logging.getLogger(__name__)
 

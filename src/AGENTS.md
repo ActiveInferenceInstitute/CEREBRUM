@@ -18,8 +18,7 @@ src/
 ├── lexicon/         # Linguistic analysis (LexiconEngine)
 ├── llm/             # LLM integration (OpenRouter, Perplexity)
 ├── examples/        # Usage examples
-├── scripts/         # Test runners
-└── tests/           # 253 tests
+└── scripts/         # Test runners
 ```
 
 ## Dependency Flow
@@ -88,12 +87,18 @@ model.case = Case.GENITIVE  # Model as source/generator
 - 253 tests total (up from 235)
 - 0 warnings
 - 18 new tests for new methods
+- Tests in `tests/` with subfolders mirroring `src/` modules
 
 ## Testing
 
 ```bash
 # Run all tests (0 warnings)
-python -m pytest src/tests/ -v
+python -m pytest tests/ -v
+
+# Run tests for a specific module
+python -m pytest tests/core/ -v
+python -m pytest tests/transformations/ -v
+python -m pytest tests/utils/ -v
 
 # Quick smoke test
 python -c "from src import Model, Case; print(Model().get_state())"

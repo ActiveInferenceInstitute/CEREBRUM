@@ -10,10 +10,8 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
-import matplotlib.animation as animation
-from typing import Dict, List, Any, Optional, Tuple, Union, Callable
+from typing import Dict, List, Optional, Tuple
 from PIL import Image
-import io
 import logging
 
 from src.core.model import Model, Case

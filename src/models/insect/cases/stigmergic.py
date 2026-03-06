@@ -6,7 +6,7 @@ through environmental modifications in insects, including trail marking,
 nest building, and collective construction.
 """
 
-from typing import Dict, Any, Optional, List, Tuple
+from typing import Dict, Any, Optional, List
 import numpy as np
 import logging
 from dataclasses import dataclass, field

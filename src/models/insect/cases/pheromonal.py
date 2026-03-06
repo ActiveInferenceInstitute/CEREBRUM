@@ -5,7 +5,7 @@ This module implements the [PHE] pheromonal case for chemical communication
 in insects, including pheromone detection, generation, and processing.
 """
 
-from typing import Dict, Any, Optional, List, Tuple
+from typing import Dict, Any, Optional, List
 import numpy as np
 import logging
 from dataclasses import dataclass, field

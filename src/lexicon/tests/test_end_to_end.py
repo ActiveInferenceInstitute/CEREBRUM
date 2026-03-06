@@ -9,7 +9,6 @@ import os
 import sys
 import unittest
 import json
-import time
 from pathlib import Path
 from datetime import datetime
 
@@ -17,7 +16,6 @@ from datetime import datetime
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent))
 
 from src.lexicon.core.config import LexiconConfig
-from src.lexicon.core.engine import LexiconEngine
 
 
 class TestLexiconEndToEnd(unittest.TestCase):

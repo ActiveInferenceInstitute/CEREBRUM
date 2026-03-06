@@ -9,9 +9,13 @@ Utilities for data generation, visualization, and file management.
 ```text
 utils/
 ├── __init__.py          # Module exports (lazy loading)
+├── array_utils.py       # Array validation and normalization
 ├── data_generator.py    # DataGenerator class
 ├── visualization.py     # Visualizer and plotting functions
 ├── animation.py         # Animation utilities
+├── fix_animations.py    # Animation repair utilities
+├── fix_case_animation.py # Case animation fixes
+├── output_organizer.py  # Output directory organization
 ├── path_utils.py        # Output directory management
 └── markdown/            # Markdown processing utilities
 ```

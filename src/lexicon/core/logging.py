@@ -4,7 +4,6 @@ LEXICON Structured Logging
 Configures structured logging for LEXICON components.
 """
 
-import os
 import sys
 import logging
 import json

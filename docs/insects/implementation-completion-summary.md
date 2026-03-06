@@ -110,7 +110,7 @@ The CEREBRUM insect documentation has been comprehensively enhanced and extended
 - Environmental modification tracking
 - Communication statistics
 
-### 3. Comprehensive Testing (`src/tests/test_insect_models.py`)
+### 3. Comprehensive Testing (`tests/models/test_insect_models.py`)
 
 **Test Coverage:**
 - **TestInsectBaseModels**: Core model functionality

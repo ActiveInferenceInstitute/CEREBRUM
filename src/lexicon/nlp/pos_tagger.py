@@ -4,14 +4,11 @@ LEXICON Part-of-Speech Tagger
 Provides POS tagging functionality for the LEXICON pipeline.
 """
 
-import re
 import string
-from typing import List, Dict, Any, Optional, Tuple
-import json
+from typing import List, Dict, Any
 
 from ..core.config import LexiconConfig
 from ..core.logging import get_logger
-from ..core.exceptions import ProcessingError
 
 try:
     import spacy

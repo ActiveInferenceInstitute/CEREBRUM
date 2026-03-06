@@ -1,6 +1,5 @@
-from typing import Dict, Any, Optional, List, Callable, Tuple, Union
+from typing import Dict, Any, Optional
 import numpy as np
-from scipy.stats import multivariate_normal
 import logging
 
 from src.core.model import Model, Case

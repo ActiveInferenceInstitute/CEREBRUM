@@ -4,7 +4,7 @@ LEXICON Paraphrase Prompt Templates
 Prompt templates for paraphrase generation.
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 
 
 def get_paraphrase_prompt(text: str, key_entities: List[Dict[str, Any]] = None) -> str:

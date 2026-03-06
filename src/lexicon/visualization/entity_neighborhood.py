@@ -7,8 +7,6 @@ Provides visualization of entity neighborhoods within the knowledge graph.
 import logging
 import re
 from pathlib import Path
-import uuid
-from typing import Dict, List, Any, Optional, Union
 
 logger = logging.getLogger(__name__)
 
@@ -62,9 +60,9 @@ def generate_entity_neighborhood_visualizations(graph_data, output_dir):
     """
     try:
         # Check for required visualization libraries
-        import matplotlib.pyplot as plt
-        import networkx as nx
-        import numpy as np
+        import matplotlib.pyplot as plt  # noqa: F401
+        import networkx as nx  # noqa: F401
+        import numpy as np  # noqa: F401
         
         # Create the output directory if it doesn't exist
         if not isinstance(output_dir, Path):
@@ -122,7 +120,6 @@ class EntityNeighborhoodVisualizer:
         try:
             import matplotlib.pyplot as plt
             import networkx as nx
-            import numpy as np
             
             # Find entity in graph
             entity_node = None
@@ -318,7 +315,6 @@ class EntityNeighborhoodVisualizer:
         try:
             import matplotlib.pyplot as plt
             import networkx as nx
-            import numpy as np
             
             # Create graph with only entity nodes
             G = nx.Graph()

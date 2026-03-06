@@ -2,7 +2,7 @@
 
 import pytest
 from beyond_cerebrum.src.formalisms.structures import (
-    SyntacticTree, SemanticGraph, TreeNode, SyntacticTreeNode
+    SyntacticTree, SemanticGraph, SyntacticTreeNode
 )
 from beyond_cerebrum.src.formalisms.types import PragmaticContext, SyntacticConstituent
 from beyond_cerebrum.src.operations.transformations import (

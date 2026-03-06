@@ -9,14 +9,11 @@ Main orchestration class for NLP preprocessing tasks:
 - Coreference resolution
 """
 
-import os
 import re
 import time
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass, field
 import json
-import logging
-import traceback
 
 from ..core.config import LexiconConfig
 from ..core.logging import get_logger, LoggingTimer

@@ -7,7 +7,7 @@ Provides animation functions for LEXICON knowledge graphs.
 import logging
 import shutil
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple, Union
+from typing import Dict, List, Any, Optional, Tuple
 
 # Configure matplotlib to use non-GUI backend for headless environments
 import matplotlib
@@ -28,10 +28,10 @@ def create_graph_animation(graph_data: Dict[str, Any], output_dir: Path) -> List
     """
     # Check if visualization dependencies are available
     try:
-        import matplotlib.pyplot as plt
-        import networkx as nx
-        import numpy as np
-        import imageio
+        import matplotlib.pyplot as plt  # noqa: F401
+        import networkx as nx  # noqa: F401
+        import numpy as np  # noqa: F401
+        import imageio  # noqa: F401
     except ImportError as e:
         logger.warning(f"Animation dependencies not available: {e}")
         return []
@@ -85,9 +85,7 @@ def _create_graph_construction_animation(graph_data: Dict[str, Any], output_path
         True if successful, False otherwise
     """
     try:
-        import matplotlib.pyplot as plt
         import networkx as nx
-        import numpy as np
         import imageio
         
         # Extract nodes and edges
@@ -192,7 +190,6 @@ def _create_graph_frame(nodes: List[Dict], edges: List[Dict], output_path: Path)
     try:
         import matplotlib.pyplot as plt
         import networkx as nx
-        import numpy as np
         
         # Create graph
         G = nx.Graph()
@@ -283,8 +280,8 @@ def _create_case_evolution_animation(graph_data: Dict[str, Any], output_path: Pa
         True if successful, False otherwise
     """
     try:
-        import matplotlib.pyplot as plt
-        import numpy as np
+        import matplotlib.pyplot as plt  # noqa: F401
+        import numpy as np  # noqa: F401
         import imageio
         
         # Extract nodes with case information
@@ -390,7 +387,6 @@ def _create_case_frame(cases: List[Tuple[str, int]], highlight_case: Optional[st
     """
     try:
         import matplotlib.pyplot as plt
-        import numpy as np
         
         # Extract data
         labels = [case for case, _ in cases]
@@ -450,8 +446,8 @@ def _create_polarity_animation(graph_data: Dict[str, Any], output_path: Path) ->
         True if successful, False otherwise
     """
     try:
-        import matplotlib.pyplot as plt
-        import numpy as np
+        import matplotlib.pyplot as plt  # noqa: F401
+        import numpy as np  # noqa: F401
         import imageio
         
         # Extract claims and their polarities
@@ -558,7 +554,6 @@ def _create_polarity_frame(polarities: Dict[str, List[Dict]], highlight_polarity
     """
     try:
         import matplotlib.pyplot as plt
-        import numpy as np
         
         # Extract data
         labels = list(polarities.keys())

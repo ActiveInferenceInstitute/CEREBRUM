@@ -25,7 +25,7 @@ from .animal_visualization import (
 
 # Import insect visualization modules
 try:
-    from .insect import (
+    from .insect import (  # noqa: F401
         InsectVisualizer,
         InsectSimulationVisualizer,
         CaseRelevanceVisualizer,
@@ -40,7 +40,7 @@ try:
         CasePerformanceLogger,
         BehavioralLogger,
         InsectAnimationCreator,
-        SwarmAnimationCreator
+        SwarmAnimationCreator,
     )
     INSECT_VISUALIZATION_AVAILABLE = True
 except ImportError:

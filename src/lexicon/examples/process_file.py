@@ -6,7 +6,6 @@ This script demonstrates how to use LEXICON to process a file,
 either text or audio, and generate a knowledge graph.
 """
 
-import os
 import sys
 import json
 import argparse

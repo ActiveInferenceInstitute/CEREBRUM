@@ -6,7 +6,7 @@ Provides prompt engineering and response parsing for OpenRouter LLM case declens
 
 import re
 import json
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 
 def declension_prompt(text: str) -> str:
     """

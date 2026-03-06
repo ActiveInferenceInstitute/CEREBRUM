@@ -6,8 +6,7 @@ Advanced case determination using structured LLM calls for accurate grammatical 
 
 import json
 import re
-import logging
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 
 from ..core.config import LexiconConfig

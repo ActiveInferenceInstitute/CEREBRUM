@@ -2,11 +2,33 @@
 
 Specialized visualization tools for CEREBRUM.
 
+## Contents
+
+| File/Directory | Purpose |
+| -------------- | ------- |
+| `__init__.py` | Module exports (lazy loading) |
+| `case_visualization.py` | Case structure visualization |
+| `case_comparison.py` | Cross-case comparison visualizer |
+| `animal_visualization.py` | Animal/agent state visualization |
+| `insect/` | Insect-specific visualizers (9 modules) |
+| `insect/animation_creator.py` | Simulation animations |
+| `insect/behavior_visualizer.py` | Behavioral state plots |
+| `insect/case_visualizer.py` | Case transition plots |
+| `insect/comprehensive_visualizer.py` | Full-suite visualizations |
+| `insect/insect_visualizer.py` | Core insect plots |
+| `insect/neural_visualizer.py` | Neural structure plots |
+| `insect/report_generator.py` | Report generation |
+| `insect/simulation_logger.py` | Simulation logging |
+
 ## Usage
 
-These classes are typically used to render the internal state of models, often in real-time or as post-hoc analysis.
+```python
+from src.visualization import plot_model_state, CaseComparisonVisualizer
 
-## Key Files
+# Quick model snapshot
+plot_model_state(model, output_dir="output/")
 
-- **`case_visualization.py`**: Visualizing grammatical case structures.
-- **`animal_visualization.py`**: Specific visualizers for the Animal/Insect models.
+# Cross-case comparison
+viz = CaseComparisonVisualizer()
+viz.compare(models, output_dir="output/comparisons/")
+```

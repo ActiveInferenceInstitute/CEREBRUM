@@ -19,8 +19,6 @@ from src.lexicon.core.config import LexiconConfig
 from src.lexicon.core.engine import LexiconEngine
 from src.lexicon.nlp.preprocessor import NLPPreprocessor
 from src.lexicon.declension.tagger import CaseTagger
-from src.lexicon.paraphrase.generator import ParaphraseGenerator
-from src.lexicon.graph.assembler import GraphAssembler
 from src.lexicon.graph.entity_linker import EntityLinker
 from src.lexicon.graph.cid_generator import generate_cid
 

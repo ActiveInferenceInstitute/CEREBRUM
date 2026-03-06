@@ -180,4 +180,4 @@ coverage_html_report/
 paper/output/*.pdf
 paper/output/*.html
 paper/output/*.png
-src/tests/pytest_run.log
+tests/pytest_run.log

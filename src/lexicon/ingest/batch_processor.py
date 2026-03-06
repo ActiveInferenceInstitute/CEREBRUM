@@ -6,7 +6,7 @@ Handles batch processing of multiple files through the LEXICON pipeline.
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any
 
 from ..core.engine import LexiconEngine
 from ..core.config import LexiconConfig

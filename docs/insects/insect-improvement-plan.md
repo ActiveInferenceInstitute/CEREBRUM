@@ -84,7 +84,7 @@ src/models/insect/
 **Objective**: Create comprehensive testing infrastructure for insect models
 
 **Deliverables**:
-- `src/tests/insect/` test directory
+- `tests/insect/` test directory
 - Unit tests for all insect model components
 - Integration tests for behavioral sequences
 - Performance benchmarks for computational efficiency

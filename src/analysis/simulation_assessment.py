@@ -8,16 +8,11 @@ data quality, and system performance across all insect models and components.
 import os
 import json
 import numpy as np
-import pandas as pd
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, Any, Optional
 from datetime import datetime
 from collections import defaultdict, Counter
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 from src.utils.path_utils import get_output_dir
-from src.core.model import Case
-from src.models.insect.base import BehavioralState
 
 
 class SimulationEffectivenessAnalyzer:

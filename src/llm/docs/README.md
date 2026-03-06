@@ -699,7 +699,7 @@ All test results are automatically saved to the `test_output/` directory:
 
 2. **Dependencies:**
    ```bash
-   pip install python-dotenv openai
+   uv pip install python-dotenv openai
    ```
 
 3. **Test Execution:**

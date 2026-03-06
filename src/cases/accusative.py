@@ -5,7 +5,7 @@ This module provides specialized methods for handling the accusative case,
 where a model acts as the object of a process, receiving updates.
 """
 
-from typing import Dict, Any, Optional, List, Tuple, Union, Callable
+from typing import Dict, Any, Optional, Callable
 import numpy as np
 import logging
 

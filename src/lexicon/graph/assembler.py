@@ -5,22 +5,17 @@ Assembles processed segments into a knowledge graph.
 """
 
 import time
-import json
-import uuid
-from typing import List, Dict, Any, Optional, Set, Tuple
+from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
-import logging
 from datetime import datetime
-import hashlib
 
 from ..core.config import LexiconConfig
-from ..core.logging import get_logger, LoggingTimer
-from ..core.exceptions import ProcessingError, GraphError
+from ..core.logging import get_logger
 from ..paraphrase.generator import ParaphrasedSegment
 from .entity_linker import EntityLinker
 from .cid_generator import generate_cid
 
-from src.llm.OpenRouter import OpenRouterClient, OpenRouterConfig
+from src.llm.OpenRouter import OpenRouterClient
 
 
 @dataclass

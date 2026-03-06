@@ -1,6 +1,6 @@
 # CEREBRUM Example: Linear Regression through Linguistic Cases
 
-This document demonstrates how the CEREBRUM framework applies linguistic cases to analyze a fundamental statistical model: Linear Regression. It draws upon the concepts and structure presented in `src/tests/test_linear_regression.py`.
+This document demonstrates how the CEREBRUM framework applies linguistic cases to analyze a fundamental statistical model: Linear Regression. It draws upon the concepts and structure presented in `tests/models/test_linear_regression.py`.
 
 ## Introduction to Linear Regression
 
@@ -9,6 +9,7 @@ This document demonstrates how the CEREBRUM framework applies linguistic cases t
 The model is defined by the equation:
 \[ y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + ... + \beta_n x_n + \epsilon \]
 Where:
+
 - \( y \) is the dependent variable.
 - \( x_1, ..., x_n \) are the independent variables.
 - \( \beta_0 \) is the intercept (bias).
@@ -80,10 +81,11 @@ While seemingly simple, Linear Regression involves multiple facets: data input, 
 ## Demonstration (`test_linear_regression.py`)
 
 The test suite structure reflects these cases:
-1.  **Data Generation:** Creates simple synthetic linear data (`DataGenerator.linear_data`).
-2.  **Case Functions:** Dedicated functions (e.g., `test_nominative_case`, `test_accusative_case`, often located in sub-modules like `src/tests/linear_regression_cases/`) implement the logic and visualizations for each case.
-3.  **Orchestration:** The `run_all_case_tests` function in the main test file calls each case-specific test function.
-4.  **Output Generation:** Each case function generates relevant plots and potentially animations, saving them into case-specific subdirectories within `src/tests/output/linear_regression/` (e.g., `nominative/`, `accusative/`). These visualizations serve to "Show, not Tell" the aspect of linear regression highlighted by that specific CEREBRUM case.
+
+1. **Data Generation:** Creates simple synthetic linear data (`DataGenerator.linear_data`).
+2. **Case Functions:** Dedicated functions (e.g., `test_nominative_case`, `test_accusative_case`, often located in sub-modules like `tests/models/linear_regression_cases/`) implement the logic and visualizations for each case.
+3. **Orchestration:** The `run_all_case_tests` function in the main test file calls each case-specific test function.
+4. **Output Generation:** Each case function generates relevant plots and potentially animations, saving them into case-specific subdirectories within `tests/output/linear_regression/` (e.g., `nominative/`, `accusative/`). These visualizations serve to "Show, not Tell" the aspect of linear regression highlighted by that specific CEREBRUM case.
     - Parameter convergence (NOMINATIVE)
     - Predicted vs. Actual plots, Residual plots (ACCUSATIVE, ABLATIVE)
     - Data scatter plots (DATIVE)
@@ -93,4 +95,4 @@ The test suite structure reflects these cases:
 
 ## Conclusion
 
-Applying the CEREBRUM framework to Linear Regression illustrates how even simple models have distinct functional aspects that can be analyzed separately. By adopting the perspective of each linguistic case (model as estimator, object of evaluation, data recipient, tool, etc.), we gain a more comprehensive understanding than by looking at the model monolithically. The tests and visualizations generated provide concrete examples of how each case illuminates a different part of the linear regression process, from data intake to parameter estimation, evaluation, and interpretation. 
+Applying the CEREBRUM framework to Linear Regression illustrates how even simple models have distinct functional aspects that can be analyzed separately. By adopting the perspective of each linguistic case (model as estimator, object of evaluation, data recipient, tool, etc.), we gain a more comprehensive understanding than by looking at the model monolithically. The tests and visualizations generated provide concrete examples of how each case illuminates a different part of the linear regression process, from data intake to parameter estimation, evaluation, and interpretation.

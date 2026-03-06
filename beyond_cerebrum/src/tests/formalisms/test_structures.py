@@ -4,7 +4,7 @@ Tests for the composite linguistic structures defined in
 """
 
 import pytest
-from typing import List, Any
+from typing import Any
 
 # Adjust the import path based on your project structure and how you run pytest
 # This assumes you run pytest from the CEREBRUM project root
@@ -13,7 +13,7 @@ from beyond_cerebrum.src.formalisms.structures import (
     FeatureStructure
 )
 from beyond_cerebrum.src.formalisms.types import (
-    SyntacticLabel, SemanticConcept
+    SemanticConcept
 )
 
 # --- Test Fixtures --- 

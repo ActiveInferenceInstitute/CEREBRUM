@@ -6,12 +6,10 @@ linguistic representations and operations with the internal states and
 computations of backend computational models (e.g., NNs, Bayesian Nets).
 """
 
-from typing import Any, Dict, Callable, Optional, List
+from typing import Any, Dict, Callable, List
 
 # Import structures and operations (adjust paths if needed)
 from ..formalisms.structures import AbstractStructure
-from ..operations.calculus import unify, project # Example operations
-from ..operations.transformations import parse_syntax_to_semantics # Example transformation
 
 # Type Aliases
 BackendModel = Any # Placeholder for diverse backend model types

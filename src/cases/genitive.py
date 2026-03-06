@@ -5,8 +5,7 @@ This module provides specialized methods for handling the genitive case,
 where a model serves as a source of information, parameters, or derivation.
 """
 
-from typing import Dict, Any, Optional, List, Tuple, Union, Callable
-import numpy as np
+from typing import Dict, Any, Optional, List
 import logging
 
 from ..core.model import Model, Case

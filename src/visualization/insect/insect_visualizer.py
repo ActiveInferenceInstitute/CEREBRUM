@@ -7,21 +7,16 @@ including case-based reasoning visualization, neural structure activity, and beh
 
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from matplotlib.patches import Circle, Arrow, Rectangle, Polygon
-from matplotlib.collections import LineCollection
-import seaborn as sns
-from typing import Dict, Any, List, Optional, Tuple, Union
+from matplotlib.patches import Circle, Rectangle
+from typing import Dict, Any, List, Optional, Tuple
 import logging
 import os
-import time
 import json
 from dataclasses import dataclass, field
 from collections import defaultdict, deque
 
 from src.core.model import Case
 from src.models.insect.base import InsectModel, BehavioralState
-from src.models.insect.neural_structures import NeuralStructure
 from src.utils.path_utils import get_output_dir
 
 logger = logging.getLogger(__name__)

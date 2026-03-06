@@ -9,7 +9,7 @@ the environment.
 import numpy as np
 from typing import List, Tuple, Dict, Any, Optional
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle, Rectangle, Polygon, Arc
+from matplotlib.patches import Circle
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 import logging

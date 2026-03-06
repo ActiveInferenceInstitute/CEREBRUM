@@ -20,14 +20,14 @@ This directory contains all documentation for the CEREBRUM framework, split into
 ### Subdirectories
 
 | Directory | Contents |
-|-----------|----------|
-| `diagrams/` | Mermaid diagram sources and rendered images |
-| `dialogs/` | 18 narrative dialog examples |
-| `discussions/` | Community discussion archives |
-| `examples/` | 9 detailed example playbooks |
-| `insects/` | 13 insect cognition documents |
-| `languages/` | 62+ natural/constructed language analyses |
-| `speculative_design/` | 59 experimental design documents |
+| --------- | -------- |
+| `diagrams/` | 13 Mermaid diagram sources and rendered images |
+| `dialogs/` | 20 narrative dialog examples |
+| `discussions/` | 5 community discussion archives |
+| `examples/` | 11 detailed example playbooks |
+| `insects/` | 15 insect cognition documents |
+| `languages/` | 66 natural/constructed language analyses |
+| `speculative_design/` | 61 experimental design documents |
 
 ## Usage for Agents
 

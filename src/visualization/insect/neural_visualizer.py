@@ -8,16 +8,13 @@ including brain activity patterns, neural connectivity, and learning dynamics.
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from matplotlib.patches import Circle, Rectangle, Polygon
-from matplotlib.collections import LineCollection
 import networkx as nx
-from typing import Dict, Any, List, Optional, Tuple, Union
+from typing import Dict, Any, Optional, Tuple
 import logging
 import os
 import time
 from collections import deque
 
-from src.core.model import Case
 from src.models.insect.neural_structures import NeuralStructure
 from src.models.insect.base import InsectModel
 

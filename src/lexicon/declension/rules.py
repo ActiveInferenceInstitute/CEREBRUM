@@ -4,7 +4,7 @@ LEXICON Case Rules
 Rule definitions for case declension tagging.
 """
 
-from typing import Dict, List, Any, Optional, Tuple, Set
+from typing import Dict, List, Any
 import re
 
 class CaseRules:

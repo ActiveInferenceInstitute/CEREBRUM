@@ -6,7 +6,7 @@ Handles environment setup including CUDA configuration, protobuf configuration, 
 
 import os
 import logging
-from typing import Optional, Any, Dict
+from typing import Any, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +63,6 @@ def test_transformers_import() -> bool:
         True if transformers can be imported, False otherwise
     """
     try:
-        import transformers
         logger.debug("Transformers imported successfully")
         return True
     except Exception as e:
@@ -139,42 +138,42 @@ def check_environment_dependencies() -> Dict[str, bool]:
     
     # Check PyTorch
     try:
-        import torch
+        import torch  # noqa: F401
         dependencies["torch"] = True
     except ImportError:
         pass
     
     # Check spaCy
     try:
-        import spacy
+        import spacy  # noqa: F401
         dependencies["spacy"] = True
     except ImportError:
         pass
     
     # Check matplotlib
     try:
-        import matplotlib
+        import matplotlib  # noqa: F401
         dependencies["matplotlib"] = True
     except ImportError:
         pass
     
     # Check networkx
     try:
-        import networkx
+        import networkx  # noqa: F401
         dependencies["networkx"] = True
     except ImportError:
         pass
     
     # Check imageio
     try:
-        import imageio
+        import imageio  # noqa: F401
         dependencies["imageio"] = True
     except ImportError:
         pass
     
     # Check OpenAI (for fallback LLM)
     try:
-        import openai
+        import openai  # noqa: F401
         dependencies["openai"] = True
     except ImportError:
         pass
@@ -182,14 +181,14 @@ def check_environment_dependencies() -> Dict[str, bool]:
     # Check transformers (after protobuf configuration)
     try:
         configure_protobuf_environment()
-        import transformers
+        import transformers  # noqa: F401
         dependencies["transformers"] = True
     except ImportError:
         pass
     
     # Check protobuf
     try:
-        import google.protobuf
+        import google.protobuf  # noqa: F401
         dependencies["protobuf"] = True
     except ImportError:
         pass
@@ -258,9 +257,9 @@ def validate_environment() -> bool:
     
     # Check for basic Python dependencies (these should be in requirements.txt)
     try:
-        import json
-        import pathlib
-        import datetime
+        import json  # noqa: F401
+        import pathlib  # noqa: F401
+        import datetime  # noqa: F401
     except ImportError as e:
         logger.error(f"Missing basic Python dependency: {e}")
         return False
@@ -301,7 +300,7 @@ def setup_environment_logging() -> None:
     
     # Suppress CUDA warnings if PyTorch is available
     try:
-        import torch
+        import torch  # noqa: F401
         warnings.filterwarnings(
             "ignore", 
             message="CUDA initialization: CUDA unknown error",

@@ -8,7 +8,7 @@ pipeline from ingestion to graph generation.
 import os
 import time
 import asyncio
-from typing import Dict, List, Any, Optional, Tuple, Union
+from typing import Dict, List, Any, Optional, Union
 from pathlib import Path
 import json
 import logging
@@ -21,12 +21,12 @@ import re
 
 # Import LEXICON components
 from .config import LexiconConfig, get_default_config
-from .logging import setup_logging, get_logger, LoggingTimer
-from .exceptions import LexiconError, InputError, ProcessingError
+from .logging import setup_logging, LoggingTimer
+from .exceptions import LexiconError, InputError
 
 # Import OpenRouter integration
 from src.llm.OpenRouter.openrouter import OpenRouterClient, OpenRouterConfig
-from src.llm.config import get_model_name, get_api_key
+from src.llm.config import get_model_name
 
 # Load environment variables from top-level .env file
 env_path = Path(__file__).resolve().parent.parent.parent.parent / '.env'

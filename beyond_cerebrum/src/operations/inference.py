@@ -11,7 +11,7 @@ import numpy as np # Example for numerical operations
 
 # Import structures and types (adjust paths if needed)
 # Use generic types like Tree, Graph. Define specific aliases if needed.
-from ..formalisms.structures import Tree, Graph 
+from ..formalisms.structures import Graph 
 from ..formalisms.types import SemanticConcept # PragmaticContext not defined here
 # Define type alias for context for clarity, can be refined later
 PragmaticContext = Dict[str, Any]

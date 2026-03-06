@@ -51,7 +51,7 @@ def main():
     # Import dynamically to allow the module to initialize paths
     try:
         # Note: Full PDF rendering requires pandoc and LaTeX
-        from src.utils.markdown.utils import cleanup_intermediate_files
+        from src.utils.markdown.utils import cleanup_intermediate_files  # noqa: F401
         
         logger.info(f"PDF rendering would generate: {args.output}")
         logger.info("Note: Full PDF rendering requires pandoc and LaTeX")

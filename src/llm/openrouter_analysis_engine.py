@@ -6,7 +6,6 @@ using OpenRouter LLM capabilities. Provides structured analysis workflows with
 comprehensive error handling, logging, and output management.
 """
 
-import os
 import json
 import logging
 from datetime import datetime

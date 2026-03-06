@@ -5,8 +5,7 @@ This module provides specialized methods for handling the locative case,
 where a model serves as a context, container, or location for operations.
 """
 
-from typing import Dict, Any, Optional, List, Tuple, Union, Callable
-import numpy as np
+from typing import Dict, Any, Optional, List
 import logging
 
 from ..core.model import Model, Case

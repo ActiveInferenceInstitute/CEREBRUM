@@ -6,12 +6,11 @@ of the specification, serving as the building blocks for more complex
 linguistic transformations and inferences.
 """
 
-from typing import TypeVar, Generic, Callable, Any, Optional, Dict, List
+from typing import TypeVar, Callable, Any, Optional, Dict, List
 # Import necessary structures and types (adjust paths as needed)
 # TODO: Define and import a proper FeatureStructure class
 # from ..formalisms.structures import FeatureStructure 
-from ..formalisms.structures import FeatureStructure, Graph, Tree 
-from ..formalisms.types import LinguisticSequence
+from ..formalisms.structures import FeatureStructure 
 
 # Type variables for generic operations
 S = TypeVar('S') # Represents a generic structure type

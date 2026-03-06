@@ -9,10 +9,7 @@ import os
 import json
 import numpy as np
 from datetime import datetime
-from typing import Dict, Any, List, Optional
-import matplotlib.pyplot as plt
-import seaborn as sns
-from pathlib import Path
+from typing import Dict, Any
 
 class ComprehensiveReportGenerator:
     """Generates comprehensive reports in multiple formats."""

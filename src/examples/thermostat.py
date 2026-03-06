@@ -6,17 +6,16 @@ through active inference and demonstrates case transformations.
 """
 
 import numpy as np
-from typing import Dict, Any, List, Optional, Tuple, Union
-import sys
+from typing import Dict, Any, List, Optional
 
 # Handle imports properly whether file is run directly or imported as a module
 try:
     # Try relative imports (work when imported as a module)
-    from ..core.model import Case, Model
+    from ..core.model import Case, Model  # noqa: F401
     from ..core.active_inference import ActiveInferenceModel
 except ImportError:
     # Fall back to absolute imports (work when run directly)
-    from src.core.model import Case, Model
+    from src.core.model import Case
     from src.core.active_inference import ActiveInferenceModel
 
 # Handle transformations imports

@@ -1,0 +1,17 @@
+{
+  "session_id": "ext_20260306_020130_fb621885",
+  "status": "open",
+  "runner": "claude",
+  "created_at": "2026-03-06T02:01:30+00:00",
+  "expires_at": "2026-03-07T02:01:30+00:00",
+  "ttl_hours": 24,
+  "token": "13cde4e228be7deb657aedf10950525d",
+  "attest": "I validated this review was completed without awareness of overall score and is unbiased.",
+  "packet_path": "/Users/4d/Documents/GitHub/CEREBRUM/.desloppify/review_packets/holistic_packet_20260306_020130.json",
+  "blind_packet_path": "/Users/4d/Documents/GitHub/CEREBRUM/.desloppify/review_packet_blind.json",
+  "packet_sha256": "637c510f020b69ac8a10ba3fdff6cb368f433a404d5c194b0f956a66f3de4a7d",
+  "template_path": "/Users/4d/Documents/GitHub/CEREBRUM/.desloppify/external_review_sessions/ext_20260306_020130_fb621885/review_result.template.json",
+  "launch_prompt_path": "/Users/4d/Documents/GitHub/CEREBRUM/.desloppify/external_review_sessions/ext_20260306_020130_fb621885/claude_launch_prompt.md",
+  "instructions_path": "/Users/4d/Documents/GitHub/CEREBRUM/.desloppify/external_review_sessions/ext_20260306_020130_fb621885/reviewer_instructions.md",
+  "expected_output_path": "/Users/4d/Documents/GitHub/CEREBRUM/.desloppify/external_review_sessions/ext_20260306_020130_fb621885/review_result.json"
+}

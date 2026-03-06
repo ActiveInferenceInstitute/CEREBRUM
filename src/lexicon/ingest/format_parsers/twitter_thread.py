@@ -5,7 +5,7 @@ Parses Twitter thread format into processed segments.
 """
 
 import re
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List
 from ...nlp.preprocessor import ProcessedSegment
 
 def parse_twitter(text: str) -> List[ProcessedSegment]:

@@ -17,7 +17,6 @@ import logging
 import requests
 from typing import Dict, Any, Optional, List, Generator, Union
 from dataclasses import dataclass
-from enum import Enum
 
 logger = logging.getLogger(__name__)
 

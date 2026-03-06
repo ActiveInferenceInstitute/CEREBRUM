@@ -8,7 +8,6 @@ import os
 import sys
 import logging
 import importlib
-import numpy as np
 import argparse
 from pathlib import Path
 
@@ -64,7 +63,7 @@ def regenerate_case_animation(case_name):
     
     # Import the test function for the specified case
     try:
-        module_name = f"src.tests.linear_regression_cases.{case_name}_case"
+        module_name = f"tests.linear_regression_cases.{case_name}_case"
         module = importlib.import_module(module_name)
         test_func = getattr(module, f"test_{case_name}_case")
     except ImportError:
@@ -81,7 +80,7 @@ def regenerate_case_animation(case_name):
     # Define output directory
     output_dir = os.path.join(
         Path(__file__).parent.parent.parent, 
-        "src/tests/output/linear_regression"
+        "tests/output/linear_regression"
     )
     
     # Make sure output directory exists

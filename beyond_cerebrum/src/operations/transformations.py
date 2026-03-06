@@ -12,7 +12,7 @@ from typing import TypeVar, Any, Dict
 # Use generic Tree/Graph for now, specific types can be defined later
 from ..formalisms.structures import Tree, Graph, TreeNode 
 # Import existing types or use basic types as placeholders
-from ..formalisms.types import SyntacticLabel, SemanticConcept, PragmaticFeature 
+from ..formalisms.types import SyntacticLabel, SemanticConcept 
 # Define type alias for context for clarity, can be refined later
 PragmaticContext = Dict[str, Any] 
 

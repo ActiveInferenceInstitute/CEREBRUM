@@ -1,7 +1,6 @@
 """Tests for FORMICA linguistic types."""
 
-import pytest
-from typing import Dict, Any
+from typing import Dict
 from beyond_cerebrum.src.formalisms.types import (
     Phoneme,
     Morpheme,

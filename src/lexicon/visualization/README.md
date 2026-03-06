@@ -42,7 +42,7 @@ The visualization module requires the following Python packages:
 
 Install these dependencies with:
 ```
-pip install matplotlib networkx numpy imageio
+uv pip install matplotlib networkx numpy imageio
 ```
 
 ## Visualization Types

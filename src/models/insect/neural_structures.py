@@ -5,11 +5,11 @@ This module provides implementations of insect neural structures mapped to CEREB
 including mushroom bodies, central complex, antennal lobes, and other brain regions.
 """
 
-from typing import Dict, Any, Optional, List, Tuple
+from typing import Dict, Any, Optional, List
 import numpy as np
 import logging
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from src.core.model import Case
 

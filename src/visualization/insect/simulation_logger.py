@@ -10,7 +10,7 @@ import csv
 import logging
 import os
 import time
-from typing import Dict, Any, List, Optional, Union
+from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field, asdict
 from collections import defaultdict, deque
 import numpy as np

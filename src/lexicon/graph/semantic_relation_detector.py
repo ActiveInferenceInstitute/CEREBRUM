@@ -10,24 +10,22 @@ Advanced semantic relationship detection using multiple strategies:
 """
 
 import re
-import logging
-from typing import List, Dict, Any, Set, Tuple, Optional, NamedTuple
+from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 from collections import defaultdict, Counter
-import json
 
 from ..core.config import LexiconConfig
 from ..core.logging import get_logger
 
 try:
     import spacy
-    from spacy.matcher import Matcher, DependencyMatcher
+    from spacy.matcher import Matcher, DependencyMatcher  # noqa: F401
     SPACY_AVAILABLE = True
 except ImportError:
     SPACY_AVAILABLE = False
 
 try:
-    import networkx as nx
+    import networkx as nx  # noqa: F401
     NETWORKX_AVAILABLE = True
 except ImportError:
     NETWORKX_AVAILABLE = False

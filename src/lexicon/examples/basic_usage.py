@@ -6,7 +6,6 @@ This script demonstrates the basic usage of the LEXICON system
 by processing a sample text through the complete pipeline.
 """
 
-import os
 import sys
 import json
 import time

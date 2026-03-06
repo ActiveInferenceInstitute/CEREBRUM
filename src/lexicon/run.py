@@ -11,7 +11,7 @@ import time
 import argparse
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Dict, Any
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))

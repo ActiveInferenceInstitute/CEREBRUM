@@ -9,12 +9,12 @@ including honeybees, ants, and fruit flies with their unique characteristics.
 import numpy as np
 import logging
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
-from .base import InsectModel, InsectActiveInferenceModel
+from .base import InsectModel
 from .neural_structures import (
     MushroomBody, CentralComplex, AntennalLobe, 
-    OpticLobe, SubesophagealGanglion, VentralNerveCord
+    OpticLobe
 )
 from .cases import (
     PheromonalCase, SwarmCase, MetamorphicCase,

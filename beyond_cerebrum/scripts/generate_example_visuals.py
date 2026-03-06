@@ -18,7 +18,7 @@ if src_path not in sys.path:
     sys.path.insert(0, src_path)
 
 try:
-    from formalisms.structures import Tree, TreeNode, Graph, GraphNode, GraphEdge
+    from formalisms.structures import Tree, TreeNode, Graph, GraphNode, GraphEdge  # noqa: F401
     from visualization.visualize import render_tree, render_graph, DEFAULT_OUTPUT_DIR
 except ImportError as e:
     print(f"Error importing FORMICA modules: {e}")

@@ -1,11 +1,10 @@
 """Tests for FORMICA inference operations."""
 
 import pytest
-import numpy as np
-from typing import Any, Dict, Optional
+from typing import Any
 
 from beyond_cerebrum.src.formalisms.structures import (
-    AbstractStructure, SemanticGraph, GraphNode, SemanticGraphNode
+    AbstractStructure, SemanticGraph, SemanticGraphNode
 )
 from beyond_cerebrum.src.formalisms.types import PragmaticContext, SemanticConcept
 from beyond_cerebrum.src.operations.inference import (

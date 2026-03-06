@@ -1,0 +1,198 @@
+{
+  "assessments": {
+    "high_level_elegance": 38,
+    "mid_level_elegance": 36,
+    "low_level_elegance": 41,
+    "test_strategy": 35
+  },
+  "findings": [
+    {
+      "dimension": "high_level_elegance",
+      "id": "dual_model_class",
+      "summary": "Two parallel, incompatible Model base classes exist: src/core/model.py and src/models/base.py, creating an unresolvable ownership split.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/base.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/tests/conftest.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/tests/cases/test_case_manager.py"
+      ],
+      "evidence": [
+        "src/core/model.py defines Model with full active-inference semantics (free_energy, update, case_history, precision_weights, connections, _apply_case_transformation hook).",
+        "src/models/base.py defines a second Model class with a stripped interface (only id, name, _case, data_buffer) and no overlap with the core version except the Case enum, which it re-imports from src/core/model.",
+        "tests/conftest.py imports Case from src.models.base, while tests/cases/test_case_manager.py imports both Model and Case from src.models.base; tests/transformations/test_case_transformations.py imports Model from src.core.model. The same abstraction has two independent source-of-truth files with different public contracts.",
+        "src/cases/case_manager.py must accept either variant silently; the CaseManager.calculate_free_energy method falls back to a hardcoded 1.0 rather than raising, concealing the incompatibility at runtime (confirmed at line 146 of the test: assert result == 1.0).",
+        "28 files in src/ import from src.core.model; only 1 imports from src.models.base within src/, but 15 test files import from src.models.base, meaning the test suite and production code do not share the same Model type."
+      ],
+      "suggestion": "Designate src/core/model.py as the sole Model source. Migrate the stripped src/models/base.py to a thin re-export shim (from src.core.model import Model, Case) and delete all duplicate implementation. Update all test imports to src.core.model.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "high_level_elegance",
+      "id": "test_directory_split_ignored_paths",
+      "summary": "pytest.ini permanently ignores three test paths (tests/pomdp/test_cases, tests/models/test_linear_regression.py, tests/models/linear_regression_cases), leaving significant coverage gaps that are hidden from CI.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/pytest.ini"
+      ],
+      "evidence": [
+        "pytest.ini addopts contains: --ignore=tests/pomdp/test_cases --ignore=tests/models/test_linear_regression.py --ignore=tests/models/linear_regression_cases",
+        "The comment in pytest.ini describes the reason as 'unimplemented modules or optional dependencies', meaning these are not flaky tests being temporarily silenced — they are structurally broken.",
+        "tests/models/linear_regression_cases/ contains 8 case-specific test files (nominative_case.py through vocative_case.py) covering what appears to be the core linear regression use case across all 8 CEREBRUM cases; these are entirely excluded.",
+        "tests/pomdp/test_cases/ contains test_nominative.py, test_ablative.py, test_locative.py, test_vocative.py — four case-specific POMDP scenario tests, all excluded.",
+        "The excluded files number at least 12+ test modules. There is no tracking issue, no xfail, no skip decorator — the exclusion is invisible at the individual test level."
+      ],
+      "suggestion": "Replace blanket --ignore flags with per-test @pytest.mark.skip(reason='...') or xfail decorators so the coverage gap is visible in test reports. Fix the underlying import/dependency issues that made the ignores necessary.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "high_level_elegance",
+      "id": "insect_module_autonomous_case_tracking",
+      "summary": "InsectModel (src/models/insect/base.py) duplicates case-tracking state parallel to the parent Model class rather than delegating.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/insect/base.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py"
+      ],
+      "evidence": [
+        "InsectModel.__init__ sets self.current_case = initial_case (line 92) alongside self.case_history = [] (line 107), duplicating fields that already exist in the parent Model as self._case and self._case_history.",
+        "InsectModel.transform_case (line 337–355) reads and writes self.current_case directly, bypassing the parent Model.case setter and its _apply_case_transformation hook entirely. The parent class case setter (with logging and history tracking) is never triggered.",
+        "The parent's self._case_history and InsectModel's self.case_history are maintained independently, giving divergent histories for the same object.",
+        "get_state() (line 701) returns current_case from self.current_case, not from self._case — meaning the base Model.get_state() and InsectModel.get_state() would report different values for the same instance."
+      ],
+      "suggestion": "Remove self.current_case and self.case_history from InsectModel. Override _apply_case_transformation() to perform insect-specific transitions when the parent case setter fires. Use self.case (the parent property) throughout.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "id": "import_try_except_seam_leakage",
+      "summary": "Example modules (thermostat.py, animal_agent.py) use try/except ImportError to switch between relative and absolute imports, exposing package structure decisions as runtime behavior.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/examples/thermostat.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/examples/animal_agent.py"
+      ],
+      "evidence": [
+        "thermostat.py lines 13-26 perform two separate try/except ImportError blocks: one for core.model and one for transformations.case_transformations.",
+        "animal_agent.py lines 19-24 repeats the same pattern for core.model.",
+        "6 such patterns were found across src/examples/ alone. The try/except construct means the import path actually taken depends on how Python is invoked, not on a declared package boundary. Import errors unrelated to package structure (e.g., a typo in a downstream import) are silently swallowed and then a fallback import is attempted, delaying failure and obscuring root cause.",
+        "animal_agent.py lines 28-38 embed a runtime .git-marker walk to determine project_root, hardcoding 'src/tests/example_outputs' as a side-effecting path at module import time. This creates a side effect (os.makedirs) at import, which breaks test isolation."
+      ],
+      "suggestion": "Fix the package to be installed editably (pip install -e .) via pyproject.toml and remove all try/except import fallbacks. Move the OUTPUT_DIR setup out of module-level scope and into a function or __main__ guard.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "id": "logging_basicconfig_in_library_code",
+      "summary": "src/core/model.py and multiple other src/ library modules call logging.basicConfig() at module-level, hijacking the host application's logging configuration.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/examples/animal_agent.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/examples/environment.py"
+      ],
+      "evidence": [
+        "src/core/model.py line 8: logging.basicConfig(level=logging.INFO, ...) is called unconditionally at module load. This is the highest-importer file in the project (57 importers), meaning every consumer has its logging configuration overridden on first import.",
+        "At least 13 additional src/ files call logging.basicConfig() at module scope or inside top-level setup code (confirmed via grep).",
+        "pytest.ini configures log_cli and log_file handlers; the repeated basicConfig calls during test collection will produce redundant or conflicting handler registrations."
+      ],
+      "suggestion": "Replace all logging.basicConfig() calls in library/src code with logger = logging.getLogger(__name__) and a NullHandler. Reserve basicConfig to __main__ entry points only.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "id": "case_manager_free_energy_silent_fallback",
+      "summary": "CaseManager.calculate_free_energy silently returns 1.0 when no handler or model method is available, making the fallback indistinguishable from a correct computation.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/cases/case_manager.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/tests/cases/test_case_manager.py"
+      ],
+      "evidence": [
+        "The test at line 146 of test_case_manager.py asserts result == 1.0 and labels this 'Default fallback', confirming that the production code path for an unimplemented model returns a magic number rather than raising.",
+        "The base Model.free_energy() raises NotImplementedError (src/core/model.py line 123), but the CaseManager wraps the call and returns 1.0 when the model's free_energy raises, losing the signal entirely.",
+        "Callers of calculate_free_energy have no way to distinguish a genuine free energy of 1.0 from an absent implementation, making the method contract untrustworthy."
+      ],
+      "suggestion": "Remove the 1.0 fallback. Raise a descriptive ValueError or re-raise NotImplementedError when no free energy implementation exists. If a default is genuinely needed, make it explicit (e.g., a keyword parameter default_value=None with a caller-side check).",
+      "confidence": "high"
+    },
+    {
+      "dimension": "low_level_elegance",
+      "id": "update_dispatch_if_elif_chain",
+      "summary": "Model.update() in src/core/model.py uses a manual 8-branch if/elif chain to dispatch to case-specific update methods instead of a dispatch table.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py"
+      ],
+      "evidence": [
+        "Lines 185-202 of src/core/model.py contain: if self._case == Case.NOMINATIVE: ... elif self._case == Case.ACCUSATIVE: ... (8 branches for 8 cases).",
+        "The fallback at line 202 returns {\"status\": \"error\", ...} for an unknown case, but Case is an exhaustive Enum — this branch is unreachable. If a new case is added to the Enum, the dispatch chain silently returns the error dict rather than raising AttributeError.",
+        "All 8 default case-update methods (_update_nominative through _update_vocative) have identical bodies returning a dict with only status and data_received keys, providing no differentiation. They exist purely as override hooks but consume vertical space."
+      ],
+      "suggestion": "Replace the if/elif chain with a dispatch dict: _case_dispatch = {Case.NOMINATIVE: self._update_nominative, ...} and call _case_dispatch[self._case](data). This is O(1), exhaustive by construction, and makes missing cases raise KeyError immediately.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "low_level_elegance",
+      "id": "insect_neural_init_random_state_at_construction",
+      "summary": "InsectModel._initialize_neural_structures() calls np.random.rand() without seeding at object construction time, making model instances non-deterministic across test runs.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/insect/base.py"
+      ],
+      "evidence": [
+        "Lines 135, 148, 161, 165, 172, 173, 184, 198 of src/models/insect/base.py each call np.random.rand() to initialize neural structure activity arrays (mushroom_body, central_complex, antennal_lobe, optic_lobe, subesophageal_ganglion, ventral_nerve_cord).",
+        "There is no random seed parameter in InsectModel.__init__ and no call to np.random.seed() before initialization.",
+        "Tests in tests/models/test_insect_models.py (e.g., test_insect_model_initialization) that assert on neural structure properties will receive different floating-point arrays on every run, making numerical assertions fragile."
+      ],
+      "suggestion": "Add a random_seed: Optional[int] = None parameter to InsectModel.__init__. When provided, call np.random.default_rng(random_seed) and pass it through _initialize_neural_structures to replace bare np.random.rand() calls.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "test_strategy",
+      "id": "no_test_for_free_energy_or_predict_on_concrete_models",
+      "summary": "The two abstract critical methods of Model (free_energy and predict) have no tests against any concrete subclass in the executed test suite.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/tests/core/test_model.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py"
+      ],
+      "evidence": [
+        "test_model_free_energy_abstract (test_model.py line 115) only confirms that Model().free_energy() raises NotImplementedError — it does not test any subclass implementation.",
+        "test_model_predict_abstract (test_model.py line 205) similarly only tests the abstract stub.",
+        "No test file in tests/core/ imports ActiveInferenceModel, ThermostatModel, or AnimalAgent to exercise a real free_energy or predict implementation.",
+        "tests/examples/test_environment.py covers only the Environment class. No test covers ThermostatModel or AnimalAgent end-to-end active inference loops.",
+        "ActiveInferenceModel (10 importers, the next most-imported critical module) has one test file test_active_inference_pomdp.py — but it is a POMDP-scenario file, not a unit test of the ActiveInferenceModel interface itself."
+      ],
+      "suggestion": "Add a concrete subclass fixture in tests/core/ (e.g., a MinimalModel that returns a fixed free_energy float and a predict array). Use it to test that the case setter triggers _apply_case_transformation, that update() dispatches correctly, and that free_energy() returns the expected type.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "test_strategy",
+      "id": "tests_import_wrong_model_class",
+      "summary": "Tests in tests/cases/ and tests/conftest.py instantiate the stripped src.models.base.Model rather than the canonical src.core.model.Model, meaning they do not test the class with 57 production importers.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/tests/conftest.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/tests/cases/test_case_manager.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/models/base.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/core/model.py"
+      ],
+      "evidence": [
+        "tests/conftest.py line 8: from src.models.base import Case",
+        "tests/cases/test_case_manager.py line 15: from src.models.base import Model, Case — so all CaseManager tests use the stripped Model (no free_energy, no connections, no _apply_case_transformation, no precision_weights).",
+        "The CaseManager in production accepts src.core.model.Model instances (28 production importers). The test suite for CaseManager exercises it only with src.models.base.Model instances, which have a different interface.",
+        "TestCalculateFreeEnergy asserts result == 1.0 because src.models.base.Model has no free_energy() method at all, so the fallback fires — this test therefore does not cover the CaseManager's integration with the real Model.free_energy() path."
+      ],
+      "suggestion": "Change all test imports for Model to src.core.model.Model. Remove src.models.base.Model entirely (see dual_model_class finding). Re-run TestCalculateFreeEnergy against a real subclass so the fallback path is not the only path tested.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "test_strategy",
+      "id": "lexicon_engine_untested",
+      "summary": "src/lexicon/core/engine.py (the main pipeline orchestrator) has zero test coverage in the executed test suite.",
+      "related_files": [
+        "/Users/4d/Documents/GitHub/CEREBRUM/src/lexicon/core/engine.py",
+        "/Users/4d/Documents/GitHub/CEREBRUM/pytest.ini"
+      ],
+      "evidence": [
+        "Grepping all test files for 'lexicon', 'LexiconEngine', or 'engine' finds only llm/test_openrouter_functionality.py, which tests OpenRouterAnalysisEngine, not the LEXICON pipeline.",
+        "pytest.ini testpaths includes tests/ and beyond_cerebrum/src/tests/ — there is no tests/lexicon/ directory.",
+        "src/lexicon/core/engine.py imports OpenRouterClient at module level and calls load_dotenv at module scope, meaning any test that imports it would require live credentials or mocking — but no such test exists.",
+        "The engine.py file also calls os.makedirs and glob operations at function scope with side effects, making isolation-free testing structurally difficult."
+      ],
+      "suggestion": "Create tests/lexicon/ with unit tests that mock OpenRouterClient and dotenv loading. At minimum, test that LexiconEngine initializes with a config, that its pipeline methods return expected shapes, and that errors from the LLM layer surface as LexiconError rather than raw exceptions.",
+      "confidence": "high"
+    }
+  ]
+}

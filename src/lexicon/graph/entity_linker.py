@@ -4,17 +4,14 @@ LEXICON Entity Linker
 Links entities in the knowledge graph and extracts relationships.
 """
 
-import time
 import json
-from typing import List, Dict, Any, Optional, Tuple, Set
-import logging
+from typing import List, Dict, Any, Tuple
 import re
 
 from ..core.config import LexiconConfig
-from ..core.logging import get_logger, LoggingTimer
-from ..core.exceptions import ProcessingError, GraphError
+from ..core.logging import get_logger
 
-from src.llm.OpenRouter import OpenRouterClient, OpenRouterConfig
+from src.llm.OpenRouter import OpenRouterClient
 
 
 class EntityLinker:

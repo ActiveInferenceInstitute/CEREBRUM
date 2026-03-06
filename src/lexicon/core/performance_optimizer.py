@@ -13,28 +13,25 @@ import gc
 import os
 import time
 import psutil
-import logging
 import pickle
 import hashlib
-from typing import List, Dict, Any, Optional, Iterator, Callable, Tuple, Union
+from typing import List, Dict, Any, Optional, Iterator, Callable
 from dataclasses import dataclass, asdict
-from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 import threading
-from collections import defaultdict
 import json
 
 from .config import LexiconConfig
 from .logging import get_logger
 
 try:
-    import numpy as np
+    import numpy as np  # noqa: F401
     NUMPY_AVAILABLE = True
 except ImportError:
     NUMPY_AVAILABLE = False
 
 try:
-    import pandas as pd
+    import pandas as pd  # noqa: F401
     PANDAS_AVAILABLE = True
 except ImportError:
     PANDAS_AVAILABLE = False

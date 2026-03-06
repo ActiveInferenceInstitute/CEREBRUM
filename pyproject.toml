@@ -1,6 +1,6 @@
 [project]
 name = "cerebrum"
-version = "1.4.0"
+version = "1.5.0"
 description = "CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling"
 readme = "README.md"
 license = {text = "CC BY-NC-ND 4.0"}

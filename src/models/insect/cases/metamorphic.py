@@ -5,7 +5,7 @@ This module implements the [MET] metamorphic case for developmental transitions
 in insects, including larval, pupal, and adult stage transformations.
 """
 
-from typing import Dict, Any, Optional, List, Tuple
+from typing import Dict, Any, Optional
 import numpy as np
 import logging
 from dataclasses import dataclass, field

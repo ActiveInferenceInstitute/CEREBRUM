@@ -1,6 +1,6 @@
 # CEREBRUM Example: Deconstructing Neural Networks with Linguistic Cases
 
-This document explores the application of the CEREBRUM framework to Neural Networks (NNs), providing a multi-faceted understanding based on linguistic cases. The concepts and demonstrations are derived from the comprehensive test suite in `src/tests/test_neural_network.py`.
+This document explores the application of the CEREBRUM framework to Neural Networks (NNs), providing a multi-faceted understanding based on linguistic cases. The concepts and demonstrations are derived from the comprehensive test suite in `tests/core/test_neural_network.py`.
 
 ## Introduction to Neural Networks
 
@@ -77,7 +77,7 @@ The extensive test suite for neural networks embodies these cases:
 2.  **Data Generation:** Functions (`DataGenerator`) create synthetic regression and classification datasets.
 3.  **Visualization:** A `Visualizer` class provides methods for plotting data, network structure, and training history. A `plot_case_linguistic_context` function visualizes the definition of each case.
 4.  **Case-Specific Tests:** Functions like `test_nominative_case`, `test_accusative_case`, etc., instantiate `NeuralNetworkModel`, train/evaluate it, and generate visualizations tailored to the specific case perspective.
-5.  **Output Generation:** Results, including detailed plots, reports (`report.md`), and animations, are saved in case-specific subdirectories within `src/tests/output/neural_network/`. Examples include:
+5.  **Output Generation:** Results, including detailed plots, reports (`report.md`), and animations, are saved in case-specific subdirectories within `tests/output/neural_network/`. Examples include:
     - Network structure diagrams (INSTRUMENTAL)
     - Training loss curves (ACCUSATIVE)
     - Prediction plots (NOMINATIVE)

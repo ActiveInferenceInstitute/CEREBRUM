@@ -141,7 +141,7 @@ config = LexiconConfig(
 
 **Dependencies**:
 ```bash
-pip install spacy numpy pandas plotly networkx psutil pytest hypothesis
+uv pip install spacy numpy pandas plotly networkx psutil pytest hypothesis
 python -m spacy download en_core_web_sm
 ```
 

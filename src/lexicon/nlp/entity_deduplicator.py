@@ -4,11 +4,8 @@ LEXICON Enhanced Entity Deduplicator
 Advanced entity deduplication using multiple similarity metrics and intelligent merging.
 """
 
-import re
-import logging
-from typing import List, Dict, Any, Set, Tuple, Optional
+from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
-import hashlib
 from collections import defaultdict
 
 from ..core.config import LexiconConfig

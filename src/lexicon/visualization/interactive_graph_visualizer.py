@@ -10,21 +10,18 @@ Advanced interactive visualization system for knowledge graphs with:
 """
 
 import math
-import logging
-from typing import List, Dict, Any, Set, Tuple, Optional, Union
+from typing import List, Dict, Any, Tuple, Optional
 from dataclasses import dataclass
-import json
 from collections import defaultdict, Counter
-import colorsys
 
 from ..core.config import LexiconConfig
 from ..core.logging import get_logger
 
 try:
     import plotly.graph_objects as go
-    import plotly.express as px
-    from plotly.subplots import make_subplots
-    import plotly.io as pio
+    import plotly.express as px  # noqa: F401
+    from plotly.subplots import make_subplots  # noqa: F401
+    import plotly.io as pio  # noqa: F401
     PLOTLY_AVAILABLE = True
 except ImportError:
     PLOTLY_AVAILABLE = False
@@ -39,8 +36,8 @@ except ImportError:
 try:
     import numpy as np
     from sklearn.cluster import DBSCAN
-    from sklearn.manifold import TSNE
-    from sklearn.decomposition import PCA
+    from sklearn.manifold import TSNE  # noqa: F401
+    from sklearn.decomposition import PCA  # noqa: F401
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False

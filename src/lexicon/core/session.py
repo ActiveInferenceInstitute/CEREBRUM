@@ -4,12 +4,11 @@ LEXICON Session Management
 Handles session management including output directories, input handling, and metadata.
 """
 
-import os
 import json
 import shutil
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Union
+from typing import Dict, List, Any, Optional
 
 
 def create_output_dir(input_name: Optional[str] = None, is_batch: bool = False) -> Path:

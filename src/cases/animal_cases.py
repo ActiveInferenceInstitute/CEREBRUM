@@ -5,7 +5,7 @@ This module provides specialized case handlers for animal agents,
 extending the general case system with animal-specific behaviors.
 """
 
-from typing import Dict, Any, List, Optional, Tuple, Union
+from typing import Dict, Any, List, Tuple
 import numpy as np
 import logging
 

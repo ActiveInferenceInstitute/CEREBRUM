@@ -44,7 +44,7 @@
 
 **(0:14:00) The Scientific Paper & Rigor**
 
-**Dr. Alex:** This isn't just a coding project; it's grounded in research. We have a full scientific paper – check the `paper/` directory in the repo. It lays out the theoretical foundations, the architecture, and experimental results. We even have a Python script (`paper/assemble_paper.py`) that builds the paper from Markdown components, using tools like `pandoc` and `XeLaTeX` to ensure consistency. We try to be really rigorous about documentation (`docs/`) and testing (`src/tests/` using `pytest`) too. Science needs transparency!
+**Dr. Alex:** This isn't just a coding project; it's grounded in research. We have a full scientific paper – check the `paper/` directory in the repo. It lays out the theoretical foundations, the architecture, and experimental results. We even have a Python script (`paper/assemble_paper.py`) that builds the paper from Markdown components, using tools like `pandoc` and `XeLaTeX` to ensure consistency. We try to be really rigorous about documentation (`docs/`) and testing (`tests/` using `pytest`) too. Science needs transparency!
 
 **(0:17:20) [Chat Simulation]**
 

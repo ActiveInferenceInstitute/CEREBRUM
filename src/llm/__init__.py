@@ -156,7 +156,7 @@ License: MIT
 """
 
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional  # noqa: F401
 
 # Set up LLM-specific logging
 logger = logging.getLogger("corym.llm")
@@ -166,7 +166,7 @@ _available_components = {}
 
 # Core utilities (should always be available)
 try:
-    from .llm_utils import LLMUtils
+    from .llm_utils import LLMUtils  # noqa: F401
     _available_components["LLMUtils"] = True
     logger.debug("LLMUtils loaded successfully")
 except ImportError as e:
@@ -175,7 +175,7 @@ except ImportError as e:
 
 # OpenRouter analysis engine
 try:
-    from .openrouter_analysis_engine import OpenRouterAnalysisEngine, AnalysisResult
+    from .openrouter_analysis_engine import OpenRouterAnalysisEngine, AnalysisResult  # noqa: F401
     _available_components["OpenRouterAnalysisEngine"] = True
     logger.debug("OpenRouterAnalysisEngine loaded successfully")
 except ImportError as e:
@@ -184,7 +184,7 @@ except ImportError as e:
 
 # OpenRouter client
 try:
-    from .OpenRouter.openrouter import OpenRouterClient, OpenRouterConfig, Conversation
+    from .OpenRouter.openrouter import OpenRouterClient, OpenRouterConfig, Conversation  # noqa: F401
     _available_components["OpenRouterClient"] = True
     logger.debug("OpenRouterClient loaded successfully")
 except ImportError as e:

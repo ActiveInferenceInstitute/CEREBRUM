@@ -7,11 +7,9 @@ case determination in therapeutic and general contexts.
 """
 
 import re
-import logging
-from typing import List, Dict, Any, Set, Tuple, Optional, NamedTuple
+from typing import List, Dict, Any, Tuple, Optional
 from dataclasses import dataclass
 from collections import defaultdict, Counter
-import json
 
 from ..core.config import LexiconConfig
 from ..core.logging import get_logger

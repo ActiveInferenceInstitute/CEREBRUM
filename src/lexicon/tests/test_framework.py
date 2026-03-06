@@ -11,17 +11,12 @@ Advanced testing system for all LEXICON components:
 """
 
 import unittest
-import pytest
 import time
-import tempfile
 import json
-import logging
-from typing import List, Dict, Any, Optional, Callable, Union
+from typing import List, Dict, Any, Optional
 from pathlib import Path
 from dataclasses import dataclass
-from unittest.mock import Mock, patch, MagicMock
 import random
-import string
 from collections import defaultdict
 
 # Import LEXICON components

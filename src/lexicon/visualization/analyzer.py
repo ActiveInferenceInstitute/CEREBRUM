@@ -6,7 +6,7 @@ Provides analysis and reporting functions for LEXICON processing results.
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any
 
 from .graph_visualizer import GraphVisualizer
 from .animated_graph import create_graph_animation

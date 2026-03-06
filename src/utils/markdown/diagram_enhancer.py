@@ -13,12 +13,10 @@ Usage:
 """
 
 import argparse
-import os
 import re
-import shutil
 import yaml
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List
 import logging
 
 # Configure logging

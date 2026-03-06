@@ -6,7 +6,7 @@ interactions in insects, including surface properties, material interactions,
 and substrate-dependent behaviors.
 """
 
-from typing import Dict, Any, Optional, List, Tuple
+from typing import Dict, Any, Optional, List
 import numpy as np
 import logging
 from dataclasses import dataclass, field

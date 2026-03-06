@@ -9,8 +9,6 @@ calls the main function.
 import os
 import sys
 import logging
-from datetime import datetime
-import matplotlib.pyplot as plt
 
 # Add the parent directory to path to allow absolute imports
 current_dir = os.path.dirname(os.path.abspath(__file__))

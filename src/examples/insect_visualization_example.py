@@ -41,7 +41,6 @@ from src.visualization.insect import (
     InsectSimulationLogger,
     CasePerformanceLogger,
     BehavioralLogger,
-    InsectAnimationCreator,
     SwarmAnimationCreator
 )
 from src.utils.path_utils import get_output_dir

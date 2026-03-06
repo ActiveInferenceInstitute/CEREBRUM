@@ -4,7 +4,6 @@ import re
 import logging
 import subprocess
 import tempfile
-import shutil
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
