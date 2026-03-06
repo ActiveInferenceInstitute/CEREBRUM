@@ -3,8 +3,7 @@ from typing import Dict, Any, Optional, List, Tuple
 import uuid
 import logging
 
-# Configure logging (can be configured more robustly elsewhere)
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 class Case(Enum):
     """Enumeration of all possible cases a Model can be in"""
@@ -68,7 +67,7 @@ class Model:
             old_case_value = self._case.value
             self._case = new_case
             self._case_history.append((self._prior_case, new_case))
-            logging.info(f"Model '{self.name}' ({self.id}): Case changed from {old_case_value} to {new_case.value}")
+            logger.debug(f"Model '{self.name}' ({self.id}): Case changed from {old_case_value} to {new_case.value}")
             self._apply_case_transformation()
     
     def _apply_case_transformation(self):
@@ -159,7 +158,7 @@ class Model:
             parameters: Dictionary of parameter names to values
         """
         self.parameters.update(parameters)
-        logging.info(f"Model '{self.name}': Updated parameters: {list(parameters.keys())}")
+        logger.debug(f"Model '{self.name}': Updated parameters: {list(parameters.keys())}")
     
     def get_case_history(self) -> List[Tuple[Case, Case]]:
         """
@@ -180,25 +179,17 @@ class Model:
         Returns:
             Dictionary of update results
         """
-        # This generic update method will dispatch to case-specific methods
-        if self._case == Case.NOMINATIVE:
-            return self._update_nominative(data)
-        elif self._case == Case.ACCUSATIVE:
-            return self._update_accusative(data)
-        elif self._case == Case.GENITIVE:
-            return self._update_genitive(data)
-        elif self._case == Case.DATIVE:
-            return self._update_dative(data)
-        elif self._case == Case.INSTRUMENTAL:
-            return self._update_instrumental(data)
-        elif self._case == Case.LOCATIVE:
-            return self._update_locative(data)
-        elif self._case == Case.ABLATIVE:
-            return self._update_ablative(data)
-        elif self._case == Case.VOCATIVE:
-            return self._update_vocative(data)
-        
-        return {"status": "error", "message": f"Unknown case {self._case}"}
+        dispatch = {
+            Case.NOMINATIVE: self._update_nominative,
+            Case.ACCUSATIVE: self._update_accusative,
+            Case.GENITIVE: self._update_genitive,
+            Case.DATIVE: self._update_dative,
+            Case.INSTRUMENTAL: self._update_instrumental,
+            Case.LOCATIVE: self._update_locative,
+            Case.ABLATIVE: self._update_ablative,
+            Case.VOCATIVE: self._update_vocative,
+        }
+        return dispatch[self._case](data)
     
     # Case-specific update methods with default implementations
     def _update_nominative(self, data: Any) -> Dict[str, Any]:

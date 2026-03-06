@@ -20,7 +20,8 @@ tests/
 │   ├── test_neural_network.py   #   NeuralNetworkModel tests
 │   └── neural_network/          #   NN test helpers
 ├── cases/                       # ← mirrors src/cases/
-│   └── test_case_manager.py     #   CaseManager tests
+│   ├── test_case_manager.py     #   CaseManager tests
+│   └── test_individual_cases.py #   All 8 case handlers (parametrized)
 ├── transformations/             # ← mirrors src/transformations/
 │   ├── test_case_transformations.py          # Core transformations
 │   ├── test_case_transformations_parametrized.py  # Parametrized suite
@@ -32,9 +33,11 @@ tests/
 ├── utils/                       # ← mirrors src/utils/
 │   ├── test_data_generator.py   #   DataGenerator tests
 │   ├── test_array_utils.py      #   Array utility tests
-│   └── test_path_utils.py       #   Path utility tests
+│   ├── test_path_utils.py       #   Path utility tests
+│   └── test_visualization_utils.py  # Visualizer, animations
 ├── analysis/                    # ← mirrors src/analysis/
-│   └── test_analysis.py         #   SimulationEffectivenessAnalyzer tests
+│   ├── test_analysis.py         #   Analysis tests
+│   └── test_simulation_assessment.py  # SimulationEffectivenessAnalyzer
 ├── llm/                         # ← mirrors src/llm/
 │   ├── test_ollama.py           #   Ollama client tests
 │   ├── test_openrouter_functionality.py  # OpenRouter function tests
@@ -47,6 +50,8 @@ tests/
 │   ├── test_cases/              #   Per-case POMDP tests
 │   ├── utils/                   #   POMDP test utilities
 │   └── visualizers.py           #   POMDP visualizers
+├── visualization/               # ← mirrors src/visualization/
+│   └── test_case_visualization.py  # plot_model_state, transitions, ecosystem
 ├── data/                        # Test data files
 ├── output/                      # Test output artifacts
 └── example_outputs/             # Example output artifacts
@@ -55,7 +60,7 @@ tests/
 ## Running Tests
 
 ```bash
-# All tests (253)
+# All tests (369)
 python -m pytest tests/ -v
 
 # By module
