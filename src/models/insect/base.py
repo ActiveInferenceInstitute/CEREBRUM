@@ -89,7 +89,7 @@ class InsectModel(ActiveInferenceModel):
         super().__init__(name=f"{species}_model", parameters=default_parameters)
         
         self.species = species
-        self.current_case = initial_case
+        self.case = initial_case
         self.behavioral_state = initial_state
         
         # Initialize neural structures
@@ -334,13 +334,13 @@ class InsectModel(ActiveInferenceModel):
         Returns:
             True if transformation was successful, False otherwise
         """
-        if target_case == self.current_case:
+        if target_case == self.case:
             return True
         
         try:
             # Validate case transformation
             if not self._validate_case_transformation(target_case):
-                logger.warning(f"Invalid case transformation: {self.current_case} -> {target_case}")
+                logger.warning(f"Invalid case transformation: {self.case} -> {target_case}")
                 return False
             
             # Update precision parameters for the new case
@@ -350,8 +350,8 @@ class InsectModel(ActiveInferenceModel):
             self._update_neural_priorities(target_case)
             
             # Record transformation
-            old_case = self.current_case
-            self.current_case = target_case
+            old_case = self.case
+            self.case = target_case
             self.case_history.append((old_case, target_case, self.performance_metrics['total_actions']))
             self.performance_metrics['case_transformations'] += 1
             
@@ -385,7 +385,7 @@ class InsectModel(ActiveInferenceModel):
             Case.VOCATIVE: [Case.NOMINATIVE, Case.DATIVE, Case.GENITIVE, Case.ACCUSATIVE, Case.INSTRUMENTAL, Case.LOCATIVE, Case.ABLATIVE]
         }
         
-        return target_case in valid_transitions.get(self.current_case, [])
+        return target_case in valid_transitions.get(self.case, [])
     
     def _update_precision_for_case(self, target_case: Case):
         """
@@ -581,7 +581,7 @@ class InsectModel(ActiveInferenceModel):
             Case.VOCATIVE: self._select_vocative_action
         }
         
-        action_selector = case_actions.get(self.current_case, self._select_default_action)
+        action_selector = case_actions.get(self.case, self._select_default_action)
         return action_selector(context)
     
     def _select_nominative_action(self, context: Dict[str, Any]) -> Action:
@@ -698,7 +698,7 @@ class InsectModel(ActiveInferenceModel):
             'case_transformations': self.performance_metrics['case_transformations'],
             'avg_sensory_processing_time': np.mean(self.performance_metrics['sensory_processing_time']) if self.performance_metrics['sensory_processing_time'] else 0.0,
             'avg_action_selection_time': np.mean(self.performance_metrics['action_selection_time']) if self.performance_metrics['action_selection_time'] else 0.0,
-            'current_case': self.current_case,
+            'current_case': self.case,
             'current_behavioral_state': self.behavioral_state,
             'sensory_history_length': len(self.sensory_history),
             'action_history_length': len(self.action_history)

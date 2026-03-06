@@ -9,10 +9,16 @@ from typing import Dict, Any, List, Optional, Tuple
 import logging
 
 from ..core.model import Model, Case
-
-logger = logging.getLogger(__name__)
 from .nominative import NominativeCase
 from .accusative import AccusativeCase
+from .dative import DativeCase
+from .genitive import GenitiveCase
+from .instrumental import InstrumentalCase
+from .locative import LocativeCase
+from .ablative import AblativeCase
+from .vocative import VocativeCase
+
+logger = logging.getLogger(__name__)
 
 class CaseManager:
     """
@@ -30,7 +36,12 @@ class CaseManager:
         self.case_handlers = {
             Case.NOMINATIVE: NominativeCase,
             Case.ACCUSATIVE: AccusativeCase,
-            # Add other cases as they're implemented
+            Case.DATIVE: DativeCase,
+            Case.GENITIVE: GenitiveCase,
+            Case.INSTRUMENTAL: InstrumentalCase,
+            Case.LOCATIVE: LocativeCase,
+            Case.ABLATIVE: AblativeCase,
+            Case.VOCATIVE: VocativeCase,
         }
         self.default_case = Case.NOMINATIVE
     
