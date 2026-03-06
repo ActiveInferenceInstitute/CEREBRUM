@@ -16,11 +16,13 @@ logger = logging.getLogger(__name__)
 class NominativeCase:
     """
     Nominative case handler for models acting as active agents.
-    
+
     The nominative case represents the model as a decision-making entity
     that generates actions and initiates processes.
     """
-    
+
+    PRECISION = 1.5  # Higher precision for active agent (confident predictions)
+
     @staticmethod
     def apply(model: Model) -> Model:
         """

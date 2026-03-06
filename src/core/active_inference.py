@@ -319,17 +319,8 @@ class ActiveInferenceModel(Model):
         Returns:
             Index of the optimal action
         """
-        # Simple implementation: use action that maximizes expected reward
-        # In more complex implementations, this would use a policy or value function
-        
-        # For now, just return the action corresponding to the most likely state
+        # Greedy policy: action corresponding to most likely state (modulo n_actions)
         max_state = np.argmax(self.posterior_means)
-        
-        # In a more sophisticated implementation, we would:
-        # 1. Compute expected rewards for each action
-        # 2. Select action with highest expected reward
-        
-        # For simplicity, we'll just use the state index (modulo n_actions)
         n_actions = self.parameters['n_actions']
         optimal_action = max_state % n_actions
         

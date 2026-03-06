@@ -16,11 +16,13 @@ logger = logging.getLogger(__name__)
 class AccusativeCase:
     """
     Accusative case handler for models acting as objects.
-    
+
     The accusative case represents the model as a recipient of actions,
     being updated or modified by other models or external processes.
     """
-    
+
+    PRECISION = 1.2  # Elevated precision for update reception (sensitive to incoming data)
+
     @staticmethod
     def apply(model: Model) -> Model:
         """

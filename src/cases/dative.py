@@ -16,11 +16,13 @@ logger = logging.getLogger(__name__)
 class DativeCase:
     """
     Dative case handler for models acting as recipients.
-    
+
     The dative case represents the model as a recipient of data flows,
     receiving information from other models or external sources.
     """
-    
+
+    PRECISION = 1.0  # Baseline precision for data reception
+
     @staticmethod
     def apply(model: Model) -> Model:
         """
