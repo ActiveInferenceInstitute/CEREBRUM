@@ -234,4 +234,68 @@ This document provides a comprehensive mapping between insect cognitive architec
 | **Metamorphic Computing** | Holometabolous development | [MET] principles | Reconfigurable computing architectures | Conceptual designs | Systems that radically reorganize for different tasks |
 | **Collective Decision Making** | Honeybee democracy | [SWARM] with quorum detection | Distributed consensus algorithms | Research implementations | Robust decentralized decision systems |
 
-This document provides a comprehensive framework for mapping entomological knowledge to the CEREBRUM case system, establishing formal relationships that can enhance both our understanding of insect cognition and the development of advanced computational systems inspired by these remarkable creatures. 
+## Table 11: Executive Functions Framework for Insect Cognition
+
+Recent research (Baran, Obidziński, & Hohol, 2025, *Frontiers in Behavioral Neuroscience*) proposes mapping vertebrate-like executive functions (EF) to insect neural substrates, providing a new lens for CEREBRUM case analysis.
+
+| Executive Function | CEREBRUM Case Mapping | Insect Neural Substrate | Behavioral Evidence | Species Examples | Vertebrate Parallel |
+|--------------------|----------------------|------------------------|---------------------|------------------|---------------------|
+| **Inhibition** | [NOM] suppressing [GEN] | Mushroom body output neurons (MBONs) inhibiting motor circuits | Reversal learning: bees learn to suppress previously rewarded responses | *Apis mellifera*, *Bombus terrestris* | Prefrontal cortex → basal ganglia inhibition |
+| **Shifting** | [NOM] → case transition | Central complex reconfiguration; fan-shaped body layer switching | Attentional set-shifting: ants switch foraging strategies based on context | *Lasius niger*, *Drosophila melanogaster* | Prefrontal-parietal attention networks |
+| **Working Memory** | [ACC] with short-term [ABL] | Mushroom body γ-lobe persistent activity; ring attractor maintenance in CX | Delayed match-to-sample tasks: bees hold color information for ~5 s | *Apis mellifera*, *Bombus terrestris* | Dorsolateral prefrontal cortex |
+| **Planning** | [NOM] with [LOC] prediction | Fan-shaped body → ellipsoid body sequential activation | Route planning: ants select optimal paths incorporating learned shortcuts | *Cataglyphis fortis*, *Formica rufa* | Prefrontal → hippocampal planning |
+| **Cognitive Flexibility** | Dynamic case reassignment | Mushroom body → central complex interaction; neuromodulatory state switching | Context-dependent behavior: wasps recognize faces only in social contexts | *Polistes fuscatus* | Frontoparietal flexibility network |
+
+**CEREBRUM Insight**: The EF framework suggests that insect [NOM] and [ACC] cases implement analogous computational functions to vertebrate executive control, despite 500+ million years of independent evolution — supporting the universality of CEREBRUM's case grammar as a domain-general cognitive description language.
+
+## Table 12: Connectome-Informed Architecture
+
+Data from the 2023 larval connectome (Winding et al., *Science*), 2020 hemibrain (Scheffer et al., *eLife*), and 2024 FlyWire full-brain connectome (Dorkenwald et al., *Nature*).
+
+| Circuit Motif | CEREBRUM Case Function | Connectome Evidence | Computational Role | Neuron Count (*Drosophila*) | Implementation Class |
+|---------------|----------------------|--------------------|--------------------|----------------------------|---------------------|
+| **Fan-in Convergence** | [DAT] → [ACC] aggregation | 50+ PN types converge onto MB calyx | Multi-modal sensory integration | ~200 PNs → ~2,500 KCs | `MushroomBody.process_input()` |
+| **Sparse Coding** | [ACC] feature extraction | MB Kenyon cells: 10% activation sparsity | Decorrelation, pattern separation | ~2,500 KCs (10% active) | `KenyonCellLayer.process()` |
+| **Winner-Take-All** | [NOM] action selection | CX ring attractor + lateral inhibition | Decision making, heading direction | ~60 E-PG neurons | `CentralComplex.process_input()` |
+| **Ring Attractor** | [LOC] spatial representation | Ellipsoid body columnar neurons form 360° map | Head direction computation | ~40 E-PG + ~40 P-EN neurons | `CentralComplex.process_input()` |
+| **Lateral Inhibition** | [INS] contrast enhancement | AL local interneurons (LNs) | Odor discrimination | ~200 LNs in AL | `AntennalLobe.process_input()` |
+| **Recurrent Amplification** | [NOM] → [GEN] motor drive | CX → descending neuron positive feedback | Movement initiation threshold | ~350 descending neurons | `InsectModel.select_action()` |
+| **Feedback Inhibition** | [ACC] gain control | APL neuron global MB inhibition | Sparsity maintenance, normalization | 1 APL neuron (giant) | `MushroomBody._apply_modulation()` |
+| **Parallel Pathways** | Multiple [DAT] streams | Optic lobe: medulla → lobula / lobula plate | Feature-parallel visual processing | ~60,000 (optic lobe total) | `OpticLobe.process_input()` |
+
+## Table 13: Cross-Kingdom Cognitive Comparison Through CEREBRUM
+
+| CEREBRUM Case | Insect Implementation | Vertebrate Parallel | Artificial Intelligence Analog | Computational Principle |
+|---------------|----------------------|---------------------|-------------------------------|------------------------|
+| [NOM] | Central complex (5,000 neurons) | Basal ganglia + prefrontal cortex (10⁷+ neurons) | Policy network / Actor module | Action selection from integrated state |
+| [ACC] | Mushroom body (2,500–175,000 KCs) | Hippocampus + cerebellum (10⁸ neurons) | Associative memory / Attention heads | Sparse associative learning |
+| [DAT] | Antennal/optic lobes (60,000+ neurons) | Thalamus + primary sensory cortex (10⁸ neurons) | Encoder network / Feature extractors | Sensory preprocessing and routing |
+| [GEN] | SEG + VNC motor neurons | Motor cortex + spinal cord (10⁶ neurons) | Decoder network / Action head | Motor pattern generation |
+| [LOC] | Ellipsoid body (40–80 neurons) | Hippocampal place/grid cells (10⁵ cells) | Spatial transformer / Position encoding | Allocentric spatial representation |
+| [INS] | Local interneurons (varies) | Cerebellar microcircuits (10¹⁰ granule cells) | Normalization layers / Attention mechanism | Computational transformation method |
+| [ABL] | Long-term MB traces | Hippocampal consolidation | Replay buffer / Long-term memory store | Historical information storage |
+| [VOC] | Queen/alarm pheromone receptors | Mirror neuron system | Addressing mechanism / Attention query | Selective entity activation |
+| [PHE] | Antennal lobe glomeruli | Olfactory bulb / vomeronasal organ | Message passing / Communication channel | Chemical signal encoding |
+| [SWARM] | Colony-level coordination | Social brain network | Multi-agent system / Consensus protocol | Distributed decision making |
+| [MET] | Hormonal cascades (JH, ecdysone) | Puberty / seasonal brain changes | Model retraining / Architecture search | Structural reorganization |
+| [CAST] | Caste-specific neural development | No direct parallel (cultural roles are learned) | Specialized sub-networks / Expert modules | Role-specific optimization |
+| [SUB] | Material-sensing sensilla | Somatosensory cortex + proprioception | Environment model / World model | Environmental interaction encoding |
+| [STIG] | Pheromone + structure reading | Written language / artifact interpretation | Shared memory / Blackboard architecture | Indirect environmental communication |
+
+**Key insight**: Despite 10,000× fewer neurons, insects implement all 14 CEREBRUM cases, suggesting that case grammar captures computational principles that are substrate-independent — what matters is the functional architecture, not the neuronal count.
+
+## Table 14: Computational Complexity by CEREBRUM Case
+
+| CEREBRUM Case | Time Complexity | Space Complexity | Biological Latency (Insects) | Bottleneck | Parallelizability |
+|---------------|----------------|-----------------|------------------------------|------------|-------------------|
+| [DAT] | O(n) per sensor | O(d) feature dim | 1–30 ms | Sensory transduction | Fully parallel across modalities |
+| [ACC] | O(k·n) sparse | O(k·n) weight matrix | 10–200 ms | Kenyon cell competition | Partially parallel (sparse coding) |
+| [NOM] | O(n²) ring attractor | O(n) attractor state | 50–200 ms | Winner-take-all convergence | Serial (global competition) |
+| [GEN] | O(m) motor pattern | O(m) pattern buffer | 5–15 ms | Descending neuron transmission | Parallel (segment-independent) |
+| [LOC] | O(n) compass update | O(n) head direction state | Continuous | Integration drift accumulation | Serial (single attractor) |
+| [INS] | O(n·k) convolution | O(n) filter state | 1–5 ms | Local interneuron speed | Fully parallel (local computation) |
+| [PHE] | O(g) glomeruli | O(g·c) conc. × channel | 100–500 ms | Diffusion time constant | Parallel across glomeruli |
+| [SWARM] | O(k·N) neighbors | O(N) population state | 100 ms – days | Communication delay | Massively parallel (all agents) |
+| [MET] | O(gene network) | O(full brain) rewiring | Hours – weeks | Hormonal cascade time | Serial (sequential reorganization) |
+
+This document provides a comprehensive framework for mapping entomological knowledge to the CEREBRUM case system, establishing formal relationships that can enhance both our understanding of insect cognition and the development of advanced computational systems inspired by these remarkable creatures. The 2023–2025 research advances — particularly the executive functions framework and complete connectomic datasets — substantively validate and refine the CEREBRUM case assignments established in this architecture reference.
