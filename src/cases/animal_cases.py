@@ -10,10 +10,10 @@ import numpy as np
 import logging
 
 from ..core.model import Model, Case
-
-logger = logging.getLogger(__name__)
 from ..examples.animal_agent import AnimalAgent
 from .case_manager import CaseManager
+
+logger = logging.getLogger(__name__)
 
 class AnimalCaseManager(CaseManager):
     """

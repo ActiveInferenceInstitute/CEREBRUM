@@ -10,7 +10,10 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.patches import Circle
 import seaborn as sns
-import networkx as nx
+try:
+    import networkx as nx
+except ImportError:
+    nx = None
 from typing import Dict, Any
 import os
 from collections import defaultdict

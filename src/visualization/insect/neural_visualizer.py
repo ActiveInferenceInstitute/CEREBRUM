@@ -8,7 +8,10 @@ including brain activity patterns, neural connectivity, and learning dynamics.
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import networkx as nx
+try:
+    import networkx as nx
+except ImportError:
+    nx = None
 from typing import Dict, Any, Optional, Tuple
 import logging
 import os

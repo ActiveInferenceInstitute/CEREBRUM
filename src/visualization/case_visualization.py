@@ -8,7 +8,10 @@ their transformations, and relationships in model ecosystems.
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-import networkx as nx
+try:
+    import networkx as nx
+except ImportError:
+    nx = None
 from typing import List, Tuple
 
 from src.core.model import Model, Case

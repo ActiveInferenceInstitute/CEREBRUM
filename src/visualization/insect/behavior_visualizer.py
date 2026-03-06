@@ -294,12 +294,9 @@ class BehaviorPatternVisualizer:
         ax2.set_yticklabels([case.value for case in unique_cases])
         ax2.grid(True, alpha=0.3)
         
-        plt.tight_layout()
-        
-        if save_path:
-            plt.savefig(save_path, dpi=self.dpi, bbox_inches='tight')
-        
-        return fig
+        fig.tight_layout()
+        plt.savefig(os.path.join(swarm_dir, 'behavior_and_case_timeline.png'), dpi=self.dpi, bbox_inches='tight')
+        plt.close(fig)
     
     def visualize_behavior_performance(self, save_path: Optional[str] = None) -> plt.Figure:
         """
@@ -692,11 +689,8 @@ class SwarmBehaviorVisualizer:
         axes[1, 1].set_aspect('equal')
         
         plt.tight_layout()
-        
-        if save_path:
-            plt.savefig(save_path, dpi=self.dpi, bbox_inches='tight')
-        
-        return fig
+        plt.savefig(os.path.join(swarm_dir, 'swarm_trajectory.png'), dpi=self.dpi, bbox_inches='tight')
+        plt.close(fig)
     
     def visualize_swarm_state(self, insects: List[InsectModel], 
                             environment: Dict[str, Any],

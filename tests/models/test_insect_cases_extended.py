@@ -11,7 +11,7 @@ from src.models.insect.cases.swarm import (
     SwarmCase, SwarmMember, SwarmBehavior, SwarmAction,
 )
 from src.models.insect.cases.stigmergic import (
-    StigmergicCase, StigmergicSignal, EnvironmentalModification,
+    StigmergicCase, StigmergicSignal,
 )
 from src.models.insect.cases.substrate import (
     SubstrateCase, SubstrateType, SubstrateProperties,
