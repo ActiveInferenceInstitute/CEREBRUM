@@ -104,7 +104,6 @@ class InsectModel(ActiveInferenceModel):
         # State tracking
         self.sensory_history = []
         self.action_history = []
-        self.case_history = []
         self.state_history = []
         
         # Performance metrics
@@ -352,7 +351,6 @@ class InsectModel(ActiveInferenceModel):
             # Record transformation
             old_case = self.case
             self.case = target_case
-            self.case_history.append((old_case, target_case, self.performance_metrics['total_actions']))
             self.performance_metrics['case_transformations'] += 1
             
             logger.info(f"Transformed case: {old_case} -> {target_case}")

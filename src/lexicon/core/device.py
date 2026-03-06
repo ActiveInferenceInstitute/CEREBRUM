@@ -6,17 +6,22 @@ PyTorch device configuration utilities for LEXICON.
 
 import warnings
 
-# Suppress PyTorch CUDA warnings that appear even without CUDA hardware
-warnings.filterwarnings(
-    "ignore",
-    message="CUDA initialization: CUDA unknown error",
-    category=UserWarning
-)
-warnings.filterwarnings(
-    "ignore",
-    message="`torch.cuda.amp.autocast(args...)` is deprecated",
-    category=FutureWarning
-)
+try:
+    import torch as _torch  # noqa: F401
+    # Suppress torch CUDA warnings only when torch is actually installed
+    warnings.filterwarnings(
+        "ignore",
+        message="CUDA initialization: CUDA unknown error",
+        category=UserWarning
+    )
+    warnings.filterwarnings(
+        "ignore",
+        message="`torch.cuda.amp.autocast(args...)` is deprecated",
+        category=FutureWarning
+    )
+    del _torch
+except ImportError:
+    pass
 
 
 def configure_torch_environment(default_device='cuda'):

@@ -11,6 +11,8 @@ import logging
 # This ensures all imports of Case refer to the same enum class
 from src.core.model import Case
 
+logger = logging.getLogger(__name__)
+
 class Model:
     """Base Model class for all CEREBRUM models."""
     
@@ -29,5 +31,5 @@ class Model:
         if not isinstance(value, Case):
             raise TypeError(f"Expected Case enum, got {type(value)}")
         # Log the case change
-        logging.info(f"Model '{self.name}' ({self.id}): Case changed from {self._case} to {value}")
+        logger.debug(f"Model '{self.name}' ({self.id}): Case changed from {self._case} to {value}")
         self._case = value 
