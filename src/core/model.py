@@ -43,8 +43,19 @@ class Model:
         # Each case has its own parameter access patterns and interface configurations
         self._case_configurations = {case: {} for case in Case}
         
-        # Initialize with default precision weights for each case
-        self._precision_weights = {case: 1.0 for case in Case}
+        # Initialize precision weights matching XxxCase.PRECISION constants in src/cases/.
+        # These weights are consumed by ActiveInferenceModel._apply_case_transformation via
+        # get_precision(case) to scale precision matrices on each case transition.
+        self._precision_weights = {
+            Case.NOMINATIVE: 1.5,   # Higher precision for active prediction generation
+            Case.ACCUSATIVE: 1.2,   # Elevated precision for update reception
+            Case.GENITIVE:   1.0,   # Baseline precision for source/origin output
+            Case.DATIVE:     1.0,   # Baseline precision for data reception
+            Case.INSTRUMENTAL: 0.8, # Lower precision for flexible tool use
+            Case.LOCATIVE:   0.9,   # Slightly lower for ambient context provision
+            Case.ABLATIVE:   1.1,   # Moderate precision for origin tracking
+            Case.VOCATIVE:   2.0,   # Highest precision for direct address / urgent attention
+        }
         
         # Track connections to other models
         self.connections = []
