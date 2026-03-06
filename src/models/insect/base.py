@@ -483,43 +483,26 @@ class InsectModel(ActiveInferenceModel):
             Processed sensory information
         """
         start_time = time.time()
-        
-        try:
-            # Add to sensory history
-            self.sensory_history.append(input_data)
-            
-            # Process through neural structures based on current case
-            processed_data = {}
-            
-            # Process visual input
-            if input_data.visual is not None:
-                if 'optic_lobe' in self.neural_structure:
-                    processed_data['visual'] = self.neural_structure['optic_lobe'].process_input(input_data.visual)
-            
-            # Process olfactory input
-            if input_data.olfactory is not None:
-                if 'antennal_lobe' in self.neural_structure:
-                    processed_data['olfactory'] = self.neural_structure['antennal_lobe'].process_input(input_data.olfactory)
-            
-            # Process pheromonal input
-            if input_data.pheromonal is not None:
-                if 'antennal_lobe' in self.neural_structure:
-                    processed_data['pheromonal'] = self.neural_structure['antennal_lobe'].process_input(input_data.pheromonal)
-            
-            # Process mechanosensory input
-            if input_data.mechanosensory is not None:
-                if 'ventral_nerve_cord' in self.neural_structure:
-                    processed_data['mechanosensory'] = self.neural_structure['ventral_nerve_cord'].process_input(input_data.mechanosensory)
-            
-            # Update performance metrics
-            processing_time = time.time() - start_time
-            self.performance_metrics['sensory_processing_time'].append(processing_time)
-            
-            return processed_data
-            
-        except Exception as e:
-            logger.error(f"Error processing sensory input: {e}")
-            return {}
+
+        self.sensory_history.append(input_data)
+        processed_data = {}
+
+        def _process(structure_name: str, data: np.ndarray, key: str):
+            structure = self.neural_structure.get(structure_name)
+            if structure is not None and hasattr(structure, 'process_input'):
+                processed_data[key] = structure.process_input(data)
+
+        if input_data.visual is not None:
+            _process('optic_lobe', input_data.visual, 'visual')
+        if input_data.olfactory is not None:
+            _process('antennal_lobe', input_data.olfactory, 'olfactory')
+        if input_data.pheromonal is not None:
+            _process('antennal_lobe', input_data.pheromonal, 'pheromonal')
+        if input_data.mechanosensory is not None:
+            _process('ventral_nerve_cord', input_data.mechanosensory, 'mechanosensory')
+
+        self.performance_metrics['sensory_processing_time'].append(time.time() - start_time)
+        return processed_data
     
     def select_action(self, context: Dict[str, Any]) -> Action:
         """
@@ -532,30 +515,12 @@ class InsectModel(ActiveInferenceModel):
             Selected action
         """
         start_time = time.time()
-        
-        try:
-            # Determine action based on current case and behavioral state
-            action = self._select_action_by_case(context)
-            
-            # Add to action history
-            self.action_history.append(action)
-            self.performance_metrics['total_actions'] += 1
-            
-            # Update performance metrics
-            selection_time = time.time() - start_time
-            self.performance_metrics['action_selection_time'].append(selection_time)
-            
-            return action
-            
-        except Exception as e:
-            logger.error(f"Error selecting action: {e}")
-            # Return default idle action
-            return Action(
-                action_type="idle",
-                parameters={},
-                confidence=0.0,
-                timestamp=time.time()
-            )
+
+        action = self._select_action_by_case(context)
+        self.action_history.append(action)
+        self.performance_metrics['total_actions'] += 1
+        self.performance_metrics['action_selection_time'].append(time.time() - start_time)
+        return action
     
     def _select_action_by_case(self, context: Dict[str, Any]) -> Action:
         """
@@ -759,37 +724,20 @@ class InsectActiveInferenceModel(InsectModel):
             Computed free energy value
         """
         try:
-            # This is a simplified implementation
-            # In practice, this would involve complex belief updating
-            
-            # Compute prediction error
             predicted_observations = self._predict_observations()
             prediction_error = np.mean((observations - predicted_observations) ** 2)
-            
-            # Compute complexity (KL divergence from prior)
             complexity = np.mean(self.beliefs['internal_state'] ** 2)
-            
-            # Compute free energy
-            free_energy = (
+            return float(
                 self.free_energy_params['accuracy_weight'] * prediction_error +
                 self.free_energy_params['complexity_weight'] * complexity
             )
-            
-            return free_energy
-            
-        except Exception as e:
+        except (ValueError, np.linalg.LinAlgError) as e:
             logger.error(f"Error computing free energy: {e}")
             return float('inf')
     
     def _predict_observations(self) -> np.ndarray:
-        """
-        Predict observations based on current beliefs.
-        
-        Returns:
-            Predicted observations
-        """
-        # Simplified prediction - in practice this would be more complex
-        return np.zeros(10)  # Placeholder
+        """Predict observations from current environmental belief state."""
+        return self.beliefs['environmental_state'].copy()
     
     def update_beliefs(self, observations: np.ndarray):
         """
@@ -826,37 +774,29 @@ class InsectActiveInferenceModel(InsectModel):
         Returns:
             List of selected actions
         """
-        try:
-            # Compute expected free energy for different actions
-            self.expected_free_energy = self._compute_expected_free_energy()
-            
-            # Select action with minimum expected free energy
-            best_action_idx = np.argmin(self.expected_free_energy)
-            
-            # Create action based on selection
-            action_types = ["explore", "observe", "sense", "produce", "navigate"]
-            action = Action(
-                action_type=action_types[best_action_idx],
-                parameters={"confidence": 1.0 - self.expected_free_energy[best_action_idx]},
-                confidence=1.0 - self.expected_free_energy[best_action_idx],
-                timestamp=0.0  # Will be set by caller
-            )
-            
-            return [action]
-            
-        except Exception as e:
-            logger.error(f"Error selecting actions: {e}")
-            return [Action(action_type="idle", parameters={}, confidence=0.0, timestamp=0.0)]
+        # Compute expected free energy for different actions
+        self.expected_free_energy = self._compute_expected_free_energy()
+
+        # Select action with minimum expected free energy
+        best_action_idx = np.argmin(self.expected_free_energy)
+
+        action_types = ["explore", "observe", "sense", "produce", "navigate"]
+        return [Action(
+            action_type=action_types[best_action_idx],
+            parameters={"confidence": 1.0 - self.expected_free_energy[best_action_idx]},
+            confidence=1.0 - self.expected_free_energy[best_action_idx],
+            timestamp=0.0,
+        )]
     
     def _compute_expected_free_energy(self) -> np.ndarray:
+        """Compute expected free energy per action from current beliefs.
+
+        Returns a 5-element array (one per action type). Higher = worse expected
+        outcome. Uses absolute deviation of internal belief state as a proxy for
+        epistemic uncertainty associated with each action.
         """
-        Compute expected free energy for different actions.
-        
-        Returns:
-            Array of expected free energy values for each action
-        """
-        # Simplified implementation - in practice this would be more complex
-        # This would involve forward models and belief propagation
-        
-        # Placeholder: random expected free energy values
-        return np.random.rand(5) * 0.5 
+        uncertainty = np.abs(self.beliefs['internal_state'])
+        n_actions = len(self.expected_free_energy)
+        # Spread uncertainty across actions with a simple linear weighting
+        weights = np.linspace(1.0, 0.5, n_actions)
+        return np.mean(uncertainty) * weights

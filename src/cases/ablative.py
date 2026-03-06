@@ -25,9 +25,6 @@ class AblativeCase:
     # Precision modifier for Active Inference
     PRECISION = 1.1  # Moderate precision for source/origin
     
-    # Valid transitions from ablative case
-    VALID_TRANSITIONS = [Case.NOMINATIVE]
-    
     @staticmethod
     def apply(model: Model) -> Model:
         """
@@ -164,15 +161,3 @@ class AblativeCase:
         logger.info(f"Emitted from {source.name} to {target.name}")
         return emission
     
-    @staticmethod
-    def can_transition_to(target_case: Case) -> bool:
-        """
-        Check if ablative can transition to target case.
-        
-        Args:
-            target_case: The target case to transition to
-            
-        Returns:
-            True if transition is valid
-        """
-        return target_case in AblativeCase.VALID_TRANSITIONS

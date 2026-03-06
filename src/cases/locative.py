@@ -24,9 +24,6 @@ class LocativeCase:
     # Precision modifier for Active Inference
     PRECISION = 0.9  # Lower precision for context (more ambient)
     
-    # Valid transitions from locative case
-    VALID_TRANSITIONS = [Case.ABLATIVE]
-    
     @staticmethod
     def apply(model: Model) -> Model:
         """
@@ -201,15 +198,3 @@ class LocativeCase:
         
         return [e.get("entity") for e in context._locative_contents]
     
-    @staticmethod
-    def can_transition_to(target_case: Case) -> bool:
-        """
-        Check if locative can transition to target case.
-        
-        Args:
-            target_case: The target case to transition to
-            
-        Returns:
-            True if transition is valid
-        """
-        return target_case in LocativeCase.VALID_TRANSITIONS
