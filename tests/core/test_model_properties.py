@@ -136,6 +136,16 @@ def test_precision_properties(p1, p2, case1, case2):
     assert_allclose(model.get_precision(), p2)
     
     # Property 3: Setting a case's precision should not affect other cases
+    default_precisions = {
+        Case.NOMINATIVE: 1.5,
+        Case.ACCUSATIVE: 1.2,
+        Case.GENITIVE: 1.0,
+        Case.DATIVE: 1.0,
+        Case.INSTRUMENTAL: 0.8,
+        Case.LOCATIVE: 0.9,
+        Case.ABLATIVE: 1.1,
+        Case.VOCATIVE: 2.0,
+    }
     for case in Case:
         if case != case1 and case != case2:
-            assert_allclose(model.get_precision(case), 1.0)  # Default value 
+            assert_allclose(model.get_precision(case), default_precisions[case]) 

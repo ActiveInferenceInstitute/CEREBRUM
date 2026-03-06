@@ -1,0 +1,497 @@
+{
+  "assessments": {
+    "cross_module_architecture": 58,
+    "high_level_elegance": 62,
+    "abstraction_fitness": 55,
+    "ai_generated_debt": 52,
+    "design_coherence": 62,
+    "test_strategy": 55,
+    "convention_outlier": 62,
+    "error_consistency": 55,
+    "dependency_health": 78,
+    "mid_level_elegance": 52,
+    "low_level_elegance": 60,
+    "package_organization": 58
+  },
+  "findings": [
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "dual_model_base_ambiguity",
+      "summary": "Two parallel Model base classes with different APIs create an ambiguous foundation for the framework",
+      "related_files": [
+        "src/core/model.py",
+        "src/models/base.py",
+        "src/models/case_definitions.py",
+        "src/utils/visualization.py"
+      ],
+      "evidence": [
+        "src/core/model.py defines Model with precision_weights, case_history, connections, and full _apply_case_transformation hook",
+        "src/models/base.py defines a second Model class with only id, name, _case, and data_buffer \u2014 no precision, no history, no transformation hook",
+        "src/models/case_definitions.py imports Case from src.models.base, which re-exports it from src.core.model \u2014 an extra indirection layer",
+        "src/utils/visualization.py imports Case from src.models.base rather than src.core.model, showing the shim is actually used as a primary import path by some modules",
+        "The two Model classes have incompatible constructors: core.Model takes (name, parameters), models.base.Model takes (name, case)"
+      ],
+      "suggestion": "Consolidate to a single Model base class in src/core/model.py. If src/models/base.py must exist for backward compatibility, it should subclass src.core.model.Model rather than redefine it from scratch, and its docstring should explicitly say it is a shim.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "cases_package_imports_examples",
+      "summary": "src/cases/__init__.py transitively imports AnimalCaseManager, which imports from src/examples \u2014 a leaf domain importing from a peer domain creates a cycle risk",
+      "related_files": [
+        "src/cases/__init__.py",
+        "src/cases/animal_cases.py",
+        "src/examples/animal_agent.py"
+      ],
+      "evidence": [
+        "src/cases/__init__.py line 26: 'from .animal_cases import AnimalCaseManager'",
+        "src/cases/animal_cases.py line 15: 'from ..examples.animal_agent import AnimalAgent'",
+        "This means importing 'from src.cases import CaseManager' also loads the full examples.animal_agent module, which itself imports from src.core",
+        "The dependency direction is: core -> cases -> examples, but examples are supposed to sit above cases in the stack"
+      ],
+      "suggestion": "Remove AnimalCaseManager from src/cases/__init__.py __all__ and the import on line 26. AnimalCaseManager belongs in src/examples/ or src/models/ since it depends on AnimalAgent. Consumers that need it can import it directly from src.cases.animal_cases.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "lexicon_absolute_imports_core",
+      "summary": "src/lexicon/core/engine.py uses absolute src.llm imports rather than relative imports, coupling a sub-package to the top-level package layout",
+      "related_files": [
+        "src/lexicon/core/engine.py"
+      ],
+      "evidence": [
+        "src/lexicon/core/engine.py lines 28-29: 'from src.llm.OpenRouter.openrouter import OpenRouterClient, OpenRouterConfig' and 'from src.llm.config import get_model_name'",
+        "All other src/cases/ and src/core/ files use relative imports (e.g. 'from ..core.model import'), but the lexicon engine breaks this convention with absolute src.X paths",
+        "This means src/lexicon cannot be extracted or tested as a standalone package without the full src tree on sys.path"
+      ],
+      "suggestion": "Either adopt relative imports throughout lexicon (e.g. 'from ...llm.OpenRouter.openrouter import ...') to match the rest of the codebase convention, or document that absolute src.X imports are the project-wide standard and apply it consistently everywhere.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "duplicate_relationship_logic",
+      "summary": "Case relationship creation logic (relationship_type -> case pair mapping) is duplicated verbatim in two separate modules",
+      "related_files": [
+        "src/cases/case_manager.py",
+        "src/transformations/case_transformations.py"
+      ],
+      "evidence": [
+        "src/cases/case_manager.py lines 107-115: transformations dict maps 'generates', 'updates', 'receives_from', 'implements', 'contextualizes', 'derives_from', 'addresses' to (source_case, target_case) pairs",
+        "src/transformations/case_transformations.py lines 192-226: create_case_relationship() function implements the same 7 relationship types with identical case assignments using if/elif chains",
+        "Both also call source.connect() and target.connect() with inverse_ prefix \u2014 identical side-effect logic"
+      ],
+      "suggestion": "Extract the relationship-type-to-case-pair mapping into a single dict constant (e.g. RELATIONSHIP_CASES) in one canonical location (src/core/model.py or src/cases/case_manager.py). Both CaseManager.create_relationship and create_case_relationship() should reference that constant.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "high_level_elegance",
+      "identifier": "precision_mutation_on_every_case_change",
+      "summary": "_apply_case_transformation multiplies precision matrices in-place on every case transition, causing unbounded growth with repeated transitions",
+      "related_files": [
+        "src/core/active_inference.py"
+      ],
+      "evidence": [
+        "active_inference.py lines 169, 172, 175, 178, 182-183, 186, 189, 192: each case branch does 'self.likelihood_precision = self.likelihood_precision * self.get_precision(self._case)' \u2014 a cumulative in-place scale",
+        "get_precision() returns self._precision_weights[case] which defaults to 1.0, so repeated NOMINATIVE transitions scale likelihood_precision by 1.0^N (harmless at default), but any non-unity precision weight applied once will compound on every subsequent transition to the same case",
+        "The pre_transform_state snapshot saved on lines 159-162 is stored in belief_history but never used to restore state, so it does not bound the mutation"
+      ],
+      "suggestion": "Store precision matrices at initialization and reconstruct them from the base values on each transformation rather than scaling cumulatively. Alternatively, apply precision scaling only when get_precision() != 1.0 and document clearly that set_precision() values are one-shot multipliers.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "high_level_elegance",
+      "identifier": "insect_dead_method_update_precision_for_case",
+      "summary": "_update_precision_for_case is defined in InsectModel but never called, making it unreachable dead code",
+      "related_files": [
+        "src/models/insect/base.py"
+      ],
+      "evidence": [
+        "src/models/insect/base.py lines 370-424: _update_precision_for_case defines detailed per-case precision configs and applies them via setattr",
+        "Grep across all src/ shows zero callers of _update_precision_for_case \u2014 it is never invoked from _apply_case_transformation, transform_case, or anywhere else",
+        "_apply_case_transformation (line 340-343) calls super()._apply_case_transformation() then _update_neural_priorities(), but not _update_precision_for_case()"
+      ],
+      "suggestion": "Either call _update_precision_for_case from _apply_case_transformation (after validating the setattr targets exist on the model), or delete the method. Dead code of this size (~55 lines) signals incomplete wiring.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "abstraction_fitness",
+      "identifier": "case_handler_static_class_not_module",
+      "summary": "Each case handler is a class with only @staticmethod members and a class-level constant, providing no benefit over a plain module with functions",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/accusative.py",
+        "src/cases/case_manager.py"
+      ],
+      "evidence": [
+        "NominativeCase has PRECISION = 1.5 and four @staticmethod methods: apply, process_update, calculate_free_energy, get_parameters \u2014 no instance state, no inheritance used",
+        "AccusativeCase follows the same pattern: PRECISION = 1.2 plus three @staticmethods",
+        "CaseManager.case_handlers stores the class objects (not instances) and calls them as NominativeCase.apply(model) \u2014 the class is used purely as a namespace",
+        "Python modules already provide namespace grouping with no boilerplate; the class wrapper adds __init__, isinstance checks, and subclass surface area for no gain"
+      ],
+      "suggestion": "Convert each case handler class to a module-level function set: nominative.py exposes apply(), process_update(), calculate_free_energy(). CaseManager.case_handlers becomes a dict mapping Case -> module. This removes one layer of indirection and makes the calling convention explicit.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "abstraction_fitness",
+      "identifier": "case_definitions_redundant_layer",
+      "summary": "CaseDefinitions is a static-method-only class that duplicates case semantics already documented in the Case enum and case handler docstrings",
+      "related_files": [
+        "src/models/case_definitions.py",
+        "src/core/model.py"
+      ],
+      "evidence": [
+        "src/models/case_definitions.py defines CaseDefinitions with 8 @staticmethod methods each returning a Dict[str, str] of linguistic_meaning, statistical_role, regression_context, example",
+        "src/core/model.py Case enum already has inline comments for each member (e.g. '# Model as active agent', '# Model as source/possessor')",
+        "CaseDefinitions.get_all_cases() returns Case -> dict, creating a parallel registry to the enum itself",
+        "src/utils/visualization.py imports CaseDefinitions but only to pass to visualization \u2014 the consumer could inline these strings or read from the enum"
+      ],
+      "suggestion": "Fold the linguistic metadata into the Case enum as a .description property or a module-level CASE_DESCRIPTIONS dict in src/core/model.py. Remove CaseDefinitions as a separate class/file to eliminate the indirection.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "identifier": "calculate_free_energy_identical_try_except_pattern",
+      "summary": "All 8 case handlers use an identical try/except around pure attribute access in calculate_free_energy, catching AttributeError on attributes already guarded by hasattr",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/accusative.py",
+        "src/cases/dative.py",
+        "src/cases/genitive.py",
+        "src/cases/instrumental.py",
+        "src/cases/locative.py",
+        "src/cases/ablative.py",
+        "src/cases/vocative.py"
+      ],
+      "evidence": [
+        "Every handler: `if hasattr(model, 'X') and hasattr(model, 'Y'): try: x = getattr(model, 'X') ... except (AttributeError, TypeError, ValueError) as e: logger.warning(...)`",
+        "The hasattr guards already prevent AttributeError from firing; the try/except block catches an error that cannot occur at that point",
+        "The identical boilerplate (hasattr guard + getattr inside try + warning log on except) is copy-pasted verbatim across all 8 files with only the attribute names changed"
+      ],
+      "suggestion": "Remove the try/except entirely where attributes are already confirmed via hasattr. If defensive coding is desired for TypeError/ValueError on arithmetic, catch only those specific exceptions without the AttributeError guard, and remove the redundant getattr calls (use direct attribute access after hasattr passes).",
+      "confidence": "high"
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "identifier": "apply_method_logger_info_on_every_case",
+      "summary": "Every case handler's apply() emits a logger.info confirming the case was applied, providing no diagnostic value beyond the model.case setter's own debug log",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/accusative.py",
+        "src/cases/dative.py",
+        "src/cases/genitive.py",
+        "src/cases/instrumental.py",
+        "src/cases/locative.py",
+        "src/cases/ablative.py",
+        "src/cases/vocative.py"
+      ],
+      "evidence": [
+        "nominative.py:36: `logger.info(f\"Applied nominative case to model {model.name}\")`",
+        "accusative.py:35: `logger.info(f\"Applied accusative case to model {model.name}\")`",
+        "All 8 files follow the same pattern with only the case name varied",
+        "src/core/model.py already logs at DEBUG level on every case assignment: `logger.debug(f\"Model '{self.name}' ... Case changed from {old_case_value} to {new_case.value}\")`"
+      ],
+      "suggestion": "Remove the logger.info from apply() in all 8 case handlers. The setter in model.py already records the transition. If retention is desired for one handler, downgrade to logger.debug.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "identifier": "get_parameters_hardcoded_generic_defaults",
+      "summary": "get_parameters() in multiple case handlers returns hardcoded default values that have no grounding in the case's actual semantics or any model attribute",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/genitive.py",
+        "src/cases/instrumental.py",
+        "src/cases/locative.py",
+        "src/cases/ablative.py",
+        "src/cases/vocative.py"
+      ],
+      "evidence": [
+        "nominative.py get_parameters: action_threshold=0.5, prediction_horizon=3, action_cost=0.1, exploration_rate=0.2 \u2014 none of these are stored on any base Model attribute",
+        "ablative.py get_parameters: emission_rate=1.0, emission_precision=1.1 \u2014 emission_precision duplicates the class-level PRECISION constant without referencing it",
+        "All get_parameters methods follow the identical template: `{key: model.parameters.get(key, <magic_number>)}` with 4 keys, never actually tested for meaningful values"
+      ],
+      "suggestion": "Either remove get_parameters() from handlers that have no real parameters to expose (it reads from model.parameters which callers can access directly), or have the method return only parameters that are actually present on the model, with no magic-number fallbacks.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "identifier": "dead_method_update_precision_for_case",
+      "summary": "_update_precision_for_case is defined in InsectModel but never called anywhere in the codebase",
+      "related_files": [
+        "src/models/insect/base.py"
+      ],
+      "evidence": [
+        "Grep across all .py files shows _update_precision_for_case appears only at its definition site (line 370 of base.py)",
+        "The method builds a large precision_configs dict for all 8 cases and then iterates setattr \u2014 this is dead code",
+        "_apply_case_transformation delegates to _update_neural_priorities, not _update_precision_for_case"
+      ],
+      "suggestion": "Remove _update_precision_for_case entirely, or wire it into _apply_case_transformation if the precision updates are intentional.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "design_coherence",
+      "identifier": "case_handler_state_mutation_via_monkey_patching",
+      "summary": "Several case handlers add new attributes to model instances at runtime (monkey-patching) rather than requiring the model to declare those attributes, creating hidden coupling between handler and model",
+      "related_files": [
+        "src/cases/genitive.py",
+        "src/cases/instrumental.py",
+        "src/cases/locative.py",
+        "src/cases/ablative.py",
+        "src/cases/vocative.py",
+        "src/cases/dative.py"
+      ],
+      "evidence": [
+        "genitive.py apply(): `if not hasattr(model, '_genitive_exports'): model._genitive_exports = set()`",
+        "dative.py receive_data(): `if not hasattr(model, '_pending_commands'): model._pending_commands = []`",
+        "locative.py add_to_context(): `if not hasattr(context, '_locative_contents'): context._locative_contents = []`",
+        "instrumental.py register_operation(): `model._instrument_operations[name] = func; setattr(model, name, func)` \u2014 attaches arbitrary callables as model attributes"
+      ],
+      "suggestion": "Case-specific state should be owned by the Model subclass or CaseManager, not injected by static handler methods at call time. At minimum, base Model.__init__ should declare these slots as None so they are not surprise attributes.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "design_coherence",
+      "identifier": "inconsistent_process_update_delegation_pattern",
+      "summary": "All 8 case handlers delegate to model._update_<case>() if it exists, but the base Model already implements all 8 _update_* methods \u2014 meaning the delegation always fires and the default fallback code in the handlers is unreachable for any Model subclass",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/accusative.py",
+        "src/cases/dative.py",
+        "src/cases/genitive.py",
+        "src/cases/instrumental.py",
+        "src/cases/locative.py",
+        "src/cases/ablative.py",
+        "src/cases/vocative.py",
+        "src/core/model.py"
+      ],
+      "evidence": [
+        "model.py lines 195-225: base Model defines _update_nominative, _update_accusative, ... _update_vocative with non-empty return dicts",
+        "nominative.py process_update: `if hasattr(model, '_update_nominative') and callable(...): return model._update_nominative(data)` \u2014 this branch always fires for any Model instance",
+        "The default fallback blocks in each handler (the non-delegating path) are dead code for the primary class hierarchy"
+      ],
+      "suggestion": "Either remove the fallback default paths from process_update() since they are unreachable for real Model instances, or document that the handlers are only intended for non-Model objects (and test that explicitly).",
+      "confidence": "high"
+    },
+    {
+      "dimension": "test_strategy",
+      "identifier": "process_update_default_paths_tested_with_fake_class_not_base_model",
+      "summary": "Tests for the default (non-delegating) path in process_update use hand-rolled _BareModel stubs rather than asserting what happens with a real base Model \u2014 meaning the actual delegation behavior is not verified",
+      "related_files": [
+        "tests/cases/test_case_handlers.py",
+        "tests/cases/test_case_default_paths.py"
+      ],
+      "evidence": [
+        "test_case_handlers.py:58-65: `class _PlainModel` with only `name` and `parameters` used to exercise AccusativeCase default path",
+        "test_case_default_paths.py:30-45: `class _BareModel` used across dative/genitive/instrumental/locative/ablative/nominative/vocative default path tests",
+        "No test asserts what process_update returns when called on a real Model instance (which always delegates to _update_<case>)"
+      ],
+      "suggestion": "Add at least one test per case that calls process_update on a real Model instance and asserts the dict it returns matches what _update_<case> produces. This would catch the real delegation chain and confirm the two code paths are consistent.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "test_strategy",
+      "identifier": "get_parameters_tests_only_check_isinstance_not_values",
+      "summary": "Tests for get_parameters() across all case handlers only assert isinstance(result, dict), not that the returned keys or values are semantically correct",
+      "related_files": [
+        "tests/cases/test_case_handlers.py"
+      ],
+      "evidence": [
+        "test_case_handlers.py:181: `result = GenitiveCase.get_parameters(model); assert isinstance(result, dict)`",
+        "test_case_handlers.py:218: `result = InstrumentalCase.get_parameters(model); assert isinstance(result, dict)`",
+        "NominativeCase has no get_parameters test at all in TestNominativeCase",
+        "These tests would pass even if get_parameters() returned an empty dict"
+      ],
+      "suggestion": "Assert that get_parameters returns the expected keys (e.g., 'export_precision', 'derivation_depth' for genitive) and that values fall within expected ranges or types. Also add a test for NominativeCase.get_parameters.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "test_strategy",
+      "identifier": "case_transformation_precision_accumulation_untested",
+      "summary": "_apply_case_transformation multiplies precision matrices in-place on every case change, causing unbounded accumulation, but no test checks precision values after multiple round-trips",
+      "related_files": [
+        "src/core/active_inference.py",
+        "tests/core/test_active_inference_coverage.py"
+      ],
+      "evidence": [
+        "active_inference.py:169: `self.likelihood_precision = self.likelihood_precision * self.get_precision(self._case)` \u2014 multiplies in place each time case is set",
+        "active_inference.py:172: `self.prior_precision = self.prior_precision * self.get_precision(self._case)` \u2014 same pattern for prior_precision and posterior_precision",
+        "test_active_inference_coverage.py has no test that transitions a model through multiple cases and checks the resulting precision matrices remain finite or bounded",
+        "Repeated NOMINATIVE -> ACCUSATIVE -> NOMINATIVE cycling would keep doubling likelihood_precision and prior_precision"
+      ],
+      "suggestion": "Add a test that transitions an ActiveInferenceModel through 3-4 case changes and asserts that likelihood_precision and prior_precision remain within expected bounds. This will reveal whether the multiplicative accumulation is an intentional design choice or a latent bug.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "convention_outlier",
+      "identifier": "animal_transformations_bare_logging",
+      "summary": "animal_transformations.py uses root logger (logging.info) while every other module in the codebase uses a named module logger",
+      "related_files": [
+        "src/transformations/animal_transformations.py"
+      ],
+      "evidence": [
+        "File imports logging but never calls logging.getLogger(__name__)",
+        "Lines 37, 69, 97, 252 call logging.info(...) directly on the root logger",
+        "Every sibling file (case_transformations.py, all src/cases/*.py, src/models/insect/base.py) declares logger = logging.getLogger(__name__) and uses it"
+      ],
+      "suggestion": "Add `logger = logging.getLogger(__name__)` after the imports, then replace all `logging.info(...)` calls with `logger.info(...)`.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "convention_outlier",
+      "identifier": "animal_cases_logger_placement",
+      "summary": "In animal_cases.py the logger is declared after an import statement, breaking the established module-level ordering convention",
+      "related_files": [
+        "src/cases/animal_cases.py"
+      ],
+      "evidence": [
+        "Line 14: logger = logging.getLogger(__name__)",
+        "Line 15: from ..examples.animal_agent import AnimalAgent  (import after logger declaration)",
+        "All other case modules declare logger after all imports, not interleaved"
+      ],
+      "suggestion": "Move the `logger = logging.getLogger(__name__)` line to after all import statements, consistent with every other module in src/cases/.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "identifier": "duplicate_animal_transform_functions",
+      "summary": "transform_to_goal_seeker, transform_to_explorer, and transform_to_follower exist as standalone functions in src/transformations/animal_transformations.py AND as methods on AnimalCaseManager in src/cases/animal_cases.py, with diverging implementations",
+      "related_files": [
+        "src/transformations/animal_transformations.py",
+        "src/cases/animal_cases.py"
+      ],
+      "evidence": [
+        "Both files define transform_to_goal_seeker with identical NOM case + speed/rotation mutations but different logger usage (root vs named)",
+        "transform_to_explorer in animal_cases.py stores _original_goal and sets animal._original_goal; the version in animal_transformations.py stores it in a local variable only",
+        "Both are exported from their respective packages (src/transformations/__init__.py and src/cases/__init__.py via AnimalCaseManager)",
+        "Callers have two different seams to reach the same behavior, with no documented preference"
+      ],
+      "suggestion": "Choose one canonical location. The method approach on AnimalCaseManager is richer (uses named logger, stores _original_goal). Remove the standalone functions from animal_transformations.py and delegate or delete them, keeping the AnimalCaseManager methods as the sole implementation.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "identifier": "case_manager_transform_ignores_return",
+      "summary": "CaseManager.create_relationship calls self.transform_case() but discards the return value, then separately calls source.connect(); the transform and connect steps are not composed and the relationship dict in CaseManager diverges from the connect() state on the model",
+      "related_files": [
+        "src/cases/case_manager.py"
+      ],
+      "evidence": [
+        "Lines 119-120: self.transform_case(source, source_case) and self.transform_case(target, target_case) \u2014 return values ignored",
+        "Lines 123-127: case_relationships list is updated and then model.connect() is called redundantly",
+        "create_case_relationship() in src/transformations/case_transformations.py also calls source_model.connect() \u2014 two independent seams that both write to model.connections"
+      ],
+      "suggestion": "Centralise the connect-after-transform step into transform_case() or into a dedicated compose_relationship() helper so that relationship registration and model.connect() always happen atomically from one place.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "error_consistency",
+      "identifier": "calculate_free_energy_silent_fallthrough",
+      "summary": "CaseManager.calculate_free_energy silently returns 1.0 when the handler lacks calculate_free_energy AND the model lacks a callable free_energy \u2014 callers cannot distinguish a legitimate 1.0 result from a missing implementation",
+      "related_files": [
+        "src/cases/case_manager.py"
+      ],
+      "evidence": [
+        "Lines 201-207: if hasattr(handler, 'calculate_free_energy') ... elif hasattr(model, 'free_energy') ... return 1.0",
+        "No log message or exception is raised on the final fallthrough",
+        "All eight case handlers (nominative through vocative) do define calculate_free_energy, but any future handler added without it would silently return 1.0 with no diagnostic"
+      ],
+      "suggestion": "Add a logger.warning() on the final fallthrough path so that missing implementations are discoverable at runtime, or raise NotImplementedError if a zero-fallback is unacceptable.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "error_consistency",
+      "identifier": "create_relationship_unregistered_models",
+      "summary": "CaseManager.create_relationship transforms and connects models that have never been registered with the manager, silently mixing tracked and untracked state",
+      "related_files": [
+        "src/cases/case_manager.py"
+      ],
+      "evidence": [
+        "create_relationship() takes arbitrary Model arguments with no check that they are in self.tracked_models",
+        "self.case_relationships stores references to these unregistered models",
+        "get_related_models() later searches case_relationships by model.id \u2014 will work, but tracked_models and case_relationships are now inconsistent"
+      ],
+      "suggestion": "Either require models to be registered before they can participate in relationships (raise ValueError if not found), or auto-register them inside create_relationship() with a debug log so the state is explicit.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "low_level_elegance",
+      "identifier": "case_transformations_unused_original_case",
+      "summary": "transform_case() captures original_case in a local variable that is never used, creating dead code that implies a revert path that does not exist in this function",
+      "related_files": [
+        "src/transformations/case_transformations.py"
+      ],
+      "evidence": [
+        "Line 24: original_case = model.case",
+        "original_case is never read again \u2014 the variable is written and immediately abandoned",
+        "The actual prior-case tracking is done by model.case setter internally (_prior_case)"
+      ],
+      "suggestion": "Remove the `original_case = model.case` line. The comment above it (line 23) should also be removed or updated to note that prior-case tracking is handled by the model's case property setter.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "low_level_elegance",
+      "identifier": "process_update_hasattr_callable_pattern",
+      "summary": "All eight case handler process_update methods repeat the identical hasattr+callable guard pattern as boilerplate, adding noise without abstraction",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/accusative.py",
+        "src/cases/dative.py",
+        "src/cases/genitive.py",
+        "src/cases/instrumental.py",
+        "src/cases/ablative.py",
+        "src/cases/locative.py",
+        "src/cases/vocative.py"
+      ],
+      "evidence": [
+        "Every process_update starts with: if hasattr(model, '_update_<case>') and callable(getattr(model, '_update_<case>')): return model._update_<case>(data)",
+        "This is eight verbatim copies of the same dispatch logic",
+        "The base Model class already defines all eight _update_* methods \u2014 the hasattr guard is always True for any Model instance"
+      ],
+      "suggestion": "Remove the hasattr/callable guard and call model._update_<case>(data) directly, since the base class guarantees the method exists. If forward-compatibility with non-Model objects is genuinely needed, extract a single _dispatch_to_model_method(model, method_name, data) helper used by all handlers.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "dependency_health",
+      "identifier": "pandas_networkx_still_imported_in_visualization",
+      "summary": "Several visualization files under src/visualization/ import pandas and networkx at module level even after they were moved to optional [lexicon] extras, meaning installing only the core package fails on import",
+      "related_files": [
+        "src/visualization/case_visualization.py",
+        "src/visualization/insect/comprehensive_visualizer.py",
+        "src/visualization/insect/neural_visualizer.py"
+      ],
+      "evidence": [
+        "Grep shows pandas/networkx imports in src/visualization/case_visualization.py and src/visualization/insect/comprehensive_visualizer.py and src/visualization/insect/neural_visualizer.py",
+        "pyproject.toml core deps do not include pandas or networkx",
+        "These files are in src/visualization/, not src/lexicon/, so they are reachable without the [lexicon] extra"
+      ],
+      "suggestion": "Guard pandas/networkx imports in src/visualization/ with try/except ImportError and raise a clear error message pointing to `pip install cerebrum[lexicon]`, or move the affected visualizers into src/lexicon/visualization/ where the dependency boundary is declared.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "package_organization",
+      "identifier": "examples_py_in_cases_package",
+      "summary": "src/cases/examples.py is a runnable script / demo file living inside the cases package, mixing concern boundaries",
+      "related_files": [
+        "src/cases/examples.py"
+      ],
+      "evidence": [
+        "File provides basic_case_example() and animal_formation_example() \u2014 demonstration code, not case logic",
+        "It imports from ..examples.animal_agent, creating a cross-package dependency from cases/ back to examples/",
+        "src/cases/__init__.py does not export anything from examples.py, meaning it is a straggler file with low cohesion to its host package",
+        "There is already a dedicated src/examples/ directory for this kind of material"
+      ],
+      "suggestion": "Move src/cases/examples.py to src/examples/case_examples.py to align with the existing examples directory, eliminating the backward dependency from cases/ into examples/.",
+      "confidence": "high"
+    }
+  ],
+  "provenance": {
+    "kind": "blind_review_batch_import",
+    "blind": true,
+    "runner": "claude",
+    "run_stamp": "ext_20260306_181433_3782079a",
+    "created_at": "2026-03-06T18:20:24+00:00",
+    "packet_path": "/Users/4d/Documents/GitHub/CEREBRUM/.desloppify/review_packet_blind.json",
+    "packet_sha256": "3ef6de68590d850cfdcaf40276eaff1345c2666da0b6654f1e0f3a5f6148fa40",
+    "external_session_id": "ext_20260306_181433_3782079a"
+  }
+}

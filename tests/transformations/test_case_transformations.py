@@ -9,8 +9,8 @@ from src.transformations.case_transformations import (
     convert_message_between_cases
 )
 
-# Helper Mock Model Class
-class MockModel(Model):
+# Helper Concrete Test Model Class
+class ConcreteTestModel(Model):
     def __init__(self, name: str, fe: float = 0.0):
         super().__init__(name=name)
         self._fe = fe
@@ -59,10 +59,10 @@ def test_revert_case_no_prior():
 
 # Tests for apply_morphosyntactic_alignment
 def test_alignment_nominative_accusative():
-    subj = MockModel(name="Subj", fe=-1.0)
-    obj = MockModel(name="Obj", fe=1.0)
-    other = MockModel(name="Other", fe=2.0) # High FE -> likely object
-    instr = MockModel(name="Instr", fe=0.0) # Zero FE -> nominative
+    subj = ConcreteTestModel(name="Subj", fe=-1.0)
+    obj = ConcreteTestModel(name="Obj", fe=1.0)
+    other = ConcreteTestModel(name="Other", fe=2.0) # High FE -> likely object
+    instr = ConcreteTestModel(name="Instr", fe=0.0) # Zero FE -> nominative
     models = [subj, obj, other, instr]
 
     result = apply_morphosyntactic_alignment(models, alignment_type="nominative_accusative", subject=subj, object=obj)
@@ -77,10 +77,10 @@ def test_alignment_nominative_accusative():
     assert "INSTRUMENTAL" not in result or len(result["INSTRUMENTAL"]) == 0 # Should not be assigned
 
 def test_alignment_ergative_absolutive():
-    subj = MockModel(name="Subj")
-    obj = MockModel(name="Obj")
-    intrans_subj = MockModel(name="IntransSubj")
-    other = MockModel(name="Other")
+    subj = ConcreteTestModel(name="Subj")
+    obj = ConcreteTestModel(name="Obj")
+    intrans_subj = ConcreteTestModel(name="IntransSubj")
+    other = ConcreteTestModel(name="Other")
 
     # Transitive case (subject + object)
     models_trans = [subj, obj, other]
@@ -101,10 +101,10 @@ def test_alignment_ergative_absolutive():
     assert result_intrans["LOCATIVE"] == [other]
 
 def test_alignment_tripartite():
-    subj = MockModel(name="Subj")
-    obj = MockModel(name="Obj")
-    intrans_subj = MockModel(name="IntransSubj")
-    other = MockModel(name="Other")
+    subj = ConcreteTestModel(name="Subj")
+    obj = ConcreteTestModel(name="Obj")
+    intrans_subj = ConcreteTestModel(name="IntransSubj")
+    other = ConcreteTestModel(name="Other")
 
     # Transitive case
     models_trans = [subj, obj, other]
@@ -125,8 +125,8 @@ def test_alignment_tripartite():
     assert result_intrans["DATIVE"] == [other]
 
 def test_alignment_default():
-    m1 = MockModel("M1")
-    m2 = MockModel("M2")
+    m1 = ConcreteTestModel("M1")
+    m2 = ConcreteTestModel("M2")
     models = [m1, m2]
     result = apply_morphosyntactic_alignment(models, alignment_type="unknown")
     assert m1.case == Case.NOMINATIVE

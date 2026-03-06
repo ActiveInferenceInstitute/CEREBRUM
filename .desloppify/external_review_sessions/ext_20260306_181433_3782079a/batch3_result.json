@@ -1,0 +1,164 @@
+{
+  "session": {
+    "id": "ext_20260306_181433_3782079a",
+    "token": "867efdec7a27ad1ba3d5ac40315b6cb3"
+  },
+  "assessments": {
+    "convention_outlier": 62,
+    "error_consistency": 55,
+    "dependency_health": 78,
+    "mid_level_elegance": 52,
+    "low_level_elegance": 60,
+    "package_organization": 58
+  },
+  "findings": [
+    {
+      "dimension": "convention_outlier",
+      "identifier": "animal_transformations_bare_logging",
+      "summary": "animal_transformations.py uses root logger (logging.info) while every other module in the codebase uses a named module logger",
+      "related_files": ["src/transformations/animal_transformations.py"],
+      "evidence": [
+        "File imports logging but never calls logging.getLogger(__name__)",
+        "Lines 37, 69, 97, 252 call logging.info(...) directly on the root logger",
+        "Every sibling file (case_transformations.py, all src/cases/*.py, src/models/insect/base.py) declares logger = logging.getLogger(__name__) and uses it"
+      ],
+      "suggestion": "Add `logger = logging.getLogger(__name__)` after the imports, then replace all `logging.info(...)` calls with `logger.info(...)`.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "convention_outlier",
+      "identifier": "animal_cases_logger_placement",
+      "summary": "In animal_cases.py the logger is declared after an import statement, breaking the established module-level ordering convention",
+      "related_files": ["src/cases/animal_cases.py"],
+      "evidence": [
+        "Line 14: logger = logging.getLogger(__name__)",
+        "Line 15: from ..examples.animal_agent import AnimalAgent  (import after logger declaration)",
+        "All other case modules declare logger after all imports, not interleaved"
+      ],
+      "suggestion": "Move the `logger = logging.getLogger(__name__)` line to after all import statements, consistent with every other module in src/cases/.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "identifier": "duplicate_animal_transform_functions",
+      "summary": "transform_to_goal_seeker, transform_to_explorer, and transform_to_follower exist as standalone functions in src/transformations/animal_transformations.py AND as methods on AnimalCaseManager in src/cases/animal_cases.py, with diverging implementations",
+      "related_files": [
+        "src/transformations/animal_transformations.py",
+        "src/cases/animal_cases.py"
+      ],
+      "evidence": [
+        "Both files define transform_to_goal_seeker with identical NOM case + speed/rotation mutations but different logger usage (root vs named)",
+        "transform_to_explorer in animal_cases.py stores _original_goal and sets animal._original_goal; the version in animal_transformations.py stores it in a local variable only",
+        "Both are exported from their respective packages (src/transformations/__init__.py and src/cases/__init__.py via AnimalCaseManager)",
+        "Callers have two different seams to reach the same behavior, with no documented preference"
+      ],
+      "suggestion": "Choose one canonical location. The method approach on AnimalCaseManager is richer (uses named logger, stores _original_goal). Remove the standalone functions from animal_transformations.py and delegate or delete them, keeping the AnimalCaseManager methods as the sole implementation.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "identifier": "case_manager_transform_ignores_return",
+      "summary": "CaseManager.create_relationship calls self.transform_case() but discards the return value, then separately calls source.connect(); the transform and connect steps are not composed and the relationship dict in CaseManager diverges from the connect() state on the model",
+      "related_files": ["src/cases/case_manager.py"],
+      "evidence": [
+        "Lines 119-120: self.transform_case(source, source_case) and self.transform_case(target, target_case) — return values ignored",
+        "Lines 123-127: case_relationships list is updated and then model.connect() is called redundantly",
+        "create_case_relationship() in src/transformations/case_transformations.py also calls source_model.connect() — two independent seams that both write to model.connections"
+      ],
+      "suggestion": "Centralise the connect-after-transform step into transform_case() or into a dedicated compose_relationship() helper so that relationship registration and model.connect() always happen atomically from one place.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "error_consistency",
+      "identifier": "calculate_free_energy_silent_fallthrough",
+      "summary": "CaseManager.calculate_free_energy silently returns 1.0 when the handler lacks calculate_free_energy AND the model lacks a callable free_energy — callers cannot distinguish a legitimate 1.0 result from a missing implementation",
+      "related_files": ["src/cases/case_manager.py"],
+      "evidence": [
+        "Lines 201-207: if hasattr(handler, 'calculate_free_energy') ... elif hasattr(model, 'free_energy') ... return 1.0",
+        "No log message or exception is raised on the final fallthrough",
+        "All eight case handlers (nominative through vocative) do define calculate_free_energy, but any future handler added without it would silently return 1.0 with no diagnostic"
+      ],
+      "suggestion": "Add a logger.warning() on the final fallthrough path so that missing implementations are discoverable at runtime, or raise NotImplementedError if a zero-fallback is unacceptable.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "error_consistency",
+      "identifier": "create_relationship_unregistered_models",
+      "summary": "CaseManager.create_relationship transforms and connects models that have never been registered with the manager, silently mixing tracked and untracked state",
+      "related_files": ["src/cases/case_manager.py"],
+      "evidence": [
+        "create_relationship() takes arbitrary Model arguments with no check that they are in self.tracked_models",
+        "self.case_relationships stores references to these unregistered models",
+        "get_related_models() later searches case_relationships by model.id — will work, but tracked_models and case_relationships are now inconsistent"
+      ],
+      "suggestion": "Either require models to be registered before they can participate in relationships (raise ValueError if not found), or auto-register them inside create_relationship() with a debug log so the state is explicit.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "low_level_elegance",
+      "identifier": "case_transformations_unused_original_case",
+      "summary": "transform_case() captures original_case in a local variable that is never used, creating dead code that implies a revert path that does not exist in this function",
+      "related_files": ["src/transformations/case_transformations.py"],
+      "evidence": [
+        "Line 24: original_case = model.case",
+        "original_case is never read again — the variable is written and immediately abandoned",
+        "The actual prior-case tracking is done by model.case setter internally (_prior_case)"
+      ],
+      "suggestion": "Remove the `original_case = model.case` line. The comment above it (line 23) should also be removed or updated to note that prior-case tracking is handled by the model's case property setter.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "low_level_elegance",
+      "identifier": "process_update_hasattr_callable_pattern",
+      "summary": "All eight case handler process_update methods repeat the identical hasattr+callable guard pattern as boilerplate, adding noise without abstraction",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/accusative.py",
+        "src/cases/dative.py",
+        "src/cases/genitive.py",
+        "src/cases/instrumental.py",
+        "src/cases/ablative.py",
+        "src/cases/locative.py",
+        "src/cases/vocative.py"
+      ],
+      "evidence": [
+        "Every process_update starts with: if hasattr(model, '_update_<case>') and callable(getattr(model, '_update_<case>')): return model._update_<case>(data)",
+        "This is eight verbatim copies of the same dispatch logic",
+        "The base Model class already defines all eight _update_* methods — the hasattr guard is always True for any Model instance"
+      ],
+      "suggestion": "Remove the hasattr/callable guard and call model._update_<case>(data) directly, since the base class guarantees the method exists. If forward-compatibility with non-Model objects is genuinely needed, extract a single _dispatch_to_model_method(model, method_name, data) helper used by all handlers.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "dependency_health",
+      "identifier": "pandas_networkx_still_imported_in_visualization",
+      "summary": "Several visualization files under src/visualization/ import pandas and networkx at module level even after they were moved to optional [lexicon] extras, meaning installing only the core package fails on import",
+      "related_files": [
+        "src/visualization/case_visualization.py",
+        "src/visualization/insect/comprehensive_visualizer.py",
+        "src/visualization/insect/neural_visualizer.py"
+      ],
+      "evidence": [
+        "Grep shows pandas/networkx imports in src/visualization/case_visualization.py and src/visualization/insect/comprehensive_visualizer.py and src/visualization/insect/neural_visualizer.py",
+        "pyproject.toml core deps do not include pandas or networkx",
+        "These files are in src/visualization/, not src/lexicon/, so they are reachable without the [lexicon] extra"
+      ],
+      "suggestion": "Guard pandas/networkx imports in src/visualization/ with try/except ImportError and raise a clear error message pointing to `pip install cerebrum[lexicon]`, or move the affected visualizers into src/lexicon/visualization/ where the dependency boundary is declared.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "package_organization",
+      "identifier": "examples_py_in_cases_package",
+      "summary": "src/cases/examples.py is a runnable script / demo file living inside the cases package, mixing concern boundaries",
+      "related_files": ["src/cases/examples.py"],
+      "evidence": [
+        "File provides basic_case_example() and animal_formation_example() — demonstration code, not case logic",
+        "It imports from ..examples.animal_agent, creating a cross-package dependency from cases/ back to examples/",
+        "src/cases/__init__.py does not export anything from examples.py, meaning it is a straggler file with low cohesion to its host package",
+        "There is already a dedicated src/examples/ directory for this kind of material"
+      ],
+      "suggestion": "Move src/cases/examples.py to src/examples/case_examples.py to align with the existing examples directory, eliminating the backward dependency from cases/ into examples/.",
+      "confidence": "high"
+    }
+  ]
+}

@@ -111,9 +111,9 @@ class TempFileManager:
             except Exception as e:
                 print(f"Error cleaning up temporary file {file_path}: {e}")
 
-# Mocking helpers
-class MockModel:
-    """Mock Model class for testing components that depend on models."""
+# Test model helpers
+class ModelHelper:
+    """Model helper class for testing components that depend on models."""
     
     def __init__(self, name="MockModel", parameters=None, case=None):
         """Initialize a mock model with the given parameters."""

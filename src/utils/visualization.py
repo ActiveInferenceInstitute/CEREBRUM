@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from typing import Tuple, Optional
 from matplotlib.figure import Figure
+from matplotlib.patches import Ellipse
 
 from src.models.base import Case
 from src.models.case_definitions import CaseDefinitions
@@ -213,7 +214,7 @@ def visualize_causal_mechanism(causes, effects, relationships, save_path=None):
     # Draw effects (ellipses)
     for i, effect in enumerate(effects):
         x, y = effect_positions[i]
-        ellipse = plt.Ellipse((x, y), 2, 0.8, facecolor='lightgreen', edgecolor='black', alpha=0.7)
+        ellipse = Ellipse((x, y), 2, 0.8, facecolor='lightgreen', edgecolor='black', alpha=0.7)
         ax.add_patch(ellipse)
         ax.text(x, y, effect, ha='center', va='center', fontweight='bold')
     

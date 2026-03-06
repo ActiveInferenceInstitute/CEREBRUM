@@ -1,0 +1,147 @@
+{
+  "session": {
+    "id": "ext_20260306_181433_3782079a",
+    "token": "867efdec7a27ad1ba3d5ac40315b6cb3"
+  },
+  "assessments": {
+    "cross_module_architecture": 58,
+    "high_level_elegance": 62,
+    "abstraction_fitness": 55
+  },
+  "findings": [
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "dual_model_base_ambiguity",
+      "summary": "Two parallel Model base classes with different APIs create an ambiguous foundation for the framework",
+      "related_files": [
+        "src/core/model.py",
+        "src/models/base.py",
+        "src/models/case_definitions.py",
+        "src/utils/visualization.py"
+      ],
+      "evidence": [
+        "src/core/model.py defines Model with precision_weights, case_history, connections, and full _apply_case_transformation hook",
+        "src/models/base.py defines a second Model class with only id, name, _case, and data_buffer — no precision, no history, no transformation hook",
+        "src/models/case_definitions.py imports Case from src.models.base, which re-exports it from src.core.model — an extra indirection layer",
+        "src/utils/visualization.py imports Case from src.models.base rather than src.core.model, showing the shim is actually used as a primary import path by some modules",
+        "The two Model classes have incompatible constructors: core.Model takes (name, parameters), models.base.Model takes (name, case)"
+      ],
+      "suggestion": "Consolidate to a single Model base class in src/core/model.py. If src/models/base.py must exist for backward compatibility, it should subclass src.core.model.Model rather than redefine it from scratch, and its docstring should explicitly say it is a shim.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "cases_package_imports_examples",
+      "summary": "src/cases/__init__.py transitively imports AnimalCaseManager, which imports from src/examples — a leaf domain importing from a peer domain creates a cycle risk",
+      "related_files": [
+        "src/cases/__init__.py",
+        "src/cases/animal_cases.py",
+        "src/examples/animal_agent.py"
+      ],
+      "evidence": [
+        "src/cases/__init__.py line 26: 'from .animal_cases import AnimalCaseManager'",
+        "src/cases/animal_cases.py line 15: 'from ..examples.animal_agent import AnimalAgent'",
+        "This means importing 'from src.cases import CaseManager' also loads the full examples.animal_agent module, which itself imports from src.core",
+        "The dependency direction is: core -> cases -> examples, but examples are supposed to sit above cases in the stack"
+      ],
+      "suggestion": "Remove AnimalCaseManager from src/cases/__init__.py __all__ and the import on line 26. AnimalCaseManager belongs in src/examples/ or src/models/ since it depends on AnimalAgent. Consumers that need it can import it directly from src.cases.animal_cases.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "lexicon_absolute_imports_core",
+      "summary": "src/lexicon/core/engine.py uses absolute src.llm imports rather than relative imports, coupling a sub-package to the top-level package layout",
+      "related_files": [
+        "src/lexicon/core/engine.py"
+      ],
+      "evidence": [
+        "src/lexicon/core/engine.py lines 28-29: 'from src.llm.OpenRouter.openrouter import OpenRouterClient, OpenRouterConfig' and 'from src.llm.config import get_model_name'",
+        "All other src/cases/ and src/core/ files use relative imports (e.g. 'from ..core.model import'), but the lexicon engine breaks this convention with absolute src.X paths",
+        "This means src/lexicon cannot be extracted or tested as a standalone package without the full src tree on sys.path"
+      ],
+      "suggestion": "Either adopt relative imports throughout lexicon (e.g. 'from ...llm.OpenRouter.openrouter import ...') to match the rest of the codebase convention, or document that absolute src.X imports are the project-wide standard and apply it consistently everywhere.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "duplicate_relationship_logic",
+      "summary": "Case relationship creation logic (relationship_type -> case pair mapping) is duplicated verbatim in two separate modules",
+      "related_files": [
+        "src/cases/case_manager.py",
+        "src/transformations/case_transformations.py"
+      ],
+      "evidence": [
+        "src/cases/case_manager.py lines 107-115: transformations dict maps 'generates', 'updates', 'receives_from', 'implements', 'contextualizes', 'derives_from', 'addresses' to (source_case, target_case) pairs",
+        "src/transformations/case_transformations.py lines 192-226: create_case_relationship() function implements the same 7 relationship types with identical case assignments using if/elif chains",
+        "Both also call source.connect() and target.connect() with inverse_ prefix — identical side-effect logic"
+      ],
+      "suggestion": "Extract the relationship-type-to-case-pair mapping into a single dict constant (e.g. RELATIONSHIP_CASES) in one canonical location (src/core/model.py or src/cases/case_manager.py). Both CaseManager.create_relationship and create_case_relationship() should reference that constant.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "high_level_elegance",
+      "identifier": "precision_mutation_on_every_case_change",
+      "summary": "_apply_case_transformation multiplies precision matrices in-place on every case transition, causing unbounded growth with repeated transitions",
+      "related_files": [
+        "src/core/active_inference.py"
+      ],
+      "evidence": [
+        "active_inference.py lines 169, 172, 175, 178, 182-183, 186, 189, 192: each case branch does 'self.likelihood_precision = self.likelihood_precision * self.get_precision(self._case)' — a cumulative in-place scale",
+        "get_precision() returns self._precision_weights[case] which defaults to 1.0, so repeated NOMINATIVE transitions scale likelihood_precision by 1.0^N (harmless at default), but any non-unity precision weight applied once will compound on every subsequent transition to the same case",
+        "The pre_transform_state snapshot saved on lines 159-162 is stored in belief_history but never used to restore state, so it does not bound the mutation"
+      ],
+      "suggestion": "Store precision matrices at initialization and reconstruct them from the base values on each transformation rather than scaling cumulatively. Alternatively, apply precision scaling only when get_precision() != 1.0 and document clearly that set_precision() values are one-shot multipliers.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "high_level_elegance",
+      "identifier": "insect_dead_method_update_precision_for_case",
+      "summary": "_update_precision_for_case is defined in InsectModel but never called, making it unreachable dead code",
+      "related_files": [
+        "src/models/insect/base.py"
+      ],
+      "evidence": [
+        "src/models/insect/base.py lines 370-424: _update_precision_for_case defines detailed per-case precision configs and applies them via setattr",
+        "Grep across all src/ shows zero callers of _update_precision_for_case — it is never invoked from _apply_case_transformation, transform_case, or anywhere else",
+        "_apply_case_transformation (line 340-343) calls super()._apply_case_transformation() then _update_neural_priorities(), but not _update_precision_for_case()"
+      ],
+      "suggestion": "Either call _update_precision_for_case from _apply_case_transformation (after validating the setattr targets exist on the model), or delete the method. Dead code of this size (~55 lines) signals incomplete wiring.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "abstraction_fitness",
+      "identifier": "case_handler_static_class_not_module",
+      "summary": "Each case handler is a class with only @staticmethod members and a class-level constant, providing no benefit over a plain module with functions",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/accusative.py",
+        "src/cases/case_manager.py"
+      ],
+      "evidence": [
+        "NominativeCase has PRECISION = 1.5 and four @staticmethod methods: apply, process_update, calculate_free_energy, get_parameters — no instance state, no inheritance used",
+        "AccusativeCase follows the same pattern: PRECISION = 1.2 plus three @staticmethods",
+        "CaseManager.case_handlers stores the class objects (not instances) and calls them as NominativeCase.apply(model) — the class is used purely as a namespace",
+        "Python modules already provide namespace grouping with no boilerplate; the class wrapper adds __init__, isinstance checks, and subclass surface area for no gain"
+      ],
+      "suggestion": "Convert each case handler class to a module-level function set: nominative.py exposes apply(), process_update(), calculate_free_energy(). CaseManager.case_handlers becomes a dict mapping Case -> module. This removes one layer of indirection and makes the calling convention explicit.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "abstraction_fitness",
+      "identifier": "case_definitions_redundant_layer",
+      "summary": "CaseDefinitions is a static-method-only class that duplicates case semantics already documented in the Case enum and case handler docstrings",
+      "related_files": [
+        "src/models/case_definitions.py",
+        "src/core/model.py"
+      ],
+      "evidence": [
+        "src/models/case_definitions.py defines CaseDefinitions with 8 @staticmethod methods each returning a Dict[str, str] of linguistic_meaning, statistical_role, regression_context, example",
+        "src/core/model.py Case enum already has inline comments for each member (e.g. '# Model as active agent', '# Model as source/possessor')",
+        "CaseDefinitions.get_all_cases() returns Case -> dict, creating a parallel registry to the enum itself",
+        "src/utils/visualization.py imports CaseDefinitions but only to pass to visualization — the consumer could inline these strings or read from the enum"
+      ],
+      "suggestion": "Fold the linguistic metadata into the Case enum as a .description property or a module-level CASE_DESCRIPTIONS dict in src/core/model.py. Remove CaseDefinitions as a separate class/file to eliminate the indirection.",
+      "confidence": "medium"
+    }
+  ]
+}

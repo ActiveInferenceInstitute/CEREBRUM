@@ -449,7 +449,7 @@ class OpenRouterTester:
     def test_analysis_engine_integration(self):
         """Test the OpenRouter analysis engine integration."""
         # Create a mock config for testing
-        class MockConfig:
+        class TestConfig:
             def __init__(self):
                 self.api_key = get_api_key()
                 self.model = get_model_name()
@@ -457,7 +457,7 @@ class OpenRouterTester:
                 self.temperature = model_config["temperature"]
                 self.max_tokens = model_config["max_tokens"]
         
-        config = MockConfig()
+        config = TestConfig()
         
         # Test engine initialization
         engine = OpenRouterAnalysisEngine(config, "test_analysis")

@@ -1,0 +1,210 @@
+{
+  "assessments": {
+    "cross_module_architecture": 62,
+    "convention_outlier": 68,
+    "error_consistency": 58,
+    "abstraction_fitness": 55,
+    "dependency_health": 72,
+    "test_strategy": 60,
+    "ai_generated_debt": 52,
+    "package_organization": 60,
+    "high_level_elegance": 63,
+    "mid_level_elegance": 55,
+    "low_level_elegance": 56,
+    "design_coherence": 57
+  },
+  "findings": [
+    {
+      "dimension": "mid_level_elegance",
+      "identifier": "precision_constants_orphaned",
+      "summary": "PRECISION class constants on all 8 case handlers are never wired into the model's precision system and have no runtime effect",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/accusative.py",
+        "src/cases/dative.py",
+        "src/cases/genitive.py",
+        "src/cases/instrumental.py",
+        "src/cases/locative.py",
+        "src/cases/ablative.py",
+        "src/cases/vocative.py",
+        "src/core/active_inference.py",
+        "src/core/model.py"
+      ],
+      "evidence": [
+        "Each XxxCase class defines a PRECISION constant (e.g. NominativeCase.PRECISION = 1.5, VocativeCase.PRECISION = 2.0)",
+        "_apply_case_transformation in active_inference.py calls self.get_precision(self._case), which reads from self._precision_weights",
+        "self._precision_weights is initialized to {case: 1.0 for case in Case} in Model.__init__ and is never populated from the case handler PRECISION constants",
+        "No caller in the codebase connects XxxCase.PRECISION to model.set_precision(); the constants are dead values"
+      ],
+      "suggestion": "Either remove the PRECISION constants if they are purely aspirational documentation, or wire them in: in each XxxCase.apply() call model.set_precision(Case.X, XxxCase.PRECISION) before returning, so _apply_case_transformation actually scales from the intended value rather than always 1.0.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "design_coherence",
+      "identifier": "dual_model_base_classes",
+      "summary": "Two parallel Model base classes (src/core/model.py and src/models/base.py) expose divergent contracts with no clear sunset for the shim",
+      "related_files": [
+        "src/core/model.py",
+        "src/models/base.py"
+      ],
+      "evidence": [
+        "src/models/base.py defines a Model class with different __init__ signature (name: str, case: Case) vs src/core/model.py (name: str = None, parameters: Dict)",
+        "src/models/base.py Model has no _apply_case_transformation hook, no _case_history, no connections list, and raises TypeError on non-Case assignment \u2014 differing invariants from core Model",
+        "src/models/base.py has 22 importers; no comment or deprecation warning indicates it is a transitional shim with a removal plan",
+        "Code that imports from src.models.base gets a Model that silently ignores case transformations (no _apply_case_transformation body)"
+      ],
+      "suggestion": "Add a deprecation warning in src/models/base.py Model.__init__ pointing to src.core.model.Model, document a migration timeline, and convert the highest-traffic importers in a single sweep so the shim's 22 importers shrink toward zero.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "abstraction_fitness",
+      "identifier": "transform_case_passthrough",
+      "summary": "src/transformations/case_transformations.py:transform_case is a one-liner passthrough that adds no policy \u2014 it only sets model.case",
+      "related_files": [
+        "src/transformations/case_transformations.py"
+      ],
+      "evidence": [
+        "transform_case(model, target_case) stores original_case but never uses it, then calls model.case = target_case and returns model",
+        "revert_case() is equally thin: it just calls model.case = model._prior_case",
+        "All callers could write model.case = target_case directly; the wrapper adds a layer but zero policy, validation, or translation"
+      ],
+      "suggestion": "Either delete the module and update callers to use the case property directly, or give it a genuine reason to exist: add validation (is target_case a valid Case member?), emit a domain event, or enforce transition guards \u2014 something that justifies the indirection.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "convention_outlier",
+      "identifier": "mixed_import_style_src_vs_relative",
+      "summary": "Visualization modules use absolute src.X imports while their sibling animal_visualization.py uses relative imports \u2014 inconsistent within the same package",
+      "related_files": [
+        "src/visualization/case_visualization.py",
+        "src/visualization/case_comparison.py",
+        "src/visualization/animal_visualization.py",
+        "src/visualization/insect/neural_visualizer.py"
+      ],
+      "evidence": [
+        "src/visualization/case_visualization.py: from src.core.model import Model, Case",
+        "src/visualization/case_comparison.py: from src.core.model import Model, Case",
+        "src/visualization/animal_visualization.py: from ..core.model import Case (relative)",
+        "src/transformations/case_transformations.py uses absolute from src.core.model while src/cases/*.py use relative from ..core.model"
+      ],
+      "suggestion": "Pick one convention for the package \u2014 relative imports are standard for intra-package references in Python. Convert the absolute src.X imports in visualization/ and transformations/ to relative form to match the style used everywhere in src/cases/ and src/models/.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "identifier": "restating_inline_comments",
+      "summary": "Numerous inline comments restate exactly what the adjacent code does without adding insight",
+      "related_files": [
+        "src/core/active_inference.py",
+        "src/models/insect/base.py",
+        "src/cases/nominative.py"
+      ],
+      "evidence": [
+        "active_inference.py line 38: '# Initialize model dimensions based on inputs or defaults' before three lines that do exactly that",
+        "active_inference.py line 65: '# Posterior beliefs (these will be updated during inference)' above posterior_means = self.prior_means.copy()",
+        "active_inference.py line 86: '# Ensure required parameters are available (if parameters dict was provided)' above 'if parameters is not None:'",
+        "insect/base.py line 81: '# Initialize with default parameters for active inference' above the literal dict",
+        "nominative.py line 30-32: comment block explaining that model.case = Case.NOMINATIVE 'will trigger _apply_case_transformation internally'"
+      ],
+      "suggestion": "Remove comments that echo the code. Retain only comments that explain WHY a decision was made (e.g. the base-precision comment in active_inference.py line 69-72 is a good example of a useful why-comment).",
+      "confidence": "high"
+    },
+    {
+      "dimension": "low_level_elegance",
+      "identifier": "select_action_by_case_dispatch_table_unused_default",
+      "summary": "_select_action_by_case builds a full dispatch dict on every call and falls back to _select_default_action which is unreachable given all 8 cases are covered",
+      "related_files": [
+        "src/models/insect/base.py"
+      ],
+      "evidence": [
+        "_select_action_by_case (line 449-471) builds a dict keyed on all 8 Case enum values on every invocation",
+        "The dict covers all 8 Case members; dict.get() fallback to _select_default_action can never be reached because Case has exactly 8 values all present in the dict",
+        "_select_default_action exists solely as this dead fallback",
+        "Building the full dict on every call is wasteful; a class-level mapping or direct getattr dispatch would be cleaner"
+      ],
+      "suggestion": "Promote the dispatch table to a class-level attribute (built once) and remove the dead _select_default_action. If future-proofing for unknown cases is genuinely needed, add an explicit raise NotImplementedError rather than a silent idle fallback.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "error_consistency",
+      "identifier": "mixed_error_strategy_update_methods",
+      "summary": "Case update methods mix return-dict-with-error-status and direct dict literals inconsistently, with no predictable contract for callers",
+      "related_files": [
+        "src/core/active_inference.py"
+      ],
+      "evidence": [
+        "_update_accusative returns {\"status\": \"error\", \"message\": ...} when data is None",
+        "_update_dative returns {\"status\": \"error\", \"message\": ...} when data is None",
+        "_update_instrumental returns {\"status\": \"error\", ...} for unknown method",
+        "_update_ablative returns {\"status\": \"error\", ...} for unrecognized data type",
+        "_update_nominative never returns an error status \u2014 it silently succeeds even on invalid input",
+        "Callers have no documented contract; some methods raise nothing, others return status dicts. No caller in tests checks status=='error'"
+      ],
+      "suggestion": "Establish a single error strategy: either raise ValueError/TypeError at the boundary (simpler, lets callers use normal exception handling) or return a typed Result/NamedTuple consistently. The current mix of silent success and dict-based errors makes callers unpredictable.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "test_strategy",
+      "identifier": "precision_constants_not_tested_for_effect",
+      "summary": "Tests confirm PRECISION constants exist but no test verifies they have any effect on model behavior during case transitions",
+      "related_files": [
+        "tests/cases/test_case_handlers.py",
+        "src/cases/nominative.py",
+        "src/core/active_inference.py"
+      ],
+      "evidence": [
+        "test_case_handlers.py line 41: test_precision_constant asserts AccusativeCase.PRECISION == 1.2 \u2014 tests the constant value only",
+        "No test verifies that after AccusativeCase.apply(model), model.get_precision(Case.ACCUSATIVE) == AccusativeCase.PRECISION",
+        "No test verifies that after a case transition, likelihood_precision or prior_precision is scaled by the case-specific PRECISION value",
+        "Given the wiring gap identified above, these tests pass but provide false confidence"
+      ],
+      "suggestion": "Add integration tests that apply a case handler to an ActiveInferenceModel and assert the resulting precision matrices reflect the intended case-specific scaling, not just that the constant attribute exists.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "abstraction_fitness",
+      "identifier": "case_handlers_static_only_no_protocol",
+      "summary": "All 8 XxxCase classes are collections of @staticmethod with no shared protocol/ABC, making the dispatch in CaseManager type-unsafe",
+      "related_files": [
+        "src/cases/case_manager.py",
+        "src/cases/nominative.py",
+        "src/cases/accusative.py"
+      ],
+      "evidence": [
+        "CaseManager.case_handlers maps Case enums to handler classes and calls handler.apply(model)",
+        "No ABC or Protocol enforces that every handler has apply(), process_update(), calculate_free_energy()",
+        "NominativeCase and AccusativeCase both have get_parameters(); AblativeCase and VocativeCase have different extra methods (emit_to, invoke, broadcast) \u2014 no shared interface",
+        "Adding a 9th case requires knowing by convention which methods to implement; mypy cannot catch missing methods"
+      ],
+      "suggestion": "Define a CaseHandler Protocol (or ABC) with the required static methods: apply, process_update, calculate_free_energy. Register it and have each class satisfy it so type checkers enforce the contract.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "high_level_elegance",
+      "identifier": "insect_domain_cases_not_in_core_enum",
+      "summary": "InsectModel domain defines extra cases (PheromonalCase, StigmergicCase, CasteCase, SwarmCase, SubstrateCase, MetamorphicCase) outside the core Case enum, creating a split case system with no common interface",
+      "related_files": [
+        "src/models/insect/cases/pheromonal.py",
+        "src/models/insect/cases/swarm.py",
+        "src/core/model.py"
+      ],
+      "evidence": [
+        "src/models/insect/cases/ contains at least 6 domain-specific case modules that are entirely separate from the 8-value Case enum in src/core/model.py",
+        "InsectModel.transform_case accepts only core Case values; the domain cases are applied via separate utility classes, not via the same setter/transformation pipeline",
+        "A reader of src/core/model.py has no visibility into the insect extension cases; the architecture contract (8 cases) is violated in practice"
+      ],
+      "suggestion": "Document the extension mechanism explicitly: either add an ExtendedCase registry concept to the framework or document in CLAUDE.md and the InsectModel docstring that domain cases extend the system via a separate protocol. Currently the existence of 6 extra cases is a silent architectural surprise.",
+      "confidence": "medium"
+    }
+  ],
+  "provenance": {
+    "kind": "blind_review_batch_import",
+    "blind": true,
+    "runner": "claude",
+    "run_stamp": "ext_20260306_183228_02a598ef",
+    "created_at": "2026-03-06T18:37:01+00:00",
+    "packet_path": "/Users/4d/Documents/GitHub/CEREBRUM/.desloppify/review_packet_blind.json",
+    "packet_sha256": "623bddac788109c81311fb2f14a918d149f4a9ffe645cb2b23dd47685cce40a6",
+    "external_session_id": "ext_20260306_183228_02a598ef"
+  }
+}

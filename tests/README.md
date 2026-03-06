@@ -5,7 +5,7 @@ This directory contains the test suite for CEREBRUM, organized into subfolders t
 ## Quick Start
 
 ```bash
-# Run all 369 tests
+# Run all 405 tests
 python -m pytest tests/ -v
 
 # Run a specific module's tests

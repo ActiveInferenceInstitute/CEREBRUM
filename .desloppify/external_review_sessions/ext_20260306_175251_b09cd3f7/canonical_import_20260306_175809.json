@@ -1,0 +1,287 @@
+{
+  "assessments": {
+    "cross_module_architecture": 58,
+    "convention_outlier": 72,
+    "error_consistency": 62,
+    "abstraction_fitness": 55,
+    "dependency_health": 68,
+    "test_strategy": 62,
+    "ai_generated_debt": 45,
+    "package_organization": 60,
+    "high_level_elegance": 62,
+    "mid_level_elegance": 54,
+    "low_level_elegance": 61,
+    "design_coherence": 48
+  },
+  "findings": [
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "dual-model-base-classes",
+      "summary": "Two parallel Model base classes with divergent interfaces create silent substitution traps",
+      "related_files": [
+        "src/core/model.py",
+        "src/models/base.py"
+      ],
+      "evidence": [
+        "src/core/model.py defines Model with precision_weights, case_history, _apply_case_transformation(), connect(), and case-dispatch update().",
+        "src/models/base.py defines a second Model with only id/name/_case/data_buffer \u2014 no precision, no history, no connections, no update dispatch.",
+        "src/models/base.py re-exports Case from src.core.model, making both Model classes share the same Case enum but have incompatible interfaces.",
+        "src/cases/__init__.py imports from src.core.model (absolute) for Case but uses relative imports for case handlers \u2014 mixed import style within the same package __init__.",
+        "Code in src/cases/case_manager.py type-annotates parameters as Model but uses src.core.model.Model; any caller passing src.models.base.Model would silently miss connect(), _case_history, etc."
+      ],
+      "suggestion": "Eliminate src/models/base.py as a distinct class; make it a thin re-export of src.core.model.Model (or a documented alias). If the data_buffer attribute is needed, add it to core Model. This removes the dual-hierarchy ambiguity without touching the 57+ importers.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "abstraction_fitness",
+      "identifier": "case-handler-duck-typing-over-contract",
+      "summary": "Case handler classes use hasattr duck-typing at every call site instead of defining a formal protocol, making the boundary invisible",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/accusative.py",
+        "src/cases/dative.py",
+        "src/cases/vocative.py",
+        "src/cases/case_manager.py"
+      ],
+      "evidence": [
+        "Every process_update() static method in every case handler opens with: `if hasattr(model, '_update_<case>') and callable(getattr(model, '_update_<case>'))` \u2014 an ad-hoc dispatch reimplementing what Python's method resolution order already does.",
+        "CaseManager.calculate_free_energy() at line 201 uses `if hasattr(handler, 'calculate_free_energy')` to probe whether a handler supports the method, despite all eight handlers implementing it \u2014 the check is never False in practice.",
+        "VocativeCase.apply() dynamically attaches _vocative_invocations to arbitrary model objects (line 43: `model._vocative_invocations = []`) rather than requiring the attribute to exist on the model type.",
+        "DativeCase.receive_data() and process_update() both dynamically attach `_pending_commands` and `_received_data` to models (lines 169-177), bypassing any declared schema."
+      ],
+      "suggestion": "Define a CaseHandlerProtocol (typing.Protocol) with apply/process_update/calculate_free_energy signatures, and a ModelProtocol listing the attributes case handlers may access. Replace hasattr guards with isinstance checks or direct method calls on a known interface. Move _vocative_invocations and similar dynamic attributes to an explicit mixin or to the core Model class.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "error_consistency",
+      "identifier": "inconsistent-error-return-vs-raise",
+      "summary": "Error conditions are reported as dict status fields in some places and raised as exceptions in others, with no predictable pattern",
+      "related_files": [
+        "src/core/active_inference.py",
+        "src/cases/case_manager.py",
+        "src/models/insect/base.py"
+      ],
+      "evidence": [
+        "ActiveInferenceModel._update_accusative returns {\"status\": \"error\", \"message\": ...} when data is None (line 405), while get_optimal_action() at line 324 raises a bare KeyError via dict access if 'n_actions' is missing from parameters.",
+        "CaseManager.create_relationship() raises ValueError for unknown relationship_type (line 132) \u2014 an exception \u2014 but CaseManager.calculate_free_energy() silently returns 1.0 as a fallback (line 208) with no log or signal.",
+        "InsectModel.transform_case() catches all Exception and returns False (lines 360-362), swallowing the error entirely; contrast with InsectActiveInferenceModel.update_beliefs() which logs the error but also swallows it (line 767-768) with a bare `except Exception`.",
+        "update_posterior() returns a dict with status='error' for dimension mismatch (line 275) rather than raising ValueError, so callers must check return values rather than rely on exception handling."
+      ],
+      "suggestion": "Decide on one strategy per layer: public API methods should raise typed exceptions (ValueError, TypeError) so callers can use try/except; internal _update_* methods can return structured dicts if that is intentional. Document the contract. Remove bare `except Exception` in InsectActiveInferenceModel and at minimum log with exc_info=True.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "absolute-imports-inside-package",
+      "summary": "src/cases/__init__.py and src/models/insect/base.py use absolute src.* imports inside a package that otherwise uses relative imports, creating an install-time coupling",
+      "related_files": [
+        "src/cases/__init__.py",
+        "src/models/insect/base.py"
+      ],
+      "evidence": [
+        "src/cases/__init__.py line 29: `from src.core.model import Case` \u2014 absolute import inside the cases package, while lines 17-26 use relative imports for the sibling modules.",
+        "src/models/insect/base.py lines 15-16: `from src.core.active_inference import ActiveInferenceModel` and `from src.core.model import Case` \u2014 absolute imports in a sub-package.",
+        "All other case handler files (nominative.py, accusative.py, dative.py, vocative.py) correctly use `from ..core.model import Model, Case` (relative), making the absolute imports in __init__.py and insect/base.py inconsistent outliers.",
+        "Absolute `src.*` imports require the package to be installed or sys.path to include the repo root, failing silently in some test or tool configurations where the package root is not on the path."
+      ],
+      "suggestion": "Replace `from src.core.model import Case` in src/cases/__init__.py with `from ..core.model import Case`, and replace both absolute imports in src/models/insect/base.py with their relative equivalents (`from ...core.active_inference import ...`). This makes the package self-contained and consistent with every other module in src/cases/.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "identifier": "hasattr-callable-dispatch-pattern",
+      "summary": "All 8 case handler classes use an identical hasattr/callable/getattr triple-check dispatch pattern that is verbose boilerplate repeated 19 times across the cases/ directory",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/accusative.py",
+        "src/cases/dative.py",
+        "src/cases/genitive.py",
+        "src/cases/instrumental.py",
+        "src/cases/vocative.py"
+      ],
+      "evidence": [
+        "Every process_update method opens with: `if hasattr(model, '_update_X') and callable(getattr(model, '_update_X')): return model._update_X(data)`",
+        "Grep count shows 19 occurrences of this pattern across 8 case files",
+        "The calculate_free_energy methods in nominative, accusative, and dative each repeat an identical structure: set default_fe, check two hasattr guards, getattr, try array norm, except broad tuple, return default"
+      ],
+      "suggestion": "Extract a dispatch helper such as `_delegate(model, method_name, data)` in a shared base or mixin, and a `_calc_array_fe(a, b, default)` utility. This would eliminate the repeated 5-line dispatch blocks and 10-line free-energy patterns across all 8 files.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "identifier": "redundant-docstring-args-returns",
+      "summary": "Nearly every method across case handlers has identical one-line Args/Returns docstring sections that state the obvious without adding information",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/accusative.py",
+        "src/cases/dative.py",
+        "src/cases/vocative.py"
+      ],
+      "evidence": [
+        "nominative.py apply(): Args section says `model: The model to configure for nominative case` and Returns says `The configured model` \u2014 both restate the type hints already in the signature",
+        "calculate_free_energy docstrings say `Returns: The calculated free energy` across all 8 case files with no additional domain context",
+        "Comment blocks like `# Standard nominative behavior: goal-directed action` and `# Handle different types of data receipt` describe the code structure without explaining the cognitive-science rationale"
+      ],
+      "suggestion": "Trim Args/Returns sections to non-obvious parameters only. Replace structural comments with domain-level reasoning (e.g., why precision differs between cases).",
+      "confidence": "high"
+    },
+    {
+      "dimension": "package_organization",
+      "identifier": "mixed-import-style-in-package-init",
+      "summary": "src/cases/__init__.py mixes relative imports for case handlers with an absolute `from src.core.model import Case` import, creating an inconsistent import style within a single __init__ file",
+      "related_files": [
+        "src/cases/__init__.py"
+      ],
+      "evidence": [
+        "Lines 17-26: all case handler imports use relative style `from .nominative import NominativeCase` etc.",
+        "Line 29: `from src.core.model import Case` breaks the relative convention inside the same file",
+        "The codebase elsewhere also mixes absolute `from src.X` imports (41 files, 86 occurrences) with relative imports, indicating no enforced convention"
+      ],
+      "suggestion": "Change line 29 in src/cases/__init__.py to `from ..core.model import Case` to be consistent with the other imports in that file. Consider adding an isort or flake8 rule to enforce relative-within-package imports.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "test_strategy",
+      "identifier": "test-workaround-classes-indicate-api-friction",
+      "summary": "Multiple test files define local stub/compat classes (_BareModel, _InsectCompat, _PlainModel) to work around API surface limitations, suggesting the real classes are hard to instantiate for unit testing",
+      "related_files": [
+        "tests/cases/test_case_default_paths.py",
+        "tests/cases/test_case_handlers.py",
+        "tests/visualization/test_behavior_visualizer.py"
+      ],
+      "evidence": [
+        "test_case_default_paths.py defines `_BareModel` (a 9-attribute manual stub) because `Model` carries unwanted case dispatch side-effects",
+        "test_case_handlers.py defines `_PlainModel` inline within a test method with the comment: 'instead of deleting the method from the Model class (which corrupts all subsequent Model instances)'",
+        "test_behavior_visualizer.py defines `_InsectCompat` with `__getattr__` delegation and overridden properties solely to reconcile attribute name mismatches with visualization code"
+      ],
+      "suggestion": "Expose a minimal constructor path or a test-friendly factory on Model/InsectModel that suppresses case dispatch side-effects. Where behavior_visualizer expects `current_case` and `behavioral_state` but the model exposes `case` and `_behavioral_state`, align the public API rather than papering over it in tests.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "design_coherence",
+      "identifier": "dual-model-class-incoherence",
+      "summary": "Two parallel Model base classes with incompatible interfaces undermine the entire type hierarchy",
+      "related_files": [
+        "src/core/model.py",
+        "src/models/base.py"
+      ],
+      "evidence": [
+        "src/core/model.py Model.__init__ takes (name, parameters) with no 'case' argument and stores _case_history, _precision_weights, connections, _case_configurations",
+        "src/models/base.py Model.__init__ takes (name, case) with no 'parameters' argument and stores only data_buffer \u2014 a completely different shape",
+        "src/models/base.py Model.case setter raises TypeError on non-Case values and never calls _apply_case_transformation, meaning subclass override hooks are silently skipped",
+        "The two classes share no common base and are not in an inheritance relationship, so code written against one Model contract is silently incompatible with the other"
+      ],
+      "suggestion": "Make src/models/base.py a thin subclass of src/core/model.Model (not a parallel class), or delete it entirely and migrate the 57+ importers. The current state makes it impossible to reason about which contract any given model satisfies.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "design_coherence",
+      "identifier": "case-transformation-hook-not-called-by-insect-transform",
+      "summary": "InsectModel.transform_case bypasses the case property setter's _apply_case_transformation hook on assignment, creating a silent split execution path",
+      "related_files": [
+        "src/models/insect/base.py",
+        "src/core/model.py",
+        "src/core/active_inference.py"
+      ],
+      "evidence": [
+        "src/core/model.py case setter (line 58-71): sets _prior_case, appends to _case_history, then calls self._apply_case_transformation()",
+        "src/models/insect/base.py InsectModel.transform_case (lines 327-362): calls _update_precision_for_case and _update_neural_priorities, then assigns self.case = target_case (line 354)",
+        "The precision update in _update_precision_for_case writes to attribute names like 'action_precision' (line 441-443) that do not exist on the model \u2014 setattr silently creates them as orphan attributes with no effect on the parent's _precision_weights dict",
+        "ActiveInferenceModel._apply_case_transformation (lines 153-180) is therefore called AFTER the custom InsectModel precision setup, meaning the parent's precision multiplication on likelihood_precision fires on potentially stale values"
+      ],
+      "suggestion": "Override _apply_case_transformation in InsectModel and put the precision/priority logic there, so there is a single execution path through the case setter. Remove the public transform_case method or have it simply delegate to self.case = target_case.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "identifier": "case-handler-classes-are-pure-static-namespaces",
+      "summary": "Case handler classes (NominativeCase, AblativeCase, etc.) contain only @staticmethod members and carry no state, making them effectively modules masquerading as classes",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/ablative.py",
+        "src/cases/case_manager.py"
+      ],
+      "evidence": [
+        "NominativeCase (nominative.py): every method is @staticmethod \u2014 apply, process_update, calculate_free_energy, get_parameters",
+        "AblativeCase (ablative.py): same pattern \u2014 apply, process_update, calculate_free_energy, get_parameters, emit_to are all @staticmethod",
+        "CaseManager stores these as class objects (not instances) in self.case_handlers dict and calls handler.apply(model), handler.process_update(model, data) \u2014 no instantiation ever occurs",
+        "The single class-level PRECISION constant (e.g. NominativeCase.PRECISION = 1.5) is the only data, and it is never read by the CaseManager dispatch path"
+      ],
+      "suggestion": "Either convert case handlers to plain module-level functions (eliminating spurious class ceremony) or make them proper stateful objects instantiated per-model so the PRECISION constant and other config can vary per instance. The current form is neither fish nor fowl.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "convention_outlier",
+      "identifier": "absolute-vs-relative-import-mixed-convention",
+      "summary": "86 absolute `from src.X` imports coexist with relative imports across 41 src files, with no enforced or documented convention",
+      "related_files": [
+        "src/cases/__init__.py",
+        "src/models/insect/base.py",
+        "src/cases/nominative.py"
+      ],
+      "evidence": [
+        "src/cases/__init__.py line 29 uses `from src.core.model import Case` (absolute) while lines 17-26 use `from .nominative import NominativeCase` (relative) \u2014 mixed in the same file",
+        "src/models/insect/base.py lines 15-16 use absolute `from src.core.*` while sibling files like nominative.py, accusative.py use `from ..core.model import Model, Case` (relative)",
+        "No pyproject.toml or .flake8 rule enforces a consistent import style across the src/ tree"
+      ],
+      "suggestion": "Standardize on relative imports within src/ packages. Fix src/cases/__init__.py line 29 and src/models/insect/base.py lines 15-16 to use relative imports. Add an isort profile or flake8-tidy-imports rule to prevent regression.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "dependency_health",
+      "identifier": "pandas-networkx-core-deps-for-subsystem-use",
+      "summary": "pandas and networkx are declared as core dependencies but are used only in optional lexicon and visualization subsystems",
+      "related_files": [
+        "pyproject.toml"
+      ],
+      "evidence": [
+        "pandas appears as a mandatory install-time dependency but is only imported in src/lexicon/ and visualization modules, both of which are optional subsystems",
+        "networkx follows the same pattern \u2014 used only in graph assembly for the LEXICON NLP pipeline",
+        "The optional dependency groups (lexicon, llm, torch) exist in pyproject.toml but pandas and networkx were not placed in them, forcing all users to install heavy data-science packages even when not using lexicon features"
+      ],
+      "suggestion": "Move pandas and networkx from the core dependencies to the [project.optional-dependencies] lexicon group in pyproject.toml. Update imports in those subsystems to fail with a clear ImportError message if not installed.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "high_level_elegance",
+      "identifier": "case-system-symbolism-without-behavioral-substance",
+      "summary": "The grammatical-case metaphor is conceptually rich but most case transformations produce no observable behavioral difference in the core model, making the architecture aspirational rather than functional",
+      "related_files": [
+        "src/core/active_inference.py",
+        "src/cases/case_manager.py"
+      ],
+      "evidence": [
+        "ActiveInferenceModel._apply_case_transformation only changes state for NOMINATIVE; 7 of 8 case transitions are silent no-ops at the core level (lines 153-180)",
+        "CaseManager.process_update dispatches to case handler process_update methods, but every handler first checks `hasattr(model, '_update_<case>')` and falls through to a generic status dict when the method is absent \u2014 which is the common case for most model subclasses",
+        "The PRECISION class constants defined on all 8 case handlers are never read by the CaseManager dispatch path, meaning the precision-weighting promise of the architecture is not delivered"
+      ],
+      "suggestion": "Implement the case transformation behavior: add elif branches in _apply_case_transformation for each precision_focus value, and wire CaseManager to use the PRECISION constants from handlers when computing free energy. This closes the gap between the documented architecture and the actual runtime behavior.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "low_level_elegance",
+      "identifier": "apply-case-transformation-only-acts-on-nominative",
+      "summary": "ActiveInferenceModel._apply_case_transformation only mutates state for the NOMINATIVE case; all other cases are silently no-ops, making 7 of 8 case transitions effectless at the core level",
+      "related_files": [
+        "src/core/active_inference.py"
+      ],
+      "evidence": [
+        "Lines 153-180: _apply_case_transformation reads precision_focus from _case_configurations and only executes a branch for precision_focus == 'likelihood' (which maps exclusively to Case.NOMINATIVE per line 101)",
+        "For all other precision_focus values ('parameters', 'outputs', 'inputs', 'operations', 'contexts', 'historical', 'identity') the if-chain has no matching branch \u2014 the function still records belief_history but makes no precision adjustment",
+        "The method's docstring says 'Each case transformation adjusts parameter access, precision weighting, etc.' \u2014 this is only true for NOMINATIVE"
+      ],
+      "suggestion": "Add elif branches for each precision_focus value, or refactor to a dispatch table keyed on precision_focus that applies the appropriate precision adjustment. At minimum, add a logger.debug call in the else path so silent no-ops are observable.",
+      "confidence": "high"
+    }
+  ],
+  "provenance": {
+    "kind": "blind_review_batch_import",
+    "blind": true,
+    "runner": "claude",
+    "run_stamp": "ext_20260306_175251_b09cd3f7",
+    "created_at": "2026-03-06T17:58:09+00:00",
+    "packet_path": "/Users/4d/Documents/GitHub/CEREBRUM/.desloppify/review_packet_blind.json",
+    "packet_sha256": "cd3c7759170334147730472c874666f2314904c94666f383968bd4102d501415",
+    "external_session_id": "ext_20260306_175251_b09cd3f7"
+  }
+}

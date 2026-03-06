@@ -80,7 +80,7 @@ def test_class_definitions():
     # Test Conversation class
     try:
         # Create a mock client for testing Conversation
-        class MockClient:
+        class StubClient:
             def chat_completion(self, messages, **kwargs):
                 return type('MockResponse', (), {
                     'choices': [type('MockChoice', (), {
@@ -95,7 +95,7 @@ def test_class_definitions():
                     })()]
                 })()
         
-        mock_client = MockClient()
+        mock_client = StubClient()
         conversation = Conversation(mock_client)
         assert hasattr(conversation, 'add_system_message')
         assert hasattr(conversation, 'add_user_message')

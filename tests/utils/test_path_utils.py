@@ -8,7 +8,6 @@ import pytest
 import os
 import sys
 from pathlib import Path
-from unittest import mock
 
 # Ensure src is in path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -47,14 +46,11 @@ class TestFindProjectRoot:
         empty_dir = tmp_path / "no_marker"
         empty_dir.mkdir()
         
-        # Mock the starting directory
-        monkeypatch.setattr(os.path, 'abspath', lambda x: str(empty_dir / "subdir"))
-        
         # When called from a path without the marker in any parent,
         # it should fall back to CWD
-        with mock.patch('os.getcwd', return_value=str(tmp_path)):
-            # The function will traverse up and eventually fail, using CWD
-            pass  # Function behavior tested via integration
+        monkeypatch.chdir(tmp_path)
+        root = find_project_root(marker="__nonexistent_marker_file__")
+        assert os.path.isabs(root)
 
 
 class TestGetOutputDir:

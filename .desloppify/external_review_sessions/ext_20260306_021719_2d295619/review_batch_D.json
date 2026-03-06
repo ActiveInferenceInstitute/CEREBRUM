@@ -1,0 +1,86 @@
+{
+  "assessments": {
+    "high_level_elegance": 38,
+    "mid_level_elegance": 34,
+    "low_level_elegance": 40
+  },
+  "findings": [
+    {
+      "dimension": "high_level_elegance",
+      "severity": "high",
+      "location": "src/models/base.py:14 vs src/core/model.py:20",
+      "title": "Parallel Model base classes with divergent interfaces",
+      "detail": "Two independent classes both named Model define the domain root. src/core/model.py::Model carries cases, precision weights, connections, case history, and update dispatch. src/models/base.py::Model re-implements only id, name, _case, and data_buffer. LinearRegressionModel inherits from the thin duplicate and lacks update(), _precision_weights, connections, and _case_history. The domain capability 'Model' is split, making the inheritance hierarchy inconsistent and the Case abstraction unreachable from production linear regression code."
+    },
+    {
+      "dimension": "high_level_elegance",
+      "severity": "medium",
+      "location": "src/cases/nominative.py, accusative.py, genitive.py, dative.py, instrumental.py, locative.py, ablative.py, vocative.py",
+      "title": "CaseHandler layer adds no decomposition — pure pass-through static namespaces",
+      "detail": "All eight case handler classes consist exclusively of static methods. Their process_update() methods check whether the model has a matching private method and, if so, immediately forward the call with no added policy, translation, or validation. The architectural layer exists but every call path that reaches real logic passes straight through it. The layer cannot be removed without changing call sites, but it also contributes nothing measurable to decomposition or boundary integrity."
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "severity": "high",
+      "location": "src/cases/nominative.py:62, accusative.py:59, genitive.py:62, vocative.py:61, instrumental.py:62, ablative.py:66",
+      "title": "Duck-type runtime probe at every case handler seam produces permanently dead fallback branches",
+      "detail": "Each case handler's process_update() guards the delegation with hasattr(model, '_update_<case>') and callable(getattr(model, '_update_<case>')). Because ActiveInferenceModel and all concrete subclasses inherit these methods from Model, the condition is always true for any registered model. The fallback logic in all six handlers is unreachable dead code, but the probe pattern implies an informal protocol that is never enforced by the type system, leaving the boundary contract implicit and unverifiable."
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "severity": "high",
+      "location": "src/core/active_inference.py:169",
+      "title": "_apply_case_transformation permanently mutates likelihood_precision on each NOMINATIVE entry",
+      "detail": "When precision_focus is 'likelihood' (NOMINATIVE case), self.likelihood_precision is multiplied in-place by get_precision(self._case). No inverse is applied when leaving the case. Every subsequent case round-trip that passes through NOMINATIVE compounds the matrix further. The precision matrix accumulates unbounded drift across case transitions with no reset path."
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "severity": "medium",
+      "location": "src/core/active_inference.py:426",
+      "title": "_update_genitive calls data.get() without type-guarding, fails silently on ndarray input",
+      "detail": "The expression data.get('n_samples', 5) is called when data is not None. Every sibling case handler (accusative, dative, ablative) accepts raw ndarray data and passes it directly to np.array(). A caller passing an ndarray in GENITIVE case receives an AttributeError at the seam boundary. The inconsistency is not documented and no type check guards the call."
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "severity": "medium",
+      "location": "src/models/insect/base.py:107 vs src/core/model.py:41",
+      "title": "InsectModel maintains a second case history list with an incompatible schema alongside the parent's",
+      "detail": "InsectModel.__init__ initializes self.case_history = [] at line 107. transform_case() appends three-tuples (old_case, new_case, action_count) to it. The parent Model.case setter writes two-tuples (prior_case, new_case) to self._case_history. After any case change, both lists exist on the same instance with different formats and different population paths. Neither list is canonical; code reading one cannot rely on the other."
+    },
+    {
+      "dimension": "low_level_elegance",
+      "severity": "high",
+      "location": "src/models/insect/base.py:787-795, 851-862",
+      "title": "Active computation paths contain unimplemented stubs returning hardcoded or random values",
+      "detail": "_predict_observations() returns np.zeros(10) unconditionally — it is called inside compute_free_energy() as if it performs real inference, silently zeroing the accuracy term. _compute_expected_free_energy() returns np.random.rand(5) * 0.5, making every call to select_actions() random. Neither method raises NotImplementedError or logs a warning. Callers receive numerically plausible but meaningless results."
+    },
+    {
+      "dimension": "low_level_elegance",
+      "severity": "medium",
+      "location": "src/models/insect/base.py:808-815",
+      "title": "update_beliefs() hard-indexes observation vector dimensions without configuration reference",
+      "detail": "observations[:10] and observations[10:15] are sliced by magic indices in the method body. The neural_config and n_observations parameters provided at initialization are not consulted. An observation vector of length less than 15 raises a silent shape mismatch; the parameterization surface at __init__ is cosmetic for this code path."
+    },
+    {
+      "dimension": "low_level_elegance",
+      "severity": "medium",
+      "location": "src/models/linear_regression.py:212-216",
+      "title": "Confidence interval in respond_to_query uses hardcoded sigma and n=100 regardless of data",
+      "detail": "sigma is set to 1.0 and the t-value denominator uses sqrt(100) unconditionally. The actual residual standard error and sample size from the fitted model are not used. The method returns structurally correct confidence interval fields whose values are disconnected from the model's training data."
+    },
+    {
+      "dimension": "low_level_elegance",
+      "severity": "medium",
+      "location": "src/core/active_inference.py:596-601",
+      "title": "_update_ablative silent error return on ndarray input mismatches sibling handler contracts",
+      "detail": "The method handles None and str inputs, then falls through to return a status:error dict for any other type. Every other case handler accepts ndarray data directly. A caller passing an ndarray in ABLATIVE case receives an error response with no exception raised and no logging at warning level, making the failure invisible in normal operation."
+    },
+    {
+      "dimension": "low_level_elegance",
+      "severity": "low",
+      "location": "src/models/insect/base.py:486, 536",
+      "title": "import time placed inside method bodies, duplicated across two methods",
+      "detail": "time is imported inside process_sensory_input() and again inside select_action(). Both methods are in the same class. The module-level import is absent. The pattern avoids circular import issues only if time were problematic to import at module level, which it is not."
+    }
+  ]
+}

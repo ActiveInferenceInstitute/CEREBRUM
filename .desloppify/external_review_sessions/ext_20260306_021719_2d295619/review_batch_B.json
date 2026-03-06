@@ -1,0 +1,89 @@
+{
+  "assessments": {
+    "design_coherence": 54,
+    "dependency_health": 63,
+    "abstraction_fitness": 49
+  },
+  "findings": [
+    {
+      "id": "B-001",
+      "dimension": "design_coherence",
+      "severity": "major",
+      "location": "src/models/insect/base.py:107 vs src/core/model.py:41",
+      "title": "Parallel case_history list duplicates parent _case_history",
+      "description": "InsectModel.__init__ initializes self.case_history = [] at line 107. The parent Model class already maintains self._case_history. InsectModel.transform_case then appends to self.case_history (line 355) while Model.case.setter appends to self._case_history (line 69). These are two separate lists that diverge silently: any case change via the property goes only to _case_history; transform_case writes only to case_history. Callers have no reliable single source of truth for case transitions. The fix note claims 'parallel tracking eliminated' but the local list persists unchanged."
+    },
+    {
+      "id": "B-002",
+      "dimension": "design_coherence",
+      "severity": "major",
+      "location": "src/models/insect/base.py:327-363",
+      "title": "InsectModel.transform_case bypasses parent case property setter",
+      "description": "transform_case() calls self.case = target_case (line 354) via the property setter, which appends to _case_history and calls _apply_case_transformation(). However, _update_precision_for_case and _update_neural_priorities are called beforehand (lines 347, 350) outside the setter's knowledge, meaning the ActiveInferenceModel._apply_case_transformation hook fires after the precision/priority updates rather than coordinating them. The two code paths (direct property assignment vs. transform_case) produce different side-effect orderings for the same logical operation."
+    },
+    {
+      "id": "B-003",
+      "dimension": "design_coherence",
+      "severity": "moderate",
+      "location": "src/lexicon/core/device.py:10-19 and src/lexicon/core/environment.py:282-315",
+      "title": "Duplicate warnings.filterwarnings calls for the same CUDA warning messages",
+      "description": "device.py suppresses 'CUDA initialization: CUDA unknown error' and 'torch.cuda.amp.autocast(args...)' at module import time (lines 10-19). environment.py:setup_environment_logging() applies identical suppression for the same two messages inside a try/except torch import block (lines 304-313). Whichever module is imported first wins; the second application is redundant noise. There is no single authoritative location for warning policy."
+    },
+    {
+      "id": "B-004",
+      "dimension": "design_coherence",
+      "severity": "moderate",
+      "location": "src/lexicon/core/config.py:101-121",
+      "title": "Duplicate model-routing config structure alongside LexiconConfig dataclass",
+      "description": "LEXICON_OPENROUTER_CONFIG is a bare module-level dict that re-declares base_url, api_key, and per-task model assignments that already exist in LexiconConfig and its fallback_models field. The dict adds circuit_breaker and retry_config keys absent from the dataclass, and the two default model values for 'case_declension' disagree (dataclass uses 'anthropic/claude-3-haiku' for 'entity_extraction'; dict uses 'anthropic/claude-3.5-sonnet'). There is no clear contract for which config is authoritative."
+    },
+    {
+      "id": "B-005",
+      "dimension": "abstraction_fitness",
+      "severity": "major",
+      "location": "src/models/insect/base.py:390-444",
+      "title": "_update_precision_for_case silently no-ops because the named attributes do not exist",
+      "description": "_update_precision_for_case iterates over keys such as 'action_precision', 'learning_precision', 'sensory_precision', etc. and applies setattr only when hasattr returns True (line 443). None of these attributes are declared in InsectModel.__init__ or its parents. As a result the method always executes without any effect. The precision_configs dict exists only as documentation; the per-case precision semantics are never actually applied at runtime."
+    },
+    {
+      "id": "B-006",
+      "dimension": "abstraction_fitness",
+      "severity": "major",
+      "location": "src/models/insect/base.py:130-210",
+      "title": "Neural structures initialized as plain dicts; process_input called as method on dict objects",
+      "description": "_initialize_neural_structures returns plain Python dicts for all structures (mushroom_body, antennal_lobe, etc.). process_sensory_input later calls self.neural_structure['optic_lobe'].process_input(input_data.visual) (line 499), treating the structure as an object with a method. Dicts have no .process_input method. The code path is only safe if a separate initialization step (not shown in this file) replaces the dicts with NeuralStructureProcessor instances. The init is internally inconsistent: it stores dicts but documents and calls them as if they were objects, with a silent fallback only in _update_neural_priorities (line 473)."
+    },
+    {
+      "id": "B-007",
+      "dimension": "abstraction_fitness",
+      "severity": "major",
+      "location": "src/cases/nominative.py:62-63 and src/cases/case_manager.py:36-44",
+      "title": "CaseHandler classes are thin static-method wrappers that bypass the Model's own protocol",
+      "description": "NominativeCase.process_update checks hasattr(model, '_update_nominative') and calls it directly by name (lines 62-63), duplicating the dispatch already performed by Model.update(). CaseManager.case_handlers maps each Case to a handler class, but every handler's apply() method simply sets model.case = Case.X, which the caller could do directly. The handler layer adds no invariant enforcement, no cross-cutting behavior, and no interface contract beyond what the model already provides. The abstraction adds indirection without fitness."
+    },
+    {
+      "id": "B-008",
+      "dimension": "abstraction_fitness",
+      "severity": "moderate",
+      "location": "src/models/insect/base.py:787-820",
+      "title": "InsectActiveInferenceModel._predict_observations is a hardcoded zero placeholder",
+      "description": "_predict_observations returns np.zeros(10) unconditionally (line 795), making compute_free_energy produce a prediction_error that is purely a function of the observation values and never of the model's internal beliefs. The method is documented as 'simplified' but the zero return is not a valid approximation — it breaks the free energy computation's meaning entirely. update_beliefs also assumes a fixed observation structure (first 10 dims environmental, next 5 internal) with no validation, silently producing index errors on any input shorter than 15 elements."
+    },
+    {
+      "id": "B-009",
+      "dimension": "dependency_health",
+      "severity": "moderate",
+      "location": "pyproject.toml:52-54 and src/lexicon/core/device.py:1-19",
+      "title": "device.py executes warning suppression at import time before torch is confirmed available",
+      "description": "device.py calls warnings.filterwarnings() for torch-specific categories unconditionally at module import time (lines 10-19), regardless of whether torch is installed. torch is declared as an optional extras group [torch] in pyproject.toml. Any import of src.lexicon.core.device in a non-torch environment unnecessarily installs global warning filters for warning categories that will never be emitted, potentially shadowing unrelated UserWarning or FutureWarning messages from other libraries."
+    },
+    {
+      "id": "B-010",
+      "dimension": "dependency_health",
+      "severity": "moderate",
+      "location": "src/lexicon/visualization/interactive_graph_visualizer.py:38-40",
+      "title": "sklearn imported at module level without guarding against missing [torch]/[lexicon] extras",
+      "description": "interactive_graph_visualizer.py imports from sklearn.cluster, sklearn.manifold, and sklearn.decomposition at or near the top of the file. scikit-learn is a core dependency so the import will succeed; however, this visualizer lives in the lexicon subsystem whose documented extras group is [lexicon]. The [lexicon] extras do not list scikit-learn, creating an implicit coupling: the lexicon package depends on a core dep for a visualization concern, but an end user installing only [lexicon] has no declaration documenting that sklearn is required for this module."
+    }
+  ]
+}

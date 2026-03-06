@@ -1,0 +1,114 @@
+{
+  "assessments": {
+    "error_consistency": 38,
+    "ai_generated_debt": 33,
+    "test_strategy": 42
+  },
+  "findings": [
+    {
+      "dimension": "error_consistency",
+      "file": "src/core/active_inference.py",
+      "line": 355,
+      "severity": "high",
+      "description": "predict_next_state() indexes transition_matrix as 3D [s, action, :], but InsectModel.__init__ initializes it as np.eye(5) (2D). The method will raise an IndexError at runtime for any caller using InsectModel's default parameters. No test exercises this path, so the defect is latent but real. The inconsistency reveals that the method was written for a different data contract than what the concrete subclass actually provides."
+    },
+    {
+      "dimension": "error_consistency",
+      "file": "src/core/active_inference.py",
+      "line": 426,
+      "severity": "medium",
+      "description": "_update_genitive() calls data.get('n_samples', 5) without guarding that data is a dict. The function docstring says data is 'Any', and the nominative/dative/ablative siblings all accept ndarray or str. If a caller passes an ndarray (consistent with every other update method), this raises AttributeError. The error is swallowed silently by the hasattr dispatch in the case handler chain rather than surfacing a typed exception."
+    },
+    {
+      "dimension": "error_consistency",
+      "file": "src/cases/nominative.py, accusative.py, dative.py, genitive.py, instrumental.py, locative.py, ablative.py, vocative.py",
+      "line": null,
+      "severity": "medium",
+      "description": "All eight calculate_free_energy() methods use an identical catch-all pattern: except Exception as e: logger.warning(...); return default_fe. This swallows every exception class without distinction, losing the original stack frame. A numpy linalg error (e.g. singular matrix in the nominative free-energy computation in active_inference.py) and a simple AttributeError from a missing field produce the same silent warning+default. The pattern is copied verbatim across all eight files."
+    },
+    {
+      "dimension": "error_consistency",
+      "file": "src/cases/case_manager.py",
+      "line": 136,
+      "severity": "low",
+      "description": "create_relationship() logs a warning for unknown relationship types but returns the unmodified (source, target) tuple with no status field. All other code paths that fail in the codebase either raise or return a dict with a 'status': 'error' key. This silent-pass-with-warning strategy is inconsistent with both sibling methods in the same file and with case handlers."
+    },
+    {
+      "dimension": "error_consistency",
+      "file": "src/core/active_inference.py",
+      "line": 274,
+      "severity": "low",
+      "description": "update_posterior() contains a silent no-op branch: when len(observation) != len(self.posterior_means), the function executes 'pass' and then returns {'status': 'success'}. This reports success on a dimension mismatch rather than raising or returning an error. A caller has no way to detect that no update occurred."
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "file": "src/cases/nominative.py, accusative.py, dative.py, genitive.py, instrumental.py, locative.py, ablative.py, vocative.py",
+      "line": null,
+      "severity": "medium",
+      "description": "All eight case handler files have multi-line docstrings on trivial 3-5 line static methods whose behavior is already evident from the method name and type signature. For example, AccusativeCase.apply() contains a 9-line docstring for a method with one functional line (model.case = Case.ACCUSATIVE). The pattern is mechanically repeated across all eight modules with the same Args/Returns structure regardless of whether the added prose adds insight."
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "file": "src/cases/vocative.py",
+      "line": 74,
+      "severity": "low",
+      "description": "process_update() records a timestamp field hardcoded to None with the comment '# Would use datetime in production'. This is a placeholder stub that was left in production code. It is a hallmark of generated code where the author scaffolded an intent without completing implementation."
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "file": "src/core/active_inference.py",
+      "line": 319,
+      "severity": "low",
+      "description": "get_optimal_action() contains an extended inline commentary block ('In a more sophisticated implementation, we would: 1. Compute expected rewards...') that restates what the surrounding code is not doing rather than explaining the chosen approach. This narrating-the-absence pattern is a common LLM hallmark."
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "file": "src/cases/nominative.py, accusative.py, dative.py, genitive.py, instrumental.py, locative.py, ablative.py, vocative.py",
+      "line": null,
+      "severity": "medium",
+      "description": "Each of the eight case handlers duplicates the same structural template: apply(), process_update(), calculate_free_energy(), and an optional get_parameters() or case-specific method. The docstrings, argument names, and guard patterns (hasattr + callable) are near-identical across all eight files. The volume and uniformity of this duplication is consistent with template-generated code where individual case semantics were substituted into a fixed scaffold."
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "file": "src/core/active_inference.py",
+      "line": 79,
+      "severity": "low",
+      "description": "The __init__ method checks for a list of 'required_params' only to log a debug message that they are missing, then proceeds normally. The comment says 'This is optional', making the check do nothing useful. This defensive-but-ineffective guard is a common pattern in generated code where validation was scaffolded without completing it."
+    },
+    {
+      "dimension": "test_strategy",
+      "file": "tests/core/test_active_inference_pomdp.py",
+      "line": null,
+      "severity": "high",
+      "description": "The POMDP test file (test_nominative_case, test_accusative_case, etc.) is primarily a simulation and visualization driver. Each test function runs multi-step inference loops, generates matplotlib figures, and saves them to disk. The actual assertions are minimal or absent in many paths. These tests are excluded from the default run via pytest.ini ignoring tests/pomdp/test_cases. The core active_inference update methods (_update_nominative through _update_vocative) have no isolated unit tests that verify their output contracts."
+    },
+    {
+      "dimension": "test_strategy",
+      "file": "pytest.ini",
+      "line": 10,
+      "severity": "high",
+      "description": "pytest.ini permanently ignores tests/pomdp/test_cases and tests/models/test_linear_regression.py with no documented sunset date or open issue. The stated reason is 'Ignore test files that require unimplemented modules or optional dependencies'. This means failing test paths are silently dropped from CI rather than being marked xfail or skipped with a runtime check. Coverage gaps are invisible to contributors."
+    },
+    {
+      "dimension": "test_strategy",
+      "file": "tests/",
+      "line": null,
+      "severity": "high",
+      "description": "predict_next_state(), predict_observation(), and free_energy() on ActiveInferenceModel are untested in the active test suite. These are the core mathematical methods of the framework. The only file that calls them (test_active_inference_pomdp.py) does so inside multi-step simulation loops where intermediate correctness is not asserted."
+    },
+    {
+      "dimension": "test_strategy",
+      "file": "tests/models/test_insect_models.py",
+      "line": 68,
+      "severity": "medium",
+      "description": "test_case_transformation() asserts that transforming ACCUSATIVE -> VOCATIVE returns False, but InsectModel._validate_case_transformation() actually lists Case.VOCATIVE in the ACCUSATIVE valid_transitions list. The test expectation and the production implementation are inconsistent. Either the test is wrong or the transition table is wrong; either way this defect is not caught because this test file depends on imports that may not be present in the active suite."
+    },
+    {
+      "dimension": "test_strategy",
+      "file": "tests/core/test_active_inference_pomdp.py",
+      "line": 14,
+      "severity": "low",
+      "description": "The test file calls logging.basicConfig() at module level. This reconfigures the root logger for the entire test session, which can interfere with log output from other test modules. pytest.ini already configures log_cli; this duplicate basicConfig call is a fragility source."
+    }
+  ]
+}

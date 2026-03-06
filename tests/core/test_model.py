@@ -42,8 +42,19 @@ class TestModel:
         assert model._case_history == []
         assert len(model._case_configurations) == len(Case)
         assert len(model._precision_weights) == len(Case)
+        # Case-specific default precision weights from Model.__init__
+        expected_precisions = {
+            Case.NOMINATIVE: 1.5,
+            Case.ACCUSATIVE: 1.2,
+            Case.GENITIVE: 1.0,
+            Case.DATIVE: 1.0,
+            Case.INSTRUMENTAL: 0.8,
+            Case.LOCATIVE: 0.9,
+            Case.ABLATIVE: 1.1,
+            Case.VOCATIVE: 2.0,
+        }
         for case in Case:
-            assert model.get_precision(case) == 1.0
+            assert model.get_precision(case) == expected_precisions[case]
         assert model.connections == []
     
     def test_model_init_custom(self, default_model_params):
@@ -53,7 +64,7 @@ class TestModel:
         assert model.parameters == default_model_params
         # Other defaults should still hold
         assert model.case == Case.NOMINATIVE
-        assert model.get_precision() == 1.0
+        assert model.get_precision() == 1.5  # NOMINATIVE default
     
     def test_model_case_setter(self):
         """Test setting the model's case."""
@@ -85,12 +96,12 @@ class TestModel:
     def test_model_precision(self):
         """Test setting and getting precision weights."""
         model = Model()
-        assert model.get_precision() == 1.0  # Default for current case (NOMINATIVE)
-        assert model.get_precision(Case.GENITIVE) == 1.0  # Default for specific case
+        assert model.get_precision() == 1.5  # Default for current case (NOMINATIVE)
+        assert model.get_precision(Case.GENITIVE) == 1.0  # GEN default
         
         model.set_precision(Case.GENITIVE, 0.5)
         assert model.get_precision(Case.GENITIVE) == 0.5
-        assert model.get_precision() == 1.0  # Current case precision unchanged
+        assert model.get_precision() == 1.5  # Current case (NOM) precision unchanged
         
         model.case = Case.GENITIVE
         assert model.get_precision() == 0.5  # Now current case precision is 0.5
@@ -161,7 +172,7 @@ class TestModel:
         assert state["prior_case"] is None
         assert state["case_history_length"] == 0
         assert state["num_connections"] == 0
-        assert state["precision"] == 1.0
+        assert state["precision"] == 1.5  # NOMINATIVE default precision
         assert state["parameters"] == params
         
         # After case change

@@ -97,14 +97,9 @@ class TestVisualizeCausalMechanism:
             (1, 0, 3, "negative"),
             (0, 1, 7, "positive"),
         ]
-        try:
-            fig = visualize_causal_mechanism(causes, effects, relationships)
-            assert isinstance(fig, plt.Figure)
-            plt.close(fig)
-        except AttributeError as e:
-            if "Ellipse" in str(e):
-                pytest.skip("visualize_causal_mechanism uses plt.Ellipse (needs patches import fix)")
-            raise
+        fig = visualize_causal_mechanism(causes, effects, relationships)
+        assert isinstance(fig, plt.Figure)
+        plt.close(fig)
 
     def test_saves_to_file(self):
         causes = ["A"]
@@ -115,10 +110,6 @@ class TestVisualizeCausalMechanism:
         try:
             fig = visualize_causal_mechanism(causes, effects, relationships, save_path=path)
             assert os.path.exists(path)
-        except AttributeError as e:
-            if "Ellipse" in str(e):
-                pytest.skip("visualize_causal_mechanism uses plt.Ellipse (needs patches import fix)")
-            raise
         finally:
             if os.path.exists(path):
                 os.unlink(path)

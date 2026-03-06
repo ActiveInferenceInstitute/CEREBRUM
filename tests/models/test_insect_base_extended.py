@@ -162,6 +162,7 @@ class TestInsectActiveInferenceModel:
         assert fe == float("inf") or isinstance(fe, float)
 
     def test_update_beliefs(self):
+        np.random.seed(42)
         model = InsectActiveInferenceModel(species="bee")
         obs = np.random.rand(10)
         model.update_beliefs(obs)

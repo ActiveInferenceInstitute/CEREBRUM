@@ -1,0 +1,78 @@
+{
+  "assessments": {
+    "high_level_elegance": 62,
+    "mid_level_elegance": 54,
+    "low_level_elegance": 61,
+    "design_coherence": 48
+  },
+  "findings": [
+    {
+      "dimension": "design_coherence",
+      "identifier": "dual-model-class-incoherence",
+      "summary": "Two parallel Model base classes with incompatible interfaces undermine the entire type hierarchy",
+      "related_files": [
+        "src/core/model.py",
+        "src/models/base.py"
+      ],
+      "evidence": [
+        "src/core/model.py Model.__init__ takes (name, parameters) with no 'case' argument and stores _case_history, _precision_weights, connections, _case_configurations",
+        "src/models/base.py Model.__init__ takes (name, case) with no 'parameters' argument and stores only data_buffer — a completely different shape",
+        "src/models/base.py Model.case setter raises TypeError on non-Case values and never calls _apply_case_transformation, meaning subclass override hooks are silently skipped",
+        "The two classes share no common base and are not in an inheritance relationship, so code written against one Model contract is silently incompatible with the other"
+      ],
+      "suggestion": "Make src/models/base.py a thin subclass of src/core/model.Model (not a parallel class), or delete it entirely and migrate the 57+ importers. The current state makes it impossible to reason about which contract any given model satisfies.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "design_coherence",
+      "identifier": "case-transformation-hook-not-called-by-insect-transform",
+      "summary": "InsectModel.transform_case bypasses the case property setter's _apply_case_transformation hook on assignment, creating a silent split execution path",
+      "related_files": [
+        "src/models/insect/base.py",
+        "src/core/model.py",
+        "src/core/active_inference.py"
+      ],
+      "evidence": [
+        "src/core/model.py case setter (line 58-71): sets _prior_case, appends to _case_history, then calls self._apply_case_transformation()",
+        "src/models/insect/base.py InsectModel.transform_case (lines 327-362): calls _update_precision_for_case and _update_neural_priorities, then assigns self.case = target_case (line 354)",
+        "The precision update in _update_precision_for_case writes to attribute names like 'action_precision' (line 441-443) that do not exist on the model — setattr silently creates them as orphan attributes with no effect on the parent's _precision_weights dict",
+        "ActiveInferenceModel._apply_case_transformation (lines 153-180) is therefore called AFTER the custom InsectModel precision setup, meaning the parent's precision multiplication on likelihood_precision fires on potentially stale values"
+      ],
+      "suggestion": "Override _apply_case_transformation in InsectModel and put the precision/priority logic there, so there is a single execution path through the case setter. Remove the public transform_case method or have it simply delegate to self.case = target_case.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "identifier": "case-handler-classes-are-pure-static-namespaces",
+      "summary": "Case handler classes (NominativeCase, AblativeCase, etc.) contain only @staticmethod members and carry no state, making them effectively modules masquerading as classes",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/ablative.py",
+        "src/cases/case_manager.py"
+      ],
+      "evidence": [
+        "NominativeCase (nominative.py): every method is @staticmethod — apply, process_update, calculate_free_energy, get_parameters",
+        "AblativeCase (ablative.py): same pattern — apply, process_update, calculate_free_energy, get_parameters, emit_to are all @staticmethod",
+        "CaseManager stores these as class objects (not instances) in self.case_handlers dict and calls handler.apply(model), handler.process_update(model, data) — no instantiation ever occurs",
+        "The single class-level PRECISION constant (e.g. NominativeCase.PRECISION = 1.5) is the only data, and it is never read by the CaseManager dispatch path"
+      ],
+      "suggestion": "Either convert case handlers to plain module-level functions (eliminating spurious class ceremony) or make them proper stateful objects instantiated per-model so the PRECISION constant and other config can vary per instance. The current form is neither fish nor fowl.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "low_level_elegance",
+      "identifier": "apply-case-transformation-only-acts-on-nominative",
+      "summary": "ActiveInferenceModel._apply_case_transformation only mutates state for the NOMINATIVE case; all other cases are silently no-ops, making 7 of 8 case transitions effectless at the core level",
+      "related_files": [
+        "src/core/active_inference.py"
+      ],
+      "evidence": [
+        "Lines 153-180: _apply_case_transformation reads precision_focus from _case_configurations and only executes a branch for precision_focus == 'likelihood' (which maps exclusively to Case.NOMINATIVE per line 101)",
+        "For all other precision_focus values ('parameters', 'outputs', 'inputs', 'operations', 'contexts', 'historical', 'identity') the if-chain has no matching branch — the function still records belief_history but makes no precision adjustment",
+        "The method's docstring says 'Each case transformation adjusts parameter access, precision weighting, etc.' — this is only true for NOMINATIVE"
+      ],
+      "suggestion": "Add elif branches for each precision_focus value, or refactor to a dispatch table keyed on precision_focus that applies the appropriate precision adjustment. At minimum, add a logger.debug call in the else path so silent no-ops are observable.",
+      "confidence": "high"
+    }
+  ]
+}

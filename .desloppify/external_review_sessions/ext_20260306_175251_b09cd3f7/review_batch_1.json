@@ -1,0 +1,83 @@
+{
+  "assessments": {
+    "cross_module_architecture": 58,
+    "convention_outlier": 72,
+    "error_consistency": 62,
+    "abstraction_fitness": 55
+  },
+  "findings": [
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "dual-model-base-classes",
+      "summary": "Two parallel Model base classes with divergent interfaces create silent substitution traps",
+      "related_files": [
+        "src/core/model.py",
+        "src/models/base.py"
+      ],
+      "evidence": [
+        "src/core/model.py defines Model with precision_weights, case_history, _apply_case_transformation(), connect(), and case-dispatch update().",
+        "src/models/base.py defines a second Model with only id/name/_case/data_buffer — no precision, no history, no connections, no update dispatch.",
+        "src/models/base.py re-exports Case from src.core.model, making both Model classes share the same Case enum but have incompatible interfaces.",
+        "src/cases/__init__.py imports from src.core.model (absolute) for Case but uses relative imports for case handlers — mixed import style within the same package __init__.",
+        "Code in src/cases/case_manager.py type-annotates parameters as Model but uses src.core.model.Model; any caller passing src.models.base.Model would silently miss connect(), _case_history, etc."
+      ],
+      "suggestion": "Eliminate src/models/base.py as a distinct class; make it a thin re-export of src.core.model.Model (or a documented alias). If the data_buffer attribute is needed, add it to core Model. This removes the dual-hierarchy ambiguity without touching the 57+ importers.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "abstraction_fitness",
+      "identifier": "case-handler-duck-typing-over-contract",
+      "summary": "Case handler classes use hasattr duck-typing at every call site instead of defining a formal protocol, making the boundary invisible",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/accusative.py",
+        "src/cases/dative.py",
+        "src/cases/vocative.py",
+        "src/cases/case_manager.py"
+      ],
+      "evidence": [
+        "Every process_update() static method in every case handler opens with: `if hasattr(model, '_update_<case>') and callable(getattr(model, '_update_<case>'))` — an ad-hoc dispatch reimplementing what Python's method resolution order already does.",
+        "CaseManager.calculate_free_energy() at line 201 uses `if hasattr(handler, 'calculate_free_energy')` to probe whether a handler supports the method, despite all eight handlers implementing it — the check is never False in practice.",
+        "VocativeCase.apply() dynamically attaches _vocative_invocations to arbitrary model objects (line 43: `model._vocative_invocations = []`) rather than requiring the attribute to exist on the model type.",
+        "DativeCase.receive_data() and process_update() both dynamically attach `_pending_commands` and `_received_data` to models (lines 169-177), bypassing any declared schema."
+      ],
+      "suggestion": "Define a CaseHandlerProtocol (typing.Protocol) with apply/process_update/calculate_free_energy signatures, and a ModelProtocol listing the attributes case handlers may access. Replace hasattr guards with isinstance checks or direct method calls on a known interface. Move _vocative_invocations and similar dynamic attributes to an explicit mixin or to the core Model class.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "error_consistency",
+      "identifier": "inconsistent-error-return-vs-raise",
+      "summary": "Error conditions are reported as dict status fields in some places and raised as exceptions in others, with no predictable pattern",
+      "related_files": [
+        "src/core/active_inference.py",
+        "src/cases/case_manager.py",
+        "src/models/insect/base.py"
+      ],
+      "evidence": [
+        "ActiveInferenceModel._update_accusative returns {\"status\": \"error\", \"message\": ...} when data is None (line 405), while get_optimal_action() at line 324 raises a bare KeyError via dict access if 'n_actions' is missing from parameters.",
+        "CaseManager.create_relationship() raises ValueError for unknown relationship_type (line 132) — an exception — but CaseManager.calculate_free_energy() silently returns 1.0 as a fallback (line 208) with no log or signal.",
+        "InsectModel.transform_case() catches all Exception and returns False (lines 360-362), swallowing the error entirely; contrast with InsectActiveInferenceModel.update_beliefs() which logs the error but also swallows it (line 767-768) with a bare `except Exception`.",
+        "update_posterior() returns a dict with status='error' for dimension mismatch (line 275) rather than raising ValueError, so callers must check return values rather than rely on exception handling."
+      ],
+      "suggestion": "Decide on one strategy per layer: public API methods should raise typed exceptions (ValueError, TypeError) so callers can use try/except; internal _update_* methods can return structured dicts if that is intentional. Document the contract. Remove bare `except Exception` in InsectActiveInferenceModel and at minimum log with exc_info=True.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "absolute-imports-inside-package",
+      "summary": "src/cases/__init__.py and src/models/insect/base.py use absolute src.* imports inside a package that otherwise uses relative imports, creating an install-time coupling",
+      "related_files": [
+        "src/cases/__init__.py",
+        "src/models/insect/base.py"
+      ],
+      "evidence": [
+        "src/cases/__init__.py line 29: `from src.core.model import Case` — absolute import inside the cases package, while lines 17-26 use relative imports for the sibling modules.",
+        "src/models/insect/base.py lines 15-16: `from src.core.active_inference import ActiveInferenceModel` and `from src.core.model import Case` — absolute imports in a sub-package.",
+        "All other case handler files (nominative.py, accusative.py, dative.py, vocative.py) correctly use `from ..core.model import Model, Case` (relative), making the absolute imports in __init__.py and insect/base.py inconsistent outliers.",
+        "Absolute `src.*` imports require the package to be installed or sys.path to include the repo root, failing silently in some test or tool configurations where the package root is not on the path."
+      ],
+      "suggestion": "Replace `from src.core.model import Case` in src/cases/__init__.py with `from ..core.model import Case`, and replace both absolute imports in src/models/insect/base.py with their relative equivalents (`from ...core.active_inference import ...`). This makes the package self-contained and consistent with every other module in src/cases/.",
+      "confidence": "high"
+    }
+  ]
+}

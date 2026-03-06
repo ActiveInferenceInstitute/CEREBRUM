@@ -1,0 +1,304 @@
+{
+  "assessments": {
+    "cross_module_architecture": 42,
+    "convention_outlier": 52,
+    "error_consistency": 44,
+    "abstraction_fitness": 38,
+    "dependency_health": 55,
+    "test_strategy": 36,
+    "ai_generated_debt": 33,
+    "package_organization": 48,
+    "high_level_elegance": 45,
+    "mid_level_elegance": 40,
+    "low_level_elegance": 47,
+    "design_coherence": 38
+  },
+  "findings": [
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "dual-model-class-identity",
+      "summary": "Two independent Model classes exist with different interfaces, and imports of Case are scattered across four re-export sites creating an identity fragmentation problem.",
+      "related_files": [
+        "src/core/model.py",
+        "src/models/base.py",
+        "src/core/model_registry.py",
+        "src/cases/__init__.py",
+        "tests/conftest.py"
+      ],
+      "evidence": [
+        "src/core/model.py defines Model with _case_history, precision_weights, connections, and case-change hooks; src/models/base.py defines a completely separate Model class with a data_buffer and no case-change hooks. LinearRegressionModel inherits from src.models.base.Model while InsectModel inherits from src.core.active_inference.ActiveInferenceModel (which inherits from src.core.model.Model), meaning these two inheritance trees share no common Model ancestor. The Case enum is re-exported from src/core/model.py, src/models/base.py, src/cases/__init__.py, and through src/cases/__init__.py again, while tests/conftest.py imports Case from src.models.base, causing different downstream callers to use the same enum via different paths."
+      ],
+      "suggestion": "Consolidate to a single Model base class in src/core/model.py and remove src/models/base.py, redirecting all consumers to src.core.model. Re-export Case from one canonical location only.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "case-handler-bypass-via-hasattr",
+      "summary": "Case handler classes in src/cases/ use hasattr duck-typing to delegate back into models, creating an inversion where case behavior is defined in two places simultaneously.",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/dative.py",
+        "src/cases/vocative.py",
+        "src/cases/ablative.py",
+        "src/core/active_inference.py"
+      ],
+      "evidence": [
+        "Every case handler's process_update method checks hasattr(model, '_update_nominative') and calls model._update_nominative(data) if present, otherwise falls through to the handler's own default logic. This means ActiveInferenceModel._update_nominative and NominativeCase.process_update both implement nominative update logic independently, with no clear authority. The indirection through CaseManager.process_update -> handler.process_update -> model._update_case means a three-hop call chain is used for every update dispatch. The actual behavior for any given model+case combination is not discoverable from either location alone."
+      ],
+      "suggestion": "Choose one location for case logic: either put all logic in the handler classes (and remove _update_* from Model), or put all logic in the model subclasses (and remove the handler default fallback). The handler-per-case pattern is valuable but should be authoritative, not just a fallback.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "abstraction_fitness",
+      "identifier": "case-handler-classes-as-namespace-containers",
+      "summary": "The eight CaseXxx classes are collections of @staticmethod functions with no instance state, providing no benefit over plain modules or functions.",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/vocative.py",
+        "src/cases/ablative.py",
+        "src/cases/dative.py"
+      ],
+      "evidence": [
+        "NominativeCase, VocativeCase, AblativeCase, and all sibling handlers declare every method as @staticmethod and hold no instance data. The class pattern adds no polymorphism \u2014 CaseManager stores them as class objects (not instances) and calls handler.apply(model) directly. A module-level function apply(model) in nominative.py would be functionally identical and simpler. The PRECISION class-level constant in VocativeCase (PRECISION = 2.0) and VALID_TRANSITIONS in AblativeCase show the pattern is being stretched to hold data without real encapsulation benefit."
+      ],
+      "suggestion": "Replace the static-method-only handler classes with module-level functions, or if a class is needed for extensibility, make them instantiable with a clear lifecycle. At minimum, remove the PRECISION and VALID_TRANSITIONS class-level constants that are inconsistently defined across handler siblings.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "identifier": "placeholder-stubs-in-production-code",
+      "summary": "Multiple methods in InsectActiveInferenceModel return hardcoded placeholder arrays and random values, with inline comments explicitly marking them as non-implemented.",
+      "related_files": [
+        "src/models/insect/base.py"
+      ],
+      "evidence": [
+        "_predict_observations returns np.zeros(10) with comment '# Placeholder' and the docstring says 'Simplified prediction - in practice this would be more complex'. _compute_expected_free_energy returns np.random.rand(5) * 0.5 with comment '# Placeholder: random expected free energy values \u2014 this would involve forward models and belief propagation'. These are not stubs protected by abstract declarations; they are concrete methods returning non-sensical values that will silently produce wrong results in production use. The belief arrays in __init__ are initialized with np.zeros(10) labeled '# Placeholder'."
+      ],
+      "suggestion": "Either mark these as NotImplementedError (make them abstract) or implement them properly. Shipping np.random.rand as an active inference policy is a correctness defect, not just debt.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "identifier": "verbose-docstring-bloat-on-trivial-methods",
+      "summary": "Multiple trivial pass-through methods carry 4-8 line docstrings with Args/Returns sections that restate the obvious, especially across all eight case handler classes.",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/vocative.py",
+        "src/cases/ablative.py",
+        "src/core/model.py"
+      ],
+      "evidence": [
+        "NominativeCase.get_parameters has a 7-line docstring for a 4-line function body that just calls model.parameters.get() four times. Model._update_nominative through _update_vocative in src/core/model.py each have a one-line docstring on a function that returns a single hardcoded dict. The CaseManager.get_related_models docstring documents parameter and return types that are already in the type annotation. This pattern is repeated uniformly across all 8 case handler files with nearly identical boilerplate structure."
+      ],
+      "suggestion": "Reduce docstrings on trivial accessor/factory methods to a single line or none. Reserve Args/Returns sections for non-obvious parameters and return shapes.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "identifier": "restating-comments-throughout-case-updates",
+      "summary": "Inline comments in ActiveInferenceModel case update methods restate what the code does rather than explaining why.",
+      "related_files": [
+        "src/core/active_inference.py"
+      ],
+      "evidence": [
+        "In _update_instrumental: '# Use model to make predictions' above predictions = self.likelihood(state), '# Use model to infer states from observations' above the inversion block, '# Copy current posterior to avoid changing it' above saved_posterior = self.posterior_means.copy(), '# Run gradient descent for specified iterations' above a for loop. In _update_locative: '# Return all context parameters' above an explicit dict literal. These comments provide no information beyond what the adjacent code already expresses and represent a recognizable AI generation pattern."
+      ],
+      "suggestion": "Remove comments that restate code. Keep only comments that explain domain rationale (e.g., why ablative is source-reference rather than what it returns).",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "error_consistency",
+      "identifier": "mixed-error-return-shapes-across-update-methods",
+      "summary": "Some case update methods return {status: error, message: ...} dicts while others raise exceptions or return empty dicts, with no documented contract.",
+      "related_files": [
+        "src/core/active_inference.py",
+        "src/models/insect/base.py",
+        "src/models/linear_regression.py"
+      ],
+      "evidence": [
+        "ActiveInferenceModel._update_accusative returns {status: error, message: ...} when data is None. ActiveInferenceModel.get_optimal_action does a bare self.parameters['n_actions'] dict access that raises KeyError with no handling when parameters dict is missing that key. InsectModel.process_sensory_input catches all exceptions and returns {}, while InsectModel.select_action catches all exceptions and returns a default idle Action. LinearRegressionModel.respond_to_query returns {error: ...} with no status key for some branches and {error: ..., status: error} for others \u2014 the error key name is also inconsistent with the status-keyed pattern used in ActiveInferenceModel."
+      ],
+      "suggestion": "Define and enforce a single error protocol: either always raise typed exceptions at boundaries, or always return a typed result object. Eliminate bare except-and-return-empty patterns; they silently swallow bugs.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "error_consistency",
+      "identifier": "silent-exception-swallowing-in-insect-model",
+      "summary": "InsectModel.process_sensory_input and select_action use broad except Exception: log; return {} patterns that permanently hide bugs in sensory and action processing.",
+      "related_files": [
+        "src/models/insect/base.py"
+      ],
+      "evidence": [
+        "process_sensory_input wraps all processing in try/except Exception as e: logger.error(...); return {}. select_action wraps action selection in try/except Exception as e: logger.error(...); return Action(idle). InsectActiveInferenceModel.update_beliefs and select_actions use the same pattern. The broad catch means any AttributeError from a missing neural structure, any numpy shape mismatch, or any logic bug is silently discarded and replaced with an empty result. There is no test coverage that could detect these silent failures."
+      ],
+      "suggestion": "Remove the broad try/except wrappers from core logic paths. Let real exceptions propagate. If a fallback default is needed, limit the catch to specific expected exception types and document why.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "test_strategy",
+      "identifier": "core-paths-permanently-ignored-in-pytest",
+      "summary": "pytest.ini permanently ignores tests/pomdp/test_cases and tests/models/linear_regression_cases with comments indicating no timeline for resolution, leaving critical case-specific paths untested.",
+      "related_files": [
+        "pytest.ini",
+        "tests/models/test_linear_regression.py",
+        "tests/pomdp/test_cases/test_nominative.py",
+        "tests/pomdp/test_cases/test_vocative.py"
+      ],
+      "evidence": [
+        "pytest.ini addopts includes --ignore=tests/pomdp/test_cases --ignore=tests/models/test_linear_regression.py --ignore=tests/models/linear_regression_cases. The comment says 'requires unimplemented POMDP backend (tracked: no timeline)'. The linear regression case tests (nominative_case.py through vocative_case.py under tests/models/linear_regression_cases/) import from tests.models.linear_regression_cases which is never run. These represent the most case-specific and domain-rich tests in the suite. The POMDP test_cases directory (test_nominative.py, test_vocative.py, test_ablative.py, test_locative.py) tests case behavior but is fully excluded."
+      ],
+      "suggestion": "Either implement the missing backends and re-enable these test files, or delete them. Permanently ignored test files create false confidence that test coverage exists when it does not.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "test_strategy",
+      "identifier": "active-inference-core-logic-not-covered-by-passing-tests",
+      "summary": "The free_energy calculation, update_posterior Bayesian path, and case transformation logic in ActiveInferenceModel have no tests that actually run in the default pytest invocation.",
+      "related_files": [
+        "src/core/active_inference.py",
+        "tests/core/test_active_inference_pomdp.py"
+      ],
+      "evidence": [
+        "tests/core/test_active_inference_pomdp.py is the primary test for ActiveInferenceModel and uses a POMDPModel subclass \u2014 but this file is not excluded, so it should run. However, the free_energy() method's KL divergence computation (line 224-230) uses np.linalg.inv and np.linalg.det which will fail on singular matrices in real use with no test exercising the failure path. The simplified update_posterior path (learning_rate=0.1 weighted average) and the full Bayesian update path are two distinct code paths with no test verifying the Bayesian path is selected or produces correct output. No test asserts numerical correctness of free energy values."
+      ],
+      "suggestion": "Add unit tests that verify: (1) free_energy() returns the correct KL value for known prior/posterior; (2) update_posterior uses the Bayesian path when observation_matrix is present; (3) the simplified path correctly updates posterior_means.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "design_coherence",
+      "identifier": "case-transformation-precision-mutation-in-nominative-only",
+      "summary": "ActiveInferenceModel._apply_case_transformation mutates likelihood_precision only for NOMINATIVE case, silently leaving precision unchanged for all other cases despite defining case-specific precision configurations.",
+      "related_files": [
+        "src/core/active_inference.py"
+      ],
+      "evidence": [
+        "_apply_case_transformation checks precision_focus == 'likelihood' and multiplies self.likelihood_precision, but 'likelihood' is only the precision_focus for NOMINATIVE case. All other cases ('parameters', 'outputs', 'inputs', 'operations', 'contexts', 'historical', 'identity') have no corresponding branch, so the transformation body does nothing for 7 out of 8 cases. Furthermore, this mutates likelihood_precision in place by multiplying it on each case entry (line 169: self.likelihood_precision = self.likelihood_precision * self.get_precision(self._case)), causing compounding precision changes if a model re-enters NOMINATIVE. The _case_configurations dict defined in _setup_case_configurations is populated but largely unused."
+      ],
+      "suggestion": "Either implement all 8 case transformations consistently or replace the current approach with a stateless precision lookup at time-of-use rather than mutation on case change. Fix the accumulating multiplication bug for repeated NOMINATIVE entry.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "design_coherence",
+      "identifier": "insect-validate-case-transition-contradicts-parent",
+      "summary": "InsectModel._validate_case_transformation defines its own valid transition graph but its parent CaseManager.create_relationship also defines a different set of valid relationships, creating two incompatible transition authority systems.",
+      "related_files": [
+        "src/models/insect/base.py",
+        "src/cases/case_manager.py"
+      ],
+      "evidence": [
+        "InsectModel._validate_case_transformation lists valid_transitions per case with most transitions allowed (e.g., NOMINATIVE can go to 7 other cases). AblativeCase.VALID_TRANSITIONS in ablative.py lists only [Case.NOMINATIVE] as valid. CaseManager.create_relationship enforces a third independent transition graph via its transformations dict. These three systems are never reconciled: a caller can succeed via one path and fail via another for the same transition. For example, ABLATIVE -> DATIVE is listed as valid in InsectModel.valid_transitions but is not in AblativeCase.VALID_TRANSITIONS."
+      ],
+      "suggestion": "Centralize valid case transitions in a single location (the Case enum or CaseManager) and have all callers defer to it. Remove the per-case-handler VALID_TRANSITIONS class constants.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "identifier": "process-sensory-input-calls-nonexistent-method",
+      "summary": "InsectModel.process_sensory_input calls neural_structure[x].process_input() but neural structures are initialized as plain dicts, so this call will always AttributeError at runtime on any non-trivial sensory input.",
+      "related_files": [
+        "src/models/insect/base.py"
+      ],
+      "evidence": [
+        "_initialize_neural_structures returns a dict of plain Python dicts (not objects). process_sensory_input then calls self.neural_structure['optic_lobe'].process_input(input_data.visual) at line 497, self.neural_structure['antennal_lobe'].process_input(...) at 502, etc. Plain dicts do not have a process_input method. The broad try/except Exception in process_sensory_input at line 520 silently catches the AttributeError and returns {}, making this bug invisible. The _update_neural_priorities method checks hasattr(structure, 'priority') and falls through to isinstance(structure, dict) for dict structures \u2014 confirming the dict type is intentional, yet process_sensory_input assumes object instances."
+      ],
+      "suggestion": "Either define NeuralStructure dataclasses/classes with a process_input method, or change process_sensory_input to work with plain dicts directly. Remove the broad exception handler that hides this.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "low_level_elegance",
+      "identifier": "linear-regression-directory-merge-logic-in-test",
+      "summary": "tests/models/test_linear_regression.py contains 20+ lines of file system merge logic (shutil.copytree, os.listdir loops, rmtree) inside a test orchestrator function for handling legacy directory naming.",
+      "related_files": [
+        "tests/models/test_linear_regression.py"
+      ],
+      "evidence": [
+        "run_all_case_tests() at lines 111-135 iterates over zip(['nom', 'acc', ...], ['nominative', ...]), checks if abbreviated and full directories both exist, copies files from abbreviated to full using shutil, and then removes the abbreviated directory. This is filesystem migration code embedded in a test function. The import shutil statements appear three times inside the loop body (lines 128, 131, 135) rather than at module level. The force_regenerate guard expression at line 142 is repeated 8 times with only the case name changing."
+      ],
+      "suggestion": "Extract the directory migration logic to a one-time setup script or conftest fixture. Move the shutil import to module level. Use a loop rather than repeating the force_regenerate condition 8 times.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "abstraction_fitness",
+      "identifier": "ablative-valid-transitions-inconsistent-with-siblings",
+      "summary": "AblativeCase defines VALID_TRANSITIONS as a class-level list with only [Case.NOMINATIVE] but InsectModel's transition table allows ABLATIVE -> 7 other cases, and no other case handler has a VALID_TRANSITIONS attribute.",
+      "related_files": [
+        "src/cases/ablative.py",
+        "src/models/insect/base.py"
+      ],
+      "evidence": [
+        "AblativeCase.VALID_TRANSITIONS = [Case.NOMINATIVE] is a class constant checked by can_transition_to(). NominativeCase, DativeCase, and VocativeCase have no VALID_TRANSITIONS attribute at all. InsectModel._validate_case_transformation defines ABLATIVE as valid to transition to [Case.ACCUSATIVE, Case.LOCATIVE, Case.NOMINATIVE, Case.GENITIVE, Case.DATIVE, Case.INSTRUMENTAL, Case.VOCATIVE]. The can_transition_to static method on AblativeCase is never called by CaseManager or InsectModel, making it dead code. The inconsistency means VALID_TRANSITIONS is both wrong (relative to InsectModel) and unused (by CaseManager)."
+      ],
+      "suggestion": "Remove the VALID_TRANSITIONS class constant and can_transition_to method from AblativeCase. If transition validation is needed, put it in one canonical place.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "package_organization",
+      "identifier": "test-linear-regression-imports-missing-modules",
+      "summary": "tests/models/test_linear_regression.py imports from src.models (Case, CaseDefinitions), tests.models.linear_regression_cases, and src.utils.data_generator \u2014 multiple of these import targets do not exist or are not resolvable, and the file is permanently excluded from the test run.",
+      "related_files": [
+        "tests/models/test_linear_regression.py",
+        "pytest.ini"
+      ],
+      "evidence": [
+        "Line 52: from src.models import Case, CaseDefinitions \u2014 src/models/__init__.py does not export CaseDefinitions. Line 57: from tests.models.linear_regression_cases import test_dative_case, test_instrumental_case \u2014 these imports would require the linear_regression_cases package to export those functions at __init__.py level. Line 53: from src.utils.data_generator import DataGenerator. This file is excluded by pytest.ini but left in the repo, giving the appearance of coverage while the imports are broken. sys.exit(1) at line 49 would terminate the entire test process if any package is missing."
+      ],
+      "suggestion": "Either fix the imports and re-enable the test file, or remove it from the repository. A test file with sys.exit(1) at module level and broken imports is actively harmful.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "convention_outlier",
+      "identifier": "case-handler-extra-methods-inconsistent-convention",
+      "summary": "Only 3 of 8 case handler classes define extended non-protocol methods (invoke/broadcast on VocativeCase, emit_to/can_transition_to on AblativeCase, accept_updates on AccusativeCase), creating inconsistent API surfaces with no protocol definition.",
+      "related_files": [
+        "src/cases/vocative.py",
+        "src/cases/ablative.py",
+        "src/cases/accusative.py",
+        "src/cases/nominative.py"
+      ],
+      "evidence": [
+        "VocativeCase adds invoke(), broadcast(), get_invocation_history() as public methods. AblativeCase adds emit_to() and can_transition_to(). AccusativeCase adds accept_updates() with a validation_func parameter. The remaining 5 case handlers (NominativeCase, DativeCase, GenitiveCase, InstrumentalCase, LocativeCase) only implement the shared protocol (apply, process_update, calculate_free_energy, get_parameters). No ABC or Protocol class documents the expected interface. Callers cannot know what extended methods are available on a given case handler without reading individual files."
+      ],
+      "suggestion": "Define a Protocol or ABC for case handlers documenting the mandatory interface. Document the extended methods explicitly, or move case-specific behaviors into the model's _update_X methods where they already exist.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "dependency_health",
+      "identifier": "torch-imported-without-guard-in-lexicon",
+      "summary": "src/lexicon/core/device.py uses torch at module level without guarding against its absence, coupling core lexicon functionality to an optional dependency.",
+      "related_files": [
+        "src/lexicon/core/device.py",
+        "src/lexicon/core/environment.py"
+      ],
+      "evidence": [
+        "device.py imports torch and uses torch.cuda.is_available(), torch.device() in module-level functions. While a try/except ImportError guard wraps some torch usage, the file's primary functions (get_device, configure_torch_environment) call torch directly and will raise NameError if torch is not installed. The [torch] extras group in pyproject.toml lists torch as optional, but lexicon code depends on it unconditionally through device.py. Users who install only the core or [lexicon] extras will encounter failures when importing from lexicon."
+      ],
+      "suggestion": "Wrap all torch usage in device.py with a TORCH_AVAILABLE = False guard (try: import torch; TORCH_AVAILABLE = True; except ImportError: pass) and provide CPU-only fallbacks for all public functions when torch is absent.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "high_level_elegance",
+      "identifier": "case-system-authority-fragmented-across-three-layers",
+      "summary": "Case transition authority is split across CaseManager.create_relationship, AblativeCase.VALID_TRANSITIONS, and InsectModel._validate_case_transformation, with no single authoritative source for which transitions are valid.",
+      "related_files": [
+        "src/cases/case_manager.py",
+        "src/cases/ablative.py",
+        "src/models/insect/base.py"
+      ],
+      "evidence": [
+        "CaseManager.create_relationship defines valid relationships via a transformations dict with 7 named relationship types. AblativeCase defines VALID_TRANSITIONS = [Case.NOMINATIVE] and a can_transition_to() method unused by CaseManager. InsectModel._validate_case_transformation defines a per-case valid_transitions dict allowing 6-7 transitions per case. These three systems are independent \u2014 InsectModel allows ABLATIVE->DATIVE while AblativeCase.VALID_TRANSITIONS does not. CaseManager creates_relationship has no overlap with either. A framework user has no clear guidance on which authority governs case transitions."
+      ],
+      "suggestion": "Establish a single authoritative source for case transition rules, ideally as a class method or module-level dict on the Case enum itself. Remove the per-handler VALID_TRANSITIONS constants and the per-model validation method in favor of the canonical source.",
+      "confidence": "high"
+    }
+  ],
+  "provenance": {
+    "kind": "blind_review_batch_import",
+    "blind": true,
+    "runner": "claude",
+    "run_stamp": "ext_20260306_031005_5f7ca607",
+    "created_at": "2026-03-06T03:17:51+00:00",
+    "packet_path": "/Users/4d/Documents/GitHub/CEREBRUM/.desloppify/review_packet_blind.json",
+    "packet_sha256": "962576fc75552bade6f2116fd046eadb357d3e8f2631d552d4c145193e4fdf16",
+    "external_session_id": "ext_20260306_031005_5f7ca607"
+  }
+}

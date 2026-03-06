@@ -1,0 +1,514 @@
+{
+  "assessments": {
+    "cross_module_architecture": 42,
+    "convention_outlier": 38,
+    "package_organization": 40,
+    "design_coherence": 54,
+    "dependency_health": 63,
+    "abstraction_fitness": 49,
+    "error_consistency": 38,
+    "ai_generated_debt": 33,
+    "test_strategy": 42,
+    "high_level_elegance": 38,
+    "mid_level_elegance": 34,
+    "low_level_elegance": 40
+  },
+  "findings": [
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "dual-model-base",
+      "summary": "Two independent Model base classes with overlapping responsibility exist in src/core/model.py and src/models/base.py, fragmenting the inheritance hierarchy",
+      "related_files": [
+        "src/core/model.py",
+        "src/models/base.py",
+        "src/models/linear_regression.py"
+      ],
+      "evidence": [
+        "src/core/model.py defines class Model with full case machinery, precision weights, connections, update dispatch, and case history",
+        "src/models/base.py defines a separate class Model (also named Model) that re-imports Case from src.core.model but reimplements __init__, case property/setter, and data_buffer \u2014 a structural duplication of the same abstraction",
+        "src/models/linear_regression.py inherits from src/models/base.py Model, not from src/core/model.py Model, so it lacks precision weights, connections, and _case_history present in the core version",
+        "src/models/__init__.py exports 'Model' and 'Case' from .base, shadowing the canonical core exports when both are imported",
+        "src/models/base.py uses bare logging.info() (root logger) instead of a named logger, unlike src/core/model.py which uses logger = logging.getLogger(__name__)"
+      ],
+      "suggestion": "Eliminate src/models/base.py by having LinearRegressionModel inherit directly from src.core.model.Model; remove the duplicate Model class and re-export from core.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "absolute-src-imports-inside-package",
+      "summary": "Many intra-package modules use absolute 'from src.X' imports instead of relative imports, coupling them to a specific install/sys.path layout",
+      "related_files": [
+        "src/models/base.py",
+        "src/models/insect/base.py",
+        "src/cases/__init__.py",
+        "src/core/active_inference.py",
+        "src/core/neural_network.py",
+        "src/transformations/case_transformations.py",
+        "src/visualization/case_visualization.py",
+        "src/utils/visualization.py"
+      ],
+      "evidence": [
+        "src/models/base.py: 'from src.core.model import Case' (absolute) while sibling src/models/linear_regression.py uses 'from .base import Model, Case' (relative)",
+        "src/cases/__init__.py: 'from src.core.model import Case' (absolute) while every case module in the same package uses relative '..core.model'",
+        "src/models/insect/base.py: 'from src.core.active_inference import ActiveInferenceModel' and 'from src.core.model import Case'",
+        "src/core/active_inference.py and src/core/neural_network.py: 'from src.core.model import Model, Case' \u2014 sibling files that should use relative imports",
+        "Over 30 files in src/ mix absolute src.* imports with relative imports; the pattern is not consistently one or the other"
+      ],
+      "suggestion": "Standardise on relative imports throughout the src package. Replace all 'from src.X' with 'from .X' or 'from ..X' as appropriate to the module's position.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "case-manager-fallback-dead-branch",
+      "summary": "CaseManager.transform_case() has an else-branch that falls back to model.case = target_case directly, but case_handlers is always a complete dict covering all 8 cases, making the else unreachable and the boundary undefined",
+      "related_files": [
+        "src/cases/case_manager.py"
+      ],
+      "evidence": [
+        "case_handlers is initialised with all 8 Case enum members (NOMINATIVE through VOCATIVE) at __init__ time",
+        "transform_case() checks 'if target_case in self.case_handlers' then falls back to 'model.case = target_case' in the else \u2014 but with a complete mapping this path is never reachable",
+        "Same pattern repeated in process_update() and calculate_free_energy() \u2014 each has an unreachable else branch that bypasses the handler layer entirely"
+      ],
+      "suggestion": "Remove the unreachable else branches, or convert the conditional to an assertion. If extensibility for future cases is intended, document the contract explicitly.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "cross_module_architecture",
+      "identifier": "insect-cases-extend-beyond-core-case-enum",
+      "summary": "src/models/insect/cases/ introduces six new domain-specific case types (PheromonalCase, SwarmCase, etc.) that are not members of the core Case enum, creating a parallel case system with no shared protocol",
+      "related_files": [
+        "src/models/insect/cases/__init__.py",
+        "src/models/insect/cases/pheromonal.py",
+        "src/cases/case_manager.py"
+      ],
+      "evidence": [
+        "src/models/insect/__init__.py exports PheromonalCase, SwarmCase, MetamorphicCase, CasteCase, SubstrateCase, StigmergicCase",
+        "These are not values in the Case enum (src/core/model.py) and cannot be registered with CaseManager.case_handlers",
+        "CaseManager only knows about the 8 canonical Case enum values; insect-specific cases are entirely invisible to the shared coordination layer",
+        "This means transform_case(), process_update(), and calculate_free_energy() in CaseManager silently do not apply to any insect-domain case"
+      ],
+      "suggestion": "Either extend the Case enum with insect-specific members, or define a shared CaseProtocol/ABC that CaseManager can discover and dispatch dynamically, so domain extensions participate in the shared infrastructure.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "convention_outlier",
+      "identifier": "case-class-inconsistent-class-constants",
+      "summary": "Sibling case modules follow inconsistent class-level conventions: 5 of 8 define PRECISION and/or VALID_TRANSITIONS class constants, 3 (NominativeCase, AccusativeCase, DativeCase) do not",
+      "related_files": [
+        "src/cases/nominative.py",
+        "src/cases/accusative.py",
+        "src/cases/dative.py",
+        "src/cases/ablative.py",
+        "src/cases/locative.py",
+        "src/cases/instrumental.py",
+        "src/cases/genitive.py",
+        "src/cases/vocative.py"
+      ],
+      "evidence": [
+        "AblativeCase: PRECISION = 1.1, VALID_TRANSITIONS = [Case.NOMINATIVE]",
+        "LocativeCase: PRECISION = 0.9, VALID_TRANSITIONS = [Case.ABLATIVE]",
+        "InstrumentalCase: PRECISION = 0.8 (no VALID_TRANSITIONS)",
+        "GenitiveCase: PRECISION = 1.0 (no VALID_TRANSITIONS)",
+        "VocativeCase: PRECISION = 2.0 (no VALID_TRANSITIONS)",
+        "NominativeCase, AccusativeCase, DativeCase: neither PRECISION nor VALID_TRANSITIONS defined",
+        "AblativeCase.VALID_TRANSITIONS restricts to only [Case.NOMINATIVE], while InsectModel._validate_case_transformation allows 6-7 transitions from ABLATIVE \u2014 the two sources of truth disagree"
+      ],
+      "suggestion": "Define PRECISION and VALID_TRANSITIONS on every case class (or on none). Reconcile VALID_TRANSITIONS values between the case-module constants and InsectModel's transition validation dict.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "convention_outlier",
+      "identifier": "case-class-inconsistent-extra-methods",
+      "summary": "Sibling case modules expose inconsistent extended API surfaces: only some case classes implement methods beyond the shared apply/process_update/calculate_free_energy/get_parameters protocol",
+      "related_files": [
+        "src/cases/accusative.py",
+        "src/cases/ablative.py",
+        "src/cases/vocative.py",
+        "src/cases/dative.py",
+        "src/cases/nominative.py",
+        "src/cases/instrumental.py"
+      ],
+      "evidence": [
+        "AccusativeCase: adds accept_updates(model, updates, validation_func)",
+        "AblativeCase: adds emit_to(source, target, payload) and can_transition_to(target_case)",
+        "VocativeCase: adds invoke(model, invocation), broadcast(models, message), get_invocation_history(model, limit)",
+        "DativeCase: adds receive_data(model, data, data_type)",
+        "NominativeCase and InstrumentalCase: no extra methods beyond the shared four",
+        "CaseManager uses only apply, process_update, and calculate_free_energy \u2014 the unique extended methods are effectively dead API with no callers inside the package"
+      ],
+      "suggestion": "Either define a shared protocol (ABC or Protocol class) that all case handlers must implement, or move the extended-method logic into the model's own _update_X methods where the case-specific behavior already lives.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "convention_outlier",
+      "identifier": "logger-name-inconsistency",
+      "summary": "Logger naming convention is inconsistent across sibling modules: most use getLogger(__name__) but several use hardcoded string names",
+      "related_files": [
+        "src/models/linear_regression.py",
+        "src/core/model_registry.py",
+        "src/utils/animation.py",
+        "src/utils/fix_animations.py",
+        "src/models/base.py"
+      ],
+      "evidence": [
+        "src/models/linear_regression.py: logging.getLogger(\"cerebrum-linear-regression\")",
+        "src/core/model_registry.py: logging.getLogger(\"cerebrum-model-registry\")",
+        "src/utils/animation.py: logging.getLogger(\"cerebrum-animation\")",
+        "src/utils/fix_animations.py: logging.getLogger(\"cerebrum-animation-fix\")",
+        "src/models/base.py: bare logging.info() (root logger), no logger variable at all",
+        "All case modules (nominative.py through vocative.py) and core/model.py correctly use getLogger(__name__)"
+      ],
+      "suggestion": "Standardise all modules to 'logger = logging.getLogger(__name__)'. Replace hardcoded names and bare logging.X() calls. The hardcoded names break the hierarchy-based filtering that __name__ provides.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "package_organization",
+      "identifier": "models-package-duplicate-case-system",
+      "summary": "src/models/ contains its own base.py with a Model class and case_definitions.py, creating a shadow case sub-system alongside src/cases/ and src/core/",
+      "related_files": [
+        "src/models/base.py",
+        "src/models/case_definitions.py",
+        "src/models/__init__.py",
+        "src/core/model.py",
+        "src/cases/"
+      ],
+      "evidence": [
+        "src/models/__init__.py exports Model and Case from .base, and CaseDefinitions from .case_definitions \u2014 separate from the canonical src/core exports",
+        "src/models/base.py duplicates the Model class (different implementation, same name)",
+        "src/utils/visualization.py imports 'from src.models.base import Case' and 'from src.models.case_definitions import CaseDefinitions', binding it to the shadow system",
+        "The package name 'models' implies it should contain model implementations, not alternative base class definitions that compete with src/core/"
+      ],
+      "suggestion": "Move case_definitions.py into src/cases/ or src/core/. Remove src/models/base.py and redirect src/models/__init__.py to re-export from src.core. The models package should contain only concrete model implementations.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "package_organization",
+      "identifier": "lexicon-license-mismatch",
+      "summary": "src/lexicon/__init__.py declares __license__ = 'MIT' while pyproject.toml declares the project license as CC BY-NC-ND 4.0",
+      "related_files": [
+        "src/lexicon/__init__.py",
+        "pyproject.toml"
+      ],
+      "evidence": [
+        "src/lexicon/__init__.py line 15: __license__ = \"MIT\"",
+        "pyproject.toml line 6: license = {text = \"CC BY-NC-ND 4.0\"}"
+      ],
+      "suggestion": "Remove the __license__ attribute from src/lexicon/__init__.py or align it with the project-level CC BY-NC-ND 4.0 declaration in pyproject.toml.",
+      "confidence": "high"
+    },
+    {
+      "dimension": "package_organization",
+      "identifier": "insect-version-metadata-in-subpackage",
+      "summary": "src/models/insect/__init__.py declares __version__ and __author__ independently from pyproject.toml, creating a maintenance split for version metadata",
+      "related_files": [
+        "src/models/insect/__init__.py",
+        "pyproject.toml"
+      ],
+      "evidence": [
+        "src/models/insect/__init__.py lines 70-71: __version__ = \"0.1.0\", __author__ = \"CEREBRUM Development Team\"",
+        "pyproject.toml: version = \"1.5.0\", author = \"Daniel Ari Friedman\"",
+        "The sub-package version (0.1.0) is already out of sync with the project version (1.5.0); the author strings differ"
+      ],
+      "suggestion": "Remove __version__ and __author__ from the sub-package __init__.py; reference importlib.metadata if version is needed at runtime.",
+      "confidence": "medium"
+    },
+    {
+      "dimension": "design_coherence",
+      "severity": "major",
+      "location": "src/models/insect/base.py:107 vs src/core/model.py:41",
+      "title": "Parallel case_history list duplicates parent _case_history",
+      "description": "InsectModel.__init__ initializes self.case_history = [] at line 107. The parent Model class already maintains self._case_history. InsectModel.transform_case then appends to self.case_history (line 355) while Model.case.setter appends to self._case_history (line 69). These are two separate lists that diverge silently: any case change via the property goes only to _case_history; transform_case writes only to case_history. Callers have no reliable single source of truth for case transitions. The fix note claims 'parallel tracking eliminated' but the local list persists unchanged.",
+      "identifier": "B-001"
+    },
+    {
+      "dimension": "design_coherence",
+      "severity": "major",
+      "location": "src/models/insect/base.py:327-363",
+      "title": "InsectModel.transform_case bypasses parent case property setter",
+      "description": "transform_case() calls self.case = target_case (line 354) via the property setter, which appends to _case_history and calls _apply_case_transformation(). However, _update_precision_for_case and _update_neural_priorities are called beforehand (lines 347, 350) outside the setter's knowledge, meaning the ActiveInferenceModel._apply_case_transformation hook fires after the precision/priority updates rather than coordinating them. The two code paths (direct property assignment vs. transform_case) produce different side-effect orderings for the same logical operation.",
+      "identifier": "B-002"
+    },
+    {
+      "dimension": "design_coherence",
+      "severity": "moderate",
+      "location": "src/lexicon/core/device.py:10-19 and src/lexicon/core/environment.py:282-315",
+      "title": "Duplicate warnings.filterwarnings calls for the same CUDA warning messages",
+      "description": "device.py suppresses 'CUDA initialization: CUDA unknown error' and 'torch.cuda.amp.autocast(args...)' at module import time (lines 10-19). environment.py:setup_environment_logging() applies identical suppression for the same two messages inside a try/except torch import block (lines 304-313). Whichever module is imported first wins; the second application is redundant noise. There is no single authoritative location for warning policy.",
+      "identifier": "B-003"
+    },
+    {
+      "dimension": "design_coherence",
+      "severity": "moderate",
+      "location": "src/lexicon/core/config.py:101-121",
+      "title": "Duplicate model-routing config structure alongside LexiconConfig dataclass",
+      "description": "LEXICON_OPENROUTER_CONFIG is a bare module-level dict that re-declares base_url, api_key, and per-task model assignments that already exist in LexiconConfig and its fallback_models field. The dict adds circuit_breaker and retry_config keys absent from the dataclass, and the two default model values for 'case_declension' disagree (dataclass uses 'anthropic/claude-3-haiku' for 'entity_extraction'; dict uses 'anthropic/claude-3.5-sonnet'). There is no clear contract for which config is authoritative.",
+      "identifier": "B-004"
+    },
+    {
+      "dimension": "abstraction_fitness",
+      "severity": "major",
+      "location": "src/models/insect/base.py:390-444",
+      "title": "_update_precision_for_case silently no-ops because the named attributes do not exist",
+      "description": "_update_precision_for_case iterates over keys such as 'action_precision', 'learning_precision', 'sensory_precision', etc. and applies setattr only when hasattr returns True (line 443). None of these attributes are declared in InsectModel.__init__ or its parents. As a result the method always executes without any effect. The precision_configs dict exists only as documentation; the per-case precision semantics are never actually applied at runtime.",
+      "identifier": "B-005"
+    },
+    {
+      "dimension": "abstraction_fitness",
+      "severity": "major",
+      "location": "src/models/insect/base.py:130-210",
+      "title": "Neural structures initialized as plain dicts; process_input called as method on dict objects",
+      "description": "_initialize_neural_structures returns plain Python dicts for all structures (mushroom_body, antennal_lobe, etc.). process_sensory_input later calls self.neural_structure['optic_lobe'].process_input(input_data.visual) (line 499), treating the structure as an object with a method. Dicts have no .process_input method. The code path is only safe if a separate initialization step (not shown in this file) replaces the dicts with NeuralStructureProcessor instances. The init is internally inconsistent: it stores dicts but documents and calls them as if they were objects, with a silent fallback only in _update_neural_priorities (line 473).",
+      "identifier": "B-006"
+    },
+    {
+      "dimension": "abstraction_fitness",
+      "severity": "major",
+      "location": "src/cases/nominative.py:62-63 and src/cases/case_manager.py:36-44",
+      "title": "CaseHandler classes are thin static-method wrappers that bypass the Model's own protocol",
+      "description": "NominativeCase.process_update checks hasattr(model, '_update_nominative') and calls it directly by name (lines 62-63), duplicating the dispatch already performed by Model.update(). CaseManager.case_handlers maps each Case to a handler class, but every handler's apply() method simply sets model.case = Case.X, which the caller could do directly. The handler layer adds no invariant enforcement, no cross-cutting behavior, and no interface contract beyond what the model already provides. The abstraction adds indirection without fitness.",
+      "identifier": "B-007"
+    },
+    {
+      "dimension": "abstraction_fitness",
+      "severity": "moderate",
+      "location": "src/models/insect/base.py:787-820",
+      "title": "InsectActiveInferenceModel._predict_observations is a hardcoded zero placeholder",
+      "description": "_predict_observations returns np.zeros(10) unconditionally (line 795), making compute_free_energy produce a prediction_error that is purely a function of the observation values and never of the model's internal beliefs. The method is documented as 'simplified' but the zero return is not a valid approximation \u2014 it breaks the free energy computation's meaning entirely. update_beliefs also assumes a fixed observation structure (first 10 dims environmental, next 5 internal) with no validation, silently producing index errors on any input shorter than 15 elements.",
+      "identifier": "B-008"
+    },
+    {
+      "dimension": "dependency_health",
+      "severity": "moderate",
+      "location": "pyproject.toml:52-54 and src/lexicon/core/device.py:1-19",
+      "title": "device.py executes warning suppression at import time before torch is confirmed available",
+      "description": "device.py calls warnings.filterwarnings() for torch-specific categories unconditionally at module import time (lines 10-19), regardless of whether torch is installed. torch is declared as an optional extras group [torch] in pyproject.toml. Any import of src.lexicon.core.device in a non-torch environment unnecessarily installs global warning filters for warning categories that will never be emitted, potentially shadowing unrelated UserWarning or FutureWarning messages from other libraries.",
+      "identifier": "B-009"
+    },
+    {
+      "dimension": "dependency_health",
+      "severity": "moderate",
+      "location": "src/lexicon/visualization/interactive_graph_visualizer.py:38-40",
+      "title": "sklearn imported at module level without guarding against missing [torch]/[lexicon] extras",
+      "description": "interactive_graph_visualizer.py imports from sklearn.cluster, sklearn.manifold, and sklearn.decomposition at or near the top of the file. scikit-learn is a core dependency so the import will succeed; however, this visualizer lives in the lexicon subsystem whose documented extras group is [lexicon]. The [lexicon] extras do not list scikit-learn, creating an implicit coupling: the lexicon package depends on a core dep for a visualization concern, but an end user installing only [lexicon] has no declaration documenting that sklearn is required for this module.",
+      "identifier": "B-010"
+    },
+    {
+      "dimension": "error_consistency",
+      "file": "src/core/active_inference.py",
+      "line": 355,
+      "severity": "high",
+      "description": "predict_next_state() indexes transition_matrix as 3D [s, action, :], but InsectModel.__init__ initializes it as np.eye(5) (2D). The method will raise an IndexError at runtime for any caller using InsectModel's default parameters. No test exercises this path, so the defect is latent but real. The inconsistency reveals that the method was written for a different data contract than what the concrete subclass actually provides.",
+      "identifier": ""
+    },
+    {
+      "dimension": "error_consistency",
+      "file": "src/core/active_inference.py",
+      "line": 426,
+      "severity": "medium",
+      "description": "_update_genitive() calls data.get('n_samples', 5) without guarding that data is a dict. The function docstring says data is 'Any', and the nominative/dative/ablative siblings all accept ndarray or str. If a caller passes an ndarray (consistent with every other update method), this raises AttributeError. The error is swallowed silently by the hasattr dispatch in the case handler chain rather than surfacing a typed exception.",
+      "identifier": ""
+    },
+    {
+      "dimension": "error_consistency",
+      "file": "src/cases/nominative.py, accusative.py, dative.py, genitive.py, instrumental.py, locative.py, ablative.py, vocative.py",
+      "line": null,
+      "severity": "medium",
+      "description": "All eight calculate_free_energy() methods use an identical catch-all pattern: except Exception as e: logger.warning(...); return default_fe. This swallows every exception class without distinction, losing the original stack frame. A numpy linalg error (e.g. singular matrix in the nominative free-energy computation in active_inference.py) and a simple AttributeError from a missing field produce the same silent warning+default. The pattern is copied verbatim across all eight files.",
+      "identifier": ""
+    },
+    {
+      "dimension": "error_consistency",
+      "file": "src/cases/case_manager.py",
+      "line": 136,
+      "severity": "low",
+      "description": "create_relationship() logs a warning for unknown relationship types but returns the unmodified (source, target) tuple with no status field. All other code paths that fail in the codebase either raise or return a dict with a 'status': 'error' key. This silent-pass-with-warning strategy is inconsistent with both sibling methods in the same file and with case handlers.",
+      "identifier": ""
+    },
+    {
+      "dimension": "error_consistency",
+      "file": "src/core/active_inference.py",
+      "line": 274,
+      "severity": "low",
+      "description": "update_posterior() contains a silent no-op branch: when len(observation) != len(self.posterior_means), the function executes 'pass' and then returns {'status': 'success'}. This reports success on a dimension mismatch rather than raising or returning an error. A caller has no way to detect that no update occurred.",
+      "identifier": ""
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "file": "src/cases/nominative.py, accusative.py, dative.py, genitive.py, instrumental.py, locative.py, ablative.py, vocative.py",
+      "line": null,
+      "severity": "medium",
+      "description": "All eight case handler files have multi-line docstrings on trivial 3-5 line static methods whose behavior is already evident from the method name and type signature. For example, AccusativeCase.apply() contains a 9-line docstring for a method with one functional line (model.case = Case.ACCUSATIVE). The pattern is mechanically repeated across all eight modules with the same Args/Returns structure regardless of whether the added prose adds insight.",
+      "identifier": ""
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "file": "src/cases/vocative.py",
+      "line": 74,
+      "severity": "low",
+      "description": "process_update() records a timestamp field hardcoded to None with the comment '# Would use datetime in production'. This is a placeholder stub that was left in production code. It is a hallmark of generated code where the author scaffolded an intent without completing implementation.",
+      "identifier": ""
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "file": "src/core/active_inference.py",
+      "line": 319,
+      "severity": "low",
+      "description": "get_optimal_action() contains an extended inline commentary block ('In a more sophisticated implementation, we would: 1. Compute expected rewards...') that restates what the surrounding code is not doing rather than explaining the chosen approach. This narrating-the-absence pattern is a common LLM hallmark.",
+      "identifier": ""
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "file": "src/cases/nominative.py, accusative.py, dative.py, genitive.py, instrumental.py, locative.py, ablative.py, vocative.py",
+      "line": null,
+      "severity": "medium",
+      "description": "Each of the eight case handlers duplicates the same structural template: apply(), process_update(), calculate_free_energy(), and an optional get_parameters() or case-specific method. The docstrings, argument names, and guard patterns (hasattr + callable) are near-identical across all eight files. The volume and uniformity of this duplication is consistent with template-generated code where individual case semantics were substituted into a fixed scaffold.",
+      "identifier": ""
+    },
+    {
+      "dimension": "ai_generated_debt",
+      "file": "src/core/active_inference.py",
+      "line": 79,
+      "severity": "low",
+      "description": "The __init__ method checks for a list of 'required_params' only to log a debug message that they are missing, then proceeds normally. The comment says 'This is optional', making the check do nothing useful. This defensive-but-ineffective guard is a common pattern in generated code where validation was scaffolded without completing it.",
+      "identifier": ""
+    },
+    {
+      "dimension": "test_strategy",
+      "file": "tests/core/test_active_inference_pomdp.py",
+      "line": null,
+      "severity": "high",
+      "description": "The POMDP test file (test_nominative_case, test_accusative_case, etc.) is primarily a simulation and visualization driver. Each test function runs multi-step inference loops, generates matplotlib figures, and saves them to disk. The actual assertions are minimal or absent in many paths. These tests are excluded from the default run via pytest.ini ignoring tests/pomdp/test_cases. The core active_inference update methods (_update_nominative through _update_vocative) have no isolated unit tests that verify their output contracts.",
+      "identifier": ""
+    },
+    {
+      "dimension": "test_strategy",
+      "file": "pytest.ini",
+      "line": 10,
+      "severity": "high",
+      "description": "pytest.ini permanently ignores tests/pomdp/test_cases and tests/models/test_linear_regression.py with no documented sunset date or open issue. The stated reason is 'Ignore test files that require unimplemented modules or optional dependencies'. This means failing test paths are silently dropped from CI rather than being marked xfail or skipped with a runtime check. Coverage gaps are invisible to contributors.",
+      "identifier": ""
+    },
+    {
+      "dimension": "test_strategy",
+      "file": "tests/",
+      "line": null,
+      "severity": "high",
+      "description": "predict_next_state(), predict_observation(), and free_energy() on ActiveInferenceModel are untested in the active test suite. These are the core mathematical methods of the framework. The only file that calls them (test_active_inference_pomdp.py) does so inside multi-step simulation loops where intermediate correctness is not asserted.",
+      "identifier": ""
+    },
+    {
+      "dimension": "test_strategy",
+      "file": "tests/models/test_insect_models.py",
+      "line": 68,
+      "severity": "medium",
+      "description": "test_case_transformation() asserts that transforming ACCUSATIVE -> VOCATIVE returns False, but InsectModel._validate_case_transformation() actually lists Case.VOCATIVE in the ACCUSATIVE valid_transitions list. The test expectation and the production implementation are inconsistent. Either the test is wrong or the transition table is wrong; either way this defect is not caught because this test file depends on imports that may not be present in the active suite.",
+      "identifier": ""
+    },
+    {
+      "dimension": "test_strategy",
+      "file": "tests/core/test_active_inference_pomdp.py",
+      "line": 14,
+      "severity": "low",
+      "description": "The test file calls logging.basicConfig() at module level. This reconfigures the root logger for the entire test session, which can interfere with log output from other test modules. pytest.ini already configures log_cli; this duplicate basicConfig call is a fragility source.",
+      "identifier": ""
+    },
+    {
+      "dimension": "high_level_elegance",
+      "severity": "high",
+      "location": "src/models/base.py:14 vs src/core/model.py:20",
+      "title": "Parallel Model base classes with divergent interfaces",
+      "detail": "Two independent classes both named Model define the domain root. src/core/model.py::Model carries cases, precision weights, connections, case history, and update dispatch. src/models/base.py::Model re-implements only id, name, _case, and data_buffer. LinearRegressionModel inherits from the thin duplicate and lacks update(), _precision_weights, connections, and _case_history. The domain capability 'Model' is split, making the inheritance hierarchy inconsistent and the Case abstraction unreachable from production linear regression code.",
+      "identifier": ""
+    },
+    {
+      "dimension": "high_level_elegance",
+      "severity": "medium",
+      "location": "src/cases/nominative.py, accusative.py, genitive.py, dative.py, instrumental.py, locative.py, ablative.py, vocative.py",
+      "title": "CaseHandler layer adds no decomposition \u2014 pure pass-through static namespaces",
+      "detail": "All eight case handler classes consist exclusively of static methods. Their process_update() methods check whether the model has a matching private method and, if so, immediately forward the call with no added policy, translation, or validation. The architectural layer exists but every call path that reaches real logic passes straight through it. The layer cannot be removed without changing call sites, but it also contributes nothing measurable to decomposition or boundary integrity.",
+      "identifier": ""
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "severity": "high",
+      "location": "src/cases/nominative.py:62, accusative.py:59, genitive.py:62, vocative.py:61, instrumental.py:62, ablative.py:66",
+      "title": "Duck-type runtime probe at every case handler seam produces permanently dead fallback branches",
+      "detail": "Each case handler's process_update() guards the delegation with hasattr(model, '_update_<case>') and callable(getattr(model, '_update_<case>')). Because ActiveInferenceModel and all concrete subclasses inherit these methods from Model, the condition is always true for any registered model. The fallback logic in all six handlers is unreachable dead code, but the probe pattern implies an informal protocol that is never enforced by the type system, leaving the boundary contract implicit and unverifiable.",
+      "identifier": ""
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "severity": "high",
+      "location": "src/core/active_inference.py:169",
+      "title": "_apply_case_transformation permanently mutates likelihood_precision on each NOMINATIVE entry",
+      "detail": "When precision_focus is 'likelihood' (NOMINATIVE case), self.likelihood_precision is multiplied in-place by get_precision(self._case). No inverse is applied when leaving the case. Every subsequent case round-trip that passes through NOMINATIVE compounds the matrix further. The precision matrix accumulates unbounded drift across case transitions with no reset path.",
+      "identifier": ""
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "severity": "medium",
+      "location": "src/core/active_inference.py:426",
+      "title": "_update_genitive calls data.get() without type-guarding, fails silently on ndarray input",
+      "detail": "The expression data.get('n_samples', 5) is called when data is not None. Every sibling case handler (accusative, dative, ablative) accepts raw ndarray data and passes it directly to np.array(). A caller passing an ndarray in GENITIVE case receives an AttributeError at the seam boundary. The inconsistency is not documented and no type check guards the call.",
+      "identifier": ""
+    },
+    {
+      "dimension": "mid_level_elegance",
+      "severity": "medium",
+      "location": "src/models/insect/base.py:107 vs src/core/model.py:41",
+      "title": "InsectModel maintains a second case history list with an incompatible schema alongside the parent's",
+      "detail": "InsectModel.__init__ initializes self.case_history = [] at line 107. transform_case() appends three-tuples (old_case, new_case, action_count) to it. The parent Model.case setter writes two-tuples (prior_case, new_case) to self._case_history. After any case change, both lists exist on the same instance with different formats and different population paths. Neither list is canonical; code reading one cannot rely on the other.",
+      "identifier": ""
+    },
+    {
+      "dimension": "low_level_elegance",
+      "severity": "high",
+      "location": "src/models/insect/base.py:787-795, 851-862",
+      "title": "Active computation paths contain unimplemented stubs returning hardcoded or random values",
+      "detail": "_predict_observations() returns np.zeros(10) unconditionally \u2014 it is called inside compute_free_energy() as if it performs real inference, silently zeroing the accuracy term. _compute_expected_free_energy() returns np.random.rand(5) * 0.5, making every call to select_actions() random. Neither method raises NotImplementedError or logs a warning. Callers receive numerically plausible but meaningless results.",
+      "identifier": ""
+    },
+    {
+      "dimension": "low_level_elegance",
+      "severity": "medium",
+      "location": "src/models/insect/base.py:808-815",
+      "title": "update_beliefs() hard-indexes observation vector dimensions without configuration reference",
+      "detail": "observations[:10] and observations[10:15] are sliced by magic indices in the method body. The neural_config and n_observations parameters provided at initialization are not consulted. An observation vector of length less than 15 raises a silent shape mismatch; the parameterization surface at __init__ is cosmetic for this code path.",
+      "identifier": ""
+    },
+    {
+      "dimension": "low_level_elegance",
+      "severity": "medium",
+      "location": "src/models/linear_regression.py:212-216",
+      "title": "Confidence interval in respond_to_query uses hardcoded sigma and n=100 regardless of data",
+      "detail": "sigma is set to 1.0 and the t-value denominator uses sqrt(100) unconditionally. The actual residual standard error and sample size from the fitted model are not used. The method returns structurally correct confidence interval fields whose values are disconnected from the model's training data.",
+      "identifier": ""
+    },
+    {
+      "dimension": "low_level_elegance",
+      "severity": "medium",
+      "location": "src/core/active_inference.py:596-601",
+      "title": "_update_ablative silent error return on ndarray input mismatches sibling handler contracts",
+      "detail": "The method handles None and str inputs, then falls through to return a status:error dict for any other type. Every other case handler accepts ndarray data directly. A caller passing an ndarray in ABLATIVE case receives an error response with no exception raised and no logging at warning level, making the failure invisible in normal operation.",
+      "identifier": ""
+    },
+    {
+      "dimension": "low_level_elegance",
+      "severity": "low",
+      "location": "src/models/insect/base.py:486, 536",
+      "title": "import time placed inside method bodies, duplicated across two methods",
+      "detail": "time is imported inside process_sensory_input() and again inside select_action(). Both methods are in the same class. The module-level import is absent. The pattern avoids circular import issues only if time were problematic to import at module level, which it is not.",
+      "identifier": ""
+    }
+  ],
+  "provenance": {
+    "kind": "blind_review_batch_import",
+    "blind": true,
+    "runner": "claude",
+    "run_stamp": "ext_20260306_021719_2d295619",
+    "created_at": "2026-03-06T02:21:12+00:00",
+    "packet_path": "/Users/4d/Documents/GitHub/CEREBRUM/.desloppify/review_packet_blind.json",
+    "packet_sha256": "6f1c8eb44b1ae052139b619d164973be08ae36c6a997b3a854f796aefc0d3dc7",
+    "external_session_id": "ext_20260306_021719_2d295619"
+  }
+}
