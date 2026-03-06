@@ -81,7 +81,7 @@ class AccusativeCase:
                 # Otherwise, return a binary match/no-match
                 else:
                     return 0.0 if predicted == actual else 0.5
-            except (AttributeError, TypeError, ValueError) as e:
+            except (TypeError, ValueError) as e:
                 logger.warning(f"Error calculating free energy: {e}")
                 return default_fe
                 
@@ -117,7 +117,7 @@ class AccusativeCase:
                             "reason": reason
                         })
                         continue
-                except (AttributeError, TypeError, ValueError) as e:
+                except (TypeError, ValueError) as e:
                     result["rejected"].append({
                         "param": param,
                         "value": value,

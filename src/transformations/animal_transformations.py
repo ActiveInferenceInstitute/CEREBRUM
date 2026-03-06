@@ -8,6 +8,8 @@ implementing the case-based model framework for navigating entities.
 import numpy as np
 from typing import Dict, Any, List, Tuple
 import logging
+
+logger = logging.getLogger(__name__)
 from copy import deepcopy
 
 from ..core.model import Case
@@ -34,7 +36,7 @@ def transform_to_goal_seeker(animal: AnimalAgent) -> AnimalAgent:
     animal.parameters['max_rotation'] = np.pi/4  # Increase rotation ability
     animal.parameters['speed'] = 0.8  # Increase speed
     
-    logging.info(f"Animal {animal.name} transformed to goal-seeker mode")
+    logger.info(f"Animal {animal.name} transformed to goal-seeker mode")
     
     return animal
 
@@ -66,7 +68,7 @@ def transform_to_explorer(animal: AnimalAgent) -> AnimalAgent:
     # This would be used in the animal's update logic if it checks for the presence of _exploration_mode
     animal._random_move_probability = 0.3
     
-    logging.info(f"Animal {animal.name} transformed to explorer mode")
+    logger.info(f"Animal {animal.name} transformed to explorer mode")
     
     return animal
 
@@ -94,7 +96,7 @@ def transform_to_follower(animal: AnimalAgent, target: AnimalAgent) -> AnimalAge
     animal.connections.append((target, "follows"))
     target.connections.append((animal, "is_followed_by"))
     
-    logging.info(f"Animal {animal.name} now following {target.name}")
+    logger.info(f"Animal {animal.name} now following {target.name}")
     
     return animal
 
@@ -249,6 +251,6 @@ def swap_animal_roles(animal1: AnimalAgent, animal2: AnimalAgent) -> Tuple[Anima
     animal1.connections.append((animal2, "follows"))
     animal2.connections.append((animal1, "is_followed_by"))
     
-    logging.info(f"Swapped roles between {animal1.name} and {animal2.name}")
+    logger.info(f"Swapped roles between {animal1.name} and {animal2.name}")
     
     return animal1, animal2 

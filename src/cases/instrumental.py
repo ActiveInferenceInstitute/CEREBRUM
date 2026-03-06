@@ -70,7 +70,7 @@ class InstrumentalCase:
                 # Lower is better for tools
                 efficiency_error = abs(actual_cost - expected_cost)
                 return efficiency_error * InstrumentalCase.PRECISION
-            except (AttributeError, TypeError, ValueError) as e:
+            except (TypeError, ValueError) as e:
                 logger.warning(f"Error calculating free energy: {e}")
                 return default_fe
         

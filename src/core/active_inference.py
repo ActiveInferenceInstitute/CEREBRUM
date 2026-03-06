@@ -65,6 +65,12 @@ class ActiveInferenceModel(Model):
         # Posterior beliefs (these will be updated during inference)
         self.posterior_means = self.prior_means.copy()
         self.posterior_precision = self.prior_precision.copy()
+
+        # Baseline precision values — _apply_case_transformation scales from these
+        # to avoid unbounded accumulation across repeated case transitions
+        self._base_prior_precision = self.prior_precision.copy()
+        self._base_likelihood_precision = self.likelihood_precision.copy()
+        self._base_posterior_precision = self.posterior_precision.copy()
         
         # Case-specific parameter access patterns
         self._setup_case_configurations()
@@ -166,30 +172,30 @@ class ActiveInferenceModel(Model):
         
         if precision_focus == "likelihood":
             # Nominative case: Emphasize precision of generative mapping (copy to avoid mutation)
-            self.likelihood_precision = self.likelihood_precision * self.get_precision(self._case)
+            self.likelihood_precision = self._base_likelihood_precision * self.get_precision(self._case)
         elif precision_focus == "parameters":
             # Accusative case: Emphasize parameter update reception precision
-            self.prior_precision = self.prior_precision * self.get_precision(self._case)
+            self.prior_precision = self._base_prior_precision * self.get_precision(self._case)
         elif precision_focus == "outputs":
             # Genitive case: Emphasize output/generative diversity
-            self.posterior_precision = self.posterior_precision * self.get_precision(self._case)
+            self.posterior_precision = self._base_posterior_precision * self.get_precision(self._case)
         elif precision_focus == "inputs":
             # Dative case: Tune input sensitivity (lower precision = more receptive)
-            self.likelihood_precision = self.likelihood_precision * self.get_precision(self._case)
+            self.likelihood_precision = self._base_likelihood_precision * self.get_precision(self._case)
         elif precision_focus == "operations":
             # Instrumental case: Balanced operational precision across both mappings
             scale = self.get_precision(self._case)
-            self.likelihood_precision = self.likelihood_precision * scale
-            self.prior_precision = self.prior_precision * scale
+            self.likelihood_precision = self._base_likelihood_precision * scale
+            self.prior_precision = self._base_prior_precision * scale
         elif precision_focus == "contexts":
             # Locative case: Contextual precision on posterior
-            self.posterior_precision = self.posterior_precision * self.get_precision(self._case)
+            self.posterior_precision = self._base_posterior_precision * self.get_precision(self._case)
         elif precision_focus == "historical":
             # Ablative case: Historical/source reference via prior precision
-            self.prior_precision = self.prior_precision * self.get_precision(self._case)
+            self.prior_precision = self._base_prior_precision * self.get_precision(self._case)
         elif precision_focus == "identity":
             # Vocative case: Strong identity focus on prior
-            self.prior_precision = self.prior_precision * self.get_precision(self._case)
+            self.prior_precision = self._base_prior_precision * self.get_precision(self._case)
         else:
             logger.debug(
                 "No precision adjustment defined for precision_focus=%r in case %s",

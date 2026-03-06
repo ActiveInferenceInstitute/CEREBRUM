@@ -366,63 +366,6 @@ class InsectModel(ActiveInferenceModel):
         }
         
         return target_case in valid_transitions.get(self.case, [])
-    
-    def _update_precision_for_case(self, target_case: Case):
-        """
-        Update precision parameters for the target case.
-        
-        Args:
-            target_case: The target case to update precision for
-        """
-        # Case-specific precision configurations
-        precision_configs = {
-            Case.NOMINATIVE: {
-                'action_precision': 1.0,
-                'prediction_precision': 0.8,
-                'sensory_precision': 0.6
-            },
-            Case.ACCUSATIVE: {
-                'learning_precision': 1.0,
-                'sensory_precision': 0.8,
-                'action_precision': 0.4
-            },
-            Case.DATIVE: {
-                'sensory_precision': 1.0,
-                'input_precision': 0.9,
-                'action_precision': 0.3
-            },
-            Case.GENITIVE: {
-                'output_precision': 1.0,
-                'action_precision': 0.8,
-                'sensory_precision': 0.5
-            },
-            Case.INSTRUMENTAL: {
-                'method_precision': 1.0,
-                'action_precision': 0.7,
-                'sensory_precision': 0.6
-            },
-            Case.LOCATIVE: {
-                'context_precision': 1.0,
-                'spatial_precision': 0.9,
-                'action_precision': 0.6
-            },
-            Case.ABLATIVE: {
-                'memory_precision': 1.0,
-                'historical_precision': 0.8,
-                'action_precision': 0.5
-            },
-            Case.VOCATIVE: {
-                'identification_precision': 1.0,
-                'communication_precision': 0.8,
-                'action_precision': 0.6
-            }
-        }
-        
-        config = precision_configs.get(target_case, {})
-        for param, value in config.items():
-            if hasattr(self, param):
-                setattr(self, param, value)
-    
     def _update_neural_priorities(self, target_case: Case):
         """
         Update neural structure priorities based on case.

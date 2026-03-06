@@ -7,7 +7,7 @@ and relationship_example.
 """
 
 
-from src.cases.examples import (
+from src.examples.case_examples import (
     basic_case_example,
     animal_formation_example,
     case_update_example,

@@ -73,7 +73,7 @@ class VocativeCase:
                 latency = model.response_latency
                 # High latency = high free energy (bad for vocative)
                 return latency * VocativeCase.PRECISION
-            except (AttributeError, TypeError, ValueError) as e:
+            except (TypeError, ValueError) as e:
                 logger.warning(f"Error calculating free energy: {e}")
                 return default_fe
         

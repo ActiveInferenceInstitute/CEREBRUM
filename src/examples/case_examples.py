@@ -9,12 +9,12 @@ import numpy as np
 import logging
 
 from ..core.model import Model, Case
-from ..examples.animal_agent import AnimalAgent
-from .case_manager import CaseManager
-from .animal_cases import AnimalCaseManager
-from .nominative import NominativeCase
-from .accusative import AccusativeCase
-from .dative import DativeCase
+from .animal_agent import AnimalAgent
+from ..cases.case_manager import CaseManager
+from ..cases.animal_cases import AnimalCaseManager
+from ..cases.nominative import NominativeCase
+from ..cases.accusative import AccusativeCase
+from ..cases.dative import DativeCase
 
 def basic_case_example():
     """

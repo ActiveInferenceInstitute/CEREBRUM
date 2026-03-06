@@ -98,7 +98,7 @@ class DativeCase:
                 # Otherwise, return a binary match/no-match
                 else:
                     return 0.0 if expected == received else 0.3
-            except (AttributeError, TypeError, ValueError) as e:
+            except (TypeError, ValueError) as e:
                 logger.warning(f"Error calculating free energy: {e}")
                 return default_fe
                 
