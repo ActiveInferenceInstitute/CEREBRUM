@@ -167,15 +167,6 @@ class ActiveInferenceModel(Model):
         if precision_focus == "likelihood":
             # Nominative case: Emphasize precision of generative mapping
             self.likelihood_precision *= self.get_precision(self._case)
-        elif precision_focus == "parameters":
-            # Accusative case: Emphasize precision of parameter updates
-            pass  # This will be handled during update
-        elif precision_focus == "inputs":
-            # Dative case: Emphasize precision of incoming data
-            pass  # This will be handled during data reception
-        elif precision_focus == "outputs":
-            # Genitive case: Emphasize precision of generated outputs
-            pass  # This will be handled during output generation
         
         # Record the transformation in history
         self.belief_history.append({
@@ -511,7 +502,7 @@ class ActiveInferenceModel(Model):
             # Run gradient descent for specified iterations
             results = []
             for i in range(iterations):
-                update_result = self.update_posterior(observations, learning_rate)
+                update_result = self.update_posterior(observations)
                 results.append(update_result)
             
             # Restore original posterior

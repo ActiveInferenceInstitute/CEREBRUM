@@ -10,6 +10,8 @@ import logging
 
 from ..core.model import Model, Case
 
+logger = logging.getLogger(__name__)
+
 
 class InstrumentalCase:
     """
@@ -39,7 +41,7 @@ class InstrumentalCase:
         if not hasattr(model, '_instrument_operations'):
             model._instrument_operations = {}
         
-        logging.info(f"Applied instrumental case to model {model.name}")
+        logger.info(f"Applied instrumental case to model {model.name}")
         return model
     
     @staticmethod
@@ -100,7 +102,7 @@ class InstrumentalCase:
                 efficiency_error = abs(actual_cost - expected_cost)
                 return efficiency_error * InstrumentalCase.PRECISION
             except Exception as e:
-                logging.warning(f"Error calculating instrumental free energy: {e}")
+                logger.warning(f"Error calculating instrumental free energy: {e}")
                 return default_fe
         
         return default_fe
@@ -143,10 +145,10 @@ class InstrumentalCase:
         if hasattr(model, operation) and callable(getattr(model, operation)):
             op_func = getattr(model, operation)
             result = op_func(input_data, **kwargs)
-            logging.info(f"Executed operation '{operation}' via {model.name}")
+            logger.info(f"Executed operation '{operation}' via {model.name}")
             return result
         else:
-            logging.warning(f"Operation '{operation}' not found on {model.name}")
+            logger.warning(f"Operation '{operation}' not found on {model.name}")
             return None
     
     @staticmethod
@@ -165,4 +167,4 @@ class InstrumentalCase:
         
         model._instrument_operations[name] = func
         setattr(model, name, func)
-        logging.info(f"Registered operation '{name}' on {model.name}")
+        logger.info(f"Registered operation '{name}' on {model.name}")

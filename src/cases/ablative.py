@@ -11,6 +11,8 @@ import logging
 
 from ..core.model import Model, Case
 
+logger = logging.getLogger(__name__)
+
 
 class AblativeCase:
     """
@@ -43,7 +45,7 @@ class AblativeCase:
         if not hasattr(model, '_ablative_emissions'):
             model._ablative_emissions = []
         
-        logging.info(f"Applied ablative case to model {model.name}")
+        logger.info(f"Applied ablative case to model {model.name}")
         return model
     
     @staticmethod
@@ -102,7 +104,7 @@ class AblativeCase:
                     variance = np.var(emissions)
                     return variance * AblativeCase.PRECISION
             except Exception as e:
-                logging.warning(f"Error calculating ablative free energy: {e}")
+                logger.warning(f"Error calculating ablative free energy: {e}")
                 return default_fe
         
         return default_fe
@@ -159,7 +161,7 @@ class AblativeCase:
         if hasattr(source, '_ablative_emissions'):
             source._ablative_emissions.append(emission)
         
-        logging.info(f"Emitted from {source.name} to {target.name}")
+        logger.info(f"Emitted from {source.name} to {target.name}")
         return emission
     
     @staticmethod

@@ -10,6 +10,8 @@ import logging
 
 from ..core.model import Model, Case
 
+logger = logging.getLogger(__name__)
+
 
 class GenitiveCase:
     """
@@ -39,7 +41,7 @@ class GenitiveCase:
         if not hasattr(model, '_genitive_exports'):
             model._genitive_exports = set()
         
-        logging.info(f"Applied genitive case to model {model.name}")
+        logger.info(f"Applied genitive case to model {model.name}")
         return model
     
     @staticmethod
@@ -107,7 +109,7 @@ class GenitiveCase:
                                 divergence += (actual - exp) ** 2
                     return divergence * GenitiveCase.PRECISION
             except Exception as e:
-                logging.warning(f"Error calculating genitive free energy: {e}")
+                logger.warning(f"Error calculating genitive free energy: {e}")
                 return default_fe
         
         return default_fe
@@ -162,5 +164,5 @@ class GenitiveCase:
                 else:
                     derived[attr] = value
         
-        logging.info(f"Derived {len(derived)} attributes from {source.name} to {target.name}")
+        logger.info(f"Derived {len(derived)} attributes from {source.name} to {target.name}")
         return derived

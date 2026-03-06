@@ -10,6 +10,8 @@ import numpy as np
 import logging
 
 from ..core.model import Model, Case
+
+logger = logging.getLogger(__name__)
 from ..examples.animal_agent import AnimalAgent
 from .case_manager import CaseManager
 
@@ -48,7 +50,7 @@ class AnimalCaseManager(CaseManager):
         animal.parameters['max_rotation'] = np.pi/4  # Increase rotation ability
         animal.parameters['speed'] = 0.8  # Increase speed
         
-        logging.info(f"Animal {animal.name} transformed to goal-seeker mode")
+        logger.info(f"Animal {animal.name} transformed to goal-seeker mode")
         return animal
     
     def transform_to_explorer(self, animal: AnimalAgent) -> AnimalAgent:
@@ -74,7 +76,7 @@ class AnimalCaseManager(CaseManager):
         animal._exploration_mode = True
         animal._random_move_probability = 0.3
         
-        logging.info(f"Animal {animal.name} transformed to explorer mode")
+        logger.info(f"Animal {animal.name} transformed to explorer mode")
         return animal
     
     def transform_to_follower(self, follower: AnimalAgent, leader: AnimalAgent) -> AnimalAgent:
@@ -94,7 +96,7 @@ class AnimalCaseManager(CaseManager):
         # Store the leader as the follow target
         follower._follow_target = leader
         
-        logging.info(f"Animal {follower.name} now following {leader.name}")
+        logger.info(f"Animal {follower.name} now following {leader.name}")
         return follower
     
     def create_v_formation(self, animals: List[AnimalAgent]) -> Dict[str, Any]:
@@ -260,7 +262,7 @@ class AnimalCaseManager(CaseManager):
         # Update relationships in the manager
         self._swap_relationships(animal1, animal2)
         
-        logging.info(f"Swapped roles between {animal1.name} and {animal2.name}")
+        logger.info(f"Swapped roles between {animal1.name} and {animal2.name}")
         return animal1, animal2
     
     def _swap_relationships(self, model1: Model, model2: Model) -> None:

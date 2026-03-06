@@ -9,6 +9,8 @@ from typing import Dict, Any, List, Optional, Tuple
 import logging
 
 from ..core.model import Model, Case
+
+logger = logging.getLogger(__name__)
 from .nominative import NominativeCase
 from .accusative import AccusativeCase
 
@@ -40,7 +42,7 @@ class CaseManager:
             model: The model to register
         """
         self.tracked_models[model.id] = model
-        logging.info(f"Model {model.name} registered with case manager")
+        logger.info(f"Model {model.name} registered with case manager")
     
     def unregister_model(self, model: Model) -> bool:
         """
@@ -59,7 +61,7 @@ class CaseManager:
                 (src, tgt, rel) for src, tgt, rel in self.case_relationships
                 if src.id != model.id and tgt.id != model.id
             ]
-            logging.info(f"Model {model.name} unregistered from case manager")
+            logger.info(f"Model {model.name} unregistered from case manager")
             return True
         return False
     
@@ -118,9 +120,9 @@ class CaseManager:
             source.connect(target, relationship_type)
             target.connect(source, f"inverse_{relationship_type}")
             
-            logging.info(f"Created {relationship_type} relationship from {source.name} to {target.name}")
+            logger.info(f"Created {relationship_type} relationship from {source.name} to {target.name}")
         else:
-            logging.warning(f"Unknown relationship type: {relationship_type}")
+            logger.warning(f"Unknown relationship type: {relationship_type}")
         
         return source, target
     

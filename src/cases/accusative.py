@@ -11,6 +11,8 @@ import logging
 
 from ..core.model import Model, Case
 
+logger = logging.getLogger(__name__)
+
 class AccusativeCase:
     """
     Accusative case handler for models acting as objects.
@@ -36,7 +38,7 @@ class AccusativeCase:
         # Additional accusative-specific initializations
         # For example, ensure update receptors are enabled
         
-        logging.info(f"Applied accusative case to model {model.name}")
+        logger.info(f"Applied accusative case to model {model.name}")
         return model
     
     @staticmethod
@@ -73,7 +75,7 @@ class AccusativeCase:
                         "old": old_value,
                         "new": param_value
                     }
-                    logging.info(f"Model {model.name} parameter updated: {param_name}={param_value}")
+                    logger.info(f"Model {model.name} parameter updated: {param_name}={param_value}")
         
         return result
     
@@ -108,7 +110,7 @@ class AccusativeCase:
                 else:
                     return 0.0 if predicted == actual else 0.5
             except Exception as e:
-                logging.warning(f"Error calculating accusative free energy: {e}")
+                logger.warning(f"Error calculating accusative free energy: {e}")
                 return default_fe
                 
         return default_fe

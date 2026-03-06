@@ -11,6 +11,8 @@ import logging
 
 from ..core.model import Model, Case
 
+logger = logging.getLogger(__name__)
+
 class DativeCase:
     """
     Dative case handler for models acting as recipients.
@@ -36,7 +38,7 @@ class DativeCase:
         # Additional dative-specific initializations
         # For example, ensure data reception buffers are enabled
         
-        logging.info(f"Applied dative case to model {model.name}")
+        logger.info(f"Applied dative case to model {model.name}")
         return model
     
     @staticmethod
@@ -74,7 +76,7 @@ class DativeCase:
                 elif hasattr(model, "goal"):
                     model.goal = goal
                 result["data_processed"].append("goal")
-                logging.info(f"Model {model.name} received new goal: {goal}")
+                logger.info(f"Model {model.name} received new goal: {goal}")
             
             if "sensory_data" in data:
                 # Process sensory data if provided
@@ -125,7 +127,7 @@ class DativeCase:
                 else:
                     return 0.0 if expected == received else 0.3
             except Exception as e:
-                logging.warning(f"Error calculating dative free energy: {e}")
+                logger.warning(f"Error calculating dative free energy: {e}")
                 return default_fe
                 
         return default_fe
@@ -173,5 +175,5 @@ class DativeCase:
             model._received_data[data_type] = data
             result["details"] = f"Stored {data_type} data"
         
-        logging.info(f"Model {model.name} received {data_type} data")
+        logger.info(f"Model {model.name} received {data_type} data")
         return result 

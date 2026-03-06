@@ -10,6 +10,8 @@ import logging
 
 from ..core.model import Model, Case
 
+logger = logging.getLogger(__name__)
+
 
 class VocativeCase:
     """
@@ -39,7 +41,7 @@ class VocativeCase:
         if not hasattr(model, '_vocative_invocations'):
             model._vocative_invocations = []
         
-        logging.info(f"Applied vocative case to model {model.name}")
+        logger.info(f"Applied vocative case to model {model.name}")
         return model
     
     @staticmethod
@@ -101,7 +103,7 @@ class VocativeCase:
                 # High latency = high free energy (bad for vocative)
                 return latency * VocativeCase.PRECISION
             except Exception as e:
-                logging.warning(f"Error calculating vocative free energy: {e}")
+                logger.warning(f"Error calculating vocative free energy: {e}")
                 return default_fe
         
         return default_fe
@@ -156,7 +158,7 @@ class VocativeCase:
         else:
             response["content"] = {"status": "acknowledged"}
         
-        logging.info(f"Invoked model {model.name} in vocative case")
+        logger.info(f"Invoked model {model.name} in vocative case")
         return response
     
     @staticmethod
@@ -181,7 +183,7 @@ class VocativeCase:
             response = VocativeCase.invoke(model, invocation)
             responses.append(response)
         
-        logging.info(f"Broadcast to {len(models)} models")
+        logger.info(f"Broadcast to {len(models)} models")
         return responses
     
     @staticmethod

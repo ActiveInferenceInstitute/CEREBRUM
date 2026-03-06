@@ -10,6 +10,8 @@ import logging
 
 from ..core.model import Model, Case
 
+logger = logging.getLogger(__name__)
+
 
 class LocativeCase:
     """
@@ -42,7 +44,7 @@ class LocativeCase:
         if not hasattr(model, '_locative_contents'):
             model._locative_contents = []
         
-        logging.info(f"Applied locative case to model {model.name}")
+        logger.info(f"Applied locative case to model {model.name}")
         return model
     
     @staticmethod
@@ -100,7 +102,7 @@ class LocativeCase:
                 # Higher stability = lower free energy
                 return (1.0 - stability) * LocativeCase.PRECISION
             except Exception as e:
-                logging.warning(f"Error calculating locative free energy: {e}")
+                logger.warning(f"Error calculating locative free energy: {e}")
                 return default_fe
         
         return default_fe
@@ -144,7 +146,7 @@ class LocativeCase:
         
         max_capacity = context.parameters.get("max_capacity", 100)
         if len(context._locative_contents) >= max_capacity:
-            logging.warning(f"Context {context.name} at capacity")
+            logger.warning(f"Context {context.name} at capacity")
             return False
         
         entry = {
@@ -153,7 +155,7 @@ class LocativeCase:
         }
         context._locative_contents.append(entry)
         
-        logging.info(f"Added entity to context {context.name}")
+        logger.info(f"Added entity to context {context.name}")
         return True
     
     @staticmethod
@@ -179,7 +181,7 @@ class LocativeCase:
         
         removed = len(context._locative_contents) < initial_count
         if removed:
-            logging.info(f"Removed entity from context {context.name}")
+            logger.info(f"Removed entity from context {context.name}")
         
         return removed
     

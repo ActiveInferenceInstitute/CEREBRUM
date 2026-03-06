@@ -11,6 +11,8 @@ import logging
 
 from ..core.model import Model, Case
 
+logger = logging.getLogger(__name__)
+
 class NominativeCase:
     """
     Nominative case handler for models acting as active agents.
@@ -37,7 +39,7 @@ class NominativeCase:
         # Additional nominative-specific initializations can be done here
         # For example, ensure any action generation mechanisms are enabled
         
-        logging.info(f"Applied nominative case to model {model.name}")
+        logger.info(f"Applied nominative case to model {model.name}")
         return model
     
     @staticmethod
@@ -104,7 +106,7 @@ class NominativeCase:
                 else:
                     return 0.0 if goal == current else 1.0
             except Exception as e:
-                logging.warning(f"Error calculating nominative free energy: {e}")
+                logger.warning(f"Error calculating nominative free energy: {e}")
                 return default_fe
                 
         return default_fe
