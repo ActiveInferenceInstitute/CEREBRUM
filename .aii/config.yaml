@@ -1,0 +1,51 @@
+# AII sidecar — InstituteOS metadata. Schema: instituteos.platform.aii_sidecar
+meta:
+  updated: '2026-06-30'
+repo:
+  name: CEREBRUM
+  slug: cerebrum
+  full_name: ActiveInferenceInstitute/CEREBRUM
+  description: 'CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations
+    for Unified Modeling'
+institute:
+  category: research-software
+  maturity: released
+  steward: Active Inference Institute
+ecosystem:
+  links:
+    github: https://github.com/ActiveInferenceInstitute/CEREBRUM
+    website: https://www.activeinference.org
+artifacts:
+- path: README.md
+  kind: doc
+  description: Repository overview.
+- path: src
+  kind: code
+  description: Source tree.
+- path: pyproject.toml
+  kind: code
+  description: Python package config.
+- path: package.json
+  kind: code
+  description: Node package config.
+provenance:
+  citation:
+    doi: 10.5281/zenodo.15170908.svg
+instituteos:
+  tags:
+  - cerebrum
+  - case
+  - enabled
+  - reasoning
+  - engine
+  - python
+capabilities:
+- python-package
+- node-package
+- tested
+- documentation
+- dataset
+tasks:
+  test:
+    cmd: python -m pytest
+    description: Run the test suite.
