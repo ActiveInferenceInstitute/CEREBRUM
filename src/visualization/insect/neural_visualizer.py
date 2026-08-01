@@ -236,6 +236,12 @@ class NeuralStructureVisualizer:
         """
         fig, ax = plt.subplots(figsize=self.figsize, dpi=self.dpi)
         
+        if nx is None:
+            ax.text(0.5, 0.5, 'networkx not available',
+                    ha='center', va='center', transform=ax.transAxes)
+            ax.set_title('Network Structure')
+            return fig
+        
         # Create network graph
         G = nx.DiGraph()
         
@@ -544,6 +550,12 @@ class BrainActivityVisualizer:
             return fig
         
         fig, ax = plt.subplots(figsize=self.figsize, dpi=self.dpi)
+        
+        if nx is None:
+            ax.text(0.5, 0.5, 'networkx not available',
+                    ha='center', va='center', transform=ax.transAxes)
+            ax.set_title('Network Structure')
+            return fig
         
         # Create network graph
         G = nx.DiGraph()

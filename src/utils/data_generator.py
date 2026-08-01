@@ -11,7 +11,21 @@ import numpy as np
 
 class DataGenerator:
     """Data generation utilities for regression tests."""
-    
+
+    @staticmethod
+    def _rng(random_seed: Optional[int]) -> np.random.RandomState:
+        """Return a local RNG for reproducible, non-global generation.
+
+        Uses ``np.random.RandomState`` so output is byte-identical to the legacy
+        ``np.random.seed`` + ``np.random.*`` path, but the process-global numpy
+        RNG is NOT mutated (which previously coupled successive calls and broke
+        thread-safety). When ``random_seed`` is None a non-deterministic local
+        generator is used.
+        """
+        if random_seed is None:
+            return np.random.RandomState()
+        return np.random.RandomState(random_seed)
+
     @staticmethod
     def linear_data(
         n_samples: int = 100,
@@ -37,14 +51,13 @@ class DataGenerator:
             X: Feature array, shape (n_samples, 1) if return_2d=True, else (n_samples,)
             y: Target array, shape (n_samples,)
         """
-        if random_seed is not None:
-            np.random.seed(random_seed)
-            
+        rng = DataGenerator._rng(random_seed)
+        
         # Generate X values within the specified range
-        X = np.random.uniform(x_range[0], x_range[1], n_samples)
+        X = rng.uniform(x_range[0], x_range[1], n_samples)
         
         # Generate y values with noise
-        y = intercept + slope * X + np.random.normal(0, noise_level, n_samples)
+        y = intercept + slope * X + rng.normal(0, noise_level, n_samples)
         
         # Reshape X to 2D if requested (standard for sklearn)
         if return_2d:
@@ -75,11 +88,10 @@ class DataGenerator:
             X: Feature array
             y: Target array following polynomial relationship
         """
-        if random_seed is not None:
-            np.random.seed(random_seed)
-            
+        rng = DataGenerator._rng(random_seed)
+        
         # Generate X values
-        X = np.random.uniform(x_range[0], x_range[1], n_samples)
+        X = rng.uniform(x_range[0], x_range[1], n_samples)
         
         # Generate polynomial y values
         y = np.zeros(n_samples)
@@ -87,7 +99,7 @@ class DataGenerator:
             y += coef * (X ** i)
             
         # Add noise
-        y += np.random.normal(0, noise_level, n_samples)
+        y += rng.normal(0, noise_level, n_samples)
         
         # Reshape X to 2D if requested
         if return_2d:
@@ -144,9 +156,8 @@ class DataGenerator:
             X: Feature array, shape (n_samples, n_features)
             y: Class labels, shape (n_samples,)
         """
-        if random_seed is not None:
-            np.random.seed(random_seed)
-            
+        rng = DataGenerator._rng(random_seed)
+        
         # Validate inputs to prevent silent data loss / degenerate output.
         if n_samples < n_classes:
             raise ValueError(
@@ -171,7 +182,7 @@ class DataGenerator:
             count = base_per_class + (1 if class_idx < extra else 0)
             
             # Generate samples around center
-            samples = np.random.randn(count, n_features) + center
+            samples = rng.randn(count, n_features) + center
             X_list.append(samples)
             y_list.append(np.full(count, class_idx))
         
@@ -179,7 +190,7 @@ class DataGenerator:
         y = np.hstack(y_list)
         
         # Shuffle
-        indices = np.random.permutation(len(y))
+        indices = rng.permutation(len(y))
         return X[indices], y[indices]
     
     @staticmethod
@@ -203,17 +214,16 @@ class DataGenerator:
             X: Feature array, shape (n_samples, n_features)
             y: Target array, shape (n_samples, n_outputs) or (n_samples,) if n_outputs=1
         """
-        if random_seed is not None:
-            np.random.seed(random_seed)
-            
+        rng = DataGenerator._rng(random_seed)
+        
         # Generate random features
-        X = np.random.randn(n_samples, n_features)
+        X = rng.randn(n_samples, n_features)
         
         # Generate random weights
-        weights = np.random.randn(n_features, n_outputs)
+        weights = rng.randn(n_features, n_outputs)
         
         # Generate targets
-        y = X @ weights + np.random.randn(n_samples, n_outputs) * noise_level
+        y = X @ weights + rng.randn(n_samples, n_outputs) * noise_level
         
         if n_outputs == 1:
             y = y.flatten()
@@ -245,9 +255,8 @@ class DataGenerator:
             t: Time indices, shape (n_samples,)
             y: Time series values, shape (n_samples, n_features) or (n_samples,)
         """
-        if random_seed is not None:
-            np.random.seed(random_seed)
-            
+        rng = DataGenerator._rng(random_seed)
+        
         t = np.arange(n_samples)
         
         # Generate components for each feature
@@ -257,7 +266,7 @@ class DataGenerator:
             y_feature = (
                 trend * t +
                 seasonality_amplitude * np.sin(2 * np.pi * t / seasonality_period) +
-                np.random.randn(n_samples) * noise_level
+                rng.randn(n_samples) * noise_level
             )
             y_list.append(y_feature)
         
@@ -286,14 +295,13 @@ class DataGenerator:
         """
         if not 0.0 <= test_size <= 1.0:
             raise ValueError(f"test_size must be between 0 and 1, got {test_size!r}")
-        if random_seed is not None:
-            np.random.seed(random_seed)
-            
+        rng = DataGenerator._rng(random_seed)
+        
         n_samples = len(X)
         n_test = int(n_samples * test_size)
         
         # Shuffle indices
-        indices = np.random.permutation(n_samples)
+        indices = rng.permutation(n_samples)
         
         test_indices = indices[:n_test]
         train_indices = indices[n_test:]

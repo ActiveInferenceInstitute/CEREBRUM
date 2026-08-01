@@ -284,6 +284,11 @@ def plot_model_ecosystem(
     Returns:
         The matplotlib figure
     """
+    if nx is None:
+        raise ImportError(
+            "plot_model_ecosystem requires networkx; install it or handle its absence "
+            "in the calling context."
+        )
     G = nx.DiGraph()
     
     # Add nodes for each model

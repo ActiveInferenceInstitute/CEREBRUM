@@ -33,12 +33,19 @@ def revert_case(model: Model) -> Model:
     """
     Revert a model to its previous case.
     
+    Uses the model's reversal stack (when available) so that repeated calls walk
+    back through the full case history rather than toggling between two states.
+    Falls back to the immediate `_prior_case` for duck-typed objects that only
+    expose that attribute.
+    
     Args:
         model: The model to revert
         
     Returns:
         The reverted model (same instance, previous case)
     """
+    if hasattr(model, 'revert') and callable(getattr(model, 'revert')):
+        return model.revert()
     if model._prior_case is not None:
         model.case = model._prior_case
     return model

@@ -60,6 +60,24 @@ def test_revert_case_no_prior():
     assert reverted_model == model
     assert model.case == Case.NOMINATIVE # Should remain unchanged
 
+def test_revert_case_multi_step_history():
+    """revert_case must walk back through a multi-step history (not toggle)."""
+    model = Model(name="Multi")
+    transform_case(model, Case.GENITIVE)
+    transform_case(model, Case.ACCUSATIVE)
+    transform_case(model, Case.DATIVE)
+    assert model.case == Case.DATIVE
+
+    revert_case(model)
+    assert model.case == Case.ACCUSATIVE
+    revert_case(model)
+    assert model.case == Case.GENITIVE
+    revert_case(model)
+    assert model.case == Case.NOMINATIVE
+    # No further history -> no-op, stays NOMINATIVE
+    revert_case(model)
+    assert model.case == Case.NOMINATIVE
+
 # Tests for apply_morphosyntactic_alignment
 def test_alignment_nominative_accusative():
     subj = ConcreteTestModel(name="Subj", fe=-1.0)

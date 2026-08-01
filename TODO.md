@@ -106,40 +106,46 @@ all green (442 passed in the combined post-isort check).
 These are the **remaining** Major-class items intentionally NOT implemented this
 pass. Each is concrete and actionable.
 
-### 1. Lexicon component-architecture dead code (partial)
+### 1. Lexicon component-architecture full unification (partial — data integrity done)
 - **Files**: `src/lexicon/core/engine.py` getters `_get_nlp_preprocessor` /
-  `_get_case_tagger` / `_get_graph_assembler` / `_get_paraphrase_generator`;
-  the `NLPPreprocessor`/`CaseTagger`/`GraphAssembler` classes
-- **Why it matters**: Some component classes remain not fully wired into the
-  shipped `process_text` path, which still relies on parallel inline logic.
-  The dedup/stable-ID and secrets/determinism issues were fixed, but a full
-  unification of the component pipeline was not completed this pass.
-- **Suggested fix**: Continue wiring `GraphAssembler`/`NLPPreprocessor` into
+  `_get_case_tagger` / `_get_paraphrase_generator`; the
+  `NLPPreprocessor`/`CaseTagger` classes
+- **Why it matters**: The **data-integrity portion is done and verified** —
+  `_get_entity_deduplicator` + `_get_graph_assembler` are wired into
+  `_build_knowledge_graph`, producing deduplicated, stable CID-based node/claim
+  IDs (verified: 3 input entities incl. a duplicate → 2 unique nodes, stable IDs).
+  What remains is the larger architectural unification: the shipped `process_text`
+  path still uses its own inline LLM logic while the spaCy-based `NLPPreprocessor` /
+  `CaseTagger` component classes exist as a separate (largely unused) pipeline.
+- **Suggested fix**: Continue wiring `NLPPreprocessor`/`CaseTagger` into
   `process_text` and remove the parallel inline implementation, or delete the
-  unused classes; add an integration test on the real path.
+  unused classes; add an integration test on the real path. This is intentionally
+  deferred because it is a large refactor of a live-API-dependent path that cannot
+  be fully validated without a real OpenRouter key/network.
 
-### 2. `revert_case` toggle semantics (H3)
-- **Files**: `src/transformations/case_transformations.py`, `src/core/model.py`
-- **Why it matters**: `_prior_case` is overwritten on each change, so `revert_case`
-  behaves as a 2-state toggle rather than restoring a multi-step history. The
-  docstring claims "maintains history."
-- **Suggested fix**: Introduce a real reversal stack (or document the toggle
-  behavior explicitly) and add a test for multi-step revert.
+---
 
-### 3. Global `np.random.seed()` mutation in data generators (MED-3)
-- **Files**: `src/utils/data_generator.py`
-- **Why it matters**: Static generators mutate the global numpy RNG, coupling
-  successive calls and breaking thread-safety / reproducibility guarantees.
-- **Suggested fix**: Use a local `np.random.Generator(seed)` per call instead of
-  setting the global seed.
+## Completed / Closed (second pass — 2026-08-01, deferred items closed)
 
-### 4. Optional-dependency fail-open/closed inconsistency (visualization)
-- **Files**: `src/visualization/insect/*` (comprehensive_visualizer, neural_visualizer)
-- **Why it matters**: `seaborn`/`networkx` are hoisted at module import, so a
-  missing optional dep disables the whole insect-visualization package; some
-  functions assume `nx` is not `None`.
-- **Suggested fix**: Import lazily inside functions / guard `nx is None`, and use
-  pandas-neutral seaborn style handling.
+These deferred items were implemented and verified after the first push.
+
+- [x] **`revert_case` multi-step history (H3)** — `Model` now maintains a real
+      `_case_stack`; every transition pushes the outgoing case, and `Model.revert()`
+      pops it so repeated calls walk back through the full history instead of
+      toggling. `revert_case()` prefers `model.revert()` and falls back to
+      `_prior_case`. Added `test_revert_case_multi_step_history`.
+- [x] **Global `np.random.seed()` mutation in data generators (MED-3)** — all
+      `DataGenerator` methods now use a local `np.random.RandomState(seed)` via
+      `DataGenerator._rng()` (byte-identical output, non-global). Verified global
+      RNG state is unchanged after generation; 30 tests pass.
+- [x] **Optional-dependency fail-open/closed consistency (visualization)** —
+      `seaborn` import in `comprehensive_visualizer` wrapped in try/except and
+      usage guarded (style selection version-fragile-proofed); `nx.DiGraph()` uses
+      in `neural_visualizer` (2) and `case_visualization.plot_model_ecosystem` (1)
+      are now guarded (`nx is None` → placeholder figure / clear ImportError);
+      `src/visualization/__init__.py` now distinguishes `ModuleNotFoundError`
+      (graceful degrade, logged) from genuine internal `ImportError` (surfaced).
+
 
 ---
 

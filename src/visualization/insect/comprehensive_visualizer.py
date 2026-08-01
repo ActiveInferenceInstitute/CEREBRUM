@@ -16,7 +16,11 @@ demo output is reproducible across runs.
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
-import seaborn as sns
+
+try:
+    import seaborn as sns
+except ImportError:
+    sns = None
 from matplotlib.patches import Circle
 
 try:
@@ -53,9 +57,18 @@ class ComprehensiveVisualizer:
         os.makedirs(self.case_dir, exist_ok=True)
         os.makedirs(self.swarm_dir, exist_ok=True)
         
-        # Set style
-        plt.style.use('seaborn-v0_8')
-        sns.set_palette("husl")
+        # Set style (guarded: style names are version-fragile and seaborn is optional)
+        for style in ('seaborn-v0_8', 'ggplot'):
+            try:
+                plt.style.use(style)
+                break
+            except Exception:
+                continue
+        if sns is not None:
+            try:
+                sns.set_palette("husl")
+            except Exception:
+                pass
         
     def generate_all_visualizations(self, simulation_data: Dict[str, Any]):
         """Generate all comprehensive visualizations."""

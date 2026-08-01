@@ -1,7 +1,7 @@
-from enum import Enum
-from typing import Dict, Any, Optional, List, Tuple
-import uuid
 import logging
+import uuid
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +39,10 @@ class Model:
         self._case = Case.NOMINATIVE  # Default case is NOMINATIVE
         self._prior_case = None
         self._case_history = []
+        # Reversal stack: every case transition pushes the outgoing case so
+        # revert_case can restore a genuine multi-step history (not just a
+        # 2-state toggle).
+        self._case_stack = []
         
         # Each case has its own parameter access patterns and interface configurations
         self._case_configurations = {case: {} for case in Case}
@@ -74,12 +78,36 @@ class Model:
             new_case: The new case to set for this model
         """
         if new_case != self._case:
+            self._case_stack.append(self._case)
             self._prior_case = self._case
             old_case_value = self._case.value
             self._case = new_case
             self._case_history.append((self._prior_case, new_case))
             logger.debug(f"Model '{self.name}' ({self.id}): Case changed from {old_case_value} to {new_case.value}")
             self._apply_case_transformation()
+
+    def revert(self) -> 'Model':
+        """Revert to the previous case, restoring genuine multi-step history.
+
+        Pops the last outgoing case off the reversal stack (populated on every
+        case transition) so repeated calls walk back through the full history
+        rather than toggling between two states.
+
+        Returns:
+            This model, with its case reverted (no-op if nothing to revert).
+        """
+        if not self._case_stack:
+            return self
+
+        prev = self._case_stack.pop()
+        if prev == self._case:
+            return self
+        self._prior_case = self._case
+        self._case = prev
+        self._case_history.append((self._prior_case, prev))
+        logger.debug(f"Model '{self.name}' ({self.id}): Reverted to {prev.value}")
+        self._apply_case_transformation()
+        return self
     
     def _apply_case_transformation(self):
         """Apply transformations when changing between cases"""
