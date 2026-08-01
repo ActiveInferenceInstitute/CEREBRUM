@@ -3,21 +3,33 @@ Comprehensive Visualization Module for CEREBRUM Insect Simulations
 
 This module provides enhanced visualization capabilities to populate all
 visualization directories with comprehensive analysis and animations.
+
+NOTE ON DATA: Many of the subplots in this dashboard are *illustrative* — they
+visualize what a full simulation *would* measure (neural activity, correlation
+matrices, sync levels, etc.) using synthetic data rather than re-measuring a
+live simulation. They are NOT intended to be read as empirical measurements.
+For measured results use the report generators (report_generator.py) and the
+simulation logger (simulation_logger.py). Synthetic generators are seeded so the
+demo output is reproducible across runs.
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from matplotlib.patches import Circle
+import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
+from matplotlib.patches import Circle
+
 try:
     import networkx as nx
 except ImportError:
     nx = None
-from typing import Dict, Any
 import os
 from collections import defaultdict
+from typing import Any, Dict
 
+# Deterministic seed for the illustrative (synthetic) demo plots so repeated
+# runs produce identical output and are reproducible.
+_DEMO_SEED = 42
 
 
 class ComprehensiveVisualizer:
@@ -27,7 +39,11 @@ class ComprehensiveVisualizer:
         self.output_dir = output_dir
         self.visualizations_dir = os.path.join(output_dir, "visualizations")
         os.makedirs(self.visualizations_dir, exist_ok=True)
+        # Reset the global RNG to a fixed seed so all illustrative subplots below
+        # render reproducibly instead of varying run-to-run.
+        np.random.seed(_DEMO_SEED)
         
+
         # Create subdirectories
         self.neural_dir = os.path.join(self.visualizations_dir, "neural_activity")
         self.case_dir = os.path.join(self.visualizations_dir, "case_analysis")

@@ -5,11 +5,12 @@ This module implements the [PHE] pheromonal case for chemical communication
 in insects, including pheromone detection, generation, and processing.
 """
 
-from typing import Dict, Any, Optional, List
-import numpy as np
 import logging
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
+import numpy as np
 
 from src.core.model import Case
 
@@ -212,7 +213,10 @@ class PheromonalCase:
             # Determine direction if source position is available
             direction = None
             if signal.source_position is not None:
-                direction = signal.source_position / np.linalg.norm(signal.source_position)
+                src = np.asarray(signal.source_position, dtype=float)
+                norm = np.linalg.norm(src)
+                if norm > 0:
+                    direction = src / norm
             
             # Update pheromone memory for learning
             self._update_pheromone_memory(signal, signal_strength)

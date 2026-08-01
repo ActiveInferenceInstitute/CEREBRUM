@@ -4,7 +4,7 @@
 
 title: "Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling (CEREBRUM)"
 author: "Daniel Ari Friedman"
-date: "Version 1.2 (2025-04-12)"
+date: "Version 1.5.0 (2025-04-16)"
 institute: "Active Inference Institute"
 email: "<daniel@activeinference.institute>"
 orcid: "0000-0001-6232-9096"
@@ -18,7 +18,7 @@ abstract: "This paper introduces the Case-Enabled Reasoning Engine with Bayesian
 <div style="text-align: center; margin-bottom: 2em;">
 <h1>Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling (CEREBRUM)</h1>
 <h2>Daniel Ari Friedman</h2>
-<h3>Version 1.2 (2025-04-12)</h3>
+<h3>Version 1.5.0 (2025-04-16)</h3>
 
 **Institution:** Active Inference Institute  
 **Email:** <daniel@activeinference.institute>  

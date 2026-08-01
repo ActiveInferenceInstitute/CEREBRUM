@@ -4,14 +4,16 @@ LEXICON Structured Case Determiner
 Advanced case determination using structured LLM calls for accurate grammatical case assignment.
 """
 
+import hashlib
 import json
 import re
-from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
+from src.llm.OpenRouter import OpenRouterClient
 
 from ..core.config import LexiconConfig
 from ..core.logging import get_logger
-from src.llm.OpenRouter import OpenRouterClient
 
 
 @dataclass
@@ -530,14 +532,15 @@ Respond with ONLY this JSON format - no other text:
             confidence = 0.6
             rationale = "Quantitative measurement - likely object"
         
-        # Default diversification - avoid too much locative
+        # Default diversification - avoid too much locative.
+        # Deterministic: derive the case from a stable hash of the entity text so
+        # repeated runs (and parallel workers) always produce the same label.
         elif case == "locative" and confidence <= 0.4:
-            # Randomly assign different cases to increase diversity
-            import random
             alternative_cases = ["nominative", "accusative", "instrumental"]
-            case = random.choice(alternative_cases)
+            digest = hashlib.md5(entity_text.strip().lower().encode()).digest()
+            case = alternative_cases[digest[0] % len(alternative_cases)]
             confidence = 0.3
-            rationale = f"Diversified assignment to reduce locative bias"
+            rationale = "Diversified assignment to reduce locative bias"
         
         return CaseAssignment(
             entity_text=entity_text,

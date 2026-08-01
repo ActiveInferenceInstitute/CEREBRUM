@@ -13,7 +13,7 @@ CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unifie
 ## Publication Information
 
 - **Author:** Daniel Ari Friedman
-- **Version:** 1.4
+- **Version:** 1.5.0
 - **Date:** April 16, 2025
 - **DOI:** [10.5281/zenodo.15170907](https://doi.org/10.5281/zenodo.15170907)
 - **Zenodo Record:** [https://zenodo.org/records/15231156](https://zenodo.org/records/15231156)
@@ -137,7 +137,7 @@ If you use CEREBRUM in your research, please cite:
   title = {CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling},
   year = {2025},
   month = {April},
-  version = {1.4},
+  version = {1.5.0},
   doi = {10.5281/zenodo.15170907},
   url = {https://doi.org/10.5281/zenodo.15170907},
   publisher = {Active Inference Institute},

@@ -5,11 +5,13 @@ This module generates detailed reports in both JSON and Markdown formats
 for all simulation analysis areas.
 """
 
-import os
 import json
-import numpy as np
+import os
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any, Dict
+
+import numpy as np
+
 
 class ComprehensiveReportGenerator:
     """Generates comprehensive reports in multiple formats."""
@@ -36,15 +38,18 @@ class ComprehensiveReportGenerator:
     def generate_performance_report(self, simulation_data: Dict[str, Any]) -> str:
         """Generate performance analysis report."""
         events = simulation_data.get("events", [])
-        
-        # Calculate performance metrics
-        confidences = [event["processed_data"]["confidence"] for event in events]
+
+        def _conf(event):
+            return event.get("processed_data", {}).get("confidence", 0.0)
+
+        # Calculate performance metrics from real event data only.
+        confidences = [_conf(event) for event in events]
         insect_performance = {}
-        
-        for insect_name in set(event["insect_id"] for event in events):
-            insect_events = [e for e in events if e["insect_id"] == insect_name]
-            insect_confidences = [e["processed_data"]["confidence"] for e in insect_events]
-            
+
+        for insect_name in set(event.get("insect_id", "unknown") for event in events):
+            insect_events = [e for e in events if e.get("insect_id", "unknown") == insect_name]
+            insect_confidences = [_conf(e) for e in insect_events]
+
             insect_performance[insect_name] = {
                 "total_events": len(insect_events),
                 "average_confidence": np.mean(insect_confidences),
@@ -52,10 +57,8 @@ class ComprehensiveReportGenerator:
                 "min_confidence": np.min(insect_confidences),
                 "confidence_std": np.std(insect_confidences),
                 "success_rate": len([c for c in insect_confidences if c > 0.5]) / len(insect_confidences),
-                "energy_efficiency": np.random.uniform(0.7, 0.95),
-                "learning_rate": np.random.uniform(0.01, 0.05)
             }
-        
+
         # Overall performance
         overall_performance = {
             "total_events": len(events),
@@ -100,8 +103,6 @@ class ComprehensiveReportGenerator:
 - **Total Events**: {metrics['total_events']}
 - **Average Confidence**: {metrics['average_confidence']:.3f}
 - **Success Rate**: {metrics['success_rate']:.1%}
-- **Energy Efficiency**: {metrics['energy_efficiency']:.1%}
-- **Learning Rate**: {metrics['learning_rate']:.3f}
 
 """
         
@@ -114,7 +115,7 @@ class ComprehensiveReportGenerator:
         # Analyze behavioral patterns
         behavioral_states = {}
         for event in events:
-            state = event["behavioral_state"]
+            state = event.get("behavioral_state", "unknown")
             behavioral_states[state] = behavioral_states.get(state, 0) + 1
         
         # Calculate behavioral metrics
@@ -128,9 +129,9 @@ class ComprehensiveReportGenerator:
         
         # Analyze success rates by behavior
         for state in behavioral_states.keys():
-            state_events = [e for e in events if e["behavioral_state"] == state]
+            state_events = [e for e in events if e.get("behavioral_state", "unknown") == state]
             if state_events:
-                confidences = [e["processed_data"]["confidence"] for e in state_events]
+                confidences = [e.get("processed_data", {}).get("confidence", 0.0) for e in state_events]
                 behavioral_analysis["behavior_success_rates"][state] = {
                     "count": len(state_events),
                     "success_rate": len([c for c in confidences if c > 0.5]) / len(confidences),
@@ -186,23 +187,23 @@ class ComprehensiveReportGenerator:
         # Analyze case transitions
         case_transitions = {}
         for i in range(len(events) - 1):
-            current_case = events[i]["case"]
-            next_case = events[i + 1]["case"]
+            current_case = events[i].get("case", "unknown")
+            next_case = events[i + 1].get("case", "unknown")
             if current_case != next_case:
                 transition = f"{current_case}->{next_case}"
                 case_transitions[transition] = case_transitions.get(transition, 0) + 1
         
-        # Analyze case effectiveness
+        # Analyze case effectiveness (real confidence data only; no synthetic
+        # "appropriateness" field fabricated from thin air).
         case_effectiveness = {}
-        for case_name in set(event["case"] for event in events):
-            case_events = [e for e in events if e["case"] == case_name]
+        for case_name in set(event.get("case", "unknown") for event in events):
+            case_events = [e for e in events if e.get("case", "unknown") == case_name]
             if case_events:
-                case_confidences = [e["processed_data"]["confidence"] for e in case_events]
+                case_confidences = [e.get("processed_data", {}).get("confidence", 0.0) for e in case_events]
                 case_effectiveness[case_name] = {
                     "usage_count": len(case_events),
                     "average_confidence": np.mean(case_confidences),
                     "success_rate": len([c for c in case_confidences if c > 0.5]) / len(case_confidences),
-                    "appropriateness": np.random.uniform(0.6, 0.9)
                 }
         
         case_analysis = {
@@ -215,7 +216,7 @@ class ComprehensiveReportGenerator:
         # Calculate case distribution
         case_counts = {}
         for event in events:
-            case = event["case"]
+            case = event.get("case", "unknown")
             case_counts[case] = case_counts.get(case, 0) + 1
         case_analysis["case_distribution"] = case_counts
         
@@ -262,44 +263,45 @@ class ComprehensiveReportGenerator:
 - **Usage Count**: {metrics['usage_count']}
 - **Success Rate**: {metrics['success_rate']:.1%}
 - **Average Confidence**: {metrics['average_confidence']:.3f}
-- **Appropriateness**: {metrics['appropriateness']:.3f}
+
 
 """
-        
         return md
     
     def generate_neural_activity_report(self, simulation_data: Dict[str, Any]) -> str:
         """Generate neural activity analysis report."""
         events = simulation_data.get("events", [])
         
-        # Generate neural activity patterns for each insect
+        # Generate neural activity patterns for each insect.
+        # No fabricated neural-region activity: event data only carries
+        # confidence. We report honest event-derived summaries instead of
+        # np.random.* values presented as measured neural activity.
         neural_activity = {
             "activity_patterns": {},
             "learning_progress": {},
             "memory_utilization": {}
         }
         
-        insect_names = set(event["insect_id"] for event in events)
+        insect_names = set(event.get("insect_id", "unknown") for event in events)
         for name in insect_names:
+            insect_events = [e for e in events if e.get("insect_id", "unknown") == name]
+            confidences = [e.get("processed_data", {}).get("confidence", 0.0) for e in insect_events]
+
             neural_activity["activity_patterns"][name] = {
-                "mushroom_body_activity": [np.random.uniform(0.2, 0.8) for _ in range(100)],
-                "central_complex_activity": [np.random.uniform(0.3, 0.9) for _ in range(100)],
-                "antennal_lobe_activity": [np.random.uniform(0.1, 0.7) for _ in range(100)],
-                "optic_lobe_activity": [np.random.uniform(0.4, 0.8) for _ in range(100)]
+                "mean_confidence": float(np.mean(confidences)) if confidences else 0.0,
+                "max_confidence": float(np.max(confidences)) if confidences else 0.0,
+                "min_confidence": float(np.min(confidences)) if confidences else 0.0,
+                "sample_count": len(confidences),
+                "note": "Neural-region activity is not present in event data; confidence summary shown.",
             }
-            
+
             neural_activity["learning_progress"][name] = {
-                "learning_rate": np.random.uniform(0.01, 0.05),
-                "memory_formation": np.random.uniform(0.6, 0.9),
-                "skill_acquisition": np.random.uniform(0.4, 0.8),
-                "adaptation_speed": np.random.uniform(0.3, 0.7)
+                "total_events": len(insect_events),
+                "note": "No neural learning signal recorded; event counts shown.",
             }
-            
+
             neural_activity["memory_utilization"][name] = {
-                "short_term_memory": np.random.uniform(0.3, 0.7),
-                "long_term_memory": np.random.uniform(0.5, 0.9),
-                "working_memory": np.random.uniform(0.4, 0.8),
-                "memory_efficiency": np.random.uniform(0.6, 0.95)
+                "note": "No memory-utilization measurements recorded.",
             }
         
         # Save JSON report
@@ -326,13 +328,14 @@ This report analyzes the neural activity patterns, learning progress, and memory
 ## Neural Activity Patterns
 
 """
-        
         for insect_name, patterns in neural_data['activity_patterns'].items():
             md += f"""### {insect_name}
-- **Mushroom Body Activity**: Average {np.mean(patterns['mushroom_body_activity']):.3f}
-- **Central Complex Activity**: Average {np.mean(patterns['central_complex_activity']):.3f}
-- **Antennal Lobe Activity**: Average {np.mean(patterns['antennal_lobe_activity']):.3f}
-- **Optic Lobe Activity**: Average {np.mean(patterns['optic_lobe_activity']):.3f}
+- **Mean Confidence**: {patterns['mean_confidence']:.3f}
+- **Max Confidence**: {patterns['max_confidence']:.3f}
+- **Min Confidence**: {patterns['min_confidence']:.3f}
+- **Sample Count**: {patterns['sample_count']}
+- **Note**: {patterns['note']}
+
 
 """
         
@@ -340,10 +343,9 @@ This report analyzes the neural activity patterns, learning progress, and memory
         
         for insect_name, learning in neural_data['learning_progress'].items():
             md += f"""### {insect_name}
-- **Learning Rate**: {learning['learning_rate']:.3f}
-- **Memory Formation**: {learning['memory_formation']:.3f}
-- **Skill Acquisition**: {learning['skill_acquisition']:.3f}
-- **Adaptation Speed**: {learning['adaptation_speed']:.3f}
+- **Total Events**: {learning['total_events']}
+- **Note**: {learning['note']}
+
 
 """
         
@@ -351,10 +353,8 @@ This report analyzes the neural activity patterns, learning progress, and memory
         
         for insect_name, memory in neural_data['memory_utilization'].items():
             md += f"""### {insect_name}
-- **Short-term Memory**: {memory['short_term_memory']:.3f}
-- **Long-term Memory**: {memory['long_term_memory']:.3f}
-- **Working Memory**: {memory['working_memory']:.3f}
-- **Memory Efficiency**: {memory['memory_efficiency']:.3f}
+- **Note**: {memory['note']}
+
 
 """
         
@@ -364,24 +364,29 @@ This report analyzes the neural activity patterns, learning progress, and memory
         """Generate swarm analysis report."""
         events = simulation_data.get("events", [])
         
-        # Analyze swarm coordination
+        # Analyze swarm coordination. All metrics are derived from real event
+        # data; no np.random.* fabrication.
         swarm_coordination = {}
+        from collections import Counter as _Counter
         for step in range(0, 100, 25):  # Every 25 steps
-            step_events = [e for e in events if e["step"] == step]
+            step_events = [e for e in events if e.get("step") == step]
             if step_events:
+                confs = [e.get("processed_data", {}).get("confidence", 0.0) for e in step_events]
+                states_in_step = [e.get("behavioral_state", "unknown") for e in step_events]
+                mode_count = max(_Counter(states_in_step).values()) if states_in_step else 0
+                behavioral_sync = mode_count / len(step_events) if step_events else 0.0
                 swarm_coordination[f"step_{step}"] = {
                     "total_insects_active": len(step_events),
-                    "average_confidence": np.mean([e["processed_data"]["confidence"] for e in step_events]),
-                    "behavioral_synchronization": np.random.uniform(0.6, 0.9),
-                    "communication_efficiency": np.random.uniform(0.5, 0.8)
+                    "average_confidence": float(np.mean(confs)),
+                    "behavioral_synchronization": float(behavioral_sync),
                 }
         
-        # Collective behavior analysis
+        # Collective behavior analysis (real event-derived summaries)
+        all_confidences = [e.get("processed_data", {}).get("confidence", 0.0) for e in events]
         collective_behavior = {
-            "foraging_efficiency": np.random.uniform(0.7, 0.95),
-            "navigation_accuracy": np.random.uniform(0.6, 0.9),
-            "social_cohesion": np.random.uniform(0.5, 0.8),
-            "task_allocation": np.random.uniform(0.6, 0.85)
+            "average_confidence": float(np.mean(all_confidences)) if all_confidences else 0.0,
+            "active_insects": len(set(e.get("insect_id", "unknown") for e in events)),
+            "unique_behavioral_states": len(set(e.get("behavioral_state", "unknown") for e in events)),
         }
         
         swarm_analysis = {
@@ -391,12 +396,12 @@ This report analyzes the neural activity patterns, learning progress, and memory
             "swarm_performance": {}
         }
         
-        # Calculate swarm performance metrics
+        # Calculate swarm performance metrics from real data only
+        sync_values = [v.get("behavioral_synchronization", 0.0) for v in swarm_coordination.values()]
         swarm_analysis["swarm_performance"] = {
-            "overall_efficiency": np.mean([collective_behavior["foraging_efficiency"], 
-                                         collective_behavior["navigation_accuracy"]]),
-            "coordination_score": np.mean([v["behavioral_synchronization"] for v in swarm_coordination.values()]),
-            "communication_score": np.mean([v["communication_efficiency"] for v in swarm_coordination.values()])
+            "overall_efficiency": collective_behavior["average_confidence"],
+            "coordination_score": float(np.mean(sync_values)) if sync_values else 0.0,
+            "average_confidence": collective_behavior["average_confidence"],
         }
         
         # Save JSON report
@@ -419,18 +424,17 @@ This report analyzes the neural activity patterns, learning progress, and memory
 
 ## Overview
 - **Total Events**: {swarm_data['total_events']}
-- **Overall Efficiency**: {swarm_data['swarm_performance']['overall_efficiency']:.3f}
+- **Overall Efficiency (mean confidence)**: {swarm_data['swarm_performance']['overall_efficiency']:.3f}
 - **Coordination Score**: {swarm_data['swarm_performance']['coordination_score']:.3f}
-- **Communication Score**: {swarm_data['swarm_performance']['communication_score']:.3f}
 
 ## Collective Behavior
 
-- **Foraging Efficiency**: {swarm_data['collective_behavior']['foraging_efficiency']:.3f}
-- **Navigation Accuracy**: {swarm_data['collective_behavior']['navigation_accuracy']:.3f}
-- **Social Cohesion**: {swarm_data['collective_behavior']['social_cohesion']:.3f}
-- **Task Allocation**: {swarm_data['collective_behavior']['task_allocation']:.3f}
+- **Average Confidence**: {swarm_data['collective_behavior']['average_confidence']:.3f}
+- **Active Insects**: {swarm_data['collective_behavior']['active_insects']}
+- **Unique Behavioral States**: {swarm_data['collective_behavior']['unique_behavioral_states']}
 
 ## Swarm Coordination by Step
+
 
 """
         
@@ -439,7 +443,7 @@ This report analyzes the neural activity patterns, learning progress, and memory
 - **Active Insects**: {coordination['total_insects_active']}
 - **Average Confidence**: {coordination['average_confidence']:.3f}
 - **Behavioral Synchronization**: {coordination['behavioral_synchronization']:.3f}
-- **Communication Efficiency**: {coordination['communication_efficiency']:.3f}
+
 
 """
         
@@ -450,18 +454,16 @@ This report analyzes the neural activity patterns, learning progress, and memory
         events = simulation_data.get("events", [])
         
         # Calculate comprehensive metrics
-        confidences = [event["processed_data"]["confidence"] for event in events]
+        confidences = [event.get("processed_data", {}).get("confidence", 0.0) for event in events]
         
         comprehensive_summary = {
             "simulation_overview": {
                 "total_events": len(events),
-                "total_insects": len(set(event["insect_id"] for event in events)),
-                "simulation_duration": np.random.uniform(40, 60),  # Estimated
-                "events_per_second": len(events) / np.random.uniform(40, 60)
+                "total_insects": len(set(event.get("insect_id", "unknown") for event in events)),
             },
             "performance_summary": {
                 "average_confidence": np.mean(confidences),
-                "success_rate": len([c for c in confidences if c > 0.5]) / len(confidences),
+                "success_rate": len([c for c in confidences if c > 0.5]) / len(confidences) if confidences else 0.0,
                 "confidence_std": np.std(confidences)
             },
             "insect_summary": {},
@@ -470,26 +472,26 @@ This report analyzes the neural activity patterns, learning progress, and memory
         }
         
         # Insect summary
-        for insect_name in set(event["insect_id"] for event in events):
-            insect_events = [e for e in events if e["insect_id"] == insect_name]
-            insect_confidences = [e["processed_data"]["confidence"] for e in insect_events]
+        for insect_name in set(event.get("insect_id", "unknown") for event in events):
+            insect_events = [e for e in events if e.get("insect_id", "unknown") == insect_name]
+            insect_confidences = [e.get("processed_data", {}).get("confidence", 0.0) for e in insect_events]
             comprehensive_summary["insect_summary"][insect_name] = {
                 "total_events": len(insect_events),
                 "average_confidence": np.mean(insect_confidences),
-                "success_rate": len([c for c in insect_confidences if c > 0.5]) / len(insect_confidences)
+                "success_rate": len([c for c in insect_confidences if c > 0.5]) / len(insect_confidences) if insect_confidences else 0.0
             }
         
         # Case summary
         case_counts = {}
         for event in events:
-            case = event["case"]
+            case = event.get("case", "unknown")
             case_counts[case] = case_counts.get(case, 0) + 1
         comprehensive_summary["case_summary"] = case_counts
         
         # Behavioral summary
         behavioral_counts = {}
         for event in events:
-            behavior = event["behavioral_state"]
+            behavior = event.get("behavioral_state", "unknown")
             behavioral_counts[behavior] = behavioral_counts.get(behavior, 0) + 1
         comprehensive_summary["behavioral_summary"] = behavioral_counts
         
@@ -513,8 +515,6 @@ This report analyzes the neural activity patterns, learning progress, and memory
 ## Simulation Overview
 - **Total Events**: {summary_data['simulation_overview']['total_events']}
 - **Total Insects**: {summary_data['simulation_overview']['total_insects']}
-- **Simulation Duration**: {summary_data['simulation_overview']['simulation_duration']:.2f} seconds
-- **Events per Second**: {summary_data['simulation_overview']['events_per_second']:.2f}
 
 ## Performance Summary
 - **Average Confidence**: {summary_data['performance_summary']['average_confidence']:.3f}

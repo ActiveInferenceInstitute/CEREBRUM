@@ -5,17 +5,17 @@ Assembles processed segments into a knowledge graph.
 """
 
 import time
-from typing import List, Dict, Any, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+from src.llm.OpenRouter import OpenRouterClient
 
 from ..core.config import LexiconConfig
 from ..core.logging import get_logger
 from ..paraphrase.generator import ParaphrasedSegment
-from .entity_linker import EntityLinker
 from .cid_generator import generate_cid
-
-from src.llm.OpenRouter import OpenRouterClient
+from .entity_linker import EntityLinker
 
 
 @dataclass
@@ -213,6 +213,23 @@ class GraphAssembler:
             "total_duration": 0.0
         }
     
+    def node_id(self, entity_type: str, content: str) -> str:
+        """
+        Stable content-derived node ID.
+
+        Returns a deterministic ID for a node of ``entity_type`` whose text is
+        ``content``, so the same entity always maps to the same node regardless
+        of build order or timing.
+
+        Args:
+            entity_type: Type of the node (e.g. ``entity``, ``claim``)
+            content: Entity text the node represents
+
+        Returns:
+            Stable content ID
+        """
+        return generate_cid(entity_type, content)
+
     def build_graph(self, segments: List[ParaphrasedSegment]) -> Dict[str, Any]:
         """
         Build a knowledge graph from processed segments.
@@ -226,8 +243,16 @@ class GraphAssembler:
         start_time = time.time()
         self.logger.info(f"Building knowledge graph for {len(segments)} segments")
         
-        # Create a new graph
-        graph_id = generate_cid("graph", str(time.time()))
+        # Create a new graph.
+        # Graph id derived from segment content (not wall-clock time) so two
+        # graphs built for the same content share an id and no id ever collides
+        # when graphs are built within the same instant.
+        if segments:
+            content_sig = "\x1f".join(s.text for s in segments)
+            graph_id = generate_cid("graph", content_sig)
+        else:
+            import uuid
+            graph_id = generate_cid("graph", f"empty-{uuid.uuid4()}")
         graph = KnowledgeGraph(
             id=graph_id,
             metadata={

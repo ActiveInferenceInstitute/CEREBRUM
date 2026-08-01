@@ -5,8 +5,8 @@ Targets the uncovered _update_* methods and free_energy calculation
 to raise coverage from 58% toward 80%+.
 """
 
-import pytest
 import numpy as np
+import pytest
 
 from src.core.model import Case
 from src.core.neural_network import NeuralNetworkModel
@@ -99,6 +99,31 @@ class TestForwardBackward:
         nn.backward(X, y)
         changed = any(not np.array_equal(old_weights[i], nn.weights[i]) for i in range(len(nn.weights)))
         assert changed
+
+    def test_backward_with_metrics_returns_gradients(self, nn):
+        """Regression: _backward_with_metrics must return one gradient per layer."""
+        X = np.random.randn(10, 2)
+        y = np.random.randn(10, 1)
+        y_pred = nn.predict(X)
+        weight_updates, gradients = nn._backward_with_metrics(X, y, y_pred)
+        # One gradient per weight matrix (input->hidden, hidden->output)
+        assert len(gradients) == len(nn.weights)
+        for grad, weight in zip(gradients, nn.weights):
+            assert grad.shape == weight.shape
+        # weight_updates list is produced but empty in the current implementation
+        assert isinstance(weight_updates, list)
+
+    @pytest.mark.parametrize("activation", ["relu", "sigmoid", "tanh", "linear"])
+    def test_backward_with_metrics_all_activations(self, activation):
+        """_backward_with_metrics must not raise for any supported activation."""
+        model = NeuralNetworkModel(
+            name="ActNN", input_dim=2, output_dim=1, hidden_dims=[3], activation=activation
+        )
+        X = np.random.randn(8, 2)
+        y = np.random.randn(8, 1)
+        y_pred = model.predict(X)
+        _, gradients = model._backward_with_metrics(X, y, y_pred)
+        assert len(gradients) == len(model.weights)
 
     def test_predict(self, nn):
         X = np.random.randn(5, 2)

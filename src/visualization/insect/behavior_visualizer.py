@@ -5,18 +5,19 @@ This module provides visualization tools for insect behavioral patterns,
 including individual behaviors, swarm dynamics, and behavioral transitions.
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from matplotlib.patches import Circle
-from typing import Dict, Any, List, Optional, Tuple
 import logging
 import os
 import time
 from collections import defaultdict, deque
+from typing import Any, Dict, List, Optional, Tuple
+
+import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.patches import Circle
 
 from src.core.model import Case
-from src.models.insect.base import InsectModel, BehavioralState
+from src.models.insect.base import BehavioralState, InsectModel
 
 logger = logging.getLogger(__name__)
 
@@ -423,7 +424,10 @@ class BehaviorPatternVisualizer:
         
         # Plot transition probabilities
         row_sums = transition_matrix.sum(axis=1, keepdims=True)
-        transition_probs = np.divide(transition_matrix, row_sums, where=row_sums != 0)
+        # Guard against zero row sums (states never visited): divide in place,
+        # leaving zero-probability rows as zeros.
+        transition_probs = np.zeros_like(transition_matrix, dtype=float)
+        np.divide(transition_matrix, row_sums, out=transition_probs, where=row_sums != 0)
         
         im2 = ax2.imshow(transition_probs, cmap='Reds', aspect='auto')
         ax2.set_title('Transition Probabilities')

@@ -5,12 +5,13 @@ This module implements the [SWARM] case for collective behavior and swarm intell
 in insects, including emergent behaviors, collective decision making, and swarm dynamics.
 """
 
-from typing import Dict, Any, Optional, List
-import numpy as np
 import logging
+from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from collections import defaultdict
+from typing import Any, Dict, List, Optional
+
+import numpy as np
 
 from src.core.model import Case
 
@@ -206,9 +207,15 @@ class SwarmCase:
         
         # Compute alignment
         velocities = np.array([member.velocity for member in self.members.values()])
-        if np.any(velocities):
-            velocity_magnitudes = np.linalg.norm(velocities, axis=1)
-            normalized_velocities = velocities / velocity_magnitudes[:, np.newaxis]
+        # Guard against per-member zero velocity: a zero-velocity member yields
+        # NaN rows when dividing by its (zero) magnitude, contaminating alignment.
+        velocity_magnitudes = np.linalg.norm(velocities, axis=1)
+        if np.any(velocity_magnitudes):
+            normalized_velocities = np.zeros_like(velocities, dtype=float)
+            np.divide(
+                velocities, velocity_magnitudes[:, np.newaxis],
+                out=normalized_velocities, where=velocity_magnitudes[:, np.newaxis] != 0
+            )
             mean_velocity = np.mean(normalized_velocities, axis=0)
             self.swarm_state.alignment = np.linalg.norm(mean_velocity)
         else:

@@ -4,10 +4,11 @@ Tests for data_generator module.
 Tests data generation utilities for CEREBRUM.
 """
 
-import pytest
-import numpy as np
 import sys
 from pathlib import Path
+
+import numpy as np
+import pytest
 
 # Ensure src is in path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -136,16 +137,25 @@ class TestClassificationData:
     """Tests for classification data generation."""
     
     def test_generates_correct_shape(self):
-        """Test that classification_data generates correct shapes."""
+        """Test that classification_data generates exactly n_samples rows."""
         X, y = DataGenerator.classification_data(n_samples=100, n_features=4, n_classes=3)
-        assert X.shape == (99, 4)  # May be slightly less due to integer division
-        assert y.shape == (99,)
+        assert X.shape == (100, 4)  # exactly n_samples, no silent truncation
+        assert y.shape == (100,)
     
     def test_correct_number_of_classes(self):
         """Test that correct number of classes are generated."""
-        X, y = DataGenerator.classification_data(n_samples=100, n_classes=5)
+        X, y = DataGenerator.classification_data(n_samples=100, n_features=5, n_classes=5)
         unique_classes = np.unique(y)
         assert len(unique_classes) == 5
+
+    def test_n_samples_lt_n_classes_raises(self):
+        with pytest.raises(ValueError):
+            DataGenerator.classification_data(n_samples=3, n_classes=5)
+
+    def test_n_features_lt_n_classes_raises(self):
+        # 5 distinct class centers cannot be placed in 2 dimensions
+        with pytest.raises(ValueError):
+            DataGenerator.classification_data(n_samples=100, n_features=2, n_classes=5)
     
     def test_reproducibility(self):
         """Test that same seed produces same data."""

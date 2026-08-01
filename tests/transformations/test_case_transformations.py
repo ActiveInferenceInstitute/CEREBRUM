@@ -1,13 +1,16 @@
-import pytest
 from typing import Any, Dict
-from src.core.model import Model, Case
+
+import pytest
+
+from src.core.model import Case, Model
 from src.transformations.case_transformations import (
-    transform_case,
-    revert_case,
     apply_morphosyntactic_alignment,
+    convert_message_between_cases,
     create_case_relationship,
-    convert_message_between_cases
+    revert_case,
+    transform_case,
 )
+
 
 # Helper Concrete Test Model Class
 class ConcreteTestModel(Model):
@@ -161,6 +164,49 @@ def test_create_case_relationship(rel_type, expected_source_case, expected_targe
     # Check connections
     assert (target, rel_type) in source.connections
     assert (source, f"inverse_{rel_type}") in target.connections
+
+
+# ── Regression: dual-Model unification (models.base.Model == core Model) ──
+
+def test_linear_regression_model_has_full_case_machinery():
+    """LinearRegressionModel must share the core Model's case machinery so
+    transformations do not crash on it (regression for the dual-base-class bug)."""
+    from src.models.base import Case as BCase
+    from src.models.linear_regression import LinearRegressionModel
+
+    m = LinearRegressionModel("lr", BCase.NOMINATIVE)
+    assert hasattr(m, "connect")
+    assert hasattr(m, "_prior_case")
+    assert hasattr(m, "get_precision")
+    assert hasattr(m, "_case_history")
+    assert hasattr(m, "data_buffer")
+
+    # create_case_relationship previously crashed with AttributeError (no .connect)
+    m2 = LinearRegressionModel("lr2", BCase.NOMINATIVE)
+    create_case_relationship(m, m2, "generates")
+    assert any(m.connections)
+
+    # revert_case previously crashed (no _prior_case)
+    transform_case(m, Case.DATIVE)
+    revert_case(m)
+    assert m.case == Case.NOMINATIVE
+
+
+def test_models_base_model_is_core_model_with_case_kwarg():
+    """src.models.base.Model must be backed by the full core model."""
+    from src.models.base import Model as BaseModel
+
+    m = BaseModel(name="bm", case=Case.ACCUSATIVE)
+    # Full machinery present
+    assert hasattr(m, "connect")
+    assert hasattr(m, "get_precision")
+    assert hasattr(m, "_case_history")
+    assert m.case == Case.ACCUSATIVE
+    # core hook fires on transition
+    m.case = Case.GENITIVE
+    assert len(m._case_history) == 1
+    assert m._prior_case == Case.ACCUSATIVE
+
 
 # Tests for convert_message_between_cases (Stub)
 def test_convert_message_stub():

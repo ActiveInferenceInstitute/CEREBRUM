@@ -5,19 +5,20 @@ This module provides comprehensive logging and tracking capabilities for insect 
 including case performance, behavioral patterns, and simulation statistics.
 """
 
-import json
 import csv
+import json
 import logging
 import os
 import time
-from typing import Dict, Any, List, Optional
-from dataclasses import dataclass, field, asdict
 from collections import defaultdict, deque
-import numpy as np
+from dataclasses import asdict, dataclass, field
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
+import numpy as np
 
 from src.core.model import Case
-from src.models.insect.base import InsectModel, BehavioralState
+from src.models.insect.base import BehavioralState, InsectModel
 from src.utils.path_utils import get_output_dir
 
 
@@ -82,16 +83,24 @@ class InsectSimulationLogger:
         
         self.max_history = max_history
         self.events = deque(maxlen=max_history)
+        # Unbounded full history for export, so exported data matches the raw
+        # log files even when `self.events` (a bounded deque) has dropped events.
+        self._all_events = []
         self.case_performance = defaultdict(list)
         self.behavioral_patterns = defaultdict(list)
         self.simulation_statistics = defaultdict(list)
         
-        # Create log files
+        # Create log files (write-mode reset so runs do not interleave/duplicate)
         self.event_log_file = os.path.join(self.insect_log_dir, "simulation_events.json")
         self.case_log_file = os.path.join(self.insect_log_dir, "case_performance.csv")
         self.behavior_log_file = os.path.join(self.insect_log_dir, "behavioral_patterns.csv")
         self.statistics_file = os.path.join(self.insect_log_dir, "simulation_statistics.json")
-        
+        # Reset aggregate files at init so each run starts clean.
+        for f in (self.event_log_file, self.statistics_file):
+            open(f, 'w').close()
+        for f in (self.case_log_file, self.behavior_log_file):
+            open(f, 'w', newline='').close()
+
         logger.info(f"Initialized InsectSimulationLogger in {self.insect_log_dir}")
     
     def log_event(self, insect: InsectModel, event_type: str, 
@@ -118,6 +127,7 @@ class InsectSimulationLogger:
         )
         
         self.events.append(event)
+        self._all_events.append(event)
         
         # Log to file
         self._write_event_to_file(event)
@@ -289,7 +299,7 @@ class InsectSimulationLogger:
             Dictionary containing simulation summary
         """
         summary = {
-            'total_events': len(self.events),
+            'total_events': len(self._all_events),
             'case_performance': {},
             'behavioral_patterns': {},
             'simulation_statistics': {}
@@ -348,7 +358,7 @@ class InsectSimulationLogger:
             
             export_data = {
                 'summary': self.get_simulation_summary(),
-                'events': [asdict(event) for event in self.events],
+                'events': [asdict(event) for event in self._all_events],
                 'case_performance': {
                     case.value: [asdict(record) for record in records]
                     for case, records in self.case_performance.items()
@@ -373,8 +383,8 @@ class InsectSimulationLogger:
                 writer.writerow(['timestamp', 'data_type', 'insect_id', 'case', 'behavioral_state', 
                                'event_type', 'performance_metrics', 'context', 'metadata'])
                 
-                # Write events
-                for event in self.events:
+                # Write events (full history so CSV matches the JSON export)
+                for event in self._all_events:
                     writer.writerow([
                         event.timestamp,
                         'event',

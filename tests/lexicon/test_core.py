@@ -5,20 +5,31 @@ Tests LexiconConfig, exceptions, StructuredLogFormatter, ContextAdapter,
 LoggingTimer, and get_default_config — all with real logic, no mocks.
 """
 
-import pytest
 import json
 import logging
 
+import pytest
+
 from src.lexicon.core.config import LexiconConfig, get_default_config
 from src.lexicon.core.exceptions import (
-    LexiconError, ConfigurationError, APIError, ModelError, InputError,
-    GraphError, StorageError, ProcessingError, RateLimitError,
-    AuthenticationError, ParsingError,
+    APIError,
+    AuthenticationError,
+    ConfigurationError,
+    GraphError,
+    InputError,
+    LexiconError,
+    ModelError,
+    ParsingError,
+    ProcessingError,
+    RateLimitError,
+    StorageError,
 )
 from src.lexicon.core.logging import (
-    StructuredLogFormatter, ContextAdapter, LoggingTimer, get_logger,
+    ContextAdapter,
+    LoggingTimer,
+    StructuredLogFormatter,
+    get_logger,
 )
-
 
 # ─── Config ───────────────────────────────────────────────────────────
 
@@ -33,6 +44,7 @@ class TestLexiconConfig:
     def test_save_and_load(self, tmp_path):
         cfg = LexiconConfig(
             openrouter_api_key="test",
+            default_model="openai/gpt-4o",
             output_dir=tmp_path / "out",
             cache_dir=tmp_path / "cache",
         )
@@ -41,7 +53,26 @@ class TestLexiconConfig:
         assert save_path.exists()
 
         loaded = LexiconConfig.load(save_path)
-        assert loaded.openrouter_api_key == "test"
+        # The API key is a secret and is intentionally NOT persisted to disk;
+        # non-secret fields still round-trip.
+        assert loaded.default_model == "openai/gpt-4o"
+        assert loaded.openrouter_api_key is None or loaded.openrouter_api_key != "test"
+
+    def test_does_not_persist_api_key(self, tmp_path):
+        cfg = LexiconConfig(
+            openrouter_api_key="sk-super-secret-xyz",
+            output_dir=tmp_path / "out",
+            cache_dir=tmp_path / "cache",
+        )
+        save_path = tmp_path / "config.json"
+        cfg.save(save_path)
+
+        raw = save_path.read_text()
+        assert "sk-super-secret-xyz" not in raw
+        assert "openrouter_api_key" not in raw
+
+        loaded = LexiconConfig.load(save_path)
+        assert loaded.openrouter_api_key != "sk-super-secret-xyz"
 
     def test_get_default_config(self, tmp_path, monkeypatch):
         monkeypatch.setenv("LEXICON_OUTPUT_DIR", str(tmp_path / "default_out"))

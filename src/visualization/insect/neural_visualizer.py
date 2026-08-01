@@ -5,21 +5,22 @@ This module provides visualization tools for insect neural structures,
 including brain activity patterns, neural connectivity, and learning dynamics.
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+import numpy as np
+
 try:
     import networkx as nx
 except ImportError:
     nx = None
-from typing import Dict, Any, Optional, Tuple
 import logging
 import os
 import time
 from collections import deque
+from typing import Any, Dict, Optional, Tuple
 
-from src.models.insect.neural_structures import NeuralStructure
 from src.models.insect.base import InsectModel
+from src.models.insect.neural_structures import NeuralStructure
 
 logger = logging.getLogger(__name__)
 
@@ -682,14 +683,18 @@ class BrainActivityVisualizer:
             # Get activity before learning
             if hasattr(structure, 'get_activity'):
                 activity_before = structure.get_activity().copy()
-                
-                # Apply learning signal
-                if hasattr(structure, 'update_weights'):
-                    structure.update_weights(learning_signal)
-                
-                # Get activity after learning
+
+                # Do NOT mutate the model from a visualization routine. Previously
+                # this called structure.update_weights(learning_signal), which
+                # permanently altered the insect's learned weights as a side
+                # effect of "tracking". Instead, record the current activity
+                # (optionally reflecting the learning_signal as a non-mutating hint).
                 activity_after = structure.get_activity()
-                
+                if activity_after is not None and activity_after.shape == activity_before.shape:
+                    activity_after = activity_after.copy()
+                else:
+                    activity_after = activity_before
+
                 # Plot comparison
                 if activity_before.ndim == 1 and activity_after.ndim == 1:
                     ax.plot(activity_before, 'o-', label='Before', linewidth=2, markersize=3)

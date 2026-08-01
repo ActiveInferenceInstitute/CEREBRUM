@@ -5,17 +5,17 @@ This module provides a centralized manager for coordinating case transformations
 and case-specific behavior across models.
 """
 
-from typing import Dict, Any, List, Optional, Tuple
 import logging
+from typing import Any, Dict, List, Optional, Tuple
 
-from ..core.model import Model, Case
-from .nominative import NominativeCase
+from ..core.model import Case, Model
+from .ablative import AblativeCase
 from .accusative import AccusativeCase
 from .dative import DativeCase
 from .genitive import GenitiveCase
 from .instrumental import InstrumentalCase
 from .locative import LocativeCase
-from .ablative import AblativeCase
+from .nominative import NominativeCase
 from .vocative import VocativeCase
 
 logger = logging.getLogger(__name__)
@@ -190,19 +190,30 @@ class CaseManager:
         """
         Calculate free energy using the appropriate case handler.
         
+        Prefers the model's own `free_energy()` implementation when available
+        (it reflects the real Bayesian state); otherwise falls back to the
+        case handler's default so the communication still returns a float.
+        
         Args:
             model: The model to calculate free energy for
             
         Returns:
             The calculated free energy
         """
+        # Prefer the genuinely computed model free energy; the base-class
+        # Model.free_energy() raises NotImplementedError, which we treat as
+        # "not overridden" and defer to the handler default.
+        if hasattr(model, 'free_energy') and callable(model.free_energy):
+            try:
+                fe = model.free_energy()
+                if fe is not None:
+                    return float(fe)
+            except (NotImplementedError, TypeError, ValueError):
+                pass
+
         case = model.case
         handler = self.case_handlers[case]
         if hasattr(handler, 'calculate_free_energy'):
             return handler.calculate_free_energy(model)
-
-        # Fall back to model's free_energy method if handler has no calculate_free_energy
-        if hasattr(model, 'free_energy') and callable(model.free_energy):
-            return model.free_energy()
 
         return 1.0

@@ -1,8 +1,9 @@
-from typing import Dict, Any, Optional
-import numpy as np
 import logging
+from typing import Any, Dict, Optional
 
-from src.core.model import Model, Case
+import numpy as np
+
+from src.core.model import Case, Model
 
 logger = logging.getLogger(__name__)
 
@@ -35,12 +36,21 @@ class ActiveInferenceModel(Model):
         """
         super().__init__(name, parameters)
         
-        # Initialize model dimensions based on inputs or defaults
+        # Initialize model dimensions based on inputs or defaults.
+        # Respect parameters-provided dims (e.g. InsectModel passes n_states/n_observations
+        # in `parameters` while omitting prior_means); prior_means takes precedence.
         self.n_states = 1
         self.n_observations = 1
         
         if prior_means is not None:
             self.n_states = len(prior_means)
+        elif parameters is not None and parameters.get('n_states'):
+            self.n_states = int(parameters['n_states'])
+        
+        if parameters is not None and parameters.get('n_observations'):
+            self.n_observations = int(parameters['n_observations'])
+        elif prior_means is not None:
+            self.n_observations = self.n_states
         
         # Set up prior distributions
         self.prior_means = prior_means if prior_means is not None else np.zeros(self.n_states)
@@ -242,6 +252,36 @@ class ActiveInferenceModel(Model):
         expected_obs = self.likelihood(self.posterior_means)
         return observations - expected_obs
     
+    def _kl_divergence(self) -> float:
+        """KL(N(posterior)||N(prior)) with numerical guards.
+
+        Guards against singular / non-positive-definite precision matrices so a
+        degenerate posterior yields a finite, large value instead of NaN/-inf.
+        """
+        try:
+            prior_inv_post = self.prior_precision @ np.linalg.inv(self.posterior_precision)
+            det_ratio = (
+                np.linalg.det(self.posterior_precision)
+                / np.linalg.det(self.prior_precision)
+            )
+        except np.linalg.LinAlgError:
+            # Singular precision matrix: posterior is maximally uninformative
+            return float(self.n_states)
+
+        quadratic = (self.prior_means - self.posterior_means).T @ self.prior_precision @ (self.prior_means - self.posterior_means)
+        if not (det_ratio > 0) or not np.isfinite(det_ratio):
+            # Non-positive ratio -> degenerate precision -> very high complexity
+            return float(1e6)
+
+        kl = 0.5 * (
+            np.trace(prior_inv_post)
+            + quadratic
+            - self.n_states
+            + np.log(det_ratio)
+        )
+        # Guard against any residual negative value from numerical noise
+        return float(max(kl, 0.0))
+
     def free_energy(self, observations: Optional[np.ndarray] = None) -> float:
         """
         Calculate the variational free energy of the model.
@@ -254,14 +294,7 @@ class ActiveInferenceModel(Model):
         """
         # If no observations provided, return the complexity term only
         if observations is None:
-            # KL divergence between posterior and prior
-            kl_divergence = 0.5 * (
-                np.trace(np.linalg.inv(self.prior_precision) @ self.posterior_precision) +
-                (self.prior_means - self.posterior_means).T @ self.prior_precision @ (self.prior_means - self.posterior_means) -
-                self.n_states +
-                np.log(np.linalg.det(self.prior_precision) / np.linalg.det(self.posterior_precision))
-            )
-            return kl_divergence
+            return self._kl_divergence()
         
         # With observations, compute complete free energy (accuracy + complexity)
         expected_obs = self.likelihood(self.posterior_means)
@@ -270,16 +303,11 @@ class ActiveInferenceModel(Model):
         prediction_error = observations - expected_obs
         accuracy = 0.5 * prediction_error.T @ self.likelihood_precision @ prediction_error
         
-        # Complexity term: KL divergence between posterior and prior
-        complexity = 0.5 * (
-            np.trace(np.linalg.inv(self.prior_precision) @ self.posterior_precision) +
-            (self.prior_means - self.posterior_means).T @ self.prior_precision @ (self.prior_means - self.posterior_means) -
-            self.n_states +
-            np.log(np.linalg.det(self.prior_precision) / np.linalg.det(self.posterior_precision))
-        )
+        # Complexity term: KL divergence between posterior and prior, KL(q||p)
+        complexity = self._kl_divergence()
         
         # Free energy = accuracy + complexity
-        free_energy = accuracy + complexity
+        free_energy = float(accuracy) + complexity
         
         # Store in history
         self.free_energy_history.append(free_energy)
@@ -333,12 +361,20 @@ class ActiveInferenceModel(Model):
         posterior = likelihood * prior
         
         # Normalize
-        if np.sum(posterior) > 0:
-            posterior = posterior / np.sum(posterior)
+        total = np.sum(posterior)
+        if total > 0:
+            posterior = posterior / total
         else:
-            # If all probabilities are zero, maintain prior
-            logger.warning("All posterior probabilities are zero, maintaining prior")
-            posterior = prior
+            # All posterior probabilities are zero: an informative but fully
+            # contradictory observation. Do NOT silently keep the prior while
+            # reporting success — surface the failure so the caller knows the
+            # belief was not updated.
+            logger.warning("All posterior probabilities are zero (contradictory observation)")
+            return {
+                "status": "error",
+                "method": "bayesian",
+                "message": "All posterior probabilities are zero; belief not updated",
+            }
         
         # Update posterior means
         self.posterior_means = posterior
@@ -355,7 +391,7 @@ class ActiveInferenceModel(Model):
         """
         # Greedy policy: action corresponding to most likely state (modulo n_actions)
         max_state = np.argmax(self.posterior_means)
-        n_actions = self.parameters['n_actions']
+        n_actions = self.parameters.get('n_actions', max(1, len(self.posterior_means))) if self.parameters else max(1, len(self.posterior_means))
         optimal_action = max_state % n_actions
         
         logger.debug(f"Selected optimal action {optimal_action} for max state {max_state}")
@@ -372,13 +408,17 @@ class ActiveInferenceModel(Model):
         Returns:
             Distribution over next states
         """
-        # Get transition matrix
+        # Get transition matrix (with a safe default so default-constructed models
+        # do not crash with a KeyError)
+        if self.parameters is None or 'transition_matrix' not in self.parameters:
+            return self.posterior_means.copy()
         transition_matrix = self.parameters['transition_matrix']
+        n_states = self.parameters.get('n_states', len(self.posterior_means))
         
         # Compute expected next state distribution
-        next_state_dist = np.zeros(self.parameters['n_states'])
+        next_state_dist = np.zeros(n_states)
         
-        for s in range(self.parameters['n_states']):
+        for s in range(n_states):
             # Weight transitions by current belief in each state
             next_state_dist += self.posterior_means[s] * transition_matrix[s, action, :]
         
@@ -397,13 +437,17 @@ class ActiveInferenceModel(Model):
         if state_dist is None:
             state_dist = self.posterior_means
         
-        # Get observation matrix
+        # Get observation matrix (with a safe default)
+        if self.parameters is None or 'observation_matrix' not in self.parameters:
+            return state_dist
         observation_matrix = self.parameters['observation_matrix']
+        n_observations = self.parameters.get('n_observations', observation_matrix.shape[1])
+        n_states = self.parameters.get('n_states', observation_matrix.shape[0])
         
         # Compute expected observation
-        expected_observation = np.zeros(self.parameters['n_observations'])
+        expected_observation = np.zeros(n_observations)
         
-        for s in range(self.parameters['n_states']):
+        for s in range(n_states):
             # Weight observation probabilities by state probabilities
             expected_observation += state_dist[s] * observation_matrix[s, :]
         

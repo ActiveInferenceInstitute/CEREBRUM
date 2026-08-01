@@ -8,12 +8,12 @@ import re
 from typing import List
 
 from ..core.config import LexiconConfig
-from ..core.logging import get_logger, LoggingTimer
+from ..core.logging import LoggingTimer, get_logger
 from ..nlp.preprocessor import ProcessedSegment
 
 try:
-    import spacy
     import neuralcoref
+    import spacy
     NEURALCOREF_AVAILABLE = True
 except ImportError:
     NEURALCOREF_AVAILABLE = False
@@ -87,32 +87,87 @@ class CoreferenceResolver:
         # Create resolved text with substitutions
         resolved_text = doc._.coref_resolved
         
-        # Map resolved text back to segments
-        # This is approximate and may not handle all cases correctly
-        offset = 0
-        resolved_segments = []
+        # Safely map the (possibly length-shifted) resolved text back onto the
+        # original segments instead of slicing by original character offsets,
+        # which silently corrupted segments whenever a substituted pronoun
+        # changed the total character count.
+        try:
+            mapped_portions = self._map_segments_to_resolved(segments, joined_text, resolved_text)
+        except Exception as e:
+            self.logger.warning(f"Coreference re-segmentation failed ({str(e)}); returning original segments")
+            return segments
         
-        for segment in segments:
-            segment_len = len(segment.text)
-            
-            # Extract corresponding portion from resolved text
-            resolved_portion = resolved_text[offset:offset + segment_len]
-            
-            # Create new segment with resolved text
+        # Build new segments from the safe mapping.
+        resolved_segments = []
+        for segment, portion in zip(segments, mapped_portions):
             resolved_segment = ProcessedSegment(
                 segment_id=segment.segment_id,
-                text=resolved_portion,
+                text=portion,
                 speaker=segment.speaker,
                 timestamp=segment.timestamp,
                 entities=segment.entities,
                 pos_tags=segment.pos_tags,
                 metadata={**segment.metadata, "coref_resolved": True}
             )
-            
             resolved_segments.append(resolved_segment)
-            offset += segment_len + 1  # +1 for the space we added when joining
         
         return resolved_segments
+    
+    @staticmethod
+    def _map_segments_to_resolved(segments: List[ProcessedSegment],
+                                  joined_text: str,
+                                  resolved_text: str) -> List[str]:
+        """
+        Re-segment resolved coreference text back onto the original segments.
+
+        neuralcoref's ``coref_resolved`` replaces pronouns with full mentions, so
+        the resolved text can be a *different length* than the joined input. The
+        historical implementation sliced ``resolved_text`` using the *original*
+        character offsets, which silently shifted every segment after the first
+        substitution (index or garbage text corruption).
+
+        This version re-anchors each segment in the resolved text. When lengths
+        are unchanged the original offsets are exact; when they have drifted each
+        segment is located by its leading word, so boundaries stay correct and a
+        segment that cannot be located is returned as its original clean text
+        rather than corrupted bytes.
+
+        Args:
+            segments: Original processed segments
+            joined_text: Text the segments were joined into (original offsets)
+            resolved_text: Corresponding coref-resolved text
+
+        Returns:
+            List of resolved text portions, one per original segment
+        """
+        # Fast path: same length means original offsets remain exact.
+        if len(joined_text) == len(resolved_text):
+            portions = []
+            cursor = 0
+            for seg in segments:
+                portions.append(resolved_text[cursor:cursor + len(seg.text)])
+                cursor += len(seg.text) + 1  # +1 for the join space
+            return portions
+        
+        # Length drifted: re-anchor each segment by its leading word so we never
+        # slice by stale offsets. No arbitrary indexing can raise IndexError here.
+        portions = []
+        cursor = 0
+        for seg in segments:
+            first_word = next((w for w in seg.text.split() if w), "")
+            if not first_word:
+                portions.append(seg.text)
+                continue
+            start = resolved_text.find(first_word, cursor)
+            if start == -1:
+                # Cannot locate the segment start; keep the original clean text.
+                portions.append(seg.text)
+                cursor += len(seg.text) + 1
+                continue
+            end = min(start + len(seg.text), len(resolved_text))
+            portions.append(resolved_text[start:end])
+            cursor = end + 1
+        return portions
     
     def _resolve_with_rules(self, segments: List[ProcessedSegment]) -> List[ProcessedSegment]:
         """

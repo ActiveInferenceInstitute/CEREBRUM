@@ -4,15 +4,19 @@ LEXICON ASR Wrapper
 Wrapper for audio transcription (ASR) services.
 """
 
+import json
+import logging
 import os
 import subprocess
-import json
 import tempfile
 from pathlib import Path
-from typing import Optional, Union, Dict, List
-import logging
+from typing import Dict, List, Optional, Union
 
 logger = logging.getLogger("lexicon.ingest.asr")
+
+# Hard cap on a single external whisper invocation so a hung subprocess can never
+# block ingestion forever.
+EXTERNAL_WHISPER_TIMEOUT = 600
 
 # Try to import whisper, but gracefully handle if not installed
 try:
@@ -95,36 +99,34 @@ def _transcribe_with_external(audio_path: Path, model: str, language: Optional[s
         Transcription text
     """
     try:
-        # Create temporary file for output
-        with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
-            output_path = tmp.name
-        
-        # Build command
-        cmd = ["whisper", str(audio_path), "--model", model, "--output_format", "json", "--output_dir", os.path.dirname(output_path)]
-        
-        if language:
-            cmd.extend(["--language", language])
-            
-        # Run command
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-        
-        # Parse output
-        output_file = Path(output_path)
-        if output_file.exists():
-            with open(output_file, "r") as f:
-                data = json.load(f)
-                
-            # Clean up
-            try:
-                os.unlink(output_file)
-            except:
-                pass
-                
-            return data.get("text", "")
-        else:
-            # Extract text from stdout
-            return result.stdout.strip()
-            
+        # Run whisper in a dedicated temp directory. The whisper CLI writes its
+        # JSON to ``<output_dir>/<audio_stem>.json`` (it does NOT honor a
+        # user-chosen temp filename), so we read from that exact path rather
+        # than a pre-created temp file that whisper never writes to.
+        with tempfile.TemporaryDirectory() as output_dir:
+            cmd = [
+                "whisper", str(audio_path), "--model", model,
+                "--output_format", "json", "--output_dir", output_dir,
+            ]
+
+            if language:
+                cmd.extend(["--language", language])
+
+            # Run command with a timeout so a hung whisper process cannot block forever
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, check=True,
+                timeout=EXTERNAL_WHISPER_TIMEOUT,
+            )
+
+            output_file = Path(output_dir) / f"{audio_path.stem}.json"
+            if output_file.exists():
+                with open(output_file, "r") as f:
+                    data = json.load(f)
+                return data.get("text", "")
+            else:
+                # Extract text from stdout
+                return result.stdout.strip()
+
     except subprocess.CalledProcessError as e:
         logger.error(f"External whisper failed: {e.stderr}")
         raise RuntimeError(f"Audio transcription failed: {e.stderr}")

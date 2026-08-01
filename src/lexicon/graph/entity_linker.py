@@ -5,13 +5,13 @@ Links entities in the knowledge graph and extracts relationships.
 """
 
 import json
-from typing import List, Dict, Any, Tuple
 import re
+from typing import Any, Dict, List, Tuple
+
+from src.llm.OpenRouter import OpenRouterClient
 
 from ..core.config import LexiconConfig
 from ..core.logging import get_logger
-
-from src.llm.OpenRouter import OpenRouterClient
 
 
 class EntityLinker:
@@ -178,8 +178,15 @@ Only include relationships with confidence of at least 0.6. If you can't identif
                 if source_id not in entity_ids or target_id not in entity_ids:
                     continue
                 
-                # Check confidence threshold
+                # Check confidence threshold. LLMs commonly return confidence as a
+                # string (e.g. "0.8"); coerce to float so one malformed field does
+                # not silently drop the whole relationship parse.
                 confidence = item.get("confidence", 0.0)
+                if isinstance(confidence, str):
+                    try:
+                        confidence = float(confidence)
+                    except (TypeError, ValueError):
+                        confidence = 0.0
                 if confidence < 0.6:
                     continue
                 

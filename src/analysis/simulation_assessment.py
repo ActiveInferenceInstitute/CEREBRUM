@@ -5,12 +5,14 @@ This module provides detailed analysis and assessment of simulation effectivenes
 data quality, and system performance across all insect models and components.
 """
 
-import os
+import glob
 import json
-import numpy as np
-from typing import Dict, Any, Optional
+import os
+from collections import Counter, defaultdict
 from datetime import datetime
-from collections import defaultdict, Counter
+from typing import Any, Dict, Optional
+
+import numpy as np
 
 from src.utils.path_utils import get_output_dir
 
@@ -90,11 +92,13 @@ class SimulationEffectivenessAnalyzer:
         else:
             quality_metrics["issues_found"].append("Simulation events file not found")
         
-        # Analyze case performance data
-        case_file = os.path.join(self.output_dir, "case_performance_logs", "case_report_20250723_130501.json")
-        if os.path.exists(case_file):
+        # Analyze case performance data (match any dated report file rather than a
+        # hard-coded timestamp, which breaks reproducibility across runs)
+        case_perf_dir = os.path.join(self.output_dir, "case_performance_logs")
+        case_files = sorted(glob.glob(os.path.join(case_perf_dir, "case_report_*.json")))
+        if case_files:
             try:
-                with open(case_file, 'r') as f:
+                with open(case_files[-1], 'r') as f:
                     case_data = json.load(f)
                 
                 quality_metrics["data_richness"]["case_effectiveness"] = len(case_data.get("case_effectiveness", {}))

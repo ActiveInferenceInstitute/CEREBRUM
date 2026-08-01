@@ -4,21 +4,21 @@ LEXICON Paraphrase Generator
 Generates micro-paraphrases for text segments.
 """
 
-import time
+import hashlib
 import json
 import os
-from typing import List, Dict, Any, Optional
+import re  # Added missing import
+import time
 from dataclasses import dataclass, field
-import hashlib
-import re # Added missing import
-
-from ..core.config import LexiconConfig
-from ..core.logging import get_logger, LoggingTimer
-from ..declension.tagger import CasedSegment
-from .prompt_templates import get_paraphrase_prompt, get_quality_prompt
-from .cache import get_cache, save_to_cache
+from typing import Any, Dict, List, Optional
 
 from src.llm.OpenRouter import OpenRouterClient
+
+from ..core.config import LexiconConfig
+from ..core.logging import LoggingTimer, get_logger
+from ..declension.tagger import CasedSegment
+from .cache import get_cache, save_to_cache
+from .prompt_templates import get_paraphrase_prompt, get_quality_prompt
 
 
 @dataclass
@@ -281,10 +281,13 @@ class ParaphraseGenerator:
         cache_key = self._get_cache_key(segment.text)
         cache_file = self.cache_dir / f"{cache_key}.json"
         
-        # Try to get from cache
+        # Try to get from cache.
+        # Guard with ``is not None`` (not truthiness) so a legitimately-cached
+        # EMPTY list counts as a hit; otherwise an empty result would be treated
+        # as a miss and needlessly regenerated every call.
         cached_paraphrases = get_cache(cache_file)
         
-        if cached_paraphrases:
+        if cached_paraphrases is not None:
             self.metrics["cache_hits"] += 1
             paraphrases = cached_paraphrases
         else:

@@ -4,9 +4,12 @@ LEXICON OpenRouter Client for Case Declension
 Provides prompt engineering and response parsing for OpenRouter LLM case declension.
 """
 
-import re
 import json
-from typing import Dict, List, Any
+import logging
+import re
+from typing import Any, Dict, List
+
+logger = logging.getLogger("lexicon.declension.openrouter_client")
 
 def declension_prompt(text: str) -> str:
     """
@@ -107,7 +110,7 @@ def extract_declensions(response: str) -> Dict[str, List[Dict[str, Any]]]:
         return declensions
         
     except Exception as e:
-        print(f"Error parsing declensions: {str(e)}")
+        logger.error(f"Error parsing declensions: {str(e)}")
         return declensions
 
 

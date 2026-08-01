@@ -5,28 +5,30 @@ This module provides the main LEXICON engine that orchestrates the complete
 pipeline from ingestion to graph generation.
 """
 
-import os
-import time
 import asyncio
-from typing import Dict, List, Any, Optional, Union
-from pathlib import Path
 import json
 import logging
-from datetime import datetime
-import uuid
+import os
+import re
+import time
 import traceback
+import uuid
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
+
 import numpy as np
 from dotenv import load_dotenv
-import re
 
-# Import LEXICON components
-from .config import LexiconConfig, get_default_config
-from .logging import setup_logging, LoggingTimer
-from .exceptions import LexiconError, InputError
+from src.llm.config import get_model_name
 
 # Import OpenRouter integration
 from src.llm.OpenRouter.openrouter import OpenRouterClient, OpenRouterConfig
-from src.llm.config import get_model_name
+
+# Import LEXICON components
+from .config import LexiconConfig, get_default_config
+from .exceptions import InputError, LexiconError
+from .logging import LoggingTimer, setup_logging
 
 # Load environment variables from top-level .env file
 env_path = Path(__file__).resolve().parent.parent.parent.parent / '.env'
@@ -127,6 +129,7 @@ class LexiconEngine:
         self._case_tagger = None
         self._graph_assembler = None
         self._paraphrase_generator = None
+        self._entity_deduplicator = None
         
         self.entity_detection_strategies = [
             self._detect_named_entities,
@@ -148,8 +151,11 @@ class LexiconEngine:
     def _setup_llm_client(self):
         """Initialize the OpenRouter LLM client."""
         try:
-            # Get API key from environment variables
+            # Get API key from environment variables, falling back to the value
+            # held on the config (which is never persisted to disk).
             api_key = os.environ.get("OPENROUTER_API_KEY")
+            if not api_key:
+                api_key = getattr(self.config, "openrouter_api_key", None)
             if not api_key:
                 raise ValueError("OPENROUTER_API_KEY environment variable is not set")
                 
@@ -207,6 +213,14 @@ class LexiconEngine:
             self._graph_assembler = GraphAssembler(self.llm_client, self.config)
             self.logger.info("Graph assembler initialized")
         return self._graph_assembler
+
+    def _get_entity_deduplicator(self):
+        """Get or initialize entity deduplicator."""
+        if self._entity_deduplicator is None:
+            from ..nlp.entity_deduplicator import EntityDeduplicator
+            self._entity_deduplicator = EntityDeduplicator(self.config)
+            self.logger.info("Entity deduplicator initialized")
+        return self._entity_deduplicator
     
     def _get_paraphrase_generator(self):
         """Get or initialize paraphrase generator."""
@@ -228,7 +242,7 @@ class LexiconEngine:
         """
         try:
             import spacy
-            
+
             # Load spaCy model (try transformer first, fallback to smaller model)
             nlp = None
             for model_name in ["en_core_web_trf", "en_core_web_sm"]:
@@ -1096,12 +1110,28 @@ class LexiconEngine:
         entity_nodes = {}
         claim_nodes = {}
         
-        # Add entities as nodes
+        # Wire lazy component getters into the shipped graph path (previously
+        # dead code): the EntityDeduplicator collapses duplicate entity text to a
+        # single node and the GraphAssembler supplies stable content-derived node
+        # IDs. Both work offline (no LLM call) and must not break the public API.
+        deduplicator = self._get_entity_deduplicator()
+        graph_assembler = self._get_graph_assembler()
+        
+        # Deduplicate entities: the same entity text becomes a single node.
+        entities = deduplicator.deduplicate_entities(entities)
+        
+        # Add entities as nodes with stable content-derived IDs
         for entity in entities:
-            entity_id = entity.get("id", str(uuid.uuid4()))
+            entity_text = entity.get("text", "")
+            entity_key = entity_text.lower()
+            # Defensive dedup guard in addition to the deduplicator: normalized text
+            # maps to exactly one node.
+            if entity_key in entity_nodes:
+                continue
+            entity_id = graph_assembler.node_id("entity", entity_text)
             node = {
                 "id": entity_id,
-                "label": entity.get("text", ""),
+                "label": entity_text,
                 "type": "entity",
                 "category": entity.get("type", "unknown"),
                 "case": entity.get("case", "locative"),
@@ -1110,14 +1140,18 @@ class LexiconEngine:
                 "data": entity
             }
             graph["nodes"].append(node)
-            entity_nodes[entity.get("text", "").lower()] = entity_id
+            entity_nodes[entity_key] = entity_id
         
-        # Add claims as nodes
+        # Add claims as nodes with stable content-derived IDs
         for claim in claims:
-            claim_id = claim.get("id", str(uuid.uuid4()))
+            claim_text = claim.get("text", "")
+            claim_key = claim_text.lower()
+            if claim_key in claim_nodes:
+                continue
+            claim_id = graph_assembler.node_id("claim", claim_text)
             node = {
                 "id": claim_id,
-                "label": claim.get("text", ""),
+                "label": claim_text,
                 "type": "claim",
                 "case": claim.get("case", "accusative"),  # Include case field for claims
                 "case_rationale": claim.get("case_rationale", ""),
@@ -1126,7 +1160,7 @@ class LexiconEngine:
                 "data": claim
             }
             graph["nodes"].append(node)
-            claim_nodes[claim.get("text", "").lower()] = claim_id
+            claim_nodes[claim_key] = claim_id
         
         # Create relationships between entities and claims
         self._create_entity_claim_relationships(graph, entities, claims, entity_nodes, claim_nodes)
@@ -1441,7 +1475,7 @@ class LexiconEngine:
                 np.linalg.norm(embeddings[0]) * np.linalg.norm(embeddings[1]))
             
             return float(similarity)
-        except (ImportError, RuntimeError, Exception) as e:
+        except (ImportError, RuntimeError) as e:
             self.logger.debug(f"Semantic similarity fallback due to error: {str(e)}")
             return self._simple_text_similarity(text1, text2)
     
@@ -1501,6 +1535,10 @@ class LexiconEngine:
         """
         # Load audio transcription module
         from ..ingest.asr_wrapper import transcribe_audio
+
+        # Normalize metadata before any access (None guard must precede use)
+        if metadata is None:
+            metadata = {}
         
         session_id = metadata.get("session_id", str(uuid.uuid4()))
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -1795,7 +1833,7 @@ class LexiconEngine:
             """
             try:
                 import spacy
-                
+
                 # Load spaCy model (try transformer first, fallback to smaller model)
                 nlp = None
                 for model_name in ["en_core_web_trf", "en_core_web_sm"]:

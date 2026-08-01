@@ -5,9 +5,12 @@ This module provides functions for transforming models between different cases,
 as well as utilities for managing case relationships between multiple models.
 """
 
-from typing import Dict, Any, List, Optional, Tuple
+import logging
+from typing import Any, Dict, List, Optional, Tuple
 
-from src.core.model import Model, Case
+from src.core.model import Case, Model
+
+logger = logging.getLogger(__name__)
 
 def transform_case(model: Model, target_case: Case) -> Model:
     """
@@ -20,9 +23,6 @@ def transform_case(model: Model, target_case: Case) -> Model:
     Returns:
         The transformed model (same instance, new case)
     """
-    # Store original case for potential reversion
-    original_case = model.case
-    
     # Apply the transformation by setting the case property
     # This will trigger the model's _apply_case_transformation method
     model.case = target_case
@@ -93,8 +93,9 @@ def apply_morphosyntactic_alignment(
                         transform_case(model, Case.NOMINATIVE)
                         result["NOMINATIVE"].append(model)
                 except Exception as e: # Catch potential errors during free_energy calculation
-                    # Default to instrumental if free energy calculation fails
-                    # Optionally log the error: logging.warning(f"Failed to get free energy for {model.name}: {e}")
+                    # Default to instrumental if free energy calculation fails; log the
+                    # error so silent re-classification is observable.
+                    logger.warning(f"Failed to get free energy for {model.name}: {e}, defaulting to INSTRUMENTAL")
                     transform_case(model, Case.INSTRUMENTAL)
                     result["INSTRUMENTAL"].append(model)
             else:

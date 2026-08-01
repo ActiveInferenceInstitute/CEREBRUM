@@ -4,12 +4,13 @@ CEREBRUM Setup and Initialization Script
 Provides quick setup, testing, and validation of the CEREBRUM framework
 """
 
-import os
-import sys
-import subprocess
-import logging
-from pathlib import Path
 import argparse
+import logging
+import os
+import subprocess
+import sys
+from pathlib import Path
+
 
 def setup_logging(verbose: bool = False) -> logging.Logger:
     """Setup logging configuration."""
@@ -51,20 +52,20 @@ def check_dependencies() -> bool:
     return True
 
 def install_dependencies(dev: bool = False) -> bool:
-    """Install project dependencies."""
+    """Install project dependencies using uv (the project's package manager)."""
     logger = logging.getLogger('cerebrum-setup')
-    
+
     try:
         # Install production dependencies
         logger.info("Installing production dependencies...")
-        subprocess.run([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'], 
+        subprocess.run(['uv', 'pip', 'install', '-e', '.'], 
                       check=True, capture_output=True)
         print("✅ Production dependencies installed")
         
         if dev:
             # Install development dependencies
             logger.info("Installing development dependencies...")
-            subprocess.run([sys.executable, '-m', 'pip', 'install', '-r', 'requirements_dev.txt'], 
+            subprocess.run(['uv', 'pip', 'install', '-e', '.[dev]'], 
                           check=True, capture_output=True)
             print("✅ Development dependencies installed")
         
@@ -196,8 +197,7 @@ def validate_project_structure() -> bool:
         'src/models/__init__.py',
         'src/core/__init__.py',
         'src/utils/__init__.py',
-        'requirements.txt',
-        'requirements_dev.txt',
+        'pyproject.toml',
         'pytest.ini'
     ]
     

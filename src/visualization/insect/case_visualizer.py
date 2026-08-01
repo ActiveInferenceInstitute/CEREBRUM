@@ -5,13 +5,14 @@ This module provides visualization tools for insect case-based reasoning,
 including case transitions, effectiveness analysis, and case relevance tracking.
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
-from typing import Dict, Any, Optional, Tuple
 import logging
 import os
 import time
 from collections import defaultdict, deque
+from typing import Any, Dict, Optional, Tuple
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 from src.core.model import Case
 from src.models.insect.base import InsectModel
@@ -704,7 +705,7 @@ class CaseEffectivenessVisualizer:
                     case_labels.append(case.value)
             
             if case_performances:
-                axes[1, 1].boxplot(case_performances, labels=case_labels)
+                axes[1, 1].boxplot(case_performances, tick_labels=case_labels)
                 axes[1, 1].set_title('Case Performance Comparison')
                 axes[1, 1].set_ylabel('Performance')
                 plt.setp(axes[1, 1].get_xticklabels(), rotation=45, ha='right')

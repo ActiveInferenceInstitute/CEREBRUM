@@ -5,16 +5,17 @@ This module provides functions for visualizing case-bearing models,
 their transformations, and relationships in model ecosystems.
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+import numpy as np
+
 try:
     import networkx as nx
 except ImportError:
     nx = None
 from typing import List, Tuple
 
-from src.core.model import Model, Case
+from src.core.model import Case, Model
 
 # Define colors for each case
 CASE_COLORS = {
@@ -434,7 +435,7 @@ def plot_free_energy_landscape(
     # We'll focus on just the first two dimensions for visualization
     n_dims = min(2, len(model.posterior_means))
     
-    # Save original model state
+    # Save original model state (restored in all code paths below)
     original_posterior = model.posterior_means.copy()
     
     # Create parameter grid
@@ -442,19 +443,28 @@ def plot_free_energy_landscape(
     p2 = np.linspace(param2_range[0], param2_range[1], resolution) if n_dims > 1 else [0]
     P1, P2 = np.meshgrid(p1, p2)
     FE = np.zeros_like(P1)
-    
-    # Compute free energy across the grid
-    for i in range(resolution):
-        for j in range(resolution):
-            # Set model parameters
-            if n_dims == 1:
-                model.posterior_means[0] = P1[i, j]
-            else:
-                model.posterior_means[0] = P1[i, j]
-                model.posterior_means[1] = P2[i, j]
-            
-            # Calculate free energy
-            FE[i, j] = model.free_energy(observations)
+
+    # Work on a copy so the model's posterior is never mutated by a viz routine.
+    posterior = model.posterior_means.copy()
+
+    try:
+        # Compute free energy across the grid
+        if n_dims == 1:
+            # P1/P2 have shape (1, resolution) for the 1D case; index with [0, j].
+            for j in range(resolution):
+                posterior[0] = P1[0, j]
+                model.posterior_means = posterior.copy()
+                FE[0, j] = model.free_energy(observations)
+        else:
+            for i in range(resolution):
+                for j in range(resolution):
+                    posterior[0] = P1[i, j]
+                    posterior[1] = P2[i, j]
+                    model.posterior_means = posterior.copy()
+                    FE[i, j] = model.free_energy(observations)
+    finally:
+        # Always restore the model's original state, even on exception.
+        model.posterior_means = original_posterior
     
     # Create figure
     fig = plt.figure(figsize=figsize)
@@ -462,7 +472,7 @@ def plot_free_energy_landscape(
     if n_dims == 1:
         # 1D visualization
         ax = fig.add_subplot(111)
-        ax.plot(p1, FE[:, 0], 'b-', linewidth=2)
+        ax.plot(p1, FE[0, :], 'b-', linewidth=2)
         
         # Mark original position
         if show_current:
@@ -495,8 +505,7 @@ def plot_free_energy_landscape(
         # Add colorbar
         fig.colorbar(surf, shrink=0.5, aspect=5)
     
-    # Restore original model state
-    model.posterior_means = original_posterior
+    # Model state is restored by the try/finally above.
     
     plt.title(f"Free Energy Landscape - {model.name} [{model.case.value}]")
     return fig

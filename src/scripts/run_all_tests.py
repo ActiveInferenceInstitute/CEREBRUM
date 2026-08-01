@@ -6,9 +6,9 @@ This is a simplified version of test_all_cases.py that directly
 calls the main function.
 """
 
+import logging
 import os
 import sys
-import logging
 
 # Add the parent directory to path to allow absolute imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -29,9 +29,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Import the main test runner function
-from src.test_all_cases import run_all_tests, create_output_dir
+from src.scripts.test_all_cases import create_output_dir, run_all_tests
 
-if __name__ == "__main__":
+
+def main():
+    """Run all case tests and print a summary of the output directories."""
     # Create timestamped output directory
     output_dir = create_output_dir("output")
     logger.info(f"Starting all case tests. Output will be saved to {output_dir}")
@@ -44,4 +46,8 @@ if __name__ == "__main__":
     logger.info(f"Results available at: {output_dir}")
     logger.info("Directory structure:")
     for model_type, path in result_dirs.items():
-        logger.info(f"- {model_type}: {path}") 
+        logger.info(f"- {model_type}: {path}")
+
+
+if __name__ == "__main__":
+    main()

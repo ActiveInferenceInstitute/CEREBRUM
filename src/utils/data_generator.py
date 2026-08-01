@@ -4,8 +4,10 @@ Data Generation Module for CEREBRUM
 Provides utilities for generating test data for regression models
 """
 
-from typing import Tuple, Optional
+from typing import Optional, Tuple
+
 import numpy as np
+
 
 class DataGenerator:
     """Data generation utilities for regression tests."""
@@ -145,19 +147,33 @@ class DataGenerator:
         if random_seed is not None:
             np.random.seed(random_seed)
             
-        samples_per_class = n_samples // n_classes
+        # Validate inputs to prevent silent data loss / degenerate output.
+        if n_samples < n_classes:
+            raise ValueError(
+                f"n_samples ({n_samples}) must be >= n_classes ({n_classes})"
+            )
+        if n_features < n_classes:
+            raise ValueError(
+                f"n_features ({n_features}) must be >= n_classes ({n_classes}); "
+                "otherwise distinct class centers cannot be separated"
+            )
+        
+        # Distribute samples so the total is exactly n_samples (no silent truncation).
+        base_per_class, extra = divmod(n_samples, n_classes)
         X_list = []
         y_list = []
         
         for class_idx in range(n_classes):
-            # Generate class center
+            # Generate class center (each class gets its own feature dimension)
             center = np.zeros(n_features)
-            center[class_idx % n_features] = class_sep * class_idx
+            center[class_idx] = class_sep * class_idx
+            
+            count = base_per_class + (1 if class_idx < extra else 0)
             
             # Generate samples around center
-            samples = np.random.randn(samples_per_class, n_features) + center
+            samples = np.random.randn(count, n_features) + center
             X_list.append(samples)
-            y_list.append(np.full(samples_per_class, class_idx))
+            y_list.append(np.full(count, class_idx))
         
         X = np.vstack(X_list)
         y = np.hstack(y_list)
@@ -268,6 +284,8 @@ class DataGenerator:
         Returns:
             X_train, X_test, y_train, y_test
         """
+        if not 0.0 <= test_size <= 1.0:
+            raise ValueError(f"test_size must be between 0 and 1, got {test_size!r}")
         if random_seed is not None:
             np.random.seed(random_seed)
             

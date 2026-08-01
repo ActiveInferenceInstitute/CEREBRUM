@@ -4,9 +4,9 @@ LEXICON Enhanced Entity Deduplicator
 Advanced entity deduplication using multiple similarity metrics and intelligent merging.
 """
 
-from typing import List, Dict, Any, Optional
-from dataclasses import dataclass
 from collections import defaultdict
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
 from ..core.config import LexiconConfig
 from ..core.logging import get_logger
@@ -356,14 +356,36 @@ class EntityDeduplicator:
         else:
             return 'keep_both'
     
+    @staticmethod
+    def _is_true_merge_pair(entity1: Dict, entity2: Dict) -> bool:
+        """
+        Decide whether two entities are genuinely the same referent.
+
+        To avoid the transitive over-merging seen with union-find closure (where
+        A~B and B~C drag in unrelated A and C), only pairs whose normalized text
+        is identical are considered "true merge pairs". This collapses duplicate
+        occurrences of the same entity (differing only by case / surrounding
+        whitespace) while keeping genuinely distinct entities separate.
+
+        Args:
+            entity1: First entity
+            entity2: Second entity
+
+        Returns:
+            True if the pair represents the same entity text
+        """
+        text1 = (entity1.get("text") or "").strip().lower()
+        text2 = (entity2.get("text") or "").strip().lower()
+        return bool(text1) and text1 == text2
+
     def _cluster_entities(self, entities: List[Dict], matches: List[EntityMatch]) -> List[List[int]]:
         """
         Group entities into clusters based on similarity matches.
-        
+
         Args:
             entities: List of entities
             matches: List of entity matches
-            
+
         Returns:
             List of clusters, where each cluster is a list of entity indices
         """
@@ -380,9 +402,14 @@ class EntityDeduplicator:
             if px != py:
                 parent[px] = py
         
-        # Process high-confidence matches first
+        # Merge only high-confidence *true* pairs. Restricting to exact-text pairs
+        # prevents the transitive over-merge that would otherwise fuse unrelated
+        # entities that merely share a common substring (e.g. "IBM" and "IBM
+        # Research" would otherwise chain together with other "…Research" names).
         for match in matches:
-            if match.merge_recommendation == 'merge':
+            if match.merge_recommendation == 'merge' and self._is_true_merge_pair(
+                entities[match.entity1_idx], entities[match.entity2_idx]
+            ):
                 union(match.entity1_idx, match.entity2_idx)
         
         # Group entities by their root parent

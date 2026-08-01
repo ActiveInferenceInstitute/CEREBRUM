@@ -6,9 +6,9 @@ Handles session management including output directories, input handling, and met
 
 import json
 import shutil
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 def create_output_dir(input_name: Optional[str] = None, is_batch: bool = False) -> Path:
@@ -160,31 +160,44 @@ def save_error_info(error: Exception, output_dir: Path, metadata: Optional[Dict[
 def create_batch_input_subdirectories(base_dir: Path, input_files: List[Path]) -> Dict[str, Path]:
     """
     Create subdirectories for batch processing with proper structure.
-    
+
+    Each input file gets its OWN unique subdirectory. Two files that share a
+    stem (e.g. from different source directories) previously collided on the
+    same ``<stem>_<timestamp>`` folder and silently overwrote each other's
+    output. Now a per-stem index is appended and the returned mapping is keyed
+    by the full input path so lookups are unambiguous.
+
     Args:
         base_dir: Base directory for batch processing
         input_files: List of input files
-        
+
     Returns:
-        Dictionary mapping file stems to their output directories
+        Dictionary mapping full input file path (str) to its output directory
     """
     batch_dirs = {}
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    
+    stem_counts = {}
+
     for input_file in input_files:
         # Create subdirectory for this input file under base_dir
         file_stem = input_file.stem
-        file_output_dir = base_dir / f"{file_stem}_{timestamp}"
+        idx = stem_counts.get(file_stem, 0)
+        stem_counts[file_stem] = idx + 1
+        # Append an index for duplicate stems so every file gets a unique dir.
+        suffix = f"_{idx}" if idx else ""
+        dir_name = f"{file_stem}{suffix}_{timestamp}"
+        file_output_dir = base_dir / dir_name
         file_output_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Create standard subdirectories for this input
         (file_output_dir / "logs").mkdir(exist_ok=True)
         (file_output_dir / "input").mkdir(exist_ok=True)
         (file_output_dir / "cache").mkdir(exist_ok=True)
         (file_output_dir / "visualizations").mkdir(exist_ok=True)
-        
-        batch_dirs[file_stem] = file_output_dir
-    
+
+        # Key by the full path so same-stem files never collide in the mapping.
+        batch_dirs[str(input_file)] = file_output_dir
+
     return batch_dirs
 
 

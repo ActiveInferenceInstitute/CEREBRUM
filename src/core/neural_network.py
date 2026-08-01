@@ -1,8 +1,9 @@
-from typing import Dict, Any, List, Tuple
-import numpy as np
 import logging
+from typing import Any, Dict, List, Tuple
 
-from src.core.model import Model, Case
+import numpy as np
+
+from src.core.model import Case, Model
 
 logger = logging.getLogger(__name__)
 
@@ -284,15 +285,17 @@ class NeuralNetworkModel(Model):
                 d_preact = np.dot(current_gradient, self.weights[i].T)
                 
                 # Apply activation function derivative
-                if self.hyperparameters.get("activation") == "relu":
+                # Use self.activation (the canonical attribute) rather than
+                # self.hyperparameters, which does not exist on this class.
+                if self.activation == "relu":
                     # ReLU derivative: 1 if x > 0, 0 otherwise
                     d_act = (activations[i] > 0).astype(float)
                     current_gradient = d_preact * d_act
-                elif self.hyperparameters.get("activation") == "sigmoid":
+                elif self.activation == "sigmoid":
                     # Sigmoid derivative: sigmoid(x) * (1 - sigmoid(x))
                     d_act = activations[i] * (1 - activations[i])
                     current_gradient = d_preact * d_act
-                elif self.hyperparameters.get("activation") == "tanh":
+                elif self.activation == "tanh":
                     # Tanh derivative: 1 - tanh(x)²
                     d_act = 1 - np.tanh(activations[i])**2
                     current_gradient = d_preact * d_act

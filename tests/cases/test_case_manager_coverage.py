@@ -8,8 +8,8 @@ model queries, and free energy calculation.
 
 import pytest
 
-from src.core.model import Model, Case
 from src.cases.case_manager import CaseManager
+from src.core.model import Case, Model
 
 
 @pytest.fixture
@@ -152,3 +152,15 @@ class TestFreeEnergy:
         model_a.case = Case.NOMINATIVE
         fe = mgr.calculate_free_energy(model_a)
         assert isinstance(fe, (int, float))
+
+    def test_calculate_free_energy_prefers_model(self, mgr):
+        """CaseManager must use the model's real free_energy() when implemented,
+        not the case-handler's hard-coded default (regression for H10)."""
+        from src.core.model import Model
+
+        class FEConcrete(Model):
+            def free_energy(self):
+                return 42.0
+
+        m = FEConcrete(name="fe")
+        assert mgr.calculate_free_energy(m) == 42.0

@@ -4,11 +4,12 @@ LEXICON Configuration
 Configuration settings for LEXICON and OpenRouter integration.
 """
 
+import json
 import os
-from typing import Dict, Optional
 from dataclasses import dataclass, field
 from pathlib import Path
-import json
+from typing import Dict, Optional
+
 
 @dataclass
 class LexiconConfig:
@@ -55,11 +56,17 @@ class LexiconConfig:
         self.cache_dir.mkdir(parents=True, exist_ok=True)
     
     def save(self, config_path: Path) -> None:
-        """Save configuration to file."""
-        # Convert paths to strings for JSON serialization
+        """Save configuration to file.
+
+        The OpenRouter API key is treated as a secret and is intentionally
+        excluded from the serialized config so it is never written to disk in
+        plaintext. It is re-populated from the environment / config on load.
+        """
+        # Convert paths to strings for JSON serialization and drop the secret key.
         config_dict = {
-            k: str(v) if isinstance(v, Path) else v 
+            k: str(v) if isinstance(v, Path) else v
             for k, v in self.__dict__.items()
+            if k != "openrouter_api_key"
         }
         
         with open(config_path, 'w') as f:

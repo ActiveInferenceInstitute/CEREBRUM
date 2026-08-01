@@ -84,7 +84,7 @@ model.case = Case.GENITIVE  # Model as source/generator
 
 ### Testing
 
-- 253 tests total (up from 235)
+- 1152 tests total (up from 235)
 - 0 warnings
 - 18 new tests for new methods
 - Tests in `tests/` with subfolders mirroring `src/` modules

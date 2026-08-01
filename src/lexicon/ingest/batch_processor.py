@@ -6,10 +6,10 @@ Handles batch processing of multiple files through the LEXICON pipeline.
 
 import logging
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
-from ..core.engine import LexiconEngine
 from ..core.config import LexiconConfig
+from ..core.engine import LexiconEngine
 from ..core.session import create_batch_input_subdirectories, save_batch_summary
 from ..visualization.analyzer import analyze_results
 
@@ -172,7 +172,9 @@ def process_all_inputs(base_dir: Path, model: str = "anthropic/claude-3.5-sonnet
     for input_file in input_files:
         print(f"Processing {input_file.name}...")
         
-        file_output_dir = batch_dirs[input_file.stem]
+        # Look up by full path; batch dirs are keyed this way so files that share
+        # a stem never collide with each other's output directory.
+        file_output_dir = batch_dirs[str(input_file)]
         
         # Initialize configuration for this file
         config = LexiconConfig(

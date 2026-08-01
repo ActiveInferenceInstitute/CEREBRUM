@@ -4,12 +4,14 @@ CEREBRUM Animation Utilities
 Provides consistent animation functions for model visualizations across the project
 """
 
-import os
 import logging
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation, PillowWriter
+import os
 import shutil
+import subprocess
+
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.animation import FuncAnimation, PillowWriter
 from PIL import Image
 
 # imageio is an optional dependency (part of 'lexicon' extras)
@@ -40,6 +42,22 @@ def _ensure_imageio():
 
 # Setup logging
 logger = logging.getLogger(__name__)
+
+def _ensure_parent_dir(path):
+    """Create the parent directory of *path* robustly.
+
+    Guards against ``os.path.dirname`` returning an empty string for bare
+    filenames (which made ``os.makedirs('')`` raise FileNotFoundError and the
+    caller silently fall back to ``False``). Returns True on success, False on
+    failure so callers can fail loudly instead of quietly returning False.
+    """
+    parent = os.path.dirname(path) or "."
+    try:
+        os.makedirs(parent, exist_ok=True)
+        return True
+    except OSError as exc:
+        logger.error(f"Could not create parent directory for {path}: {exc}")
+        return False
 
 def ensure_scalar(value):
     """
@@ -135,7 +153,9 @@ def save_animation(animation, output_path, fps=5, dpi=100, writer='pillow', **kw
         _, imread, imwrite, mimsave = _ensure_imageio()
         
         # Create directory if it doesn't exist
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        if not _ensure_parent_dir(output_path):
+            logger.error(f"Could not create output directory for {output_path}")
+            return False
         
         # Set up keyword arguments with defaults
         save_kwargs = {'dpi': dpi}
@@ -308,16 +328,29 @@ def save_animation(animation, output_path, fps=5, dpi=100, writer='pillow', **kw
                 if os.path.exists(mp4_path) and os.path.getsize(mp4_path) > 0:
                     logger.info(f"Animation saved as MP4 instead of GIF: {mp4_path} ({os.path.getsize(mp4_path)/1024:.1f} KB)")
                     
-                    # Try to convert MP4 to GIF using ffmpeg directly
+                    # Try to convert MP4 to GIF using ffmpeg directly.
+                    # Use subprocess with an argument list (no shell) to avoid
+                    # command injection from file paths / metadata.
                     if shutil.which('ffmpeg'):
                         try:
                             logger.info(f"Converting MP4 to GIF using ffmpeg command")
-                            cmd = f"ffmpeg -i {mp4_path} -vf 'fps={fps},scale=320:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse' -loop 0 {output_path}"
-                            os.system(cmd)
-                            
-                            if os.path.exists(output_path) and os.path.getsize(output_path) > 0:
+                            vf_filter = (
+                                f"fps={fps},scale=320:-1:flags=lanczos,"
+                                f"split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse"
+                            )
+                            result = subprocess.run(
+                                ["ffmpeg", "-y", "-i", mp4_path, "-vf", vf_filter,
+                                 "-loop", "0", output_path],
+                                capture_output=True, text=True,
+                            )
+                            if (result.returncode == 0
+                                    and os.path.exists(output_path)
+                                    and os.path.getsize(output_path) > 0):
                                 logger.info(f"Successfully converted MP4 to GIF: {output_path} ({os.path.getsize(output_path)/1024:.1f} KB)")
                                 return True
+                            else:
+                                stderr = (result.stderr or "").strip()
+                                logger.warning(f"ffmpeg conversion failed (rc={result.returncode}): {stderr}")
                         except Exception as e:
                             logger.warning(f"Failed to convert MP4 to GIF: {str(e)}")
                     
@@ -377,9 +410,9 @@ def save_frames_as_gif(frames, output_path, fps=5, loop=0):
         logger.info(f"Saving {len(frames)} frames as GIF to {output_path}")
         
         # Create directory if it doesn't exist
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
-        
-        # Check for empty frames
+        if not _ensure_parent_dir(output_path):
+            logger.error(f"Could not create output directory for {output_path}")
+            return False
         if not frames:
             logger.error("No frames to save")
             return False

@@ -6,13 +6,14 @@ This script runs all case tests for all model types (POMDP, Neural Network,
 and Linear Regression) and generates comparative visualizations.
 """
 
+import argparse
+import logging
 import os
 import sys
-import logging
-import argparse
-from typing import Dict, Optional
-import matplotlib.pyplot as plt
 from datetime import datetime
+from typing import Dict, Optional
+
+import matplotlib.pyplot as plt
 
 # Add the parent directory to path to allow absolute imports
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -20,11 +21,22 @@ parent_dir = os.path.dirname(current_dir)
 if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
-from src.core.model import Case
 from tests.core.test_active_inference_pomdp import run_all_case_tests as run_pomdp_tests
 from tests.core.test_neural_network import run_all_case_tests as run_nn_tests
-from tests.models.test_linear_regression import run_all_case_tests as run_linear_tests
+
+from src.core.model import Case
 from src.visualization.case_comparison import CaseComparisonVisualizer
+
+# The linear-regression backend is deliberately ignored by pytest.ini (its
+# per-case backend lives under tests/models/linear_regression_cases and is not
+# importable as a module). Import it defensively so the aggressive runner can
+# still run POMDP/NN suites when that optional backend is unavailable.
+try:
+    from tests.models.test_linear_regression import run_all_case_tests as run_linear_tests
+    _HAS_LINEAR_BACKEND = True
+except Exception:  # ImportError or broken per-case module (documented/ignored)
+    _HAS_LINEAR_BACKEND = False
+    run_linear_tests = None
 
 # Configure logging
 logging.basicConfig(
@@ -82,11 +94,15 @@ def run_all_tests(output_dir: str, specific_case: Optional[str] = None) -> Dict[
         nn_model_dict = run_nn_tests(nn_dir)
     
     logger.info("Starting Linear Regression case tests...")
-    try:
-        linear_model_dict = run_linear_tests(linear_dir, specific_case)
-    except TypeError:
-        # Try with single argument if it doesn't accept specific_case
-        linear_model_dict = run_linear_tests(linear_dir)
+    linear_model_dict = {}
+    if _HAS_LINEAR_BACKEND and run_linear_tests is not None:
+        try:
+            linear_model_dict = run_linear_tests(linear_dir, specific_case)
+        except TypeError:
+            # Try with single argument if it doesn't accept specific_case
+            linear_model_dict = run_linear_tests(linear_dir)
+    else:
+        logger.warning("Linear regression case-test backend unavailable; skipping.")
     
     # Create comparison visualizations
     logger.info("Generating cross-model comparisons...")

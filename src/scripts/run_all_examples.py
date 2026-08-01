@@ -1,6 +1,6 @@
+import logging
 import os
 import subprocess
-import logging
 import sys
 from datetime import datetime
 
@@ -68,7 +68,7 @@ def run_example(module_name):
         logging.error(f"Failed to run {module_name}: {e}")
         return -1
 
-if __name__ == "__main__":
+def main():
     logging.info("Starting execution of all examples.")
     logging.info(f"Runner log file: {log_filename}")
     logging.info(f"Example plot outputs will be saved in: {example_output_dir}")
@@ -86,4 +86,8 @@ if __name__ == "__main__":
         logging.warning(f"The following examples failed (exit code != 0): {', '.join(failed_examples)}")
         logging.warning("Check the log file for details.")
     
-    logging.info(f"Log file saved to: {log_filename}") 
+    logging.info(f"Log file saved to: {log_filename}")
+
+
+if __name__ == "__main__":
+    main()

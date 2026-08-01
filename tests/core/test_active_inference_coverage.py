@@ -6,11 +6,11 @@ likelihood, free energy, posterior updates, predictions, and all 8
 case-specific _update_* methods.
 """
 
-import pytest
 import numpy as np
+import pytest
 
-from src.core.model import Case
 from src.core.active_inference import ActiveInferenceModel
+from src.core.model import Case
 
 
 @pytest.fixture
@@ -270,3 +270,104 @@ class TestCaseUpdates:
     def test_vocative_unknown(self, ai_model):
         result = ai_model._update_vocative("explode")
         assert result['status'] == 'error'
+
+
+# ── Regression: KL correctness & default-model robustness ────────
+
+class TestKLCorrectness:
+    """free_energy() complexity term must match the analytic KL(N(q)||N(p))."""
+
+    @staticmethod
+    def _analytic_kl(mu_p, mu_q, sig_p, sig_q):
+        """Reference KL(N(mu_q,sig_q) || N(mu_p,sig_p))."""
+        d = len(mu_p)
+        return 0.5 * (
+            np.trace(np.linalg.inv(sig_p) @ sig_q)
+            + (mu_p - mu_q).T @ np.linalg.inv(sig_p) @ (mu_p - mu_q)
+            - d
+            + np.log(np.linalg.det(sig_p) / np.linalg.det(sig_q))
+        )
+
+    def test_kl_matches_analytic_reference(self):
+        mu_p = np.zeros(2)
+        mu_q = np.array([0.3, -0.2])
+        sig_p = np.array([[2.0, 0.3], [0.3, 1.0]])
+        sig_q = np.array([[1.0, 0.1], [0.1, 0.8]])
+
+        m = ActiveInferenceModel(
+            name="KL",
+            prior_means=mu_p,
+            prior_precision=np.linalg.inv(sig_p),
+            likelihood_precision=np.eye(2),
+        )
+        m.posterior_means = mu_q.copy()
+        m.posterior_precision = np.linalg.inv(sig_q)
+
+        expected = self._analytic_kl(mu_p, mu_q, sig_p, sig_q)
+        assert m.free_energy() == pytest.approx(expected, abs=1e-8)
+
+    def test_kl_nonnegative_for_distinct_posterior(self):
+        # KL divergence is always >= 0; a wrong (inverted) formula can go negative
+        mu_p = np.zeros(2)
+        mu_q = np.array([0.6, -0.4])
+        sig_p = np.eye(2)
+        sig_q = np.array([[1.5, 0.2], [0.2, 1.0]])
+        m = ActiveInferenceModel(
+            name="KL2", prior_means=mu_p, prior_precision=sig_p
+        )
+        m.posterior_means = mu_q.copy()
+        m.posterior_precision = np.linalg.inv(sig_q)
+        assert m.free_energy() >= 0.0
+
+    def test_zero_at_prior_holds(self):
+        # Regression: still exactly zero when posterior == prior
+        m = ActiveInferenceModel(name="Z", prior_means=np.zeros(3))
+        assert m.free_energy() == pytest.approx(0.0, abs=1e-10)
+
+
+class TestDefaultModelRobustness:
+    """Default-constructed models must not crash on core compute methods."""
+
+    def test_get_optimal_action_default(self):
+        m = ActiveInferenceModel(name="bare")
+        action = m.get_optimal_action()
+        assert action >= 0
+
+    def test_predict_next_state_default(self):
+        m = ActiveInferenceModel(name="bare")
+        dist = m.predict_next_state(0)
+        assert np.asarray(dist).shape == m.posterior_means.shape
+
+    def test_predict_observation_default(self):
+        m = ActiveInferenceModel(name="bare")
+        obs = m.predict_observation()
+        assert np.asarray(obs).shape == m.posterior_means.shape
+
+    def test_dimensions_from_parameters(self):
+        """n_states/n_observations must be read from parameters when prior_means absent."""
+        n_states, n_obs = 5, 5
+        m = ActiveInferenceModel(
+            name="params", parameters={"n_states": n_states, "n_observations": n_obs}
+        )
+        assert m.n_states == n_states
+        assert m.n_observations == n_obs
+        assert m.posterior_means.shape == (n_states,)
+        assert m.prior_precision.shape == (n_states, n_states)
+
+    def test_insectmodel_like_dimensions_free_energy(self):
+        """Mimic InsectModel init (params without prior_means) and verify compute works."""
+        params = {
+            "transition_matrix": np.stack([np.eye(5)] * 3, axis=1),
+            "observation_matrix": np.eye(5),
+            "n_states": 5,
+            "n_actions": 3,
+            "n_observations": 5,
+        }
+        m = ActiveInferenceModel(name="insectlike", parameters=params)
+        assert m.n_states == 5
+        assert isinstance(m.free_energy(), (float, np.floating))
+        r = m._update_genitive({"n_samples": 3})
+        assert r["status"] == "success"
+        assert len(r["products"]) == 3
+        r2 = m._update_vocative("status")
+        assert r2["status"] == "success"
