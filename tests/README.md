@@ -2,17 +2,25 @@
 
 This directory contains the test suite for CEREBRUM, organized into subfolders that mirror `src/` modules.
 
+Current suite: **1242 tests collected (1239 passing, 3 skipped)**. The 3 skipped tests are live-API tests, opt-in via `@pytest.mark.live`.
+
 ## Quick Start
 
 ```bash
-# Run all 405 tests
-python -m pytest tests/ -v
+# Run the full suite (from the repository root, inside the uv virtualenv)
+uv run python -m pytest
 
 # Run a specific module's tests
-python -m pytest tests/core/ -v
-python -m pytest tests/transformations/ -v
-python -m pytest tests/utils/ -v
+uv run python -m pytest tests/core/ -v
+uv run python -m pytest tests/transformations/ -v
+uv run python -m pytest tests/utils/ -v
+
+# Run the suite via the project's test runner (coverage, HTML reports)
+python src/scripts/run_tests.py --coverage --html
 ```
+
+Note: use `uv run python -m pytest` rather than a bare `pytest` so the correct
+virtual environment and configuration (see `pytest.ini`) are always used.
 
 ## Module Mapping
 
@@ -29,9 +37,15 @@ python -m pytest tests/utils/ -v
 | `visualization/` | `src/visualization/` | Case visualization, transitions, ecosystem |
 | `integration/` | Cross-module | Model interactions |
 | `pomdp/` | POMDP infrastructure | Per-case POMDP tests |
+| `lexicon/` | `src/lexicon/` | Lexicon engine, NLP, declension, graph |
 
 ## Detailed Documentation
 
-- **`README_TESTING.md`** — TDD methodology and linear regression test guide
-- **`Testing_README.md`** — Legacy testing context
+- **`README_TESTING.md`** — TDD methodology, testing tools, and the linear-regression case tests
 - **`AGENTS.md`** — Full directory tree and agent context
+
+## Test Reports
+
+When run through `src/scripts/run_tests.py`, timestamped reports are written to
+`tests/output/` (HTML coverage report, JUnit XML, logs, and a summary), with
+visualizations under `tests/output/linear_regression/` organized by case.

@@ -8,8 +8,6 @@ CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unifie
 
 **GitHub Repository:** [https://github.com/ActiveInferenceInstitute/CEREBRUM](https://github.com/ActiveInferenceInstitute/CEREBRUM)
 
-[![DOI](https://zenodo.org/badge/962267666.svg)](https://doi.org/10.5281/zenodo.15171283)
-
 ## Publication Information
 
 - **Author:** Daniel Ari Friedman
@@ -27,13 +25,13 @@ Key features include:
 
 - Integration of symbolic case structures with Bayesian probabilistic representations
 - Flexible transformation engine for model adaptation and learning
-- Multiple language implementations with consistent APIs
+- Case-system mappings and implementation guidelines for 60+ natural and 35+ programming languages (see `docs/languages/`)
 - Visualization tools for model inspection and analysis
 - Extensive example library demonstrating applications across domains
 
 ## Project Architecture
 
-![CEREBRUM Project Architecture](docs/diagrams/project_architecture.mermaid)
+Architecture diagram (Mermaid source): [project_architecture.mermaid](docs/diagrams/project_architecture.mermaid)
 
 ## Repository Structure
 
@@ -59,7 +57,7 @@ The CEREBRUM repository is organized into the following structure:
 
 ## Implementation Workflow
 
-![CEREBRUM Implementation Workflow](docs/diagrams/implementation_workflow.mermaid)
+Workflow diagram (Mermaid source): [implementation_workflow.mermaid](docs/diagrams/implementation_workflow.mermaid)
 
 ## Getting Started
 
@@ -125,7 +123,7 @@ For more detailed information about the paper building process, please see `pape
 
 ## Use Cases
 
-![CEREBRUM Use Cases](docs/diagrams/use_cases_mindmap.mermaid)
+Use-case mindmap (Mermaid source): [use_cases_mindmap.mermaid](docs/diagrams/use_cases_mindmap.mermaid)
 
 ## Citation
 
@@ -139,7 +137,6 @@ If you use CEREBRUM in your research, please cite:
   month = {April},
   version = {1.5.0},
   doi = {10.5281/zenodo.15170907},
-  url = {https://doi.org/10.5281/zenodo.15170907},
   publisher = {Active Inference Institute},
   url = {https://github.com/ActiveInferenceInstitute/CEREBRUM}
 }
@@ -147,7 +144,7 @@ If you use CEREBRUM in your research, please cite:
 
 ## License
 
-[CC BY-NC-ND 4.0](LICENSE)
+[CC BY 4.0](LICENSE)
 
 ## Acknowledgements
 

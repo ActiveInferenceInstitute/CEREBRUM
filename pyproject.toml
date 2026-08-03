@@ -3,7 +3,7 @@ name = "cerebrum"
 version = "1.5.0"
 description = "CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling"
 readme = "README.md"
-license = {text = "CC BY-NC-ND 4.0"}
+license = {text = "CC BY 4.0"}
 authors = [
     {name = "Daniel Ari Friedman", email = "daniel@activeinference.institute"}
 ]

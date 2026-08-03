@@ -54,15 +54,15 @@ lexicon/ (depends on core/)
 
 ## Testing
 
-Tests are located at the top-level `tests/` directory (253 tests).
+Tests are located at the top-level `tests/` directory (1242 tests collected: 1239 passing, 3 skipped).
 
 ```bash
 # Run all tests
-python -m pytest tests/ -v
+uv run python -m pytest tests/ -v
 ```
 
 Run specific module tests:
 
 ```bash
-python -m pytest tests/core/test_model.py -v
+uv run python -m pytest tests/core/test_model.py -v
 ```

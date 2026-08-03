@@ -8,9 +8,9 @@ Automated verification suite for every CEREBRUM `src/` module. Test subdirectori
 
 | Metric | Value |
 |--------|-------|
-| Test files | 67 (65 in `tests/` + 2 in `beyond_cerebrum/src/tests/`) |
-| Collected tests | 1152 |
-| Passing | 1149 |
+| Test files | 68 (66 in `tests/` + 2 in `beyond_cerebrum/src/tests/`) |
+| Collected tests | 1242 |
+| Passing | 1239 |
 | Skipped | 3 (live API, opt-in via `@pytest.mark.live`) |
 | Ignored paths | `tests/pomdp/test_cases`, `tests/models/test_linear_regression.py`, `tests/models/linear_regression_cases` |
 
@@ -107,19 +107,19 @@ tests/
 ## Running Tests
 
 ```bash
-# All tests (1152)
-python -m pytest -v
+# All tests (1242 collected: 1239 passing, 3 skipped)
+uv run python -m pytest
 
 # By module
-python -m pytest tests/core/ -v
-python -m pytest tests/cases/ -v
-python -m pytest tests/transformations/ -v
-python -m pytest tests/models/ -v
-python -m pytest tests/utils/ -v
-python -m pytest tests/visualization/ -v
-python -m pytest tests/llm/ -v
-python -m pytest tests/lexicon/ -v
-python -m pytest tests/analysis/ -v
+uv run python -m pytest tests/core/ -v
+uv run python -m pytest tests/cases/ -v
+uv run python -m pytest tests/transformations/ -v
+uv run python -m pytest tests/models/ -v
+uv run python -m pytest tests/utils/ -v
+uv run python -m pytest tests/visualization/ -v
+uv run python -m pytest tests/llm/ -v
+uv run python -m pytest tests/lexicon/ -v
+uv run python -m pytest tests/analysis/ -v
 
 # With coverage
 python -m pytest --cov=src --cov-report=html

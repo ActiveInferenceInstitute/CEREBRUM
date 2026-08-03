@@ -85,7 +85,7 @@ For specific contribution ideas aligned with the current development phase, see 
 
 ## License
 
-CEREBRUM is released under the [CC BY-NC-ND 4.0](../LICENSE) license.
+CEREBRUM is released under the [CC BY 4.0](../LICENSE) license.
 
 ## Contact
 

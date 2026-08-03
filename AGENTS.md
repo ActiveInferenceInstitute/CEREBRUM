@@ -7,7 +7,7 @@ This repository contains the CEREBRUM (Case-Enabled Reasoning Engine with Bayesi
 ## Key Directories
 
 - **`src/`**: The core source code for the framework. This is where the primary logic resides.
-- **`tests/`**: Automated test suite (1152 tests) covering core, cases, models, transformations, utils, and visualization.
+- **`tests/`**: Automated test suite (1242 tests: 1239 passing, 3 skipped) covering core, cases, models, transformations, utils, and visualization.
 - **`paper/`**: Contains resources for generating the academic paper associated with this project, including LaTeX components, figures, and build scripts.
 - **`docs/`**: Documentation for the project, including guides, specifications, and educational materials.
 - **`scripts/`**: One-off or orchestration scripts that may not fit into the core library.
@@ -35,4 +35,4 @@ uv pip install -e ".[all]"      # Install all optional dependencies
 ## Development Workflow
 
 - Refer to `CONTRIBUTING.md` for detailed guidelines on how to contribute.
-- Use `PROGRESS_REPORT.md` to track or view the status of ongoing major tasks.
+- Use `TODO.md` to track or view the status of ongoing major tasks.

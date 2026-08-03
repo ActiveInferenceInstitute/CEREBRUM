@@ -107,6 +107,22 @@ CEREBRUM uses the following testing tools:
 - **hypothesis**: Property-based testing
 - **pytest-mock**: Mocking utilities
 
+## Dependencies & Environment
+
+Test dependencies (pytest, pytest-cov, hypothesis, pytest-mock, and the
+scientific stack used by the tests) are declared in `pyproject.toml` under the
+`dev` extra and installed with uv:
+
+```bash
+uv venv
+source .venv/bin/activate
+uv pip install -e ".[dev]"
+```
+
+The repository requires a coverage threshold of 90% (`--cov-fail-under=90` in
+`pytest.ini`); run the suite with `uv run python -m pytest` to pick up the
+project configuration automatically.
+
 ## Continuous Integration
 
 Tests are automatically run in continuous integration to verify that all tests pass before changes are merged.
@@ -144,7 +160,7 @@ The CEREBRUM framework includes comprehensive linear regression tests that demon
 
 ```bash
 # Run the nominative case test (currently the most reliable)
-python3 -c "from tests.test_linear_regression import CaseDefinitions, DataGenerator, test_nominative_case; case_definitions = CaseDefinitions.get_all_cases(); linear_data = DataGenerator.linear_data(n_samples=150, slope=3.0, intercept=-2.0, noise_level=2.0); test_nominative_case(linear_data, case_definitions)"
+python -c "from tests.test_linear_regression import CaseDefinitions, DataGenerator, test_nominative_case; case_definitions = CaseDefinitions.get_all_cases(); linear_data = DataGenerator.linear_data(n_samples=150, slope=3.0, intercept=-2.0, noise_level=2.0); test_nominative_case(linear_data, case_definitions)"
 ```
 
 **Note:** Currently, there are array dimension issues with several of the case tests when run individually. Work is ongoing to fix these issues. The nominative case test is the most reliable and demonstrates the core concepts of the CEREBRUM framework in the context of linear regression.
@@ -215,6 +231,48 @@ Each case test generates specific visualizations that demonstrate the linguistic
    - `model_addressing_data.png` - Model addressing data points
    - `vocative_communication.gif` - Animation of model interactions
    - `vocative_results.txt` - Summary of test results
+
+## Troubleshooting
+
+### Common Test Errors
+
+1. **Missing Dependencies**:
+   ```
+   ModuleNotFoundError: No module named 'X'
+   ```
+   Solution: install the project's dev dependencies with `uv pip install -e ".[dev]"`.
+
+2. **Import Errors for Local Modules**:
+   ```
+   ImportError: No module named 'src'
+   ```
+   Solution: run pytest from the project root (where `src/` lives), or add the
+   project root to `PYTHONPATH`.
+
+3. **Animation Errors**:
+   ```
+   ValueError: operands could not be broadcast together with shapes (X,) (Y,)
+   ```
+   Solution: ensure array shapes match in animation functions.
+
+4. **Permission Errors when Writing Output**:
+   ```
+   PermissionError: [Errno 13] Permission denied: 'path/to/file'
+   ```
+   Solution: check directory permissions or run with higher privileges.
+
+5. **Coverage Threshold Failure**: if the run reports coverage below 90%,
+   the configured `--cov-fail-under=90` gate fails the suite; add tests for
+   the uncovered paths rather than lowering the threshold.
+
+### Debugging Failed Tests
+
+For failed tests, check:
+
+1. The test logs in the output directory
+2. The traceback for the specific error message
+3. Generated visualizations for anomalies
+4. The state of the model after failure
 
 ## References
 

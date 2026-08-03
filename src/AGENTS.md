@@ -84,15 +84,15 @@ model.case = Case.GENITIVE  # Model as source/generator
 
 ### Testing
 
-- 1152 tests total (up from 235)
-- 0 warnings
+- 1242 tests total (1239 passing, 3 skipped; up from 235)
+- 13 warnings (numpy RuntimeWarnings in visualization tests)
 - 18 new tests for new methods
 - Tests in `tests/` with subfolders mirroring `src/` modules
 
 ## Testing
 
 ```bash
-# Run all tests (0 warnings)
+# Run all tests (13 warnings expected: numpy RuntimeWarnings)
 python -m pytest tests/ -v
 
 # Run tests for a specific module
