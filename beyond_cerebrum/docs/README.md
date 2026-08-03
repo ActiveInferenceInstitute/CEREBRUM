@@ -6,9 +6,14 @@ See the main [FORMICA Specification](../beyond_spec.md) for the overall vision a
 
 ## Modules
 
--   [Formalisms](./formalisms/README.md): Core linguistic representations (types, structures).
--   [Operations](./operations/README.md): Computational calculus (calculus, transformations, inference).
--   [Backends](./backends/README.md): Interfaces to computational models.
--   [Analysis](./analysis/README.md): Interpretability and monitoring tools.
--   [Interfaces](./interfaces/README.md): Input/Output handling.
--   [Utils](./utils/README.md): Utility functions. 
+- [Formalisms](./formalisms/README.md): Core linguistic representations (types, structures, categories). Theory notes live in [`formalisms/theory/`](formalisms/theory/README.md).
+
+The following modules have source code but do not yet have dedicated
+documentation pages (see their source packages instead):
+
+- **Operations** (`src/operations/`): Computational calculus (`calculus.py`, `transformations.py`, `inference.py`)
+- **Analysis** (`src/analysis/`): Interpretability and monitoring tools (`interpretability_hooks.py`, `lexical_forensics.py`)
+- **Visualization** (`src/visualization/`): Visualization utilities (`visualize.py`)
+- **Backends** (`src/backends/`): Interfaces to computational models (placeholder)
+- **Interfaces** (`src/interfaces/`): Input/Output handling (placeholder)
+- **Utils** (`src/utils/`): Utility functions (placeholder)

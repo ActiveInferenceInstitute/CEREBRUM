@@ -222,23 +222,26 @@ We use [uv](https://docs.astral.sh/uv/) for fast, reliable Python dependency man
 
 ### Code Examples
 
-Each implementation directory contains example code to help you understand the framework:
+Example code and guides live in the following locations:
 
-- `examples/python/` - Python examples
-- `examples/js/` - JavaScript examples
-- `examples/rust/` - Rust examples
+- `src/examples/` - Runnable Python example implementations (environment, model demos)
+- `docs/examples/` - Playbooks, guides, and templates for applying CEREBRUM across domains (see the [examples index](examples/Examples_README.md))
+- `docs/getting_started.md` - A runnable first-model walkthrough
+
+The language mappings under `docs/languages/computer/` include per-language
+code sketches; the only runnable implementation in this repository is Python.
 
 ### Technical Documentation
 
-- [API Documentation](api_documentation.md)
-- [Architecture Guide](architecture_guide.md)
-- [Implementation Standards](implementation_standards.md)
-- [Testing Guide](testing_guide.md)
+- [How CEREBRUM Works](how_it_works.md) - Architecture overview
+- [Core Specification](cerebrum_core_spec.md) - Component/interface standards
+- [Testing Guide](../tests/README.md) - Running and writing tests
+- [Implementation Roadmap](implementation_roadmap.md) - Current priorities
 
 ## Getting Started with Technical Contributions
 
 1. Review the [implementation roadmap](implementation_roadmap.md) to understand current priorities
-2. Join the [developer chat](https://discord.gg/cerebrum-dev) to connect with other contributors
+2. Browse [GitHub Discussions](https://github.com/ActiveInferenceInstitute/CEREBRUM/discussions) to connect with other contributors
 3. Check the [good first issues](https://github.com/ActiveInferenceInstitute/CEREBRUM/labels/good%20first%20issue) on GitHub
 4. Set up your development environment following the [Getting Started guide](getting_started.md)
 
@@ -247,11 +250,8 @@ For general contribution guidelines, please refer to the main [CONTRIBUTING.md](
 ## Technical Support and Communication
 
 - **GitHub Issues**: Technical questions and bug reports
-- **Developer Chat**: Real-time discussions on Discord
-- **Technical Meetings**: Bi-weekly developer calls
+- **GitHub Discussions**: Real-time discussions with the community
 - **Technical Blog**: Updates and deep dives on the development blog
 
-For specific technical questions, please contact:
-
-- Technical Lead: <tech@activeinference.org>
-- Developer Relations: <devrel@activeinference.institute>
+For specific technical questions, please open an issue or discussion on
+[GitHub](https://github.com/ActiveInferenceInstitute/CEREBRUM).

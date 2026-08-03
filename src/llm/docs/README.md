@@ -709,13 +709,13 @@ All test results are automatically saved to the `test_output/` directory:
 
 2. **Dependencies:**
    ```bash
-   uv pip install python-dotenv openai
+   uv pip install -e ".[dev]"
    ```
 
 3. **Test Execution:**
    ```bash
-   # Run all tests
-   python3 test_openrouter_functionality.py && python3 test_openrouter_structure.py
+   # Run all OpenRouter tests (from the repository root)
+   uv run python -m pytest tests/llm/test_openrouter_functionality.py tests/llm/test_openrouter_structure.py
    ```
 
 ### Continuous Integration
@@ -726,9 +726,8 @@ The test suite is designed for CI/CD integration:
 # Example GitHub Actions workflow
 - name: Run OpenRouter Tests
   run: |
-    cd src/llm
-    python3 test_openrouter_structure.py
-    python3 test_openrouter_functionality.py
+    uv run python -m pytest tests/llm/test_openrouter_structure.py
+    uv run python -m pytest tests/llm/test_openrouter_functionality.py
   env:
     OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
 ```

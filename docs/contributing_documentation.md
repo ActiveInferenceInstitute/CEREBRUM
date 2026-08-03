@@ -240,16 +240,15 @@ This guide provides detailed information for contributors interested in improvin
 
 ### Reference Resources
 
-- [CEREBRUM Style Guide](docs/style_guide.md)
+- [Diagram Style Guide](diagrams/style-guide.md)
 - [Markdown Cheat Sheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
 - [Mermaid Diagram Syntax](https://mermaid-js.github.io/mermaid/#/)
-- [Documentation Best Practices](docs/documentation_best_practices.md)
 
 ## Getting Started with Documentation Contributions
 
 1. Browse the [open documentation issues](https://github.com/ActiveInferenceInstitute/CEREBRUM/labels/documentation)
-2. Join the [documentation channel](https://discord.gg/cerebrum-docs) to connect with other contributors
-3. Review the [documentation roadmap](docs/documentation_roadmap.md) to understand current priorities
+2. Join the [documentation discussions](https://github.com/ActiveInferenceInstitute/CEREBRUM/discussions) to connect with other contributors
+3. Review the [implementation roadmap](implementation_roadmap.md) to understand current priorities
 4. Start with a small documentation improvement to get familiar with the process
 
 For general contribution guidelines, please refer to the main [CONTRIBUTING.md](https://github.com/ActiveInferenceInstitute/CEREBRUM/blob/main/CONTRIBUTING.md) document.
@@ -257,10 +256,8 @@ For general contribution guidelines, please refer to the main [CONTRIBUTING.md](
 ## Documentation Support and Communication
 
 - **Documentation Issues**: Submit questions and suggestions via GitHub issues
-- **Documentation Chat**: Discuss documentation in the Discord channel
-- **Documentation Meetings**: Monthly documentation team meetings
-- **Style Guide**: Reference the comprehensive style guide for consistency
+- **Documentation Discussions**: Discuss documentation in GitHub Discussions
+- **Style Guide**: Reference the [diagram style guide](diagrams/style-guide.md) for consistency
 
-For specific documentation questions, please contact:
-- Documentation Lead: docs@activeinference.org
-- Education Coordinator: education@activeinference.institute 
+For specific documentation questions, please open an issue or discussion on
+[GitHub](https://github.com/ActiveInferenceInstitute/CEREBRUM). 

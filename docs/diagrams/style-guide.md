@@ -404,6 +404,5 @@ linkStyle feedback {
 - [Template Library](../templates/)
 
 ### Support
-- [CEREBRUM Discord](https://discord.gg/cerebrum)
 - [GitHub Issues](https://github.com/ActiveInferenceInstitute/CEREBRUM/issues)
-- [Documentation Channel](https://discord.gg/cerebrum-docs) 
+- [GitHub Discussions](https://github.com/ActiveInferenceInstitute/CEREBRUM/discussions) 

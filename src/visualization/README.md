@@ -10,7 +10,7 @@ Specialized visualization tools for CEREBRUM.
 | `case_visualization.py` | Case structure visualization |
 | `case_comparison.py` | Cross-case comparison visualizer |
 | `animal_visualization.py` | Animal/agent state visualization |
-| `insect/` | Insect-specific visualizers (9 modules) |
+| `insect/` | Insect-specific visualizers (8 modules) |
 | `insect/animation_creator.py` | Simulation animations |
 | `insect/behavior_visualizer.py` | Behavioral state plots |
 | `insect/case_visualizer.py` | Case transition plots |

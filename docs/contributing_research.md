@@ -157,14 +157,12 @@ This guide provides detailed information for researchers interested in contribut
 ## Getting Started with Research Contributions
 
 1. Browse the [open research questions](https://github.com/ActiveInferenceInstitute/CEREBRUM/labels/research)
-2. Join the [research mailing list](mailto:research@activeinference.org)
-3. Review the [current research roadmap](docs/research_roadmap.md)
-4. Check the [research contribution examples](docs/research_examples.md)
+2. Review the [current implementation roadmap](implementation_roadmap.md)
+3. Check the [research contribution examples](examples/Examples_README.md)
 
 For general contribution guidelines, please refer to the main [CONTRIBUTING.md](https://github.com/ActiveInferenceInstitute/CEREBRUM/blob/main/CONTRIBUTING.md) document.
 
 ## Contact the Research Team
 
 For specific research-related questions, please contact:
-- Research Coordinator: research@activeinference.org
 - Daniel Ari Friedman: daniel@activeinference.institute 

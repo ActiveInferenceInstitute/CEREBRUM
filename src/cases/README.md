@@ -17,7 +17,6 @@ This directory defines the grammatical cases used in the CEREBRUM system.
 | `ablative.py` | Origin/Separation case (ABL) |
 | `vocative.py` | Address/Communication case (VOC) |
 | `animal_cases.py` | Animal-specific case implementations |
-| `examples.py` | Case usage examples |
 
 ## Usage
 
