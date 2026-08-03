@@ -30,7 +30,7 @@ This linguistic approach enables models to adapt their function contextually wit
 
 ## Architecture: Five Core Components
 
-CEREBRUM's implementation is built around five key architectural components that work together to enable case-based reasoning:
+CEREBRUM's [core specification](cerebrum_core_spec.md#1-core-components) defines five key architectural components that work together to enable case-based reasoning:
 
 1. **Model Registry**: Maintains references to all models with their current case assignments
 2. **Case Manager**: Handles case transformations and maintains rules governing valid transitions
@@ -38,7 +38,7 @@ CEREBRUM's implementation is built around five key architectural components that
 4. **Message Bus**: Facilitates communication between case-bearing models
 5. **Transformation Engine**: Implements actual case transformations
 
-These components are detailed in the [Core Specification](cerebrum_core_spec.md#1-core-components), with technical implementation guides available for [Python, JavaScript, and Rust](language_implementations.md).
+The Python reference implementation currently provides the **Model Registry**, **Case Manager**, and **Transformation Engine** (`src/core/model_registry.py`, `src/cases/case_manager.py`, `src/transformations/`); the Precision Allocator and Message Bus are specified components not yet implemented in `src/`. These components are detailed in the [Core Specification](cerebrum_core_spec.md#1-core-components), with implementation guidelines available for [Python, JavaScript, and Rust](language_implementations.md).
 
 ## Mathematical Foundation: Free Energy Minimization
 
@@ -96,10 +96,16 @@ The specific equations and implementation details are covered in [Active Inferen
 
 ## Practical Implementation
 
-CEREBRUM can be implemented in various programming languages, with reference implementations provided in:
+CEREBRUM provides a Python reference implementation in `src/`, plus implementation guidelines for other languages:
+
 - [Python](language_implementations.md#1-python-implementation)
 - [JavaScript](language_implementations.md#2-javascripttypescript-implementation)
 - [Rust](language_implementations.md#3-rust-implementation)
+
+The JavaScript and Rust entries are guidelines for implementing CEREBRUM in
+those languages; the only runnable implementation in this repository is the
+Python one. Per-language case mappings for 35+ programming languages live in
+[`docs/languages/computer/`](languages/computer/README.md).
 
 To get started with a practical implementation, see the [Getting Started Guide](getting_started.md) which walks through creating a simple temperature model with case transformations.
 

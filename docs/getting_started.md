@@ -7,8 +7,7 @@ This guide helps new developers get started with the CEREBRUM framework. It cove
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
   - [Python Implementation](#python-implementation)
-  - [JavaScript Implementation](#javascript-implementation)
-  - [Rust Implementation](#rust-implementation)
+  - [Other Languages](#other-languages)
 - [Your First CEREBRUM Model](#your-first-cerebrum-model)
   - [Python Example](#python-example)
   - [Using the Model](#using-the-model)
@@ -22,14 +21,15 @@ This guide helps new developers get started with the CEREBRUM framework. It cove
 
 Before you begin, ensure you have the following installed:
 
-- Python 3.9+ for the Python reference implementation
-- Node.js 16+ (if working with JavaScript implementation)
-- Rust 1.60+ (if working with Rust implementation)
+- Python 3.9+ (the reference implementation lives in `src/`)
 - Git for version control
+- [uv](https://docs.astral.sh/uv/) (recommended) for dependency management
+
+The reference implementation is Python-only. Case-system mappings and
+implementation guidelines for other languages (JavaScript, Rust, Julia, and
+35+ more) are provided as documentation in [`docs/languages/computer/`](languages/computer/README.md).
 
 ## Installation
-
-Choose the implementation language that best suits your project and follow the corresponding installation instructions.
 
 ### Python Implementation
 
@@ -62,39 +62,12 @@ We use [uv](https://docs.astral.sh/uv/) for fast, reliable Python dependency man
    uv pip install -e ".[dev]"
    ```
 
-### JavaScript Implementation
+### Other Languages
 
-1. Navigate to the JavaScript implementation:
-
-   ```bash
-   cd implementations/js
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. Build the library:
-
-   ```bash
-   npm run build
-   ```
-
-### Rust Implementation
-
-1. Navigate to the Rust implementation:
-
-   ```bash
-   cd implementations/rust
-   ```
-
-2. Build the library:
-
-   ```bash
-   cargo build
-   ```
+There are no runnable non-Python implementations in this repository. If you
+want to implement CEREBRUM in another language, see the
+[Language Implementation Guidelines](language_implementations.md) and the
+per-language mappings in [`docs/languages/computer/`](languages/computer/README.md).
 
 ## Your First CEREBRUM Model
 
@@ -103,113 +76,62 @@ Let's create a simple temperature model that can transform between different cas
 ### Python Example
 
 ```python
-from cerebrum import GenerativeModel, Case, ModelRegistry
+from src import Model, Case, register_model, get_global_registry
+from src.transformations import transform_case
 
 # 1. Define a simple model
-class TemperatureModel(GenerativeModel):
+class TemperatureModel(Model):
     def __init__(self, model_id):
-        super().__init__(model_id)
-        # Core parameters
-        self.parameters = {
+        super().__init__(name=model_id, parameters={
             'current_temp': 72.0,
             'target_temp': 70.0,
             'heating_rate': 0.5,
             'cooling_rate': 0.3,
-        }
-        # Define supported cases
-        self.supported_cases = [
-            Case('nominative', 'NOM'),  # Active predictor
-            Case('accusative', 'ACC'),  # Recipient of updates
-            Case('genitive', 'GEN'),    # Output generator
-        ]
-        # Default to nominative case
-        self.current_case = self.supported_cases[0]
-    
+        })
+
     def predict(self, inputs=None):
         """Generate predictions based on current case."""
-        if self.current_case.abbreviation == 'NOM':
-            # As active predictor
-            return self._predict_temperature()
-        elif self.current_case.abbreviation == 'GEN':
-            # As report generator
-            return self._generate_report()
-        else:
-            return {"error": "Prediction not implemented for this case"}
-    
-    def _predict_temperature(self):
-        """Nominative case: predict future temperature."""
         current = self.parameters['current_temp']
         target = self.parameters['target_temp']
-        
-        if current < target:
-            # Heating
-            new_temp = current + self.parameters['heating_rate']
+
+        if self.case == Case.NOMINATIVE:
+            # As active predictor
+            if current < target:
+                new_temp = current + self.parameters['heating_rate']
+            else:
+                new_temp = current - self.parameters['cooling_rate']
+            return {
+                'predicted_temp': new_temp,
+                'system_state': 'heating' if current < target else 'cooling',
+            }
+        elif self.case == Case.GENITIVE:
+            # As report generator
+            return {
+                'current_temperature': current,
+                'target_temperature': target,
+                'system_status': 'heating' if current < target else 'cooling',
+                'efficiency': max(0, 100 - abs(current - target) * 5),
+            }
         else:
-            # Cooling
-            new_temp = current - self.parameters['cooling_rate']
-        
-        return {
-            'predicted_temp': new_temp,
-            'system_state': 'heating' if current < target else 'cooling',
-        }
-    
-    def _generate_report(self):
-        """Genitive case: generate performance report."""
-        return {
-            'current_temperature': self.parameters['current_temp'],
-            'target_temperature': self.parameters['target_temp'],
-            'system_status': 'heating' if self.parameters['current_temp'] < self.parameters['target_temp'] else 'cooling',
-            'efficiency': self._calculate_efficiency(),
-        }
-    
-    def _calculate_efficiency(self):
-        """Helper method for report generation."""
-        # Simple efficiency calculation
-        temp_diff = abs(self.parameters['current_temp'] - self.parameters['target_temp'])
-        return max(0, 100 - (temp_diff * 5))
-    
-    def update(self, prediction, observation):
-        """Update model based on observations."""
-        if self.current_case.abbreviation == 'ACC':
+            return {"error": f"Prediction not implemented for case {self.case}"}
+
+    def update(self, prediction=None, observation=None):
+        """Update model parameters based on observations."""
+        if self.case == Case.ACCUSATIVE:
             # As recipient of updates
-            return self._update_parameters(observation)
+            if 'measured_temp' in observation:
+                self.parameters['current_temp'] = observation['measured_temp']
+            if 'new_target' in observation:
+                self.parameters['target_temp'] = observation['new_target']
+            return {
+                'updated_parameters': {
+                    'current_temp': self.parameters['current_temp'],
+                    'target_temp': self.parameters['target_temp'],
+                },
+                'update_status': 'success',
+            }
         else:
-            return {"error": "Update not implemented for this case"}
-    
-    def _update_parameters(self, observation):
-        """Accusative case: update model parameters."""
-        if 'measured_temp' in observation:
-            self.parameters['current_temp'] = observation['measured_temp']
-        
-        if 'new_target' in observation:
-            self.parameters['target_temp'] = observation['new_target']
-        
-        return {
-            'updated_parameters': {
-                'current_temp': self.parameters['current_temp'],
-                'target_temp': self.parameters['target_temp'],
-            },
-            'update_status': 'success',
-        }
-    
-    def transform_case(self, target_case_abbr):
-        """Transform the model to a different case."""
-        # Find the target case
-        target_case = next((case for case in self.supported_cases 
-                           if case.abbreviation == target_case_abbr), None)
-        
-        if not target_case:
-            return {'success': False, 'error': 'Unsupported case'}
-            
-        # Perform the transformation
-        old_case = self.current_case
-        self.current_case = target_case
-        
-        return {
-            'success': True,
-            'previous_case': old_case.abbreviation,
-            'new_case': target_case.abbreviation,
-        }
+            return {"error": f"Update not implemented for case {self.case}"}
 ```
 
 ### Using the Model
@@ -217,8 +139,10 @@ class TemperatureModel(GenerativeModel):
 ```python
 # Create and register the model
 model = TemperatureModel('home_thermostat')
-registry = ModelRegistry()
-registry.register_model(model, 'NOM')  # Register with nominative case
+register_model(model, tags=["demo"])  # Persists to output/model_registry/
+
+# A model starts in the nominative case (active predictor)
+print(f"Initial case: {model.case}")          # Case.NOMINATIVE
 
 # Use as active predictor (nominative case)
 prediction = model.predict()
@@ -226,13 +150,13 @@ print(f"Predicted temperature: {prediction['predicted_temp']}°F")
 print(f"System state: {prediction['system_state']}")
 
 # Transform to accusative case (recipient of updates)
-model.transform_case('ACC')
+transform_case(model, Case.ACCUSATIVE)
 update_result = model.update(None, {'measured_temp': 68.0, 'new_target': 72.0})
 print(f"Update status: {update_result['update_status']}")
 print(f"Updated parameters: {update_result['updated_parameters']}")
 
 # Transform to genitive case (report generator)
-model.transform_case('GEN')
+transform_case(model, Case.GENITIVE)
 report = model.predict()
 print(f"Current temperature: {report['current_temperature']}°F")
 print(f"Target temperature: {report['target_temperature']}°F")
@@ -243,8 +167,9 @@ print(f"Efficiency: {report['efficiency']}%")
 #### Expected Output
 
 ```
-Predicted temperature: 72.5°F
-System state: heating
+Initial case: Case.NOMINATIVE
+Predicted temperature: 71.7°F
+System state: cooling
 Update status: success
 Updated parameters: {'current_temp': 68.0, 'target_temp': 72.0}
 Current temperature: 68.0°F
@@ -257,51 +182,52 @@ Efficiency: 80.0%
 
 When working with CEREBRUM, keep these key components in mind:
 
-### 1. GenerativeModel
+### 1. Model (`src.core.model.Model`)
 
-The base class for all CEREBRUM models, providing:
+The base class for all CEREBRUM models (`Model(name=None, parameters=None)`),
+providing:
 
-- Parameter management
-- State tracking
-- Case transformation capabilities
-- Prediction and update methods
+- Parameter management (`model.parameters`)
+- Case state tracking (`model.case`)
+- `predict()` and `update()` hooks that dispatch on the current case
 
-### 2. Case
+### 2. Case (`src.core.model.Case`)
 
-Represents a linguistic case with:
+An enum of the eight standard linguistic cases:
 
-- Name and abbreviation
-- Parameter access patterns
-- Interface requirements
-- Update dynamics
+- `Case.NOMINATIVE` [NOM] — model as active agent
+- `Case.ACCUSATIVE` [ACC] — model as object of a process
+- `Case.GENITIVE` [GEN] — model as source/possessor
+- `Case.DATIVE` [DAT] — model as recipient
+- `Case.INSTRUMENTAL` [INS] — model as method/tool
+- `Case.LOCATIVE` [LOC] — model as context
+- `Case.ABLATIVE` [ABL] — model as origin/cause
+- `Case.VOCATIVE` [VOC] — model as addressable entity
 
-### 3. ModelRegistry
+### 3. ModelRegistry (`src.core.model_registry.ModelRegistry`)
 
 Manages model instances:
 
-- Registers models with initial cases
-- Provides model lookup
-- Tracks model relationships
-- Maintains case assignments
+- Registers models with initial case assignments (`register_model(model, tags=...)`)
+- Persists models to `output/model_registry/`
+- Provides model lookup (`get_global_registry().get_model(name)`)
 
-### 4. Transformation Engine
+### 4. Transformation Functions (`src.transformations`)
 
-Handles case transformations:
+Handle case transformations:
 
-- Validates transformation validity
-- Optimizes transformations
-- Applies transformations
-- Maintains transformation history
+- `transform_case(model, target_case)` — apply a case transformation
+- `revert_case(model)` — revert to the previous case
 
 ## Development Workflow
 
 A typical development workflow with CEREBRUM includes:
 
-1. **Define your model**: Create a subclass of `GenerativeModel`
-2. **Implement case-specific behaviors**: Add methods for different cases
-3. **Register with ModelRegistry**: Make your model available to the framework
-4. **Transform cases as needed**: Change your model's functional role
-5. **Connect models together**: Use the message bus for model communication
+1. **Define your model**: Create a subclass of `Model` with a `parameters` dict
+2. **Implement case-specific behaviors**: Branch on `self.case` inside `predict()` / `update()`
+3. **Register with ModelRegistry**: `register_model(model, tags=[...])`
+4. **Transform cases as needed**: `transform_case(model, Case.ACCUSATIVE)`
+5. **Connect models together**: Use `model.connect(other)` to link models
 
 ## Contributing to CEREBRUM
 
@@ -313,7 +239,7 @@ If you're interested in contributing to CEREBRUM, we welcome contributions acros
   - Extending the mathematical framework
   - Proposing novel case structures
   - Developing new inference algorithms
-  
+
 - **Empirical Testing**
   - Designing experiments
   - Benchmarking performance
@@ -325,9 +251,9 @@ If you're interested in contributing to CEREBRUM, we welcome contributions acros
   - Implementing new model components
   - Optimizing existing implementations
   - Improving the transformation engine
-  
+
 - **Language Implementations**
-  - Creating or improving implementations in various languages
+  - Creating or improving implementation guidelines for various languages
   - Building integrations with other frameworks
   - Developing specialized variants
 
@@ -337,7 +263,7 @@ If you're interested in contributing to CEREBRUM, we welcome contributions acros
   - Creating tutorials and guides
   - Developing learning resources
   - Documenting use cases
-  
+
 - **Model Examples**
   - Creating demonstrative models
   - Implementing domain-specific applications
@@ -368,27 +294,26 @@ After building your first model, explore these advanced topics:
 
 ### Common Issues
 
-1. **Case transformation errors**: Ensure your model supports the target case
+1. **Case transformation errors**: Ensure your model supports the target case.
 
    ```python
-   # Check supported cases
-   print(f"Supported cases: {[case.abbreviation for case in model.supported_cases]}")
+   # Check the current case
+   print(f"Current case: {model.case}")
    ```
 
-2. **Prediction/update errors**: Check that you've implemented the appropriate methods for each case
+2. **Prediction/update errors**: Check that you've implemented the appropriate methods for each case.
 
    ```python
    # Debug case-specific method dispatch
-   print(f"Current case: {model.current_case.abbreviation}")
-   if model.current_case.abbreviation == 'NOM':
+   if model.case == Case.NOMINATIVE:
        print("Using nominative prediction method")
    ```
 
-3. **Registry errors**: Verify that your model is properly registered with the correct initial case
+3. **Registry errors**: Verify that your model is properly registered.
 
    ```python
    # Verify model registration
-   registered_model = registry.get_model(model.model_id)
+   registered_model = get_global_registry().get_model(model.name)
    print(f"Is registered: {registered_model is not None}")
    ```
 

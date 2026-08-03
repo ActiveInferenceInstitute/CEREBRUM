@@ -1,5 +1,11 @@
 # CEREBRUM Model Examples
 
+> **Note on API style**: the code in this document is written in a compact,
+> illustrative style and is not guaranteed to run verbatim against the current
+> reference implementation. For runnable code grounded in the actual API
+> (`src.Model`, the `Case` enum, `transform_case()`), see
+> [Getting Started](getting_started.md) and `src/examples/`.
+
 This document provides concrete examples of CEREBRUM models in various domains, demonstrating how the case system can be applied to real-world problems.
 
 ## 1. Thermostat Model Example
@@ -10,11 +16,11 @@ The thermostat model from the CEREBRUM paper is implemented here in Python to de
 
 ```python
 import numpy as np
-from cerebrum import GenerativeModel, Case, ParameterAccessPattern
+from src import Model, Case
 
-class ThermostatModel(GenerativeModel):
+class ThermostatModel(Model):
     def __init__(self, model_id):
-        super().__init__(model_id)
+        super().__init__(name=model_id)
         # Core parameters
         self.parameters = {
             'target_temp': 72.0,
@@ -206,12 +212,12 @@ class ThermostatModel(GenerativeModel):
 ### 1.2 Using the Thermostat Model
 
 ```python
-from cerebrum import ModelRegistry
+from src import ModelRegistry, register_model
 
 # Create and register the model
 thermostat = ThermostatModel('main_thermostat')
 registry = ModelRegistry()
-registry.register_model(thermostat, 'NOM')  # Register with nominative case
+register_model(thermostat, tags=["example"])  # Register with nominative case
 
 # Use the model in nominative case (active predictor)
 predictions = thermostat.predict()
@@ -242,11 +248,11 @@ This example demonstrates how a language model can take on different cases, chan
 
 ```python
 import numpy as np
-from cerebrum import GenerativeModel, Case, ParameterAccessPattern
+from src import Model, Case
 
-class LanguageModel(GenerativeModel):
+class LanguageModel(Model):
     def __init__(self, model_id, vocabulary_size=10000, embedding_dim=256, context_length=100):
-        super().__init__(model_id)
+        super().__init__(name=model_id)
         # Core parameters
         self.parameters = {
             'vocabulary_size': vocabulary_size,
@@ -509,12 +515,12 @@ class LanguageModel(GenerativeModel):
 ### 2.2 Using the Language Model
 
 ```python
-from cerebrum import ModelRegistry
+from src import ModelRegistry, register_model
 
 # Create and register the model
 lm = LanguageModel('gpt_model', vocabulary_size=50000)
 registry = ModelRegistry()
-registry.register_model(lm, 'NOM')  # Register with nominative case
+register_model(lm, tags=["example"])  # Register with nominative case
 
 # Use in nominative case (text generator)
 text_result = lm.predict({'prompt': 'Once upon a time'})
@@ -552,7 +558,7 @@ print(f"Fine-tuning loss: {fine_tuning['loss']}")
 This example demonstrates how multiple CEREBRUM models can work together in an intelligence workflow.
 
 ```python
-from cerebrum import ModelRegistry, Workflow, CaseManager
+from src import ModelRegistry, CaseManager
 
 # Create registry and case manager
 registry = ModelRegistry()
