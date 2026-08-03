@@ -6,7 +6,7 @@ See the main [FORMICA Specification](../beyond_spec.md) for the overall vision a
 
 ## Modules
 
-- [Formalisms](./formalisms/README.md): Core linguistic representations (types, structures, categories). Theory notes live in [`formalisms/theory/`](formalisms/theory/README.md).
+- [Formalisms](./formalisms/README.md): Core linguistic representations (types, structures, categories). Theory notes live in [`formalisms/theory/`](../src/formalisms/theory/README.md).
 
 The following modules have source code but do not yet have dedicated
 documentation pages (see their source packages instead):
