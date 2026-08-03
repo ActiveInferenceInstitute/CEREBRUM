@@ -17,7 +17,7 @@ In intelligence production systems, these case relationships fulfill distinct fu
 
 The concept of 'case' extends beyond purely linguistic analysis. Notably, the structured approach inherent in linguistic case systems finds a compelling parallel in the domain of intelligence production, specifically within 'Case Management Systems'. These systems, designed to organize, track, and process complex information flows for decision-making, rely on assigning roles and relationships to data points—much like grammatical cases assign roles to sentence constituents. Examining how information is categorized, prioritized, and transformed within these operational frameworks offers valuable insights into the functional demands placed on cognitive systems that must similarly manage and act upon diverse, often ambiguous, streams of input. This convergence highlights a shared underlying principle: the need for structured frameworks to manage complexity, whether in language comprehension or strategic analysis.
 
-![Generative Model Integration in Intelligence Case Management.](../figures/Figure_4.png){#fig:fig4}
+![Generative Model Integration in Intelligence Case Management.](Figure_4.png){#fig:fig4}
 
 ## A Prototype Case-Bearing Model: Homeostatic Thermostat
 
@@ -79,6 +79,6 @@ The Vocative case [VOC] optimizes models for name-based recognition and command 
 
 This systematic pattern of transformations constitutes a complete "declension paradigm" for cognitive models, using precision-modulation to fulfill diverse functional roles while maintaining core identity. Figure 5 illustrates the workflow of case transformations.
 
-![Model Workflows as Case Transformations - Sequence Diagram.](../figures/Figure_5.png){#fig:fig5}
+![Model Workflows as Case Transformations - Sequence Diagram.](Figure_5.png){#fig:fig5}
 
 The implications of this declension paradigm extend beyond individual models to entire model ecosystems, as further explored in Supplements 2 and 7.

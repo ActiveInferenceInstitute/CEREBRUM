@@ -60,12 +60,12 @@ Core cases include:
 - Locative (location)
 - Ablative (origin)
 
-Each serves distinct functional roles within sentence structures, with implementation varying across languages. Nominative-accusative systems distinguish subjects from objects, while ergative-absolutive systems group intransitive subjects with direct objects, as illustrated in ![Figure 9: Morphosyntactic Alignments in Model Relationships.](../figures/Figure_9.png){#fig:fig9}.
+Each serves distinct functional roles within sentence structures, with implementation varying across languages. Nominative-accusative systems distinguish subjects from objects, while ergative-absolutive systems group intransitive subjects with direct objects, as illustrated in ![Figure 9: Morphosyntactic Alignments in Model Relationships.](Figure_9.png){#fig:fig9}.
 
 While English has largely lost morphological case marking, underlying case relationships persist through word order and prepositions. In "The cat chased the mouse," nominative case appears through position (subject before verb) rather than morphology. In "I gave him the book," dative case manifests through implied preposition and word order. These examples demonstrate that case relationships—encompassing semantics, semiosis, and pragmatics—remain fundamental to language structure regardless of explicit morphological marking.
 
 ## Intelligence Case Management Systems
-Intelligence case management systems organize investigative workflows and analytical processes in operational contexts. These systems structure information collection, analysis, evaluation, and dissemination while tracking provenance and relationships between intelligence products, as depicted in ![Figure 6: Intelligence Production Workflow with Case-Bearing Models.](../figures/Figure_6.png){#fig:fig6}. Modern implementations increasingly manage complex model ecosystems where analytical tools, data sources, and products interact within organizational workflows. However, current frameworks lack formal mathematical foundations for representing model relationships, leading to ad hoc integration approaches that become unwieldy at scale. As artificial intelligence components proliferate in these systems, a more rigorous basis for model interaction becomes essential for maintaining operational coherence and analytical integrity, a gap specifically addressed by CEREBRUM.
+Intelligence case management systems organize investigative workflows and analytical processes in operational contexts. These systems structure information collection, analysis, evaluation, and dissemination while tracking provenance and relationships between intelligence products, as depicted in ![Figure 6: Intelligence Production Workflow with Case-Bearing Models.](Figure_6.png){#fig:fig6}. Modern implementations increasingly manage complex model ecosystems where analytical tools, data sources, and products interact within organizational workflows. However, current frameworks lack formal mathematical foundations for representing model relationships, leading to ad hoc integration approaches that become unwieldy at scale. As artificial intelligence components proliferate in these systems, a more rigorous basis for model interaction becomes essential for maintaining operational coherence and analytical integrity, a gap specifically addressed by CEREBRUM.
 
 ## Towards Languages for Generative Modeling
 The Active Inference community has explored numerous adjectival modifications of the base framework, including:
@@ -84,7 +84,7 @@ This approach emphasizes declensional aspects of generative models as noun-like 
 ## Conceptual Foundations: The Intersection of Four Domains
 CEREBRUM integrates four key domains to create a unified framework for model management, as illustrated in Figure 1:
 
-![Figure 1: Foundation Domains of CEREBRUM.](../figures/Figure_1.png){#fig:fig1}
+![Figure 1: Foundation Domains of CEREBRUM.](Figure_1.png){#fig:fig1}
 
 1. **Cognitive Systems Modeling**: Provides the entities that take on case relationships
 2. **Active Inference**: Supplies the predictive processing mechanics driving case transformations
@@ -100,7 +100,7 @@ The CEREBRUM framework emerged from a synthesis of linguistic theory, cognitive 
 
 1. **Linguistic Formalization**: Adapting morphosyntactic case theory into computational representations through abstract algebraic structures. This process formalized case relationships as mathematical operators that transform model properties while preserving essential characteristics.
 
-2. **Category-Theoretic Mapping**: Implementing category theory to formalize morphisms between case states as functorial transformations. This approach enabled rigorous tracking of identity preservation across transformations while verifying compositional consistency, as formalized in ![Figure 7: CEREBRUM Category Theory Framework.](../figures/Figure_7.png){#fig:fig7}.
+2. **Category-Theoretic Mapping**: Implementing category theory to formalize morphisms between case states as functorial transformations. This approach enabled rigorous tracking of identity preservation across transformations while verifying compositional consistency, as formalized in ![Figure 7: CEREBRUM Category Theory Framework.](Figure_7.png){#fig:fig7}.
 
 3. **Algorithmic Implementation**: Developing algorithmic specifications for case transformations compliant with the Free Energy Principle. These algorithms define concrete computational procedures for implementing case transitions in operational systems.
 
@@ -112,11 +112,11 @@ The mathematical foundation of CEREBRUM builds on formalizations of case transfo
 ## Core Concept: Cognitive Models as Case-Bearing Entities
 CEREBRUM's central innovation is the formalization of cognitive models as case-bearing entities that transform systematically based on their functional relationships. Just as nouns in morphologically rich languages take different forms based on grammatical function, cognitive models in CEREBRUM exist in different "states" or "cases" depending on their relationships to other models within the system. Figure 2 illustrates this linguistic parallel.
 
-![Figure 2: Case Relationships - Model and Linguistic Parallels.](../figures/Figure_2.png){#fig:fig2}
+![Figure 2: Case Relationships - Model and Linguistic Parallels.](Figure_2.png){#fig:fig2}
 
 The core framework organizes cognitive models according to their case relationships, as shown in Figure 3, which maps primary case assignments and their functional roles. This structured approach enables precise transformations between model states while maintaining identity persistence across functional transitions.
 
-![Figure 3: Cognitive Model Case Framework.](../figures/Figure_3.png){#fig:fig3}
+![Figure 3: Cognitive Model Case Framework.](Figure_3.png){#fig:fig3}
 
 The implementation of this core concept extends across multiple domains and applications, with specific mathematical formulations provided in Supplement 11 and practical applications demonstrated in Supplement 3. The case framework not only formalizes existing model relationships but also opens new possibilities for model composition and transformation that align with natural language structures, creating a systematic foundation for complex model ecosystems.
 
@@ -254,14 +254,14 @@ This systematic workflow demonstrates how case transformations enable models to 
 ## Active Inference Integration
 CEREBRUM integrates with active inference principles by framing case transformations as predictive processes operating within a free energy minimization framework. Case transitions are formalized as parameterized Bayesian inference operations that minimize variational free energy across model interfaces. This conceptual alignment is illustrated in Figure 13, which depicts case transitions driven by hierarchical prediction error minimization through precision-weighted message passing. The specific message passing rules governing these transformations under active inference are detailed in Figure 14 and formally defined in Supplement 11.
 
-![Figure 13: Active Inference Integration Framework.](../figures/Figure_13.png){#fig:fig13}
+![Figure 13: Active Inference Integration Framework.](Figure_13.png){#fig:fig13}
 
-![Figure 14: Case-Specific Message Passing in Active Inference.](../figures/Figure_14.png){#fig:fig14}
+![Figure 14: Case-Specific Message Passing in Active Inference.](Figure_14.png){#fig:fig14}
 
 ## Formal Case Calculus
 The interactions and transformations between case-bearing models in CEREBRUM adhere to a formal calculus derived from grammatical case systems. This calculus defines the permissible transitions and combinatorial rules for models based on their assigned cases, as formally presented in Figure 15 and mathematically elaborated in Supplement 9. Case transformations follow category-theoretic principles where morphisms preserve semantic integrity while modifying interface properties and precision parameters.
 
-![Figure 15: Model Case Calculus Framework.](../figures/Figure_15.png){#fig:fig15}
+![Figure 15: Model Case Calculus Framework.](Figure_15.png){#fig:fig15}
 
 ## Cross-Domain Integration Benefits
 CEREBRUM's strength lies in its synthesis of concepts from four foundational domains: Linguistic Case Systems, Cognitive Systems Modeling, Active Inference, and Intelligence Production. The benefits derived from this integration are summarized in Table 4.

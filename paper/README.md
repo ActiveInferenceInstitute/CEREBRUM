@@ -146,6 +146,7 @@ During the build process (`assemble_paper.py`):
 
 **Key points:**
 - Use the correct `Figure_X.png` filename in the placement tag.
+- The placement-tag path is relative to `paper/output/`, where the rendered PNGs live (use the bare `Figure_X.png`, not `../figures/...`).
 - Use unique `#fig:figY` labels.
 - The script handles the final numbering (`Figure S`) and caption insertion based on the `Figure_X.md` file and appearance order.
 - Do **not** include "Figure X:" prefixes in the caption paragraph within `Figure_X.md`.
