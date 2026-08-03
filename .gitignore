@@ -181,3 +181,7 @@ paper/output/*.pdf
 paper/output/*.html
 paper/output/*.png
 tests/pytest_run.log
+
+# Personal tool artifacts (must never be committed to this public repo)
+~/
+.desloppify/
