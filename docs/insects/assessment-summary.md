@@ -1,5 +1,13 @@
 # CEREBRUM Insect Documentation Assessment Summary
 
+> **Status note (2026-08-02):** This assessment predates the insect
+> implementation. The implementation gaps it identifies (Items 1 and 2 below)
+> have since been closed: `src/models/insect/` now contains a full
+> implementation (base models, neural structures, behaviors, species, and six
+> insect-specific cases) with tests in `tests/models/` and
+> `tests/visualization/`. See [implementation-completion-summary.md](implementation-completion-summary.md).
+> The analysis below is retained as historical context.
+
 ## Executive Summary
 
 The CEREBRUM insect documentation represents a sophisticated theoretical framework that successfully maps insect cognitive architectures to linguistic case systems. However, significant opportunities exist for implementation, validation, and integration with cutting-edge research to create a practical, scientifically grounded framework for insect-inspired computing.

@@ -1,5 +1,10 @@
 # CEREBRUM Insect Implementation Roadmap
 
+> **Status note (2026-08-02):** This roadmap documents the *original* plan for
+> the insect implementation. The implementation has since been completed — see
+> [implementation-completion-summary.md](implementation-completion-summary.md)
+> for the current state. This roadmap is retained for historical reference.
+
 ## Immediate Next Steps (Next 2 Weeks)
 
 ### 1. Create Base Insect Model Structure

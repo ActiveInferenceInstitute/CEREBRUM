@@ -151,11 +151,11 @@ PTCI has the potential to transform fields ranging from education and healthcare
 
 ## Figure 1: Polyphonic Time Crystal Lattice
 
-![Figure 1: Schematic of a polyphonic time crystal lattice, showing multiple cognitive agents (nodes) oscillating at distinct phases and frequencies. Colored arcs represent phase-coupled communication pathways, while recurring motifs illustrate memory encoding. The emergent pattern demonstrates distributed, temporally entangled intelligence.](../figures/polyphonic_time_crystal_lattice.png)
+_(Diagram: schematic of a polyphonic time crystal lattice — multiple cognitive agents oscillating at distinct phases and frequencies, with phase-coupled communication pathways. Not yet rendered.)_
 
 ## Figure 2: Temporal Motif Recall in a Noisy Environment
 
-![Figure 2: Visualization of a PTCI network recalling a temporal motif. Despite the presence of noise and missing data, the network re-synchronizes to the original motif, demonstrating robust, context-dependent memory reconstruction.](../figures/ptci_temporal_motif_recall.png)
+_(Diagram: a PTCI network recalling a temporal motif despite noise and missing data. Not yet rendered.)_
 
 ## References
 - Wilczek, F. (2012). Quantum Time Crystals. *Physical Review Letters*, 109(16), 160401.

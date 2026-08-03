@@ -7,6 +7,7 @@ This directory contains the comprehensive documentation for CEREBRUM's insect co
 ## Quick Start
 
 ```python
+from src.core.model import Case
 from src.models.insect.base import InsectModel, BehavioralState, SensoryInput
 from src.models.insect.neural_structures import MushroomBody, CentralComplex
 from src.models.insect.cases.pheromonal import PheromonalCase

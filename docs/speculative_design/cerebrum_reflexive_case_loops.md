@@ -6,7 +6,7 @@ To move from theoretical formulation to practical implementation, we need concre
 
 The core challenge in implementing [REF] case models is creating a representation of "self" that can be both observed and modified. We propose a dual-layer architecture where the self-model is explicitly represented as part of the model's state space.
 
-![REF Case Architecture Diagram](ref_case_architecture.png)
+_(Diagram: REF case architecture — not yet rendered; the diagram source is planned for this section.)_
 
 #### State Space Structure
 

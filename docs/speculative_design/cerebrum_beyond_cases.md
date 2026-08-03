@@ -100,7 +100,7 @@ Where \( \mathbf{W}_{k \to k_{new}} \) is a learned weight matrix for the transf
 
 A computational architecture capable of supporting emergent cases requires several specialized components that extend the base CEREBRUM framework.
 
-![Emergent Case Architecture](emergent_case_architecture.png)
+_(Diagram: emergent case architecture — not yet rendered; the diagram source is planned for this section.)_
 
 ### Core System Components
 

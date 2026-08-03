@@ -11,6 +11,9 @@ This directory contains practical examples, guides, and templates for applying t
 | [03_CEREBRUM_Interpretability_Procedure.md](03_CEREBRUM_Interpretability_Procedure.md) | Procedure | Outlines a step-by-step procedure for enhancing model interpretability using case-based model decomposition and analysis | Interpretability techniques (e.g., SHAP, LIME integration), case-based explanation generation |
 | [04_CEREBRUM_Agent_Design_Playbook.md](04_CEREBRUM_Agent_Design_Playbook.md) | Playbook | Details how to design AI agents with CEREBRUM, treating agent components as case-bearing entities with explicit workflows | Agent architectures (e.g., ReAct), state management, tool integration, decision logic |
 | [05_CEREBRUM_Documentation_Template.md](05_CEREBRUM_Documentation_Template.md) | Template | Provides a comprehensive template for documenting CEREBRUM-based projects, covering all aspects from model ecosystems to deployment considerations | Structuring technical documentation, defining model specifications, deployment plans |
+| [06_CEREBRUM_Active_Inference_POMDP_Example.md](06_CEREBRUM_Active_Inference_POMDP_Example.md) | Example | Applies CEREBRUM to Active Inference agents modeled as Partially Observable Markov Decision Processes (POMDPs) | Active Inference, POMDP formulation, belief updating (see `tests/core/test_active_inference_pomdp.py`) |
+| [07_CEREBRUM_Linear_Regression_Example.md](07_CEREBRUM_Linear_Regression_Example.md) | Example | Demonstrates how linguistic cases apply to linear regression, one role per case | Statistical modeling through case roles (see `tests/models/test_linear_regression.py`) |
+| [08_CEREBRUM_Neural_Network_Example.md](08_CEREBRUM_Neural_Network_Example.md) | Example | Deconstructs neural networks through linguistic cases, providing a multi-faceted understanding | Neural network analysis via case roles (see `tests/core/test_neural_network.py`) |
 
 ## Using These Examples
 
@@ -42,7 +45,7 @@ All examples utilize CEREBRUM's eight core case roles that models can assume:
 
 To begin using these examples:
 
-1. Read the [CEREBRUM.md](../CEREBRUM.md) document to understand the core framework concepts
+1. Read the [Core Specification](../cerebrum_core_spec.md) document to understand the core framework concepts
 2. Choose an example most relevant to your use case
 3. Adapt the patterns and workflows to your specific project needs
 4. Refer to the documentation template for comprehensive project documentation
