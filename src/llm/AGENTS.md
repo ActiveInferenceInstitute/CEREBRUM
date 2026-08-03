@@ -21,36 +21,37 @@ llm/
 
 ```python
 from src.llm import (
-    # Research Assistants
-    PerplexityResearcher,
-    OpenAIResearcher,
-    WebResearcher,
-    ResearchAssistant,
-    
-    # Analysis Engines
-    StrategicAnalyzer,
-    ProductEvaluator,
-    OpenRouterAnalysisEngine,
-    
-    # Utilities
     LLMUtils,
-    EvaluationResultsManager
+    OpenRouterAnalysisEngine,
+    AnalysisResult,
+    OpenRouterClient,
+    OpenRouterConfig,
+    Conversation,
 )
 ```
+
+The `src.llm.ollama` submodule additionally provides `OllamaClient`,
+`list_models`, `pull_model`, `check_ollama_running`, and `get_default_model`.
+
+> **Note**: research-assistant style components (`PerplexityResearcher`,
+> `OpenAIResearcher`, `WebResearcher`, `ResearchAssistant`,
+> `StrategicAnalyzer`, `ProductEvaluator`, `EvaluationResultsManager`) are
+> described in `docs/` as planned components but are **not yet implemented**
+> in this package.
 
 ## Key Components
 
 | Component | Purpose |
 | --------- | ------- |
-| `PerplexityResearcher` | Real-time internet research |
+| `OpenRouterClient` | OpenRouter provider client (chat, streaming, conversations) |
 | `OpenRouterAnalysisEngine` | Multi-model analysis workflows |
 | `LLMUtils` | Rate limiting, retry, validation |
+| `OllamaClient` | Local Ollama provider client |
 | `config.py` | API key and model configuration |
 
 ## Features
 
-- Multi-provider support (OpenAI, Perplexity, OpenRouter, Ollama)
-- Real-time internet search with citations
+- Multi-provider support (OpenRouter, Ollama)
 - Rate limiting and retry mechanisms
 - Response validation and parsing
 

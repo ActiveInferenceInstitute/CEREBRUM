@@ -1,158 +1,59 @@
 """
-Corym Library Large Language Model Integration Framework
+CEREBRUM LLM Integration Framework
 
-This module provides comprehensive tools for integrating with various Large Language Models,
-conducting research, performing analysis, and managing LLM-based workflows. It supports
-multiple LLM providers and research methodologies with robust error handling and
-performance tracking.
+This module provides integration with Large Language Models for the CEREBRUM
+framework. It supports multiple LLM providers (OpenRouter cloud and local
+Ollama) with robust error handling, retry mechanisms, and performance
+tracking.
 
 Key Components:
-    Research Assistants:
-        - PerplexityResearcher: Real-time internet research with citations
-        - OpenAIResearcher: Knowledge-based research and analysis  
-        - WebResearcher: Web scraping and content extraction
-        - ResearchAssistant: General-purpose research interface
-        
-    Analysis Engines:
-        - StrategicAnalyzer: Strategic planning and recommendation generation
-        - ProductEvaluator: Product-market fit and team evaluation
+    OpenRouter Integration:
+        - OpenRouterClient: Provider client with chat completion, streaming,
+          conversation management, and circuit-breaker fault tolerance
+        - OpenRouterConfig: Client configuration (model, temperature, tokens)
+        - Conversation: Multi-turn conversation management
+        - quick_chat: One-shot convenience helper
+
+    Analysis:
         - OpenRouterAnalysisEngine: Multi-model analysis workflows
-        
-    Utilities and Management:
+        - AnalysisResult: Typed analysis result container
+
+    Utilities:
         - LLMUtils: Common utilities for LLM operations
-        - EvaluationResultsManager: Results processing and reporting
+
+    Local Inference:
+        - ollama.OllamaClient: Local Ollama LLM integration
+        - ollama.check_ollama_running / list_models / pull_model: model helpers
 
 Features:
-    Multi-Provider Support:
-        - OpenAI GPT models (3.5-turbo, 4, etc.)
-        - Perplexity Sonar models with real-time search
-        - OpenRouter model marketplace access
-        - Custom provider integration support
-        
-    Research Capabilities:
-        - Real-time internet search and analysis
-        - Multi-query batch processing  
-        - Citation extraction and validation
-        - Domain-specific filtering
-        - Recency-based search constraints
-        
-    Analysis Workflows:
-        - Team capability assessment
-        - Product-market fit evaluation
-        - Strategic recommendation generation
-        - Narrative development and adaptation
-        - Audience targeting and segmentation
-        
-    Quality Assurance:
-        - Rate limiting and retry mechanisms
-        - Response validation and parsing
-        - Error handling and recovery
-        - Performance metrics tracking
-        - Cost monitoring and optimization
+    - Multi-provider support (OpenRouter, Ollama)
+    - Rate limiting and retry mechanisms
+    - Circuit breakers for fault tolerance
+    - Response validation and parsing
+    - Performance metrics tracking
+    - Cost monitoring and optimization
 
-Architecture:
-    The LLM module uses a layered architecture with provider abstraction:
-    
-    Application Layer:
-        - StrategicAnalyzer: High-level strategic analysis
-        - ProductEvaluator: Specialized product evaluation
-        - EvaluationResultsManager: Results processing
-        
-    Research Layer:
-        - ResearchAssistant: General research interface
-        - PerplexityResearcher: Real-time web research
-        - OpenAIResearcher: Knowledge-based analysis
-        - WebResearcher: Direct web access
-        
-    Provider Layer:
-        - OpenRouterAnalysisEngine: Multi-model access
-        - Provider-specific API clients
-        - Rate limiting and authentication
-        
-    Utility Layer:
-        - LLMUtils: Common operations and utilities
-        - Token counting and text processing
-        - Response parsing and validation
+Note:
+    Research-assistant style components (PerplexityResearcher,
+    OpenAIResearcher, WebResearcher, ResearchAssistant, StrategicAnalyzer,
+    ProductEvaluator, EvaluationResultsManager) are planned but not yet
+    implemented; see docs/README.md for the implementation status.
 
 Usage Examples:
-    Basic Research:
-        >>> from corym.llm import PerplexityResearcher
-        >>> researcher = PerplexityResearcher()
-        >>> results = await researcher.search("AI safety trends 2024")
-        
-    Strategic Analysis:
-        >>> from corym.llm import StrategicAnalyzer, ResearchAssistant
-        >>> analyzer = StrategicAnalyzer(ResearchAssistant(), ProductEvaluator(), FileUtils())
-        >>> recommendations = analyzer.generate_strategic_recommendations(context)
-        
-    Product Evaluation:
-        >>> from corym.llm import ProductEvaluator
-        >>> evaluator = ProductEvaluator()
-        >>> evaluation = await evaluator.evaluate_team_for_product(team, product)
-        
-    Batch Research:
-        >>> queries = ["AI trends", "Market analysis", "Tech adoption"]
-        >>> results = await researcher.multi_query_research(queries)
+    OpenRouter chat:
+        >>> from src.llm.OpenRouter.openrouter import quick_chat
+        >>> response = quick_chat("What is CEREBRUM?")
 
-API Reference:
-    Research Interfaces:
-        - BaseResearcher: Abstract researcher interface
-        - PerplexityResearcher: Real-time search with Perplexity API
-        - OpenAIResearcher: Knowledge analysis with OpenAI models
-        - WebResearcher: Direct web scraping and extraction
-        - ResearchAssistant: General-purpose research wrapper
-        
-    Analysis Components:
-        - StrategicAnalyzer: Strategic planning and recommendations
-        - ProductEvaluator: Product and team evaluation
-        - OpenRouterAnalysisEngine: Multi-model analysis workflows
-        
-    Result Management:
-        - EvaluationResultsManager: Processing and reporting
-        - Result formatting and export capabilities
-        - Performance metrics and analytics
-        
-    Utilities:
-        - LLMUtils: Token counting, validation, formatting
-        - Rate limiting and retry mechanisms
-        - Response parsing and extraction
-        - Cost tracking and optimization
+    Multi-model analysis:
+        >>> from src.llm import OpenRouterAnalysisEngine
+        >>> engine = OpenRouterAnalysisEngine()
+        >>> result = engine.analyze("Describe the CEREBRUM framework")
 
-Provider Integration:
-    Perplexity API:
-        - Real-time web search capabilities
-        - Citation extraction and validation
-        - Multiple model sizes (small, large, pro)
-        - Domain and recency filtering
-        
-    OpenAI API:
-        - GPT model family access
-        - Function calling and structured outputs
-        - Fine-tuned model support
-        - Cost-optimized model selection
-        
-    OpenRouter API:
-        - Multi-provider model access
-        - Cost comparison and optimization
-        - Rate limit management
-        - Model capability matching
-
-Error Handling:
-    - Graceful degradation for missing dependencies
-    - Automatic retry with exponential backoff
-    - Provider failover and fallback
-    - Comprehensive error logging and reporting
-    - Circuit breaker patterns for reliability
-
-Performance Features:
-    - Request batching and optimization
-    - Response caching and memoization
-    - Token usage tracking and alerts
-    - Rate limit management
-    - Concurrent request handling
-
-Version: 1.0.0
-License: MIT
+    Local Ollama inference:
+        >>> from src.llm.ollama import OllamaClient, check_ollama_running
+        >>> if check_ollama_running():
+        ...     client = OllamaClient(model="llama3.2")
+        ...     response = client.generate("What is CEREBRUM?")
 """
 
 import logging

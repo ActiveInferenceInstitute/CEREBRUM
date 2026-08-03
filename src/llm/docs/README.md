@@ -1,5 +1,16 @@
 # LLM Module Documentation
 
+> **Implementation status (2026-08-02):** This document describes both
+> implemented and planned components of the `src/llm` package.
+> **Implemented**: `LLMUtils`, `OpenRouterAnalysisEngine`, `AnalysisResult`,
+> `OpenRouterClient`, `OpenRouterConfig`, `Conversation`, and the `ollama`
+> submodule (`OllamaClient`, `check_ollama_running`, etc.).
+> **Planned / not yet implemented**: `PerplexityResearcher`,
+> `OpenAIResearcher`, `WebResearcher`, `ResearchAssistant`,
+> `StrategicAnalyzer`, `ProductEvaluator`, and `EvaluationResultsManager`.
+> Sections of this document that reference the planned components are
+> retained as design notes.
+
 ## Overview
 
 The LLM module provides comprehensive integration with Large Language Model services, including OpenAI, Perplexity, and OpenRouter. It offers specialized researchers, analysis engines, and evaluation tools for AI-powered research, content generation, and strategic analysis.
@@ -67,50 +78,49 @@ LLM Module
 ## Module Structure
 
 ### Core Files
-- **`openai_researcher.py`** - OpenAI API integration and research
-- **`perplexity_researcher.py`** - Perplexity-powered web research
-- **`openrouter_analysis_engine.py`** - Multi-model analysis framework
-- **`research_assistant.py`** - General-purpose research assistant
-- **`product_evaluator.py`** - Product and team evaluation engine
-- **`strategic_analyzer.py`** - Strategic analysis and planning
-- **`web_researcher.py`** - Web-focused research capabilities
-- **`evaluation_results_manager.py`** - Results processing and reporting
-- **`llm_utils.py`** - Common utilities and helpers
+- **`config.py`** - Configuration management (API keys, model selection)
+- **`llm_utils.py`** - Common utilities and helpers (`LLMUtils`)
+- **`openrouter_analysis_engine.py`** - Multi-model analysis framework (`OpenRouterAnalysisEngine`)
+- **`openrouter_example.py`** - Comprehensive usage example script
+- **`__init__.py`** - Lazy exports of implemented components
 
 ### OpenRouter Submodule
-- **`OpenRouter/openrouter.py`** - Advanced OpenRouter client with circuit breakers
+- **`OpenRouter/openrouter.py`** - Advanced OpenRouter client with circuit breakers (`OpenRouterClient`, `OpenRouterConfig`, `Conversation`, `quick_chat`)
+
+### Ollama Submodule
+- **`ollama/client.py`** - Local Ollama client (`OllamaClient`)
+- **`ollama/utils.py`** - Model management helpers (`list_models`, `pull_model`, `check_ollama_running`, `get_default_model`)
+
+### Planned Components (not yet implemented)
+- `openai_researcher.py` - OpenAI API integration and research
+- `perplexity_researcher.py` - Perplexity-powered web research
+- `research_assistant.py` - General-purpose research assistant
+- `product_evaluator.py` - Product and team evaluation engine
+- `strategic_analyzer.py` - Strategic analysis and planning
+- `web_researcher.py` - Web-focused research capabilities
+- `evaluation_results_manager.py` - Results processing and reporting
 
 ## Quick Start
 
-### Basic Research
+### Local Inference with Ollama
 
 ```python
-from llm.perplexity_researcher import PerplexityResearcher
-from llm.openai_researcher import OpenAIResearcher
+from src.llm.ollama import OllamaClient, check_ollama_running
 
-# Initialize researchers
-perplexity = PerplexityResearcher()
-openai = OpenAIResearcher()
+if check_ollama_running():
+    client = OllamaClient(model="llama3.2")
+    response = client.generate("What is CEREBRUM?")
+    print(response.text)
+```
 
-# Perform web research with citations
-web_results = await perplexity.search(
-    "latest developments in quantum computing 2024",
-    model="sonar-large",
-    return_citations=True,
-    recency_filter="month"
-)
+### OpenRouter Cloud Inference
 
-print(f"Research Results: {web_results['answer']}")
-print(f"Citations: {len(web_results['citations'])}")
+```python
+from src.llm.OpenRouter.openrouter import quick_chat
 
-# Perform general AI research
-ai_results = await openai.search(
-    "Explain transformer architecture improvements",
-    model="gpt-4",
-    temperature=0.2
-)
-
-print(f"AI Analysis: {ai_results['answer']}")
+# Requires OPENROUTER_API_KEY environment variable
+response = quick_chat("Explain transformer architecture improvements")
+print(response)
 ```
 
 ### OpenRouter Multi-Model Analysis
@@ -763,12 +773,15 @@ The test suite is designed for CI/CD integration:
 ## API Reference
 
 For detailed API documentation, see:
-- [OpenAI Researcher API](openai_researcher.md)
-- [Perplexity Researcher API](perplexity_researcher.md)
-- [OpenRouter Client API](OpenRouter/README.md)
-- [Product Evaluator API](product_evaluator.md)
-- [Strategic Analyzer API](strategic_analyzer.md)
-- [LLM Utils API](llm_utils.md)
+- [OpenRouter Client API](../OpenRouter/README.md)
+- [LLM Utils API](../llm_utils.py)
+- [OpenRouter Analysis Engine](../openrouter_analysis_engine.py)
+- [Config](../config.py)
+- [Ollama Integration](../ollama/README.md)
+
+> The planned research components (`openai_researcher.md`,
+> `perplexity_researcher.md`, `product_evaluator.md`, `strategic_analyzer.md`)
+> do not yet exist; they will be documented here once implemented.
 
 ## Contributing
 
