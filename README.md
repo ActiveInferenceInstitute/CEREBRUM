@@ -1,6 +1,7 @@
 # CEREBRUM
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15170908.svg)](https://doi.org/10.5281/zenodo.15170908)
+[![CI](https://github.com/ActiveInferenceInstitute/CEREBRUM/actions/workflows/ci.yml/badge.svg)](https://github.com/ActiveInferenceInstitute/CEREBRUM/actions/workflows/ci.yml)
 
 CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling
 
@@ -127,6 +128,9 @@ Use-case mindmap (Mermaid source): [use_cases_mindmap.mermaid](docs/diagrams/use
 
 ## Citation
 
+CEREBRUM is archived on Zenodo and citable via [CITATION.cff](CITATION.cff)
+(GitHub's "Cite this repository" button) or the BibTeX entry below.
+
 If you use CEREBRUM in your research, please cite:
 
 ```bibtex
@@ -163,3 +167,5 @@ We welcome contributions from researchers, developers, and enthusiasts across mu
 - **🌍 Community**: Organizing events, content creation, mentoring, user support
 
 For detailed contribution guidelines, process information, and more specific ideas, please see our [CONTRIBUTING.md](CONTRIBUTING.md) document.
+
+To report a security vulnerability, see [SECURITY.md](SECURITY.md).

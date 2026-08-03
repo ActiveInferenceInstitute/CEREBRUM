@@ -5,7 +5,7 @@ This directory contains Mermaid diagram source files and related assets for CERE
 ## Contents
 
 - **Mermaid Sources**: `.mermaid` files for project architecture, data flow, workflows, etc.
-- **`generated/`**: Rendered diagram images (PNG/SVG).
+- **`generated/`**: Rendered diagram copies (`.mermaid`) produced by `scripts/render_diagrams.py`
 - **`templates/`**: Reusable diagram templates.
 - **`style-guide.md`**: Diagram styling conventions.
 - **`improvement_plan.md`**: Roadmap for diagram enhancements.

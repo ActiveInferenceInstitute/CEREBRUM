@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use CEREBRUM in your research, please cite it as follows."
+title: "CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling"
+authors:
+  - family-names: Friedman
+    given-names: Daniel Ari
+    orcid: "https://orcid.org/0000-0001-6232-9096"
+    affiliation: "Active Inference Institute"
+version: 1.5.0
+date-released: "2025-04-16"
+license: CC-BY-4.0
+doi: 10.5281/zenodo.15170907
+url: "https://github.com/ActiveInferenceInstitute/CEREBRUM"
+keywords:
+  - active inference
+  - case grammar
+  - Bayesian modeling
+  - cognitive modeling
+  - free energy principle
+preferred-citation:
+  type: software
+  authors:
+    - family-names: Friedman
+      given-names: Daniel Ari
+      orcid: "https://orcid.org/0000-0001-6232-9096"
+  title: "CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling"
+  version: 1.5.0
+  doi: 10.5281/zenodo.15170907
+  date-released: "2025-04-16"
+  publisher: "Active Inference Institute"
+  url: "https://zenodo.org/records/15231156"

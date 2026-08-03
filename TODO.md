@@ -2,7 +2,7 @@
 
 > **Status**: Active
 > **Owner**: Daniel Ari Friedman
-> **Last reviewed**: 2026-08-01
+> **Last reviewed**: 2026-08-02
 
 This is the authoritative project backlog. It records completed work and the
 remaining **Major**-class items from the hostile red-team review pass of
@@ -146,6 +146,54 @@ These deferred items were implemented and verified after the first push.
       `src/visualization/__init__.py` now distinguishes `ModuleNotFoundError`
       (graceful degrade, logged) from genuine internal `ImportError` (surfaced).
 
+
+---
+
+## Docs review pass — 2026-08-02
+
+Mega-deep documentation review (see `REVIEW_LOG_2026-08-02.md` for the full
+findings). Test baseline verified on this date: **1242 collected, 1239 passed,
+3 skipped, 13 warnings**.
+
+### Minor (✓ completed)
+
+- [x] **Duplicate BibTeX `url` key in README** — removed the DOI `url` line (kept GitHub `url` + `doi` field). (`README.md`, `0e42932`)
+- [x] **Overlapping Zenodo badges** — removed the redundant repo badge; kept the DOI badge. (`README.md`, `0e42932`)
+- [x] **`.mermaid` embeds in README** — GitHub cannot render them; converted to source links. (`README.md`, `0e42932`)
+- [x] **Broken `../CEREBRUM.md` link** in the examples index → core spec. (`docs/examples/Examples_README.md`, `f1f08f9`)
+- [x] **Missing `Case` import** in insects quick-start. (`docs/insects/README.md`, `f1f08f9`)
+- [x] **Nonexistent `examples.py`** listed in `src/cases/README.md`. (`7b1fb51`)
+- [x] **"9 modules" → 8** in `src/visualization/README.md`. (`7b1fb51`)
+- [x] **`generated/` description** in `docs/diagrams/README.md` (PNG/SVG → `.mermaid` copies).
+- [x] **Missing language index entries** — Lean/Nim/OCaml added to `docs/languages/README.md`; 8 languages added to `computer/README.md`. (`f1f08f9`)
+
+### Medium (✓ completed)
+
+- [x] **Stale test counts (5 files)** — 405/253/1152/1149 → measured 1242/1239/3; "0 warnings" → 13 warnings. (`0e42932`)
+- [x] **License mismatch** — README, `docs/README.md`, `pyproject.toml` → CC BY 4.0 to match `LICENSE`. (`0e42932`)
+- [x] **Three overlapping tests READMEs** — consolidated into `README.md` (index) + `README_TESTING.md` (methodology + dependencies + troubleshooting); `Testing_README.md` deleted; commands unified to `uv run python -m pytest`. (`0e42932`)
+- [x] **`getting_started.md` fictional API** — rewritten against the verified real API (`src.Model`, `Case` enum, `transform_case()`, `register_model()`); example executed. (`f19d991`)
+- [x] **`how_it_works.md` overclaims** — Precision Allocator / Message Bus marked spec-only; JS/Rust marked guidelines. (`f19d991`)
+- [x] **`model_examples.md` fictional imports** — illustrative-style banner + real API imports. (`f19d991`)
+- [x] **Examples index missing 06–08** — added POMDP / Linear Regression / Neural Network rows. (`f1f08f9`)
+- [x] **Speculative-design index** — full 58-file index added; 0-byte `case_evolution_today.md` deleted; 4 broken image refs → honest diagram notes. (`f1f08f9`)
+- [x] **Insects status contradiction** — banners on `assessment-summary.md` / `implementation-roadmap.md` reconciling with the completed implementation. (`f1f08f9`)
+- [x] **`src/llm` drift (large)** — README/AGENTS/docs rewritten to implemented reality; `__init__.py` vendored docstring ("Corym Library") replaced; planned components marked as such. (`8e2761f`)
+- [x] **Contributing guides** — 8 dead doc links, nonexistent `examples/python|js|rust`, unverifiable Discord invites/emails → real targets + GitHub channels. (`7b1fb51`)
+- [x] **`beyond_cerebrum` READMEs** — "placeholder" claim corrected to actual modules; dead module links fixed. (`7b1fb51`)
+- [x] **Language index clickability** — 90+ backtick filenames → real links (`computer/` prefix); stale gap/roadmap lists fixed. (`f1f08f9`)
+
+### Major (✓ completed / ○ deferred)
+
+- [x] **Paper figure path convention** — 17 placement tags in 5 components + `assembled_paper.md` + HTML normalized to bare `Figure_N.png` (matching `assemble_paper.py`); README clarified. (`60de1e1`)
+- [x] **Private `~/.claude/` artifact removed** from the public repo; `~/` + `.desloppify/` gitignored. (`32e253e`)
+- [x] **CI added** — `.github/workflows/ci.yml` (uv + pytest, Python 3.11–3.13) + README badge. Lint not added (pre-existing `src/llm` ruff debt).
+- [x] **CITATION.cff + SECURITY.md added**.
+- [x] **Doc indexes completed** — dialogs, discussions, speculative_design, languages, computer.
+- ○ **Full paper regeneration** — deferred (heavy pandoc/xelatex/mmdc pipeline; committed artifacts self-consistent).
+- ○ **`.desloppify/` tracked artifacts** — gitignored; recommend `git rm -r .desloppify` if it shouldn't be public.
+- ○ **Zenodo deposit metadata** still NC-ND vs repo CC BY 4.0 — update the Zenodo record externally.
+- ○ **`src/llm` ruff debt (168 pre-existing errors)** — out of scope for this docs pass.
 
 ---
 

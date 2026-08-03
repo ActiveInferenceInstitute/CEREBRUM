@@ -44,6 +44,14 @@ This directory contains case mapping analyses for the following computer languag
 - [R](r.md) - Statistical computing and graphics language
 - [Lua](lua.md) - Lightweight, embeddable scripting language
 - [Dart](dart.md) - Client-optimized language for multi-platform applications
+- [Zig](zig.md) - Modern systems programming with compile-time execution
+- [Nim](nim.md) - Systems language with metaprogramming
+- [Odin](odin.md) - Data-oriented design with explicit memory management
+- [Carbon](carbon.md) - C++ successor with bidirectional interoperability
+- [WebAssembly](webassembly.md) - Stack-based virtual instruction set architecture
+- [OCaml](ocaml.md) - Functional language with strong static typing
+- [Lean](lean.md) - Interactive theorem prover and functional language
+- [Scala](scala.md) - Multi-paradigm JVM language
 
 ## Structure of Each Language Document
 
