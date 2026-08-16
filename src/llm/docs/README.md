@@ -640,7 +640,7 @@ The LLM module includes comprehensive testing with proper organization and outpu
 
 ```
 src/llm/
-├── test_openrouter_functionality.py    # Full API functionality tests
+├── manual_openrouter_functionality.py    # Full API functionality tests
 ├── test_openrouter_structure.py        # Code structure validation
 ├── openrouter_example.py               # Usage examples and demos
 └── test_output/                        # Test results directory
@@ -653,7 +653,7 @@ src/llm/
 ```bash
 # Functionality tests (requires API key)
 cd src/llm
-python3 test_openrouter_functionality.py
+python3 manual_openrouter_functionality.py
 
 # Structure tests (no API key required)
 python3 test_openrouter_structure.py
@@ -664,7 +664,7 @@ python3 openrouter_example.py
 
 ### Test Coverage
 
-**Functionality Tests (`test_openrouter_functionality.py`):**
+**Functionality Tests (`manual_openrouter_functionality.py`):**
 - ✅ Client initialization and configuration
 - ✅ Chat completion (synchronous and asynchronous)
 - ✅ Streaming responses (sync and async)
@@ -715,7 +715,7 @@ All test results are automatically saved to the `test_output/` directory:
 3. **Test Execution:**
    ```bash
    # Run all OpenRouter tests (from the repository root)
-   uv run python -m pytest tests/llm/test_openrouter_functionality.py tests/llm/test_openrouter_structure.py
+   uv run python -m pytest tests/llm/manual_openrouter_functionality.py tests/llm/test_openrouter_structure.py
    ```
 
 ### Continuous Integration
@@ -727,7 +727,7 @@ The test suite is designed for CI/CD integration:
 - name: Run OpenRouter Tests
   run: |
     uv run python -m pytest tests/llm/test_openrouter_structure.py
-    uv run python -m pytest tests/llm/test_openrouter_functionality.py
+    uv run python -m pytest tests/llm/manual_openrouter_functionality.py
   env:
     OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
 ```

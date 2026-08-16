@@ -250,6 +250,7 @@ class TestPheromonalCase:
             concentration=0.8,
             volatility=0.3,
             source_position=np.array([1.0, 2.0]),
+            timestamp=pheromonal._get_current_time(),
         )
         result = pheromonal.process_chemical_signal(signal)
         assert isinstance(result, ProcessedSignal)
@@ -260,6 +261,7 @@ class TestPheromonalCase:
             pheromone_type=PheromoneType.ALARM,
             concentration=0.9,
             volatility=0.8,
+            timestamp=pheromonal._get_current_time(),
         )
         result = pheromonal.process_chemical_signal(signal)
         assert isinstance(result, ProcessedSignal)
@@ -448,6 +450,29 @@ class TestMetamorphicCase:
         )
         assert isinstance(updated, DevelopmentalState)
         assert updated.age > state.age
+
+    def test_transition_probability_is_bounded_for_negative_nutrition(self, metamorphic):
+        state = DevelopmentalState(
+            stage=DevelopmentalStage.LARVA,
+            age=10.0,
+            size=0.8,
+            maturity=0.95,
+            hormone_levels={"ecdysone": 0.9, "juvenile_hormone": 0.1},
+        )
+        probability = metamorphic._calculate_transition_probability(state, {"nutrition": -1.0})
+        assert 0.0 <= probability <= 1.0
+
+    def test_predict_next_transition_does_not_mutate_history(self, metamorphic):
+        state = DevelopmentalState(
+            stage=DevelopmentalStage.LARVA,
+            age=10.0,
+            size=0.8,
+            maturity=0.95,
+            hormone_levels={"ecdysone": 0.9, "juvenile_hormone": 0.1},
+        )
+        before = (len(metamorphic.developmental_history), len(metamorphic.transition_history))
+        metamorphic.predict_next_transition(state, {"temperature": 25.0})
+        assert (len(metamorphic.developmental_history), len(metamorphic.transition_history)) == before
 
     def test_predict_next_transition(self, metamorphic):
         state = DevelopmentalState(

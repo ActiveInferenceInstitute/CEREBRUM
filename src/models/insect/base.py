@@ -638,26 +638,30 @@ class InsectActiveInferenceModel(InsectModel):
         self.expected_free_energy = np.zeros(5)  # Placeholder
     
     def compute_free_energy(self, observations: np.ndarray) -> float:
+        """Compute the model's squared-error free-energy proxy.
+
+        ``observations`` must be a finite one-dimensional vector with the same
+        shape as the model's environmental prediction.  Returning infinity for
+        invalid observations would silently turn malformed input into a valid
+        optimisation result, so invalid inputs raise ``ValueError``.
         """
-        Compute variational free energy for the insect model.
-        
-        Args:
-            observations: Current observations
-            
-        Returns:
-            Computed free energy value
-        """
-        try:
-            predicted_observations = self._predict_observations()
-            prediction_error = np.mean((observations - predicted_observations) ** 2)
-            complexity = np.mean(self.beliefs['internal_state'] ** 2)
-            return float(
-                self.free_energy_params['accuracy_weight'] * prediction_error +
-                self.free_energy_params['complexity_weight'] * complexity
+        observations = np.asarray(observations, dtype=float)
+        predicted_observations = self._predict_observations()
+        if observations.shape != predicted_observations.shape:
+            raise ValueError(
+                "observations shape "
+                f"{observations.shape} does not match prediction shape "
+                f"{predicted_observations.shape}"
             )
-        except (ValueError, np.linalg.LinAlgError) as e:
-            logger.error(f"Error computing free energy: {e}")
-            return float('inf')
+        if not np.all(np.isfinite(observations)):
+            raise ValueError("observations must contain only finite values")
+
+        prediction_error = np.mean((observations - predicted_observations) ** 2)
+        complexity = np.mean(self.beliefs['internal_state'] ** 2)
+        return float(
+            self.free_energy_params['accuracy_weight'] * prediction_error +
+            self.free_energy_params['complexity_weight'] * complexity
+        )
     
     def _predict_observations(self) -> np.ndarray:
         """Predict observations from current environmental belief state."""
@@ -702,14 +706,23 @@ class InsectActiveInferenceModel(InsectModel):
         # Compute expected free energy for different actions
         self.expected_free_energy = self._compute_expected_free_energy()
 
-        # Select action with minimum expected free energy
-        best_action_idx = np.argmin(self.expected_free_energy)
-
         action_types = ["explore", "observe", "sense", "produce", "navigate"]
+        if len(self.expected_free_energy) != len(action_types):
+            raise ValueError(
+                "expected free-energy vector must contain one value per action "
+                f"(got {len(self.expected_free_energy)}, expected {len(action_types)})"
+            )
+        if not np.all(np.isfinite(self.expected_free_energy)):
+            raise ValueError("expected free-energy values must be finite")
+
+        # Select action with minimum expected free energy.  Confidence is a
+        # bounded presentation value, not the unbounded raw EFE proxy.
+        best_action_idx = int(np.argmin(self.expected_free_energy))
+        confidence = float(np.clip(1.0 - self.expected_free_energy[best_action_idx], 0.0, 1.0))
         return [Action(
             action_type=action_types[best_action_idx],
-            parameters={"confidence": 1.0 - self.expected_free_energy[best_action_idx]},
-            confidence=1.0 - self.expected_free_energy[best_action_idx],
+            parameters={"confidence": confidence},
+            confidence=confidence,
             timestamp=0.0,
         )]
     

@@ -63,9 +63,10 @@ def test_transformers_import() -> bool:
         True if transformers can be imported, False otherwise
     """
     try:
+        import transformers  # noqa: F401
         logger.debug("Transformers imported successfully")
         return True
-    except Exception as e:
+    except ImportError as e:
         logger.warning(f"Transformers import failed: {e}")
         return False
 

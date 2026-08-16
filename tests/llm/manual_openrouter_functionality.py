@@ -45,7 +45,7 @@ from src.llm.openrouter_analysis_engine import OpenRouterAnalysisEngine
 from src.llm.config import get_model_name, get_model_config, validate_api_key, get_api_key
 
 
-class OpenRouterTester:
+class OpenRouterManualTester:
     """Comprehensive tester for OpenRouter functionality."""
     
     def __init__(self):
@@ -521,7 +521,7 @@ class OpenRouterTester:
 
 async def main():
     """Main test execution function."""
-    tester = OpenRouterTester()
+    tester = OpenRouterManualTester()
     
     try:
         # Basic functionality tests

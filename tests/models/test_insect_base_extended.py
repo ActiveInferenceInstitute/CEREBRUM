@@ -5,6 +5,7 @@ InsectActiveInferenceModel, and NeuralStructureProcessor.
 """
 
 import numpy as np
+import pytest
 
 from src.models.insect.base import (
     InsectModel,
@@ -153,13 +154,17 @@ class TestInsectActiveInferenceModel:
         assert isinstance(fe, float)
         assert fe >= 0.0
 
-    def test_compute_free_energy_error(self):
+    def test_compute_free_energy_rejects_mismatched_dimensions(self):
         model = InsectActiveInferenceModel(species="bee")
-        # Mismatched dimensions
-        obs = np.random.rand(3)  # wrong shape
-        fe = model.compute_free_energy(obs)
-        # Should return inf on error
-        assert fe == float("inf") or isinstance(fe, float)
+        with pytest.raises(ValueError, match="does not match prediction shape"):
+            model.compute_free_energy(np.random.rand(3))
+
+    def test_select_actions_bounds_confidence(self):
+        model = InsectActiveInferenceModel(species="bee")
+        model.beliefs["internal_state"] = np.full(5, 3.0)
+        action = model.select_actions()[0]
+        assert action.confidence == 0.0
+        assert action.parameters["confidence"] == 0.0
 
     def test_update_beliefs(self):
         np.random.seed(42)

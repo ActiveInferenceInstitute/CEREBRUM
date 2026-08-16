@@ -50,6 +50,8 @@ class ComprehensiveReportGenerator:
             insect_events = [e for e in events if e.get("insect_id", "unknown") == insect_name]
             insect_confidences = [_conf(e) for e in insect_events]
 
+            if not insect_confidences:
+                continue
             insect_performance[insect_name] = {
                 "total_events": len(insect_events),
                 "average_confidence": np.mean(insect_confidences),
@@ -58,6 +60,25 @@ class ComprehensiveReportGenerator:
                 "confidence_std": np.std(insect_confidences),
                 "success_rate": len([c for c in insect_confidences if c > 0.5]) / len(insect_confidences),
             }
+
+        if not events:
+            report = {
+                "total_events": 0,
+                "average_confidence": 0.0,
+                "max_confidence": 0.0,
+                "min_confidence": 0.0,
+                "confidence_std": 0.0,
+                "success_rate": 0.0,
+                "insect_performance": {},
+            }
+            directory = os.path.join(self.reports_dir, "performance_analysis")
+            os.makedirs(directory, exist_ok=True)
+            json_path = os.path.join(directory, "performance_analysis_report.json")
+            with open(json_path, "w") as f:
+                json.dump(report, f, indent=2)
+            with open(os.path.join(directory, "performance_analysis_report.md"), "w") as f:
+                f.write(self._generate_performance_markdown(report))
+            return json_path
 
         # Overall performance
         overall_performance = {

@@ -9,9 +9,9 @@ Automated verification suite for every CEREBRUM `src/` module. Test subdirectori
 | Metric | Value |
 |--------|-------|
 | Test files | 68 (66 in `tests/` + 2 in `beyond_cerebrum/src/tests/`) |
-| Collected tests | 1242 |
-| Passing | 1239 |
-| Skipped | 3 (live API, opt-in via `@pytest.mark.live`) |
+| Collected tests | measured by the current pytest run |
+| Passing | measured by the current pytest run |
+| Skipped | measured by the current pytest run; live tests are opt-in via `@pytest.mark.live` |
 | Ignored paths | `tests/pomdp/test_cases`, `tests/models/test_linear_regression.py`, `tests/models/linear_regression_cases` |
 
 ## Structure
@@ -107,7 +107,7 @@ tests/
 ## Running Tests
 
 ```bash
-# All tests (1242 collected: 1239 passing, 3 skipped)
+# All tests (the current collection/result counts are printed by pytest)
 uv run python -m pytest
 
 # By module

@@ -1,6 +1,6 @@
 # CEREBRUM Example: Linear Regression through Linguistic Cases
 
-This document demonstrates how the CEREBRUM framework applies linguistic cases to analyze a fundamental statistical model: Linear Regression. It draws upon the concepts and structure presented in `tests/models/test_linear_regression.py`.
+This document demonstrates how the CEREBRUM framework applies linguistic cases to analyze a fundamental statistical model: Linear Regression. It draws upon the concepts and structure presented in `tests/models/test_linear_regression_comprehensive.py`.
 
 ## Introduction to Linear Regression
 

@@ -253,7 +253,10 @@ class StigmergicCase:
                 if distance <= detection_range:
                     # Calculate current intensity (with decay)
                     time_elapsed = current_time - modification.timestamp
-                    decayed_intensity = modification.intensity * np.exp(-modification.decay_rate * time_elapsed)
+                    with np.errstate(over="ignore", invalid="ignore"):
+                        decayed_intensity = modification.intensity * np.exp(
+                        -modification.decay_rate * time_elapsed
+                    )
                     
                     # Check if signal is still active
                     if time_elapsed < modification.duration and decayed_intensity > 0.1:
@@ -462,7 +465,10 @@ class StigmergicCase:
                 expired_signals.append(modification)
             else:
                 # Check if signal has decayed below threshold
-                decayed_intensity = modification.intensity * np.exp(-modification.decay_rate * time_elapsed)
+                with np.errstate(over="ignore", invalid="ignore"):
+                    decayed_intensity = modification.intensity * np.exp(
+                        -modification.decay_rate * time_elapsed
+                    )
                 if decayed_intensity < 0.1:
                     expired_signals.append(modification)
         

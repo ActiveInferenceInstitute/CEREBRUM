@@ -482,10 +482,21 @@ class SwarmCase:
             member.velocity += strength * direction * 0.1
     
     def _apply_synchronization_behavior(self, member: SwarmMember, strength: float):
-        """Apply synchronization behavior to a member."""
-        # Align velocity with swarm average
-        if self.swarm_state.alignment > 0:
-            member.velocity = (1 - strength) * member.velocity + strength * self.swarm_state.alignment * 0.1
+        """Blend a member's velocity toward the swarm's mean direction."""
+        velocities = [other.velocity for other in self.members.values()]
+        if not velocities:
+            return
+        norms = [np.linalg.norm(velocity) for velocity in velocities]
+        directions = [velocity / norm for velocity, norm in zip(velocities, norms) if norm > 0]
+        if not directions:
+            return
+        mean_direction = np.mean(directions, axis=0)
+        mean_norm = np.linalg.norm(mean_direction)
+        if mean_norm > 0:
+            mean_direction = mean_direction / mean_norm
+            target_speed = np.mean(norms)
+            target_velocity = mean_direction * target_speed
+            member.velocity = (1 - strength) * member.velocity + strength * target_velocity
     
     def _calculate_task_match(self, task: str, capabilities: List[str]) -> float:
         """

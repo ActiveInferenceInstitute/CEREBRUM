@@ -237,7 +237,8 @@ class InsectAnimationCreator:
         
         # Set limits
         ax2.set_xlim(0, max(normalized_times) if normalized_times else 10)
-        ax2.set_ylim(0, max(performances) * 1.1 if performances else 10)
+        performance_max = max(performances, default=0)
+        ax2.set_ylim(0, max(performance_max * 1.1, 1))
         
         def animate(frame):
             if frame < len(case_history):
@@ -483,7 +484,8 @@ class SwarmAnimationCreator:
         # Set limits for metrics plot
         if dispersions and cohesions:
             ax2.set_xlim(0, max(normalized_times) if normalized_times else 10)
-            ax2.set_ylim(0, max(max(dispersions), max(cohesions)) * 1.1)
+            metric_max = max(max(dispersions), max(cohesions))
+            ax2.set_ylim(0, max(metric_max * 1.1, 1))
         else:
             ax2.set_xlim(0, 10)
             ax2.set_ylim(0, 1)

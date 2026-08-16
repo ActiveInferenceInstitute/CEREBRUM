@@ -388,7 +388,7 @@ class NeuralStructureVisualizer:
         ax.legend()
         
         # Add trend line
-        if len(steps) > 1:
+        if len(steps) > 1 and np.std(steps) > 0 and np.std(confidences) > 0:
             z = np.polyfit(steps, confidences, 1)
             p = np.poly1d(z)
             ax.plot(steps, p(steps), "r--", alpha=0.8, label=f'Trend (slope: {z[0]:.4f})')
@@ -555,6 +555,8 @@ class BrainActivityVisualizer:
             ax.text(0.5, 0.5, 'networkx not available',
                     ha='center', va='center', transform=ax.transAxes)
             ax.set_title('Network Structure')
+            if save_path:
+                fig.savefig(save_path, dpi=self.dpi, bbox_inches='tight')
             return fig
         
         # Create network graph

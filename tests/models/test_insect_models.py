@@ -260,7 +260,7 @@ class TestPheromonalCase:
             concentration=0.8,
             volatility=0.1,
             source_position=np.array([1.0, 2.0, 0.0]),
-            timestamp=0.0
+            timestamp=pc._get_current_time()
         )
         
         # Process signal
@@ -269,6 +269,20 @@ class TestPheromonalCase:
         assert isinstance(processed, ProcessedSignal)
         assert processed.signal_strength > 0
         assert processed.behavioral_response == "follow_trail"
+
+    def test_chemical_signal_strength_decays_with_age(self, monkeypatch):
+        pc = PheromonalCase()
+        monkeypatch.setattr(pc, "_get_current_time", lambda: 100.0)
+        def strength(timestamp):
+            signal = ChemicalSignal(
+                pheromone_type=PheromoneType.TRAIL,
+                concentration=0.8,
+                volatility=0.1,
+                timestamp=timestamp,
+                species_specificity=1.0,
+            )
+            return pc.process_chemical_signal(signal).signal_strength
+        assert strength(100.0) >= strength(99.0) >= strength(90.0)
     
     def test_pheromone_generation(self):
         """Test pheromone generation."""
@@ -789,7 +803,7 @@ class TestInsectIntegration:
             pheromone_type=PheromoneType.RECRUITMENT,
             concentration=0.8,
             volatility=0.6,
-            timestamp=0.0
+            timestamp=pc._get_current_time()
         )
         
         # Process signal

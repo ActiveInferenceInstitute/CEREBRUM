@@ -34,9 +34,8 @@ def configure_torch_environment(default_device='cuda'):
     Returns:
         torch.device: Configured device
     """
-    import torch
-
     try:
+        import torch
         if default_device == 'cuda' and torch.cuda.is_available():
             device = torch.device('cuda')
             torch.cuda.empty_cache()
@@ -47,6 +46,9 @@ def configure_torch_environment(default_device='cuda'):
 
         return device
 
+    except ImportError as e:
+        print(f"PyTorch is unavailable; device configuration skipped: {e}")
+        return None
     except Exception as e:
         print(f"Device configuration error: {e}")
         return torch.device('cpu')

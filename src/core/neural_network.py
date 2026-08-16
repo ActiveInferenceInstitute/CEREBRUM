@@ -214,16 +214,15 @@ class NeuralNetworkModel(Model):
             activations.append(a)
             current_activation = a
         
-        # Output layer (linear activation)
+        # Output layer followed by the configured output activation.
         output = np.dot(current_activation, self.weights[-1]) + self.biases[-1]
-        activations.append(output)
-        
-        # Apply output activation if necessary
         if self.output_activation == 'softmax':
-            exp_scores = np.exp(output - np.max(output, axis=1, keepdims=True))
+            shifted = output - np.max(output, axis=1, keepdims=True)
+            exp_scores = np.exp(shifted)
             output = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
-        elif self.output_activation == 'sigmoid': # Example if needed later
+        elif self.output_activation == 'sigmoid':
             output = 1 / (1 + np.exp(-output))
+        activations.append(output)
         
         return output, activations
     
@@ -326,10 +325,17 @@ class NeuralNetworkModel(Model):
             current_activation = self._activation_function(z)
             activations.append(current_activation)
         
-        # Output layer
+        # Output layer followed by the configured output activation.
         z_out = np.dot(current_activation, self.weights[-1]) + self.biases[-1]
-        # Clip output to prevent extreme values
-        output = np.clip(z_out, -1e10, 1e10)  # Linear activation for output layer by default
+        z_out = np.clip(z_out, -1e10, 1e10)
+        if self.output_activation == 'softmax':
+            shifted = z_out - np.max(z_out, axis=1, keepdims=True)
+            exp_scores = np.exp(shifted)
+            output = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
+        elif self.output_activation == 'sigmoid':
+            output = 1 / (1 + np.exp(-z_out))
+        else:
+            output = z_out
         activations.append(output)
         
         return output, activations
@@ -357,8 +363,14 @@ class NeuralNetworkModel(Model):
         weight_grads = [np.zeros_like(w) for w in self.weights]
         bias_grads = [np.zeros_like(b) for b in self.biases]
         
-        # Output layer gradient with clipping
-        delta = np.clip(diff, -1e5, 1e5)  # Gradient clipping for stability
+        # Derivative of the declared mean-squared-error loss. For a softmax
+        # output, apply the Jacobian-vector product after the MSE derivative.
+        delta = 2.0 * diff / diff.size
+        if self.output_activation == 'softmax':
+            probabilities = outputs
+            projection = np.sum(delta * probabilities, axis=1, keepdims=True)
+            delta = probabilities * (delta - projection)
+        delta = np.clip(delta, -1e5, 1e5)
         
         # Backpropagate through layers
         for layer in reversed(range(len(self.weights))):

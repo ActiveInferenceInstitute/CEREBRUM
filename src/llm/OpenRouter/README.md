@@ -198,13 +198,13 @@ The client includes comprehensive tests with proper output organization:
 
 ```bash
 # Run functionality tests (requires API key)
-python3 test_openrouter_functionality.py
+python3 manual_openrouter_functionality.py
 
 # Run structure tests (no API key required)
 python3 test_openrouter_structure.py
 
 # Run both test suites
-python3 test_openrouter_functionality.py && python3 test_openrouter_structure.py
+python3 manual_openrouter_functionality.py && python3 test_openrouter_structure.py
 ```
 
 ### Test Output Organization
@@ -295,7 +295,7 @@ logging.basicConfig(level=logging.INFO)
 
 - **Documentation:** This README and inline code documentation
 - **Examples:** See `examples/` directory for usage patterns
-- **Tests:** Reference `tests/llm/test_openrouter_functionality.py` for all capabilities
+- **Tests:** Reference `tests/llm/manual_openrouter_functionality.py` for all capabilities
 - **OpenRouter API:** [Official Documentation](https://openrouter.ai/docs)
 
 ## Contributing

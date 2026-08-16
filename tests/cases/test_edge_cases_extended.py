@@ -63,12 +63,12 @@ class TestAblativeCaseEdges:
         """Cover L76-79: model has emit method."""
         m = Model(name="abl_emit")
         m._ablative_emissions = []
+        m._update_ablative = None  # exercise AblativeCase's emission path
         m.emit = lambda data: {"emitted": data}
         result = AblativeCase.process_update(m, {"signal": 1})
-        # The default path may or may not include emission key
-        # What matters is that the emit method was called
-        assert len(m._ablative_emissions) >= 0
-        assert result["status"] == "success"
+        assert result["status"] == "origin"
+        assert result["emission"] == {"emitted": {"signal": 1}}
+        assert m._ablative_emissions == [{"emitted": {"signal": 1}}]
 
     def test_free_energy_numeric_emissions(self):
         """Cover L103-105: numeric emissions → variance * PRECISION."""

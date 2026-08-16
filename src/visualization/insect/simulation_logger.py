@@ -523,7 +523,10 @@ class CasePerformanceLogger:
                             numeric_performances.append(float(performances[i]))
                     
                     if len(numeric_values) > 1:
-                        correlation = np.corrcoef(numeric_values, numeric_performances)[0, 1]
+                        if np.std(numeric_values) == 0 or np.std(numeric_performances) == 0:
+                            correlation = 0.0
+                        else:
+                            correlation = np.corrcoef(numeric_values, numeric_performances)[0, 1]
                     else:
                         correlation = 0.0
                 else:

@@ -345,7 +345,7 @@ class MetamorphicCase:
             humidity_factor = 0.7
         
         # Nutrition effects
-        nutrition_factor = min(nutrition, 1.0)
+        nutrition_factor = np.clip(nutrition, 0.0, 1.0)
         
         # Hormone balance effects
         hormone_balance = 1.0
@@ -357,7 +357,7 @@ class MetamorphicCase:
         # Calculate final probability
         final_probability = base_probability * temp_factor * humidity_factor * nutrition_factor * hormone_balance
         
-        return min(final_probability, 1.0)
+        return float(np.clip(final_probability, 0.0, 1.0))
     
     def _execute_transition(self, state: DevelopmentalState, 
                            transition: MetamorphicTransition) -> DevelopmentalState:
@@ -442,22 +442,31 @@ class MetamorphicCase:
         Returns:
             Predicted transition or None if no transition expected
         """
-        # Simulate future development
+        # Simulate on a private evaluator: prediction must not append to the
+        # model's histories or consume stochastic transition outcomes.
         simulated_state = current_state
         time_horizon = 30.0  # Look ahead 30 days
         time_step = 0.1
-        
-        for t in np.arange(0, time_horizon, time_step):
-            simulated_state = self.update_developmental_state(
-                simulated_state, time_step, environmental_conditions
-            )
-            
-            # Check for transition
-            transition = self._check_stage_transition(simulated_state, environmental_conditions)
-            if transition:
-                return transition
-        
-        return None
+        developmental_history = self.developmental_history
+        transition_history = self.transition_history
+        rng_state = np.random.get_state()
+        try:
+            self.developmental_history = []
+            self.transition_history = []
+            for _ in np.arange(0, time_horizon, time_step):
+                simulated_state = self.update_developmental_state(
+                    simulated_state, time_step, environmental_conditions
+                )
+                transition = self._check_stage_transition(
+                    simulated_state, environmental_conditions
+                )
+                if transition:
+                    return transition
+            return None
+        finally:
+            self.developmental_history = developmental_history
+            self.transition_history = transition_history
+            np.random.set_state(rng_state)
     
     def _get_current_time(self) -> float:
         """Get current simulation time."""

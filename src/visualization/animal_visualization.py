@@ -224,8 +224,11 @@ def plot_animal_sensory_state(
     ax.set_xticks(np.radians(np.linspace(-90, 90, 5))) # Ticks for FoV
     ax.set_xticklabels([f'{deg:.0f}°' for deg in np.linspace(-vision_angle/2 * 180/np.pi, vision_angle/2 * 180/np.pi, 5)])
     ax.set_title("Sensory State (Vision & Goal Direction)")
-    if ax.get_legend() is None:
-         ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
+    if ax.get_legend() is None and any(
+        handle.get_label() and not handle.get_label().startswith("_")
+        for handle in ax.get_lines()
+    ):
+        ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
          
     return fig
 

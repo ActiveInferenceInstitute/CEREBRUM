@@ -188,6 +188,11 @@ class ComprehensiveVisualizer:
         
     def generate_case_analysis_visualizations(self, simulation_data: Dict[str, Any]):
         """Generate comprehensive case analysis visualizations."""
+
+        if nx is None:
+            raise ImportError(
+                "Case analysis visualizations require networkx; install the lexicon extra."
+            )
         
         # 1. Case Transition Network
         fig, ax = plt.subplots(figsize=(12, 10))
@@ -360,6 +365,11 @@ class ComprehensiveVisualizer:
         
     def generate_swarm_analysis_visualizations(self, simulation_data: Dict[str, Any]):
         """Generate comprehensive swarm analysis visualizations."""
+
+        if nx is None:
+            raise ImportError(
+                "Swarm analysis visualizations require networkx; install the lexicon extra."
+            )
         
         # 1. Swarm Coordination Network
         fig, ax = plt.subplots(figsize=(12, 10))

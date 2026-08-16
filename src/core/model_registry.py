@@ -8,6 +8,8 @@ import logging
 import json
 import pickle
 import os
+import re
+import tempfile
 from datetime import datetime
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, asdict, field
@@ -97,6 +99,8 @@ class ModelRegistry:
             The model ID used for registration
         """
         model_id = model_id or model.name
+        if not model_id or not re.fullmatch(r"[A-Za-z0-9_.-]+", model_id):
+            raise ValueError("model_id must contain only letters, numbers, '.', '_' or '-'")
         
         if model_id in self._models:
             logger.warning(f"Model {model_id} already registered, overwriting")
@@ -358,8 +362,22 @@ class ModelRegistry:
                 }
             }
             
-            with open(self.metadata_file, 'w') as f:
-                json.dump(registry_data, f, indent=2)
+            self.metadata_file.parent.mkdir(parents=True, exist_ok=True)
+            fd, temp_name = tempfile.mkstemp(
+                dir=self.metadata_file.parent, prefix=".registry-", suffix=".tmp"
+            )
+            try:
+                with os.fdopen(fd, 'w', encoding='utf-8') as f:
+                    json.dump(registry_data, f, indent=2)
+                    f.flush()
+                    os.fsync(f.fileno())
+                os.replace(temp_name, self.metadata_file)
+            except Exception:
+                try:
+                    os.unlink(temp_name)
+                except FileNotFoundError:
+                    pass
+                raise
                 
         except Exception as e:
             logger.error(f"Failed to save registry: {e}")

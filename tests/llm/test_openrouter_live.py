@@ -14,34 +14,17 @@ import pytest
 from src.llm.OpenRouter.openrouter import OpenRouterClient, OpenRouterConfig
 
 
-@pytest.fixture
-def api_key():
-    key = os.environ.get("OPENROUTER_API_KEY")
-    if not key:
-        pytest.skip("OPENROUTER_API_KEY not set")
-    return key
+class TestOpenRouterClientContract:
+    def test_client_initializes_with_explicit_key(self):
+        config = OpenRouterConfig(api_key="test-key")
+        client = OpenRouterClient(config)
+        assert client.config.api_key == "test-key"
+        assert client.config.base_url.endswith("/api/v1")
 
-
-@pytest.fixture
-def client(api_key):
-    config = OpenRouterConfig(api_key=api_key)
-    return OpenRouterClient(config)
-
-
-@pytest.mark.live
-class TestOpenRouterLive:
-    def test_simple_completion(self, client):
-        """Test a real API call to OpenRouter."""
-        response = client.chat_completion(
-            messages=[{"role": "user", "content": "Say 'hello' and nothing else."}],
-            model="openai/gpt-4o-mini",
-        )
-        assert response is not None
-        assert "choices" in response or "content" in str(response)
-
-    def test_config_has_api_key(self, api_key):
-        config = OpenRouterConfig(api_key=api_key)
-        assert config.api_key == api_key
+    def test_missing_key_is_rejected(self, monkeypatch):
+        monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+        with pytest.raises(ValueError, match="OPENROUTER_API_KEY required"):
+            OpenRouterConfig()
 
 
 class TestOpenRouterConfig:

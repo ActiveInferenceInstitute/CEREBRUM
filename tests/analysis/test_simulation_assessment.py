@@ -231,6 +231,7 @@ class TestComprehensiveReport:
     
     def test_report_structure(self, populated_analyzer):
         report = populated_analyzer.generate_comprehensive_report()
+        assert report["timestamp"] == report["assessment_timestamp"]
         assert "assessment_timestamp" in report
         assert "data_quality" in report
         assert "behavioral_analysis" in report

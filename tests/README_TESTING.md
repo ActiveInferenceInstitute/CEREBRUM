@@ -119,9 +119,12 @@ source .venv/bin/activate
 uv pip install -e ".[dev]"
 ```
 
-The repository requires a coverage threshold of 90% (`--cov-fail-under=90` in
-`pytest.ini`); run the suite with `uv run python -m pytest` to pick up the
-project configuration automatically.
+The project tracks a 90% coverage goal, but the current `pytest.ini` and CI
+workflow do not enforce that threshold automatically. To measure coverage, run:
+
+```bash
+uv run python -m pytest --cov=src --cov-report=term-missing
+```
 
 ## Continuous Integration
 
@@ -160,10 +163,13 @@ The CEREBRUM framework includes comprehensive linear regression tests that demon
 
 ```bash
 # Run the nominative case test (currently the most reliable)
-python -c "from tests.test_linear_regression import CaseDefinitions, DataGenerator, test_nominative_case; case_definitions = CaseDefinitions.get_all_cases(); linear_data = DataGenerator.linear_data(n_samples=150, slope=3.0, intercept=-2.0, noise_level=2.0); test_nominative_case(linear_data, case_definitions)"
+uv run python -m pytest tests/models/test_linear_regression_comprehensive.py -q
 ```
 
-**Note:** Currently, there are array dimension issues with several of the case tests when run individually. Work is ongoing to fix these issues. The nominative case test is the most reliable and demonstrates the core concepts of the CEREBRUM framework in the context of linear regression.
+The legacy `tests/models/test_linear_regression.py` and its case-specific directory are
+excluded by `pytest.ini`; the comprehensive test module above is the maintained
+entry point. If you need to run the legacy demonstration manually, treat it as
+unsupported and do not interpret its output as CI-verified evidence.
 
 All visualizations and animations will be generated in the `tests/output/linear_regression` directory, organized by case:
 
@@ -261,9 +267,9 @@ Each case test generates specific visualizations that demonstrate the linguistic
    ```
    Solution: check directory permissions or run with higher privileges.
 
-5. **Coverage Threshold Failure**: if the run reports coverage below 90%,
-   the configured `--cov-fail-under=90` gate fails the suite; add tests for
-   the uncovered paths rather than lowering the threshold.
+5. **Coverage Goal Shortfall**: if measured coverage is below the 90% project
+   goal, add tests for uncovered paths. The current CI workflow does not fail
+   automatically on this threshold.
 
 ### Debugging Failed Tests
 

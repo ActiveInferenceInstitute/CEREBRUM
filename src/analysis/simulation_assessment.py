@@ -40,6 +40,8 @@ class SimulationEffectivenessAnalyzer:
             Dictionary containing data quality metrics
         """
         quality_metrics = {
+            "total_files": 0,
+            "status": "unknown",
             "data_completeness": {},
             "data_consistency": {},
             "data_richness": {},
@@ -62,11 +64,15 @@ class SimulationEffectivenessAnalyzer:
                 quality_metrics["data_completeness"][structure] = "missing"
                 quality_metrics["issues_found"].append(f"Missing directory: {structure}")
         
+        quality_metrics["total_files"] = sum(
+            len(files) for _root, _dirs, files in os.walk(self.output_dir)
+        )
+
         # Analyze simulation events
         events_file = os.path.join(self.output_dir, "insect_simulation_logs", "simulation_events.json")
         if os.path.exists(events_file):
             try:
-                with open(events_file, 'r') as f:
+                with open(events_file) as f:
                     events_data = [json.loads(line) for line in f]
                 
                 quality_metrics["data_richness"]["total_events"] = len(events_data)
@@ -98,7 +104,7 @@ class SimulationEffectivenessAnalyzer:
         case_files = sorted(glob.glob(os.path.join(case_perf_dir, "case_report_*.json")))
         if case_files:
             try:
-                with open(case_files[-1], 'r') as f:
+                with open(case_files[-1]) as f:
                     case_data = json.load(f)
                 
                 quality_metrics["data_richness"]["case_effectiveness"] = len(case_data.get("case_effectiveness", {}))
@@ -107,6 +113,9 @@ class SimulationEffectivenessAnalyzer:
             except Exception as e:
                 quality_metrics["issues_found"].append(f"Error reading case performance: {e}")
         
+        quality_metrics["status"] = (
+            "OK" if not quality_metrics["issues_found"] else "ISSUES_FOUND"
+        )
         return quality_metrics
     
     def analyze_behavioral_patterns(self) -> Dict[str, Any]:
@@ -129,7 +138,7 @@ class SimulationEffectivenessAnalyzer:
             return behavioral_analysis
         
         try:
-            with open(events_file, 'r') as f:
+            with open(events_file) as f:
                 events_data = [json.loads(line) for line in f]
             
             # Analyze state transitions
@@ -179,7 +188,7 @@ class SimulationEffectivenessAnalyzer:
             return case_analysis
         
         try:
-            with open(events_file, 'r') as f:
+            with open(events_file) as f:
                 events_data = [json.loads(line) for line in f]
             
             # Analyze case usage
@@ -227,7 +236,7 @@ class SimulationEffectivenessAnalyzer:
         
         # Count visualization files
         png_files = []
-        for root, dirs, files in os.walk(self.output_dir):
+        for root, _dirs, files in os.walk(self.output_dir):
             for file in files:
                 if file.endswith('.png'):
                     png_files.append(os.path.join(root, file))
@@ -268,8 +277,10 @@ class SimulationEffectivenessAnalyzer:
         Returns:
             Complete assessment report
         """
+        assessment_timestamp = datetime.now().isoformat()
         report = {
-            "assessment_timestamp": datetime.now().isoformat(),
+            "assessment_timestamp": assessment_timestamp,
+            "timestamp": assessment_timestamp,
             "output_directory": self.output_dir,
             "data_quality": self.analyze_simulation_data_quality(),
             "behavioral_analysis": self.analyze_behavioral_patterns(),
@@ -301,6 +312,12 @@ class SimulationEffectivenessAnalyzer:
             report["overall_assessment"]["score"] = 50
         
         report["overall_assessment"]["total_issues"] = total_issues
+        report["status"] = report["overall_assessment"]["status"]
+        report["summary"] = {
+            "status": report["overall_assessment"]["status"],
+            "score": report["overall_assessment"]["score"],
+            "total_issues": total_issues,
+        }
         
         # Generate recommendations
         if report["data_quality"]["issues_found"]:
@@ -333,7 +350,8 @@ class SimulationEffectivenessAnalyzer:
             filename = f"simulation_assessment_{timestamp}.json"
         
         report_path = os.path.join(self.output_dir, filename)
-        with open(report_path, 'w') as f:
+        os.makedirs(self.output_dir, exist_ok=True)
+        with open(report_path, 'w', encoding="utf-8") as f:
             json.dump(report, f, indent=2, default=str)
         
         print(f"Assessment report saved to: {report_path}")

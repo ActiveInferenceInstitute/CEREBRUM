@@ -110,9 +110,9 @@ class TestComprehensiveReportGenerator:
         assert "Total Events" in content
 
     def test_empty_events_handled(self, gen):
-        """Reports should handle missing events gracefully (may raise but shouldn't crash hard)."""
-        try:
-            gen.generate_performance_report({"events": []})
-        except (ValueError, ZeroDivisionError, KeyError):
-            # Expected for empty events list (set() on empty, division by zero)
-            pass
+        """Empty input produces a valid zero-event report."""
+        path = gen.generate_performance_report({"events": []})
+        with open(path) as f:
+            report = json.load(f)
+        assert report["total_events"] == 0
+        assert report["average_confidence"] == 0.0

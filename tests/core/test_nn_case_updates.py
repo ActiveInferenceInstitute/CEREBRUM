@@ -85,6 +85,29 @@ class TestForwardBackward:
         assert output.shape == (10, 1)
         assert len(activations) == 3  # input + hidden + output
 
+    def test_multiclass_forward_returns_probabilities(self):
+        model = NeuralNetworkModel(input_dim=2, output_dim=3, hidden_dims=[4])
+        output, _ = model.forward(np.ones((5, 2)))
+        assert np.all(output >= 0.0)
+        np.testing.assert_allclose(output.sum(axis=1), 1.0)
+
+    def test_mse_backward_gradient_is_normalized(self):
+        model = NeuralNetworkModel(input_dim=1, output_dim=1, hidden_dims=[])
+        model.weights[0][:] = 0.5
+        model.biases[0][:] = 0.1
+        X = np.array([[2.0], [3.0]])
+        y = np.array([[0.0], [1.0]])
+        old_weight = model.weights[0][0, 0]
+        epsilon = 1e-6
+        model.weights[0][0, 0] = old_weight + epsilon
+        loss_plus = np.mean((model.forward(X)[0] - y) ** 2)
+        model.weights[0][0, 0] = old_weight - epsilon
+        loss_minus = np.mean((model.forward(X)[0] - y) ** 2)
+        model.weights[0][0, 0] = old_weight
+        expected = (loss_plus - loss_minus) / (2 * epsilon)
+        result = model.backward(X, y, learning_rate=0.0)
+        np.testing.assert_allclose(result["weight_grads"][0][0, 0], expected, rtol=1e-5, atol=1e-7)
+
     def test_backward_returns_loss(self, nn):
         X = np.random.randn(10, 2)
         y = np.random.randn(10, 1)

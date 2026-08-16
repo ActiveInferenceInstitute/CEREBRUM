@@ -2,7 +2,7 @@
 
 This directory contains the test suite for CEREBRUM, organized into subfolders that mirror `src/` modules.
 
-Current suite: **1242 tests collected (1239 passing, 3 skipped)**. The 3 skipped tests are live-API tests, opt-in via `@pytest.mark.live`.
+Run `uv run python -m pytest` for the current suite count and result. Live-API tests are opt-in via `@pytest.mark.live`.
 
 ## Quick Start
 
