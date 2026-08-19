@@ -579,9 +579,9 @@ def run_comprehensive_simulation():
                     plots = [
                         (case_visualizer.visualize_case_distribution, f"{name.lower()}_case_distribution_step_{step:03d}.png"),
                         (behavior_visualizer.visualize_behavior_timeline, f"{name.lower()}_behavior_timeline_step_{step:03d}.png"),
-                        (lambda: neural_visualizer.visualize_structure_activity(insect.neural_structure), f"{name.lower()}_neural_activity_step_{step:03d}.png"),
-                        (lambda: brain_visualizer.visualize_brain_activity(insect), f"{name.lower()}_brain_activity_step_{step:03d}.png"),
-                        (lambda: case_visualizer.visualize_case_effectiveness(insect, {"step": step}), f"{name.lower()}_case_effectiveness_step_{step:03d}.png"),
+                        (lambda ins=insect: neural_visualizer.visualize_structure_activity(ins.neural_structure), f"{name.lower()}_neural_activity_step_{step:03d}.png"),
+                        (lambda ins=insect: brain_visualizer.visualize_brain_activity(ins), f"{name.lower()}_brain_activity_step_{step:03d}.png"),
+                        (lambda ins=insect, st=step: case_visualizer.visualize_case_effectiveness(ins, {"step": st}), f"{name.lower()}_case_effectiveness_step_{step:03d}.png"),
                         (behavior_visualizer.visualize_behavior_performance, f"{name.lower()}_behavior_performance_step_{step:03d}.png")
                     ]
                     

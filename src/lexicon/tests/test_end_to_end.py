@@ -272,7 +272,7 @@ def parse_{parser_name.split("_")[0]}(text: str) -> List[ProcessedSegment]:
         if not line.strip():
             continue
         segments.append(ProcessedSegment(
-            segment_id=f"{parser_name}_{i+1}",
+            segment_id=f"{{parser_name}}_{{i+1}}",
             text=line.strip()
         ))
     

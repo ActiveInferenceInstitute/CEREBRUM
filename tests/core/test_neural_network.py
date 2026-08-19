@@ -8,8 +8,6 @@ from typing import Dict, List, Tuple
 
 from src.core.model import Case
 from src.core.neural_network import NeuralNetworkModel
-from src.utils.visualization import plot_case_linguistic_context
-from tests.pomdp.visualizers import Visualizer
 from sklearn.decomposition import PCA
 
 logger = logging.getLogger(__name__)
@@ -2062,12 +2060,7 @@ def test_vocative_case(nn_classification_data, case_definitions):
         f.write(f"* Activation function: {model.activation}\n")
         f.write("* Evaluation metrics:\n")
         
-        # Handle case where evaluation_results might not be defined or empty
-        if 'evaluation_results' in locals() and evaluation_results:
-            for metric, value in evaluation_results.items():
-                f.write(f"  - {metric}: {value:.6f}\n")
-        else:
-            f.write("  - Evaluation not performed (not allowed in VOCATIVE case)\n")
+        f.write("  - Evaluation not performed (not allowed in VOCATIVE case)\n")
         f.write("\n### Evaluation Process\n\n")
         f.write("The model was evaluated across multiple test segments to analyze the stability of its performance metrics. ")
         f.write("The animation shows how different evaluation metrics evolve as more test data is included.\n\n")

@@ -8,6 +8,7 @@ including individual insect animations and swarm dynamics animations.
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from collections import defaultdict
 from matplotlib.patches import Circle
 from typing import Dict, Any, List, Optional, Tuple
 import logging
