@@ -212,7 +212,7 @@ class TestLexiconComponents(unittest.TestCase):
             # Initialize OpenRouter client
             router_config = OpenRouterConfig(
                 api_key=os.environ.get("OPENROUTER_API_KEY"),
-                default_model="anthropic/claude-3.5-sonnet"
+                default_model="moonshotai/kimi-k2"
             )
             openrouter_client = OpenRouterClient(router_config)
             

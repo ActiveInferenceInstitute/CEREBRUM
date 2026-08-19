@@ -38,7 +38,7 @@ class TestLexiconConfig:
         monkeypatch.setenv("OPENROUTER_API_KEY", "test-key")
         monkeypatch.setattr(LexiconConfig, "__post_init__", lambda self: None)
         cfg = LexiconConfig()
-        assert cfg.default_model == "anthropic/claude-3.5-sonnet"
+        assert cfg.default_model == "moonshotai/kimi-k2"
         assert cfg.max_batch_size == 25
 
     def test_save_and_load(self, tmp_path):

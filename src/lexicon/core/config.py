@@ -20,7 +20,7 @@ class LexiconConfig:
     base_api_url: str = "https://openrouter.ai/api/v1"
     
     # Model selection
-    default_model: str = "anthropic/claude-3.5-sonnet"
+    default_model: str = "moonshotai/kimi-k2"
     fallback_models: Dict[str, str] = field(default_factory=lambda: {
         "case_declension": "openai/gpt-4o-mini",
         "paraphrase": "openai/gpt-4o-mini",

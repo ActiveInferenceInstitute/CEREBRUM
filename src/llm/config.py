@@ -13,8 +13,8 @@ load_dotenv()
 
 # Available OpenRouter Models
 AVAILABLE_MODELS = {
-    "kimi": "moonshotai/kimi-k2:free",
-    "deepseek": "tngtech/deepseek-r1t2-chimera:free"
+    "kimi": "moonshotai/kimi-k2",
+    "deepseek": "tngtech/deepseek-r1t2-chimera"
 }
 
 # Default model selection
@@ -23,7 +23,7 @@ DEFAULT_MODEL = "kimi"  # Uses moonshotai/kimi-k2:free
 # Model configurations
 MODEL_CONFIGS = {
     "kimi": {
-        "name": "moonshotai/kimi-k2:free",
+        "name": "moonshotai/kimi-k2",
         "display_name": "Kimi K2 (Free)",
         "provider": "Moonshot AI",
         "max_tokens": 4000,
@@ -31,7 +31,7 @@ MODEL_CONFIGS = {
         "description": "Free tier of Moonshot AI's Kimi K2 model"
     },
     "deepseek": {
-        "name": "tngtech/deepseek-r1t2-chimera:free", 
+        "name": "tngtech/deepseek-r1t2-chimera", 
         "display_name": "DeepSeek R1T2 Chimera (Free)",
         "provider": "TNG Tech",
         "max_tokens": 4000,

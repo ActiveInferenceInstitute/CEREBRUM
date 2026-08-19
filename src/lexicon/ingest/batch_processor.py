@@ -117,7 +117,7 @@ def generate_health_summary(batch_results: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def process_all_inputs(base_dir: Path, model: str = "anthropic/claude-3.5-sonnet", 
+def process_all_inputs(base_dir: Path, model: str = "moonshotai/kimi-k2", 
                       log_level: str = "INFO") -> Dict[str, Any]:
     """
     Process all input files in the input directory.

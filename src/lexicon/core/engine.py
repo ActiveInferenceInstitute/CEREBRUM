@@ -162,7 +162,7 @@ class LexiconEngine:
             # Use OpenRouter client with configuration
             router_config = OpenRouterConfig(
                 api_key=api_key,
-                default_model=get_model_name() or "anthropic/claude-3.5-sonnet",
+                default_model=get_model_name() or "moonshotai/kimi-k2",
                 temperature=0.7,
                 max_tokens=1000
             )
@@ -325,6 +325,65 @@ class LexiconEngine:
             # Fallback to LLM-based detection with structured cases
             return self._llm_entity_detection_with_structured_cases(text)
     
+    def _llm_entity_detection(self, text):
+        """
+        Extract named entities from text using the LLM.
+
+        This is the entity-extraction backend used when spaCy (or a spaCy
+        model) is unavailable. It asks the LLM for a JSON array of entities
+        and normalizes each to the entity dict shape used across the engine:
+        {'id', 'text', 'category', 'confidence', 'metadata'}.
+
+        Args:
+            text (str): Input text
+
+        Returns:
+            list: Detected entities with metadata; empty list on failure
+        """
+        prompt = f"""
+        Extract all named entities from the following text. Include people,
+        organizations, locations, dates, and other significant named entities.
+
+        Format your response as a JSON array of objects, each with 'text',
+        'category', and 'confidence' (between 0 and 1) fields.
+
+        Text:
+        {text}
+
+        Entities (JSON array):
+        """
+
+        response = self._call_llm(prompt)
+
+        entities = []
+        try:
+            if response.strip().startswith('['):
+                parsed = json.loads(response)
+                if isinstance(parsed, list):
+                    entities = parsed
+            else:
+                import re
+                json_match = re.search(r'\[\s*\{.*\}\s*\]', response, re.DOTALL)
+                if json_match:
+                    entities = json.loads(json_match.group(0))
+        except json.JSONDecodeError:
+            self.logger.warning("Could not parse LLM entity detection response as JSON")
+
+        for entity in entities:
+            if isinstance(entity, dict):
+                if 'id' not in entity:
+                    entity['id'] = str(uuid.uuid4())
+                if 'confidence' not in entity:
+                    entity['confidence'] = 0.8
+                if 'category' not in entity:
+                    entity['category'] = 'unknown'
+                entity['metadata'] = {
+                    **entity.get('metadata', {}),
+                    'detection_strategy': 'llm_named_entity'
+                }
+
+        return entities
+
     def _llm_entity_detection_with_structured_cases(self, text):
         """
         LLM-based entity detection with structured case determination.
@@ -1060,6 +1119,56 @@ class LexiconEngine:
             
             result["relations"] = relations
             result["graph"] = graph
+            
+            # Run the unified component pipeline: NLPPreprocessor segments the
+            # text (format detection, sentence splitting, NER/POS when spaCy is
+            # available, coreference resolution) and CaseTagger applies the
+            # 8-case declension to each segment. Both stages degrade gracefully:
+            # a failure records a warning on the result and never aborts the
+            # shipped entity/claim/graph outputs.
+            segments = None
+            try:
+                self.logger.info("Running NLP preprocessing")
+                segments = self._get_nlp_preprocessor().process(text)
+                self.logger.info(f"NLP preprocessing produced {len(segments)} segments")
+            except Exception as e:
+                self.logger.warning(f"NLP preprocessing failed: {e}")
+            
+            if segments:
+                result["segments"] = [
+                    {
+                        "segment_id": s.segment_id,
+                        "text": s.text,
+                        "speaker": s.speaker,
+                        "entities": s.entities,
+                    }
+                    for s in segments
+                ]
+                try:
+                    self.logger.info(f"Applying case declension to {len(segments)} segments")
+                    cased_segments = self._get_case_tagger().tag(segments)
+                    result["cased_segments"] = [
+                        {
+                            "segment_id": c.segment_id,
+                            "text": c.text,
+                            "nominative": c.nominative,
+                            "accusative": c.accusative,
+                            "genitive": c.genitive,
+                            "dative": c.dative,
+                            "locative": c.locative,
+                            "instrumental": c.instrumental,
+                            "ablative": c.ablative,
+                            "vocative": c.vocative,
+                            "metadata": {
+                                "processing_time": c.metadata.get("processing_time"),
+                                "error": c.metadata.get("error"),
+                            },
+                        }
+                        for c in cased_segments
+                    ]
+                    self.logger.info(f"Case declension produced {len(cased_segments)} cased segments")
+                except Exception as e:
+                    self.logger.warning(f"Case declension failed: {e}")
             
             # Validate - now safe since keys exist
             if not result["entities"] or not result["claims"] or not result["graph"]["nodes"]:
