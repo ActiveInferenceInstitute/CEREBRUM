@@ -233,10 +233,37 @@ after this pass: **1273 passed, 0 failed** (19 net new tests).
       it is a point-in-time coverage report that stales on every run and is
       gitignore-class.
 
+### Second pass — 2026-08-18 (live OpenRouter validation)
+
+Suite after this pass: **1273 passed, 0 failed** (default run; live test
+opt-in via `-m live` adds 1 more). Live key validated `moonshotai/kimi-k2`.
+
+- [x] **Dead OpenRouter model slugs** — every configured default model 404s on
+      the live API: `moonshotai/kimi-k2:free` ("unavailable for free — use
+      moonshotai/kimi-k2"), `tngtech/deepseek-r1t2-chimera:free` ("No
+      endpoints found"), and `anthropic/claude-3.5-sonnet` ("No endpoints
+      found"). Replaced with live-verified slugs
+      (`moonshotai/kimi-k2`, verified PONG) in `src/llm/config.py`,
+      `src/lexicon/core/config.py`, `engine.py`, `run.py`,
+      `batch_processor.py`, `examples/process_file.py`, `test_components.py`.
+- [x] **Missing `_llm_entity_detection`** — the no-spaCy fallback path of
+      `_detect_named_entities` called a method that did not exist
+      (AttributeError on every run without spaCy). Implemented as a real LLM
+      entity extractor with JSON parsing and field normalization.
+- [x] **Lexicon component unification (the deferred Major)** —
+      `process_text` now runs the unified component pipeline:
+      `NLPPreprocessor` segments text (format detection, sentence split,
+      NER/POS, coreference) and `CaseTagger` applies 8-case declension, with
+      results surfaced as `result["segments"]` / `result["cased_segments"]`.
+      Both stages degrade gracefully (warning log, never abort). Verified live
+      end-to-end: "Alice met Bob in Paris..." → 2 segments, correct
+      nominative tagging. Added `src/lexicon/tests/test_integration_live.py`
+      (`live` marker, skipped without OPENROUTER_API_KEY).
+
 ### Deferred (unchanged)
 
-- Lexicon component-architecture full unification (see above) — still requires
-  a live OpenRouter key to validate end-to-end.
+- ~~Lexicon component-architecture full unification~~ — **completed** in the
+  second 2026-08-18 pass above.
 - Full paper regeneration (heavy pandoc/xelatex pipeline) — committed
   artifacts remain self-consistent.
 - `src/llm` ruff debt — pre-existing, out of scope.
