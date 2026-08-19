@@ -2,7 +2,7 @@
 
 > **Status**: Active
 > **Owner**: Daniel Ari Friedman
-> **Last reviewed**: 2026-08-02
+> **Last reviewed**: 2026-08-18
 
 This is the authoritative project backlog. It records completed work and the
 remaining **Major**-class items from the hostile red-team review pass of
@@ -194,6 +194,52 @@ findings). Test baseline verified on this date: **1242 collected, 1239 passed,
 - ○ **`.desloppify/` tracked artifacts** — gitignored; recommend `git rm -r .desloppify` if it shouldn't be public.
 - ○ **Zenodo deposit metadata** still NC-ND vs repo CC BY 4.0 — update the Zenodo record externally.
 - ○ **`src/llm` ruff debt (168 pre-existing errors)** — out of scope for this docs pass.
+
+---
+
+## Review + remediation pass — 2026-08-18
+
+Fleet review pass. Baseline verified: **1254 passed, 0 failed** (full suite);
+after this pass: **1273 passed, 0 failed** (19 net new tests).
+
+### Completed
+
+- [x] **FORMICA `update_belief` shadowed by a dead placeholder** — the
+      placeholder 2-arg definition at `inference.py:271` overwrote the real
+      3-arg Bayesian update, so the exported symbol (and everything imported
+      from `beyond_cerebrum.src.operations`) raised `TypeError` on correct
+      calls. Placeholder removed; real Bayesian update now exported.
+- [x] **`beyond_cerebrum/tests/` stale, broken, and silently uncollected** —
+      pytest.ini collects `beyond_cerebrum/src/tests`, so the outer tree
+      (importing removed APIs: `SyntacticTree`, `AbstractStructure`,
+      `SyntacticConstituent`, plus a `Generic[...]` subscript misuse) never ran
+      and failed collection when invoked directly. Deleted; its unique
+      coverage (inference, transformations) was re-authored against the
+      current API in `beyond_cerebrum/src/tests/operations/` (30 new tests,
+      all passing, zero mocks).
+- [x] **`defaultdict` NameError** in `src/visualization/insect/animation_creator.py`
+      `animate()` (used but never imported) — import added.
+- [x] **Loop-variable capture in lambdas** (`src/examples/comprehensive_insect_simulation.py`)
+      — three lambdas captured `insect`/`step` by reference; bound as default
+      args.
+- [x] **f-string brace escaping bug** in `src/lexicon/tests/test_end_to_end.py`
+      — the generator template interpolated `{i+1}` from the outer scope
+      (NameError at runtime) instead of writing a literal f-string into the
+      generated parser; braces escaped.
+- [x] **Dead shadowed imports** in `tests/core/test_neural_network.py`
+      (`Visualizer`, `plot_case_linguistic_context` — both overridden by local
+      definitions) removed.
+- [x] **Stale generated `coverage.json` (641 KB) untracked** — `git rm --cached`;
+      it is a point-in-time coverage report that stales on every run and is
+      gitignore-class.
+
+### Deferred (unchanged)
+
+- Lexicon component-architecture full unification (see above) — still requires
+  a live OpenRouter key to validate end-to-end.
+- Full paper regeneration (heavy pandoc/xelatex pipeline) — committed
+  artifacts remain self-consistent.
+- `src/llm` ruff debt — pre-existing, out of scope.
 
 ---
 
