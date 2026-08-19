@@ -1,1 +1,0 @@
-"""Tests for FORMICA formalisms (types, structures).""" 

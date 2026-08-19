@@ -1,1 +1,0 @@
-"""Tests for FORMICA operations (calculus, transformations, inference).""" 
