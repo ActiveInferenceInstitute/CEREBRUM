@@ -162,7 +162,8 @@ class LexiconEngine:
             # Use OpenRouter client with configuration
             router_config = OpenRouterConfig(
                 api_key=api_key,
-                default_model=get_model_name() or "moonshotai/kimi-k2",
+                default_model=get_model_name() or "qwen/qwen3.8-27b",
+                fallback_models=list(getattr(self.config, "client_fallback_models", []) or []),
                 temperature=0.7,
                 max_tokens=1000
             )

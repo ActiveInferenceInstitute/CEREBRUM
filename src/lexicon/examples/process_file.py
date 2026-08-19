@@ -235,7 +235,7 @@ def main():
     """Run the LEXICON file processing example."""
     parser = argparse.ArgumentParser(description="Process a file with LEXICON")
     parser.add_argument("--file", help="Path to file to process (creates sample if not provided)")
-    parser.add_argument("--model", default="moonshotai/kimi-k2", help="OpenRouter model to use")
+    parser.add_argument("--model", default="qwen/qwen3.8-27b", help="OpenRouter model to use")
     parser.add_argument("--log-level", default="INFO", help="Logging level", 
                         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"])
     parser.add_argument("--format", help="Input format", 

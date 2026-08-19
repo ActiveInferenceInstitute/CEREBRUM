@@ -8,7 +8,7 @@ import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 
 @dataclass
@@ -20,13 +20,23 @@ class LexiconConfig:
     base_api_url: str = "https://openrouter.ai/api/v1"
     
     # Model selection
-    default_model: str = "moonshotai/kimi-k2"
+    default_model: str = "qwen/qwen3.8-27b"
+    # Per-task model preferences; each is used as the primary model for that
+    # task, with client_fallback_models used when the primary is unavailable.
     fallback_models: Dict[str, str] = field(default_factory=lambda: {
-        "case_declension": "openai/gpt-4o-mini",
-        "paraphrase": "openai/gpt-4o-mini",
-        "entity_extraction": "anthropic/claude-3-haiku",
-        "graph_assembly": "openai/gpt-4o-mini",
+        "case_declension": "nvidia/nemotron-3.5-lightning:free",
+        "paraphrase": "nvidia/nemotron-3.5-lightning:free",
+        "entity_extraction": "dots-studio/dots-3-note-preview:free",
+        "graph_assembly": "nvidia/nemotron-3.5-lightning:free",
     })
+    # Client-wide ordered fallback chain tried when any model 404s
+    # (dead slug, no endpoints, or account guardrail restriction).
+    client_fallback_models: List[str] = field(default_factory=lambda: [
+        "nvidia/nemotron-3.5-lightning:free",
+        "dots-studio/dots-3-note-preview:free",
+        "qwen/qwen3.8-27b",
+        "moonshotai/kimi-k2",
+    ])
     
     # Processing settings
     max_batch_size: int = 25

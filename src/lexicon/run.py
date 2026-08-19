@@ -207,7 +207,7 @@ def main():
     parser = argparse.ArgumentParser(description="Run LEXICON pipeline")
     parser.add_argument("--input", "-i", help="Input file or text content")
     parser.add_argument("--model", "-m", help="OpenRouter model", 
-                        default="moonshotai/kimi-k2")
+                        default="qwen/qwen3.8-27b")
     parser.add_argument("--log-level", "-l", help="Logging level", default="INFO", 
                         choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"])
     parser.add_argument("--format", "-f", help="Input format", 

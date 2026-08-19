@@ -54,6 +54,10 @@ class OpenRouterConfig:
     http_referer: str = "https://github.com/corym-library/openrouter"
     x_title: str = "OpenRouter Python Client"
     default_model: str = "openai/gpt-3.5-turbo"
+    # Ordered fallback chain tried when the default model is unavailable
+    # (e.g. 404 no-endpoints / dead slug). Empty by default so existing
+    # behavior is unchanged.
+    fallback_models: List[str] = field(default_factory=list)
     temperature: float = 0.8
     max_tokens: int = 300
     retry_config: RetryConfig = field(default_factory=RetryConfig)
@@ -289,9 +293,29 @@ class OpenRouterClient:
         max_tokens: Optional[int] = None,
         **kwargs
     ) -> ChatCompletion:
-        """Chat completion with retry and circuit breaker."""
+        """Chat completion with retry, circuit breaker, and model fallback.
+
+        Tries the requested model (or the configured default), then each
+        configured fallback model, when the model is unavailable — an
+        openai.NotFoundError (404: dead slug, no endpoints, or guardrail
+        restriction) is a permanent condition for that model, so retrying it
+        cannot help and the next model in the chain is tried instead.
+        """
         enhanced_func = self._with_retry_and_circuit_breaker(self._base_chat_completion)
-        return enhanced_func(messages, model, temperature, max_tokens, **kwargs)
+        model_chain = [model or self.config.default_model] + [
+            m for m in self.config.fallback_models
+            if m and m != (model or self.config.default_model)
+        ]
+        last_error: Exception = RuntimeError("no models configured")
+        for candidate in model_chain:
+            try:
+                return enhanced_func(messages, candidate, temperature, max_tokens, **kwargs)
+            except openai.NotFoundError as e:
+                last_error = e
+                self.logger.warning(
+                    f"Model '{candidate}' unavailable (404), trying next fallback: {str(e)[:160]}"
+                )
+        raise last_error
     
     def _base_chat_completion(
         self,
@@ -415,13 +439,16 @@ class OpenRouterClient:
     
     def get_available_models(self) -> List[str]:
         """Get static list of available models."""
+        # Live-verified slugs (2026-08-18). Availability varies by account
+        # data-policy guardrails; use get_available_models_from_api() for the
+        # authoritative list.
         return [
-            "openai/gpt-4", "openai/gpt-4-turbo-preview", "openai/gpt-3.5-turbo", "openai/gpt-3.5-turbo-16k",
-            "anthropic/claude-3-opus", "anthropic/claude-3-sonnet", "anthropic/claude-3-haiku", 
-            "anthropic/claude-2", "anthropic/claude-instant-v1",
-            "google/palm-2-chat-bison", "google/gemini-pro",
-            "meta-llama/llama-2-70b-chat", "meta-llama/llama-2-13b-chat",
-            "mistralai/mistral-7b-instruct", "mistralai/mixtral-8x7b-instruct"
+            "qwen/qwen3.8-27b",
+            "moonshotai/kimi-k2",
+            "dots-studio/dots-3-note-preview:free",
+            "nvidia/nemotron-3.5-lightning:free",
+            "openai/gpt-4o-mini",
+            "anthropic/claude-3-haiku",
         ]
     
     def get_available_models_from_api(self) -> List[Dict[str, Any]]:

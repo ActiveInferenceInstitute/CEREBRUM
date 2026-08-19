@@ -13,31 +13,49 @@ load_dotenv()
 
 # Available OpenRouter Models
 AVAILABLE_MODELS = {
+    "qwen": "qwen/qwen3.8-27b",
+    "nemotron": "nvidia/nemotron-3.5-lightning:free",
+    "dots": "dots-studio/dots-3-note-preview:free",
     "kimi": "moonshotai/kimi-k2",
-    "deepseek": "tngtech/deepseek-r1t2-chimera"
 }
 
 # Default model selection
-DEFAULT_MODEL = "kimi"  # Uses moonshotai/kimi-k2:free
+DEFAULT_MODEL = "qwen"  # Uses qwen/qwen3.8-27b:free
 
 # Model configurations
 MODEL_CONFIGS = {
+    "qwen": {
+        "name": "qwen/qwen3.8-27b",
+        "display_name": "Qwen 3.8 27B",
+        "provider": "Alibaba Qwen",
+        "max_tokens": 4000,
+        "temperature": 0.7,
+        "description": "Primary paid model (live-verified 2026-08-18)"
+    },
+    "nemotron": {
+        "name": "nvidia/nemotron-3.5-lightning:free",
+        "display_name": "Nemotron 3.5 Lightning (Free)",
+        "provider": "NVIDIA",
+        "max_tokens": 4000,
+        "temperature": 0.7,
+        "description": "Free tier; subject to account data-policy guardrails"
+    },
+    "dots": {
+        "name": "dots-studio/dots-3-note-preview:free",
+        "display_name": "Dots 3 Note Preview (Free)",
+        "provider": "Dots Studio",
+        "max_tokens": 4000,
+        "temperature": 0.7,
+        "description": "Free tier; subject to account data-policy guardrails"
+    },
     "kimi": {
         "name": "moonshotai/kimi-k2",
-        "display_name": "Kimi K2 (Free)",
+        "display_name": "Kimi K2",
         "provider": "Moonshot AI",
         "max_tokens": 4000,
         "temperature": 0.7,
-        "description": "Free tier of Moonshot AI's Kimi K2 model"
+        "description": "Backstop model (live-verified 2026-08-18)"
     },
-    "deepseek": {
-        "name": "tngtech/deepseek-r1t2-chimera", 
-        "display_name": "DeepSeek R1T2 Chimera (Free)",
-        "provider": "TNG Tech",
-        "max_tokens": 4000,
-        "temperature": 0.7,
-        "description": "Free tier of DeepSeek's R1T2 Chimera model"
-    }
 }
 
 # API Configuration
@@ -66,7 +84,7 @@ def get_model_name(model_key: Optional[str] = None) -> str:
         model_key: Model key (e.g., 'kimi', 'deepseek'). If None, uses DEFAULT_MODEL.
         
     Returns:
-        Full model name (e.g., 'moonshotai/kimi-k2:free')
+        Full model name (e.g., 'qwen/qwen3.8-27b')
     """
     if model_key is None:
         model_key = DEFAULT_MODEL

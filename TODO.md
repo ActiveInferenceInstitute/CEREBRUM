@@ -260,6 +260,29 @@ opt-in via `-m live` adds 1 more). Live key validated `moonshotai/kimi-k2`.
       nominative tagging. Added `src/lexicon/tests/test_integration_live.py`
       (`live` marker, skipped without OPENROUTER_API_KEY).
 
+### Third pass — 2026-08-18 (model chain + client fallback)
+
+- [x] **OpenRouter client model-fallback chain** — `OpenRouterConfig` gained
+      `fallback_models`; `chat_completion` now tries the requested model,
+      then each fallback, when the model 404s (dead slug / no endpoints /
+      account guardrail restriction — a permanent condition for that model,
+      so a retry cannot help). Live-verified: dead default → both free
+      models guardrail-blocked → qwen → success (PONG, stats show 4 requests,
+      1 success).
+- [x] **Model roster updated to the 2026-08 operator guidance** — primary
+      `qwen/qwen3.8-27b` (live-verified), free-tier
+      `nvidia/nemotron-3.5-lightning:free` and
+      `dots-studio/dots-3-note-preview:free` as per-task primaries
+      (both currently guardrail-blocked on this account; the fallback chain
+      routes around them), `moonshotai/kimi-k2` as backstop. Applied across
+      `src/llm/config.py`, `LexiconConfig` (incl. new
+      `client_fallback_models`), engine wiring, CLI defaults, and examples.
+      Stale static `get_available_models()` list refreshed.
+- [x] Live engine E2E re-verified with the new chain (case tagging: Paris →
+      LOCATIVE, Oxford → ABLATIVE). Live integration test loosened to assert
+      the case-tagging mechanism (any populated slot) rather than a specific
+      slot, which is model-dependent.
+
 ### Deferred (unchanged)
 
 - ~~Lexicon component-architecture full unification~~ — **completed** in the
