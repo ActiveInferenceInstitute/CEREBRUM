@@ -268,21 +268,6 @@ def infer_meaning(structure: StructureType, context: ContextType) -> MeaningType
     # Might return a probability distribution over meanings P(Meaning | Structure, Context)
     raise NotImplementedError("Meaning inference logic not implemented.")
 
-def update_belief(current_belief: BeliefStateType, observation: ObservationType) -> BeliefStateType:
-    """Updates a belief state based on a new linguistic observation.
-
-    This is central to the Bayesian aspect. Could represent:
-    - Updating a probabilistic grammar.
-    - Updating a model of speaker intentions.
-    - Updating a world model based on communicated information.
-    """
-    print(f"Updating belief {current_belief} based on observation {observation}")
-    # Requires a defined BeliefStateType and a probabilistic update rule (e.g., Bayes' theorem)
-    # Example using a hypothetical Bayesian library:
-    # posterior = bbn.update(prior=current_belief, likelihood=calculate_likelihood(observation), evidence=observation)
-    # return posterior
-    raise NotImplementedError("Belief update logic (Bayesian or otherwise) not implemented.")
-
 def resolve_reference(discourse_model: DiscourseModelType, referring_expression: ReferenceType) -> Any:
     """Resolves a referring expression (e.g., pronoun, definite description) 
        within the current discourse model.
