@@ -36,3 +36,14 @@ uv pip install -e ".[all]"      # Install all optional dependencies
 
 - Refer to `CONTRIBUTING.md` for detailed guidelines on how to contribute.
 - Use `TODO.md` to track or view the status of ongoing major tasks.
+
+## Documentation Entry Points
+
+- **Framework concepts (cold start):** `docs/README.md` — core spec, how-it-works,
+  getting started, case system, and per-audience contributing guides.
+- **Core mechanics:** `docs/cerebrum_core_spec.md` (compliance spec) and
+  `docs/how_it_works.md` (architecture overview); architecture diagram source at
+  `docs/diagrams/project_architecture.mermaid`.
+- **Language case mappings:** `docs/language_implementations.md` and `docs/languages/`.
+- **Agent orientation:** this file (`AGENTS.md`) plus `CLAUDE.md` (commands and
+  architecture notes). Read `docs/README.md` before extending the conceptual surface.

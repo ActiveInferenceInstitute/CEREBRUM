@@ -14,7 +14,7 @@ uv pip install -e ".[all]"       # all optional dependencies including lexicon a
 pytest
 
 # Run a single test file
-pytest tests/test_case_manager.py -v
+pytest tests/cases/test_case_manager.py -v
 
 # Run tests by marker
 pytest -m unit
