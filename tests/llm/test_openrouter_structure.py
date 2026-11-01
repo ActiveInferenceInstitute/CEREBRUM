@@ -12,8 +12,15 @@ import inspect
 from pathlib import Path
 from datetime import datetime
 
+import pytest
+
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+try:  # optional llm extra (openai, ...) is absent in the default dev install
+    from src.llm.OpenRouter.openrouter import OpenRouterClient  # noqa: F401
+except ImportError as exc:
+    pytest.skip(f"llm extra not installed: {exc}", allow_module_level=True)
 
 def test_imports():
     """Test that all OpenRouter modules can be imported."""

@@ -11,7 +11,10 @@ Run with:
 import os
 import pytest
 
-from src.llm.OpenRouter.openrouter import OpenRouterClient, OpenRouterConfig
+try:
+    from src.llm.OpenRouter.openrouter import OpenRouterClient, OpenRouterConfig
+except ImportError as exc:  # optional llm extra (requests, openai, ...) is absent
+    pytest.skip(f"llm extra not installed: {exc}", allow_module_level=True)
 
 
 class TestOpenRouterClientContract:

@@ -13,15 +13,18 @@ Covers, with real logic and no mocks:
 
 import pytest
 
-from src.lexicon.core.config import LexiconConfig
-from src.lexicon.declension.structured_case_determiner import StructuredCaseDeterminer
-from src.lexicon.graph.assembler import GraphAssembler
-from src.lexicon.nlp.entity_deduplicator import EntityDeduplicator
-from src.lexicon.nlp.coreference_resolver import CoreferenceResolver
-from src.lexicon.nlp.preprocessor import ProcessedSegment
-from src.lexicon.core.session import create_batch_input_subdirectories
-from src.lexicon.ingest.file_watcher import FileWatcher
-from src.lexicon.paraphrase import cache as paraphrase_cache
+try:
+    from src.lexicon.core.config import LexiconConfig
+    from src.lexicon.declension.structured_case_determiner import StructuredCaseDeterminer
+    from src.lexicon.graph.assembler import GraphAssembler
+    from src.lexicon.nlp.entity_deduplicator import EntityDeduplicator
+    from src.lexicon.nlp.coreference_resolver import CoreferenceResolver
+    from src.lexicon.nlp.preprocessor import ProcessedSegment
+    from src.lexicon.core.session import create_batch_input_subdirectories
+    from src.lexicon.ingest.file_watcher import FileWatcher
+    from src.lexicon.paraphrase import cache as paraphrase_cache
+except ImportError as exc:  # optional lexicon extra (python-dotenv, spacy, ...) is absent
+    pytest.skip(f"lexicon extra not installed: {exc}", allow_module_level=True)
 
 
 @pytest.fixture

@@ -6,10 +6,13 @@ Tests CID generation, validation, and CaseRules with real logic.
 
 import pytest
 
-from src.lexicon.graph.cid_generator import (
-    generate_cid, generate_timestamp_id, generate_uuid, validate_cid,
-)
-from src.lexicon.declension.rules import CaseRules
+try:
+    from src.lexicon.graph.cid_generator import (
+        generate_cid, generate_timestamp_id, generate_uuid, validate_cid,
+    )
+    from src.lexicon.declension.rules import CaseRules
+except ImportError as exc:  # optional lexicon extra (python-dotenv, spacy, ...) is absent
+    pytest.skip(f"lexicon extra not installed: {exc}", allow_module_level=True)
 
 
 # ─── CID Generator ───────────────────────────────────────────────────

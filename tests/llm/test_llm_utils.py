@@ -6,7 +6,10 @@ Tests all 12 LLMUtils methods with real logic — no mocks.
 
 import pytest
 
-from src.llm.llm_utils import LLMUtils
+try:
+    from src.llm.llm_utils import LLMUtils
+except ImportError as exc:  # optional llm extra (requests, openai, ...) is absent
+    pytest.skip(f"llm extra not installed: {exc}", allow_module_level=True)
 
 
 @pytest.fixture

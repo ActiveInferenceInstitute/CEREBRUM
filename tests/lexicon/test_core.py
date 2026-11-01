@@ -10,26 +10,29 @@ import logging
 
 import pytest
 
-from src.lexicon.core.config import LexiconConfig, get_default_config
-from src.lexicon.core.exceptions import (
-    APIError,
-    AuthenticationError,
-    ConfigurationError,
-    GraphError,
-    InputError,
-    LexiconError,
-    ModelError,
-    ParsingError,
-    ProcessingError,
-    RateLimitError,
-    StorageError,
-)
-from src.lexicon.core.logging import (
-    ContextAdapter,
-    LoggingTimer,
-    StructuredLogFormatter,
-    get_logger,
-)
+try:
+    from src.lexicon.core.config import LexiconConfig, get_default_config
+    from src.lexicon.core.exceptions import (
+        APIError,
+        AuthenticationError,
+        ConfigurationError,
+        GraphError,
+        InputError,
+        LexiconError,
+        ModelError,
+        ParsingError,
+        ProcessingError,
+        RateLimitError,
+        StorageError,
+    )
+    from src.lexicon.core.logging import (
+        ContextAdapter,
+        LoggingTimer,
+        StructuredLogFormatter,
+        get_logger,
+    )
+except ImportError as exc:  # optional lexicon extra (python-dotenv, spacy, ...) is absent
+    pytest.skip(f"lexicon extra not installed: {exc}", allow_module_level=True)
 
 # ─── Config ───────────────────────────────────────────────────────────
 

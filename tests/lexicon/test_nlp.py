@@ -6,8 +6,11 @@ Tests SentenceSplitter using rule-based splitting (no spaCy required).
 
 import pytest
 
-from src.lexicon.core.config import LexiconConfig
-from src.lexicon.nlp.sentence_splitter import SentenceSplitter
+try:
+    from src.lexicon.core.config import LexiconConfig
+    from src.lexicon.nlp.sentence_splitter import SentenceSplitter
+except ImportError as exc:  # optional lexicon extra (python-dotenv, spacy, ...) is absent
+    pytest.skip(f"lexicon extra not installed: {exc}", allow_module_level=True)
 
 
 @pytest.fixture
