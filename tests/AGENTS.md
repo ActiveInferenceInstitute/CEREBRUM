@@ -8,7 +8,7 @@ Automated verification suite for every CEREBRUM `src/` module. Test subdirectori
 
 | Metric | Value |
 |--------|-------|
-| Test files | 68 (66 in `tests/` + 2 in `beyond_cerebrum/src/tests/`) |
+| Test files | 67 under `tests/` + 4 under `beyond_cerebrum/src/tests/` (counted with `git ls-files 'tests/**/test_*.py'` and `git ls-files 'beyond_cerebrum/**/test_*.py'`) |
 | Collected tests | measured by the current pytest run |
 | Passing | measured by the current pytest run |
 | Skipped | measured by the current pytest run; live tests are opt-in via `@pytest.mark.live` |
