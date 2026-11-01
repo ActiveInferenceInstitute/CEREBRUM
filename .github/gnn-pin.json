@@ -1,0 +1,14 @@
+{
+  "schema": "cerebrum-gnn-pin-v1",
+  "upstream_repository": "https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation.git",
+  "tag": "v5.0.3",
+  "revision": "8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1",
+  "version": "5.0.3",
+  "pinned_on": "2026-11-01",
+  "spec_directory": "models",
+  "spec_files": [
+    "models/case_conditioned_active_inference.gnn.md"
+  ],
+  "sibling_checkout_directory": "Generalized_Notation_Notation",
+  "claim_boundary": "framework-structure-only"
+}
