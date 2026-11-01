@@ -17,6 +17,7 @@ This documentation is organized as follows:
 - **[Language Implementations](language_implementations.md)**: Guidelines for implementing CEREBRUM in different programming languages
 - **[Model Examples](model_examples.md)**: Examples of CEREBRUM models in various domains
 - **[Active Inference Integration](active_inference_integration.md)**: Details on how CEREBRUM integrates with Active Inference principles
+- **[GNN model specification](../models/README.md)**: The Generalized Notation Notation source of truth for the framework's discrete generative model, its runtime axis orders, the case precision contract, and the pinned upstream revision
 - **[Implementation Roadmap](implementation_roadmap.md)**: Phased development plan for implementing the framework
 - **[Language Nuance Handling](language_nuance_handling.md)**: Explanation of how CEREBRUM handles linguistic nuances
 

@@ -48,6 +48,7 @@ The CEREBRUM repository is organized into the following structure:
 | `/src/transformations` | Model transformation and adaptation algorithms |
 | `/src/cases` | Case definition and management functionalities |
 | `/src/examples` | Example implementations and demonstrations |
+| `/models` | Generalized Notation Notation specifications for the generative models, with the loader/drift guard in `src/core/gnn.py` |
 | `/docs` | Documentation including specifications, guides, and discussions |
 | `/docs/examples` | Detailed documentation for example models |
 | `/docs/languages` | Language-specific implementation guidelines |
@@ -125,6 +126,39 @@ For more detailed information about the paper building process, please see `pape
 ## Use Cases
 
 Use-case mindmap (Mermaid source): [use_cases_mindmap.mermaid](docs/diagrams/use_cases_mindmap.mermaid)
+
+## Generative model specification
+
+The framework's discrete generative model is specified in Generalized Notation
+Notation (GNN) at
+[`models/case_conditioned_active_inference.gnn.md`](models/case_conditioned_active_inference.gnn.md).
+[`models/README.md`](models/README.md) records the declared structure (one
+hidden-state factor, one identity-likelihood modality, three controls, the
+runtime `A[state, observation]` and `B[previous_state, action, next_state]`
+storage orders, and the eight-case precision-focus contract), the loader in
+`src/core/gnn.py`, and the pinned upstream revision (GNN v5.0.3, commit
+`8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1`, also in
+[`.github/gnn-pin.json`](.github/gnn-pin.json)). `tests/core/test_gnn_spec.py`
+checks the specification against the parameters and case configurations the
+framework uses, and re-validates it with the pinned upstream parser when the GNN
+checkout is available.
+
+For new model work, start from the upstream [framework integration
+guide](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1/docs/gnn/integration/framework_integration_guide.md)
+and the [downstream adoption
+guide](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/1f3abb56e25886dfa6ddc49c76af7b723941485a/docs/gnn/integration/downstream_adoption.md).
+
+Related Active Inference Institute repositories that already declare models this
+way:
+
+- [active_inference_language_model](https://github.com/ActiveInferenceInstitute/active_inference_language_model)
+  — case-level specifications such as `gnn/models/L4_case.gnn.md`, plus mutation
+  variants that show how a declared model degrades.
+- [ActiveBlockference](https://github.com/ActiveInferenceInstitute/ActiveBlockference)
+  — a control model validated against the same GNN v5.0.3 tag.
+- [active_fractal_rabbit](https://github.com/ActiveInferenceInstitute/active_fractal_rabbit)
+  — the reference layout this repository follows: `models/`, a loader module,
+  and `.github/gnn-pin.json`.
 
 ## Citation
 

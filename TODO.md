@@ -2,7 +2,7 @@
 
 > **Status**: Active
 > **Owner**: Daniel Ari Friedman
-> **Last reviewed**: 2026-08-18
+> **Last reviewed**: 2026-11-01
 
 This is the authoritative project backlog. It records completed work and the
 remaining **Major**-class items from the hostile red-team review pass of
@@ -98,6 +98,36 @@ all green (442 passed in the combined post-isort check).
 - [x] README version + BibTeX → 1.5.0; test-count claims in AGENTS.md files updated.
 - [x] Paper title page → "Version 1.5.0 (2025-04-16)".
 - [x] TODO.md created (this file) as the authoritative backlog.
+
+### GNN specification, verification gate (2026-11-01)
+- [x] **Generalized Notation Notation specification for the discrete model** —
+      `models/case_conditioned_active_inference.gnn.md` declares the hidden-state
+      factor, observation modality, identity likelihood, three controls, identity
+      transition, uniform prior, the runtime axis orders
+      (`A[state, observation]`, `B[previous_state, action, next_state]`), and the
+      eight-case precision-focus contract. `src/core/gnn.py` parses it without
+      upstream dependencies; `tests/core/test_gnn_spec.py` compares it with the
+      `InsectModel` parameters and the `ActiveInferenceModel` case
+      configurations, checks the stored orientations with asymmetric matrices,
+      verifies each case transformation rescales exactly the declared matrices,
+      and re-validates the file with the pinned upstream parser (`--strict`) from
+      a clean export of the pinned revision. Pin: GNN v5.0.3,
+      `8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1`, recorded in
+      `.github/gnn-pin.json`.
+- [x] **Documented test gate collects cleanly on a `.[dev]` install** — seven test
+      modules (`tests/lexicon/*`, `tests/llm/test_llm_utils.py`,
+      `tests/llm/test_openrouter_live.py`, `tests/llm/test_openrouter_structure.py`)
+      import optional extras (`python-dotenv`, `requests`, `openai`) that the
+      documented `uv pip install -e ".[dev]"` command does not install, so the CI
+      job failed with six collection errors on every observed run between
+      2026-08-03 and 2026-09-01; with collection repaired, the structure tests
+      then failed individually because they import inside test functions. Each
+      suite now skips with an explicit reason naming the missing dependency
+      instead of erroring, `pytest --collect-only` collects the full suite, and
+      the suites run normally when the extras are installed.
+- [x] **Metadata and signposting** — the package classifiers list Python 3.13,
+      which the CI matrix already tests, and the README points to related Active
+      Inference Institute repositories that already declare models in GNN.
 
 ---
 

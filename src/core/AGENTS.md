@@ -11,6 +11,7 @@ core/
 ├── __init__.py          # Module exports
 ├── model.py             # Base Model and Case enum
 ├── active_inference.py  # ActiveInferenceModel
+├── gnn.py               # GNN specification loader and conformance checks
 ├── neural_network.py    # NeuralNetworkModel
 └── model_registry.py    # ModelRegistry and utilities
 ```
@@ -41,6 +42,7 @@ from src.core import (
 | `Model` | Base class for all models | `update()`, `get_state()`, `set_parameters()`, `predict()` |
 | `Case` | Enum with 8 linguistic cases | `NOMINATIVE`, `ACCUSATIVE`, `GENITIVE`, etc. |
 | `ActiveInferenceModel` | Active inference implementation | `update_posterior()`, `get_optimal_action()`, `free_energy()` |
+| `gnn` | GNN specification loader and conformance checks | `load_spec()`, `structural_issues()`, `parameter_issues()`, `case_focus_issues()`, `conformance_issues()` |
 | `NeuralNetworkModel` | Neural network model | `forward()`, `backward()`, `train()`, `evaluate()` |
 | `ModelRegistry` | Model lifecycle management | `register_model()`, `get_model()`, `list_models()` |
 

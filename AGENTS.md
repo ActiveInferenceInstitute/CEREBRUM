@@ -8,6 +8,7 @@ This repository contains the CEREBRUM (Case-Enabled Reasoning Engine with Bayesi
 
 - **`src/`**: The core source code for the framework. This is where the primary logic resides.
 - **`tests/`**: Automated test suite; run `uv run python -m pytest` for the current count, covering core, cases, models, transformations, utils, and visualization.
+- **`models/`**: Generalized Notation Notation specifications for the generative models, with the loader in `src/core/gnn.py` and the drift guard in `tests/core/test_gnn_spec.py`; see `models/README.md` for the pinned upstream revision.
 - **`paper/`**: Contains resources for generating the academic paper associated with this project, including LaTeX components, figures, and build scripts.
 - **`docs/`**: Documentation for the project, including guides, specifications, and educational materials.
 - **`scripts/`**: One-off or orchestration scripts that may not fit into the core library.
@@ -44,6 +45,8 @@ uv pip install -e ".[all]"      # Install all optional dependencies
 - **Core mechanics:** `docs/cerebrum_core_spec.md` (compliance spec) and
   `docs/how_it_works.md` (architecture overview); architecture diagram source at
   `docs/diagrams/project_architecture.mermaid`.
+- **Generative model specification:** `models/README.md` (GNN source of truth,
+  loader, drift guard, upstream pin).
 - **Language case mappings:** `docs/language_implementations.md` and `docs/languages/`.
 - **Agent orientation:** this file (`AGENTS.md`) plus `CLAUDE.md` (commands and
   architecture notes). Read `docs/README.md` before extending the conceptual surface.

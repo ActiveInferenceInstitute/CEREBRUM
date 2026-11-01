@@ -16,6 +16,9 @@ pytest
 # Run a single test file
 pytest tests/cases/test_case_manager.py -v
 
+# GNN specification drift guard (model structure vs. implementation)
+pytest tests/core/test_gnn_spec.py -v
+
 # Run tests by marker
 pytest -m unit
 pytest -m integration
@@ -53,6 +56,7 @@ src/models/base.py: Model (simplified re-export, re-exports Case from core)
 
 - **`src/core/model.py`** — `Case` enum (8 cases: NOM/ACC/GEN/DAT/INS/LOC/ABL/VOC) and base `Model` class with case-switching logic. Changing `model.case` triggers `_apply_case_transformation()`.
 - **`src/core/active_inference.py`** — `ActiveInferenceModel` extending `Model` with variational free energy minimization, precision-weighted message passing, and belief updating via Bayesian inference.
+- **`src/core/gnn.py`** — loads the Generalized Notation Notation specification in `models/` and reports conformance against the model parameters and case configurations; see `models/README.md`.
 - **`src/cases/`** — One file per case (e.g., `nominative.py`, `accusative.py`). `case_manager.py` orchestrates transitions. Cases define how the model behaves when in that role.
 - **`src/transformations/case_transformations.py`** — `transform_case(model, target_case)` and `revert_case(model)` functions. `animal_transformations.py` has animal-specific variants.
 - **`src/models/insect/`** — Domain-specific insect cognitive models (`base.py`, `behaviors.py`, `neural_structures.py`, `species.py`) built on `ActiveInferenceModel`. Uses `BehavioralState` enum and structured `SensoryInput`/`Action` dataclasses.

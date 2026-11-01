@@ -2,6 +2,14 @@
 
 This document details how the CEREBRUM framework integrates with Active Inference principles, providing a mathematically rigorous foundation for case transformations and model interactions.
 
+The implemented discrete generative model — factors, modalities, the stored
+`A`/`B` orientations, and the case-to-precision contract described below — is
+specified in Generalized Notation Notation at
+[`../models/case_conditioned_active_inference.gnn.md`](../models/case_conditioned_active_inference.gnn.md);
+[`../models/README.md`](../models/README.md) records the loader, the drift
+guard, and the pinned upstream revision. The equations below are the conceptual
+framework; the GNN file and its drift guard are the checked contract.
+
 ## 1. Free Energy Minimization in Case Transformations
 
 Case transformations in CEREBRUM are formally grounded in the Free Energy Principle, treating each transformation as an inference process.

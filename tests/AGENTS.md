@@ -38,6 +38,7 @@ tests/
 │   ├── test_active_inference_coverage.py #  ActiveInference coverage boost
 │   ├── test_active_inference_extended.py #  Extended ActiveInference tests
 │   ├── test_active_inference_pomdp.py   #   ActiveInferenceModel POMDP tests
+│   ├── test_gnn_spec.py                 #   GNN spec drift guard + pinned upstream validation
 │   ├── test_model.py                    #   Model & Case tests
 │   ├── test_model_properties.py         #   Property-based tests (hypothesis)
 │   ├── test_model_registry.py           #   ModelRegistry tests
@@ -55,7 +56,7 @@ tests/
 │   └── test_nlp.py                      #   SentenceSplitter
 ├── llm/                                 # ← mirrors src/llm/
 │   ├── test_llm_utils.py               #   LLM utility tests
-│   ├── test_openrouter_functionality.py #   OpenRouter function tests
+│   ├── manual_openrouter_functionality.py # Manual OpenRouter function checks
 │   ├── test_openrouter_live.py          #   OpenRouter live tests (@pytest.mark.live)
 │   └── test_openrouter_structure.py     #   OpenRouter structure tests
 ├── models/                              # ← mirrors src/models/
