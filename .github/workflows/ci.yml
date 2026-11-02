@@ -25,6 +25,9 @@ jobs:
         uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           python-version: ${{ matrix.python-version }}
+          # v5 created and activated the venv implicitly; from v6 on that is
+          # opt-in, and the next step's `uv pip install -e` needs it active.
+          activate-environment: true
 
       - name: Install dependencies
         run: uv pip install -e ".[${{ matrix.extras || 'dev' }}]"
