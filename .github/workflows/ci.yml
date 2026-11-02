@@ -7,12 +7,17 @@ on:
 
 jobs:
   test:
-    name: pytest (Python ${{ matrix.python-version }})
+    name: pytest (Python ${{ matrix.python-version }})${{ matrix.extras && ' + llm extra' || '' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
+        include:
+          # One leg installs the light `llm` extra so the OpenRouter contract tests
+          # run instead of skipping. The heavier `lexicon` extra stays out of CI.
+          - python-version: "3.13"
+            extras: "dev,llm"
     steps:
       - uses: actions/checkout@v4
 
@@ -22,7 +27,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv pip install -e ".[dev]"
+        run: uv pip install -e ".[${{ matrix.extras || 'dev' }}]"
 
       - name: Run test suite
         run: uv run python -m pytest -q --cov=src --cov-report=term-missing

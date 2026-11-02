@@ -57,7 +57,7 @@ tests/
 ├── llm/                                 # ← mirrors src/llm/
 │   ├── test_llm_utils.py               #   LLM utility tests
 │   ├── manual_openrouter_functionality.py # Manual OpenRouter function checks
-│   ├── test_openrouter_live.py          #   OpenRouter live tests (@pytest.mark.live)
+│   ├── test_openrouter_contract.py      #   Offline OpenRouter contract tests (needs the llm extra)
 │   └── test_openrouter_structure.py     #   OpenRouter structure tests
 ├── models/                              # ← mirrors src/models/
 │   ├── test_insect_base_extended.py     #   InsectModel & ActiveInference extended
@@ -125,7 +125,7 @@ uv run python -m pytest tests/analysis/ -v
 # With coverage
 python -m pytest --cov=src --cov-report=html
 
-# Live API tests (opt-in, requires OPENROUTER_API_KEY)
+# Live API tests (opt-in: deselected by default via `-m "not live"`, needs OPENROUTER_API_KEY)
 OPENROUTER_API_KEY=sk-or-... python -m pytest -m live -v
 ```
 

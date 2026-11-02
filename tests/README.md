@@ -2,7 +2,7 @@
 
 This directory contains the test suite for CEREBRUM, organized into subfolders that mirror `src/` modules.
 
-Run `uv run python -m pytest` for the current suite count and result. Live-API tests are opt-in via `@pytest.mark.live`.
+Run `uv run python -m pytest` for the current suite count and result. Live-API tests carry `@pytest.mark.live` and are deselected by default (`-m "not live"` in `pytest.ini`); opt in with `-m live`.
 
 ## Quick Start
 
