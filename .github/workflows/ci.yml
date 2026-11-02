@@ -19,12 +19,15 @@ jobs:
           - python-version: "3.13"
             extras: "dev,llm"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           python-version: ${{ matrix.python-version }}
+          # v5 created and activated the venv implicitly; from v6 on that is
+          # opt-in, and the next step's `uv pip install -e` needs it active.
+          activate-environment: true
 
       - name: Install dependencies
         run: uv pip install -e ".[${{ matrix.extras || 'dev' }}]"
