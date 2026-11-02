@@ -116,7 +116,7 @@ all green (442 passed in the combined post-isort check).
       `.github/gnn-pin.json`.
 - [x] **Documented test gate collects cleanly on a `.[dev]` install** — seven test
       modules (`tests/lexicon/*`, `tests/llm/test_llm_utils.py`,
-      `tests/llm/test_openrouter_live.py`, `tests/llm/test_openrouter_structure.py`)
+      `tests/llm/test_openrouter_contract.py`, `tests/llm/test_openrouter_structure.py`)
       import optional extras (`python-dotenv`, `requests`, `openai`) that the
       documented `uv pip install -e ".[dev]"` command does not install, so the CI
       job failed with six collection errors on every observed run between
@@ -124,7 +124,10 @@ all green (442 passed in the combined post-isort check).
       then failed individually because they import inside test functions. Each
       suite now skips with an explicit reason naming the missing dependency
       instead of erroring, `pytest --collect-only` collects the full suite, and
-      the suites run normally when the extras are installed.
+      the suites run normally when the extras are installed. The Python 3.13 CI
+      leg now installs the light `llm` extra, so the OpenRouter contract tests run
+      there instead of skipping; `live`-marked tests stay out of the default run
+      (`-m "not live"` in `pytest.ini`).
 - [x] **Metadata and signposting** — the package classifiers list Python 3.13,
       which the CI matrix already tests, and the README points to related Active
       Inference Institute repositories that already declare models in GNN.

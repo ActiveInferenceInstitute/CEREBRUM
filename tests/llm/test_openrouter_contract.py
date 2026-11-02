@@ -1,11 +1,15 @@
 """
-Tests for src/llm/OpenRouter/openrouter.py — live API test.
+Offline contract tests for src/llm/OpenRouter/openrouter.py.
 
-Tests a real OpenRouter API call using the OPENROUTER_API_KEY environment variable.
-Marked with @pytest.mark.live so they only run when opted in.
+These tests construct clients and configs with a placeholder key (``test-key``) and
+assert the missing-key rejection path, so they need no API key and make no network
+calls. They require the optional ``llm`` extra and skip when it is absent:
 
-Run with:
-    OPENROUTER_API_KEY=sk-or-... python -m pytest tests/llm/test_openrouter_live.py -v -m live
+    uv pip install -e ".[dev,llm]"
+    uv run python -m pytest tests/llm/test_openrouter_contract.py -v
+
+A test that talks to the live service belongs behind ``@pytest.mark.live``; the
+default run deselects that marker (see ``pytest.ini``), so opt in with ``-m live``.
 """
 
 import os
