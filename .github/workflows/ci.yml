@@ -34,3 +34,51 @@ jobs:
 
       - name: Run test suite
         run: uv run python -m pytest -q --cov=src --cov-report=term-missing
+
+  gnn-conformance:
+    # Validates models/case_conditioned_active_inference.gnn.md with the upstream
+    # parser revision pinned in .github/gnn-pin.json. The pinned revision is
+    # fetched from the public repository at the recorded SHA into its own
+    # runtime; tests/core/test_gnn_spec.py fails (never skips) when the
+    # explicitly selected checkout is missing or unusable, so the pin is
+    # checked here rather than assumed.
+    name: gnn conformance (pinned v5.0.3)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          python-version: "3.12"
+          # v5 created and activated the venv implicitly; from v6 on that is
+          # opt-in, and the next step's `uv pip install -e` needs it active.
+          activate-environment: true
+
+      - name: Install dependencies
+        run: uv pip install -e ".[dev]"
+
+      - name: Provision the pinned GNN parser runtime
+        env:
+          GNN_CHECKOUT: ${{ runner.temp }}/gnn
+        run: |
+          REVISION=$(python -c "import json; print(json.load(open('.github/gnn-pin.json'))['revision'])")
+          TAG=$(python -c "import json; print(json.load(open('.github/gnn-pin.json'))['tag'])")
+          git init --quiet "$GNN_CHECKOUT"
+          git -C "$GNN_CHECKOUT" remote add origin \
+            https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation.git
+          # A pin that no longer resolves upstream fails here rather than skipping.
+          git -C "$GNN_CHECKOUT" fetch --depth 1 origin "$REVISION" "refs/tags/$TAG:refs/tags/$TAG"
+          git -C "$GNN_CHECKOUT" checkout --quiet --detach "$REVISION"
+          uv venv --python 3.12 --no-project "$GNN_CHECKOUT/.venv"
+          # The pinned parser CLI imports numpy, defusedxml and psutil; a missing
+          # dependency fails the run loudly instead of degrading to a skip.
+          uv pip install --python "$GNN_CHECKOUT/.venv/bin/python" numpy defusedxml psutil
+
+      - name: Run the pinned-upstream conformance tests
+        env:
+          GNN_CHECKOUT: ${{ runner.temp }}/gnn
+        # The activated environment from the install step, not `uv run`: the
+        # point of the job is to exercise the environment it just built.
+        run: python -m pytest tests/core/test_gnn_spec.py -q
