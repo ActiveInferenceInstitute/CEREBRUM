@@ -47,7 +47,7 @@ clean export of the pinned revision (`git archive <revision> src/gnn`) with the
 GNN checkout's interpreter, so in-progress edits in a sibling checkout cannot
 contaminate the result; they skip with an explicit reason when no checkout was
 selected, and fail when `GNN_CHECKOUT` selects a missing or unusable one. CI
-runs this file in the `gnn conformance (pinned v5.0.3)` job, which fetches the
+runs this file in the `gnn conformance (pinned)` job, which fetches the
 pinned revision from the public upstream repository and provisions its
 interpreter, so the pin is re-checked on every push and pull request.
 
