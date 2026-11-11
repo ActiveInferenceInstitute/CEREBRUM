@@ -27,6 +27,18 @@ This documentation is organized as follows:
 - **[Research Contributions](contributing_research.md)**: Guide for researchers and academic contributors
 - **[Documentation Contributions](contributing_documentation.md)**: Guide for documentation and educational content contributors
 
+### Subdirectories
+
+Each subdirectory has its own index; start there for the full listings.
+
+- **[Diagrams](diagrams/README.md)**: Mermaid diagram sources, templates, and the styling guide
+- **[Dialogs](dialogs/README.md)**: Narrative dialog examples illustrating the case system
+- **[Discussions](discussions/README.md)**: Archived community discussion notes
+- **[Examples](examples/README.md)**: Detailed example playbooks
+- **[Insects](insects/README.md)**: Insect cognition case studies and implementation notes
+- **[Languages](languages/README.md)**: Natural- and programming-language case analyses
+- **[Speculative Design](speculative_design/README.md)**: Experimental design essays
+
 ## Core Concepts
 
 CEREBRUM is built around several key concepts:

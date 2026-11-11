@@ -8,7 +8,7 @@ This directory contains Mermaid diagram source files and related assets for CERE
 - **`generated/`**: Rendered diagram copies (`.mermaid`) produced by `scripts/render_diagrams.py`
 - **`templates/`**: Reusable diagram templates.
 - **`style-guide.md`**: Diagram styling conventions.
-- **`improvement_plan.md`**: Roadmap for diagram enhancements.
+- **[`improvement_plan.md`](improvement_plan.md)**: Roadmap for diagram enhancements.
 
 ## Usage
 

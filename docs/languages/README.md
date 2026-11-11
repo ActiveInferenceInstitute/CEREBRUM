@@ -12,6 +12,7 @@ This directory contains comprehensive documentation of case systems from natural
 - **Ancient Greek** [ancient_greek.md](ancient_greek.md) - Classical case system with philosophical foundations
 - **Latin** [latin.md](latin.md) - Comprehensive 6-case system with rich morphology
 - **Sanskrit** [sanskrit.md](sanskrit.md) - 8-case system with kāraka theory (66KB, most comprehensive)
+- **Hindi** [hindi.md](hindi.md) - Indo-Aryan split-ergative case marking
 - **Russian** [russian.md](russian.md) - 6-case system with complex declension patterns
 - **German** [german.md](german.md) - 4-case system with strong/weak declensions
 - **Polish** [polish.md](polish.md) - 7-case system with complex morphology
@@ -86,6 +87,14 @@ This directory contains comprehensive documentation of case systems from natural
 - **Serbian** [serbian.md](serbian.md) - South Slavic case system
 - **Interslavic** [interslavic.md](interslavic.md) - Constructed Slavic language
 - **Esperanto** [esperanto.md](esperanto.md) - Constructed international language
+
+#### Additional Analyses
+- **American Sign Language** [asl.md](asl.md) - Spatial-visual case expression
+- **Cherokee** [cherokee.md](cherokee.md) - Iroquoian polysynthetic case mapping
+- **Hawaiian** [hawaiian.md](hawaiian.md) - Polynesian particle-based case relations
+- **Mandarin** [mandarin.md](mandarin.md) - Analytic case functions without morphology
+- **Russian-English** [russian-english.md](russian-english.md) - Language-transfer evidence for case cognition
+- **Welsh** [welsh.md](welsh.md) - Celtic conjugated-preposition case marking
 
 ### Programming Languages (35+ languages)
 
