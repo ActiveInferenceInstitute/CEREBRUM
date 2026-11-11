@@ -5,6 +5,30 @@
 
 CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling
 
+## Status
+
+Actively maintained (v1.5.0). The offline unit suite runs and passes on a
+`uv pip install -e ".[dev]"` checkout; `pytest.ini` deselects the opt-in `live`
+network tests by default. The LEXICON and LLM subsystems additionally need
+`OPENROUTER_API_KEY` and network access, so their live paths are not exercised by
+the default run. Paper regeneration needs pandoc, XeLaTeX and Node with
+`mermaid-cli`; it is not part of CI.
+
+## Contents
+
+- [Overview](#overview)
+- [Project architecture](#project-architecture)
+- [Repository structure](#repository-structure)
+- [Implementation workflow](#implementation-workflow)
+- [Getting started](#getting-started)
+- [PDF documentation](#pdf-documentation)
+- [Generative model specification](#generative-model-specification)
+- [Documentation index](docs/README.md)
+- [Citation](#citation)
+- [License](#license)
+- [Contributing](#contributing)
+- [InstituteOS sidecar](#instituteos-sidecar)
+
 ## Repository
 
 **GitHub Repository:** [https://github.com/ActiveInferenceInstitute/CEREBRUM](https://github.com/ActiveInferenceInstitute/CEREBRUM)

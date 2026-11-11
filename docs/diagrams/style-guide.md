@@ -401,7 +401,7 @@ linkStyle feedback {
 - [Mermaid Documentation](https://mermaid-js.github.io/mermaid/)
 - [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
 - [CEREBRUM Project](https://github.com/ActiveInferenceInstitute/CEREBRUM)
-- [Template Library](../templates/)
+- [Template Library](templates/)
 
 ### Support
 - [GitHub Issues](https://github.com/ActiveInferenceInstitute/CEREBRUM/issues)

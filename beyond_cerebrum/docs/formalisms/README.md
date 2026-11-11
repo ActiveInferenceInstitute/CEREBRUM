@@ -7,8 +7,8 @@ This package defines the core data structures and theoretical foundations for re
 ## Submodules
 
 -   `types.py`: Defines base and composite linguistic types. See [Types Documentation](./types.md).
--   `structures.py`: Implements concrete structures like Trees, Graphs, Feature Structures. See [Structures Documentation](./structures.md).
--   `categories.py`: (Conceptual) Defines elements related to Category Theory. See [Category Theory Documentation](./categories.md).
+-   `structures.py`: Implements concrete structures like Trees, Graphs, Feature Structures. See [the source module](../../src/formalisms/structures.py).
+-   `categories.py`: (Conceptual) Defines elements related to Category Theory. See [the source module](../../src/formalisms/categories.py).
 -   `theory/`: Contains detailed theoretical specifications (e.g., type system details).
 
 [Back to Main Docs](../README.md) 
