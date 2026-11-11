@@ -1,12 +1,13 @@
-# AII sidecar — InstituteOS metadata. Schema: instituteos.platform.aii_sidecar
+# AII sidecar — InstituteOS metadata. Schema: aii_platform.aii_sidecar
 meta:
-  updated: '2026-06-30'
+  sidecar_version: 1.2.1
+  updated: '2026-11-10'
 repo:
   name: CEREBRUM
   slug: cerebrum
   full_name: ActiveInferenceInstitute/CEREBRUM
-  description: 'CEREBRUM: Case-Enabled Reasoning Engine with Bayesian Representations
-    for Unified Modeling'
+  description: A unified modeling framework that integrates case-based reasoning with
+    Bayesian representations for developing, testing, and deploying cognitive models.
 institute:
   category: research-software
   maturity: released
@@ -18,6 +19,8 @@ ecosystem:
     note: Federated via the InstituteOS .aii manifest.
   - repo: ActiveInferenceInstitute/Active_Inference_Ontology
     note: Uses Active Inference Ontology terms.
+  - repo: ActiveInferenceInstitute/Generalized_Notation_Notation
+    note: Uses Generalized Notation Notation (GNN) for model specifications.
   links:
     github: https://github.com/ActiveInferenceInstitute/CEREBRUM
     website: https://www.activeinference.org
@@ -34,17 +37,34 @@ artifacts:
 - path: package.json
   kind: code
   description: Node package config.
+- path: AGENTS.md
+  kind: doc
+  description: Agent guidance.
+- path: LICENSE
+  kind: doc
+  description: License.
+- path: CITATION.cff
+  kind: citation
+  description: Machine-readable citation metadata.
+- path: tests
+  kind: test
+  description: Test suite.
+- path: docs
+  kind: doc
+  description: Documentation tree.
+- path: paper
+  kind: publication
+  description: Published paper artifacts.
 provenance:
   license: CC-BY-4.0
   citation:
     doi: 10.5281/zenodo.15170908.svg
+    text: Active Inference Institute — CEREBRUM.
 instituteos:
   tags:
   - cerebrum
-  - case
-  - enabled
-  - reasoning
-  - engine
+  - case-based-reasoning
+  - bayesian
   - python
 capabilities:
 - python-package
@@ -52,7 +72,16 @@ capabilities:
 - tested
 - documentation
 - dataset
+- ci
+- citation
 tasks:
   test:
     cmd: python -m pytest
     description: Run the test suite.
+docs:
+- README.md
+- AGENTS.md
+- docs/INTEGRATION.md
+- docs/README.md
+- docs/AGENTS.md
+schema: aii-sidecar/v1

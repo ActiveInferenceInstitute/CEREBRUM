@@ -5,8 +5,16 @@ on:
     branches: [main, master]
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   test:
+    timeout-minutes: 60
     name: pytest (Python ${{ matrix.python-version }})${{ matrix.extras && ' + llm extra' || '' }}
     runs-on: ubuntu-latest
     strategy:
@@ -37,6 +45,7 @@ jobs:
         run: uv run python -m pytest -q --cov=src --cov-report=term-missing
 
   gnn-conformance:
+    timeout-minutes: 60
     # Validates models/case_conditioned_active_inference.gnn.md with the upstream
     # parser revision pinned in .github/gnn-pin.json. The pinned revision is
     # fetched from the public repository at the recorded SHA into its own

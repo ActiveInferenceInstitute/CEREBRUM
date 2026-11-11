@@ -1,0 +1,11 @@
+{
+  "schema": "aii-readiness/v1",
+  "repo": "ActiveInferenceInstitute/CEREBRUM",
+  "tier": "python-library",
+  "standard_version": "1.0.0",
+  "baseline": {
+    "commit": "0b52f8b4594e025abdff13dda0bf1cc794a1eddb",
+    "measured_at": "2026-11-10"
+  },
+  "waivers": []
+}
