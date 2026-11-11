@@ -1,7 +1,7 @@
 # AII sidecar — InstituteOS metadata. Schema: aii_platform.aii_sidecar
 meta:
   sidecar_version: 1.2.1
-  updated: '2026-11-10'
+  updated: '2026-11-11'
 repo:
   name: CEREBRUM
   slug: cerebrum
@@ -58,7 +58,7 @@ artifacts:
 provenance:
   license: CC-BY-4.0
   citation:
-    doi: 10.5281/zenodo.15170908.svg
+    doi: 10.5281/zenodo.15170907
     text: Active Inference Institute — CEREBRUM.
 instituteos:
   tags:

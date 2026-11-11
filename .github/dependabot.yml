@@ -21,3 +21,15 @@ updates:
           - "*"
     cooldown:
       default-days: 7
+  # package.json only declares the Mermaid CLI used to render the paper's
+  # diagrams; keep it patched alongside the Python dependencies.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      npm-dependencies:
+        patterns:
+          - "*"
+    cooldown:
+      default-days: 7

@@ -93,6 +93,23 @@ uv pip install -e ".[dev]"
 uv pip install -e ".[all]"
 ```
 
+### Testing
+
+```bash
+# Full test suite (the default run deselects the opt-in `live` network tests)
+uv run python -m pytest
+
+# A single test file
+uv run python -m pytest tests/core/test_model.py -v
+
+# GNN specification drift guard
+uv run python -m pytest tests/core/test_gnn_spec.py -v
+
+# Run tests by marker
+uv run python -m pytest -m unit
+uv run python -m pytest -m integration
+```
+
 ## PDF Documentation
 
 The full documentation for CEREBRUM is available as a PDF file in the `paper/output/` directory, which is generated from the Markdown source files.
