@@ -17,10 +17,10 @@ gate: `./run.sh gnn` (see [../docs/RUN_GUIDE.md](../docs/RUN_GUIDE.md)).
 | Specification directory | `models` |
 | Specification files | `models/case_conditioned_active_inference.gnn.md` |
 
-`.github/gnn-pin.json` owns the upstream identity. The gate delegates pin,
-pointer and specification validation to `gnn.importers`; CEREBRUM's tests
-retain model/specification agreement, pinned-parser acceptance and exported
-runtime identity checks.
+`.github/gnn-pin.json` owns the upstream identity. While the pinned release
+predates `gnn.importers`, `scripts/gnn_checkout.py` is the local pin reader and
+checks pin/pointer drift. The runtime tests call that same reader and retain
+model agreement, pinned-parser acceptance and exported-runtime identity checks.
 
 ## What the job parses
 
@@ -29,12 +29,13 @@ runtime identity checks.
   `git checkout --detach <revision>`, then a private `uv venv --python 3.12`
   with the parser's runtime dependencies (`numpy`, `defusedxml`, `psutil`).
   A revision that no longer resolves upstream fails the arm instead of skipping.
-* The gate invokes the reader from that checkout's interpreter and `src/`:
+* Before provisioning or reusing a checkout, the script checks the pin's schema,
+  revision and declared specifications, and requires this pointer to name the
+  pin path, revision, workflow and job. The same drift check runs without network
+  or provisioning via:
 
   ```bash
-  PYTHONPATH=.gate/gnn/src .gate/gnn/.venv/bin/python -m gnn.importers check \
-      --repo . --require-pointer --workflow .github/workflows/ci.yml \
-      --job gnn-conformance
+  .venv/bin/python scripts/gnn_checkout.py --check
   ```
 
 * `tests/core/test_gnn_spec.py` loads
@@ -52,17 +53,16 @@ runtime identity checks.
 
 ## Migration blocker
 
-The pinned revision does not contain `src/gnn/importers.py`. The reader call
-therefore fails instead of substituting an unpinned implementation. The
-[GNN–FEP contract](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/5efd8b2922c678e99e754c9f1ec2a5bd63b62cc2/docs/workflows/gnn-fep.md)
-requires the reader and parser from the same pinned runtime.
+The pinned release does not contain `src/gnn/importers.py`. The updated
+[GNN–FEP prerequisite](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/d31c1768114098e91033ad2ad5a383e188c3cd67/docs/workflows/gnn-fep.md#prerequisite-the-reader-ships-in-a-revision-not-in-a-version-name)
+requires members in this state to retain their local reader and add pin/pointer
+drift checks, not call the unavailable shared module or vendor it. This gate
+implements that interim path; it does not claim the full shared-reader cutover.
 
-This migration cannot land until a reviewed upstream revision containing the
-reader is adopted, and clean-checkout provisioning can call its `read_pin`.
-`scripts/gnn_checkout.py` still has the bootstrap JSON read, and the preserved
-runtime-test fixture still reads the pin to select its clean export. These
-reads remain part of the blocker, not a completed migration. No schema or pin
-identity is changed here.
+Cutover waits for an upstream release containing the reader. The same reviewed
+change must advance this pin, remove the local reader, call `gnn.importers`
+from the new pinned runtime, and record the old and new revisions. The pin and
+schema are unchanged here; no unpinned bootstrap reader or parser overlay is used.
 
 The check covers the one selected specification. It is not a scan of every
 `*.gnn.md` in the tree, and it says nothing about behavioural or biological

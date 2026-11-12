@@ -1,14 +1,13 @@
 """GNN model agreement, pinned-parser acceptance and exported-runtime identity.
 
-Pin-shape assertions belong to ``gnn.importers`` in the gate's ``gnn`` arm.
-The clean-export checks remain independent coverage: they prove the parser
-accepts the specification and the imported runtime is the pinned version.
+Until the pinned release ships ``gnn.importers``, the local provisioner owns
+pin/pointer drift checks. Clean-export checks independently prove strict parser
+acceptance, actual tag resolution and pinned-runtime identity.
 """
 
 from __future__ import annotations
 
 import io
-import json
 import os
 import re
 import subprocess
@@ -18,6 +17,8 @@ from typing import Any, Dict, Iterator
 
 import numpy as np
 import pytest
+
+from scripts.gnn_checkout import load_pin
 
 from src.core.active_inference import ActiveInferenceModel
 from src.core.gnn import (
@@ -39,7 +40,6 @@ from src.core.model import Case
 from src.models.insect.base import InsectModel
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-PIN_PATH = REPO_ROOT / ".github" / "gnn-pin.json"
 CHECKOUT_ENV = "GNN_CHECKOUT"
 DEFAULT_CHECKOUT = REPO_ROOT.parent / "Generalized_Notation_Notation"
 UPSTREAM_TIMEOUT_SECONDS = 300
@@ -64,7 +64,7 @@ def _replace_block(text: str, section: str, body: str) -> str:
 
 
 def _pin() -> Dict[str, Any]:
-    return json.loads(PIN_PATH.read_text(encoding="utf-8"))
+    return load_pin(REPO_ROOT)
 
 
 def _focus_by_case(model: ActiveInferenceModel) -> Dict[str, str]:
@@ -272,6 +272,27 @@ def test_upstream_export_is_the_pinned_version(pinned_upstream: Any) -> None:
     module_path, version = result.stdout.strip().splitlines()
     assert str(tree) in module_path, "the export must shadow any installed gnn package"
     assert version == _pin()["version"], f"expected {revision} to report version {_pin()['version']}"
+
+
+@pytest.mark.parametrize("fact", [".github/gnn-pin.json", "revision", "ci.yml", "gnn-conformance"])
+def test_gnn_pin_pointer_drift_is_reported(tmp_path: Path, fact: str) -> None:
+    pin = _pin()
+    (tmp_path / ".github").mkdir()
+    (tmp_path / ".github" / "gnn-pin.json").write_bytes(
+        (REPO_ROOT / ".github" / "gnn-pin.json").read_bytes()
+    )
+    for relative in pin["spec_files"]:
+        target = tmp_path / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes((REPO_ROOT / relative).read_bytes())
+    pointer = (REPO_ROOT / ".github" / "GNN.md").read_text(encoding="utf-8")
+    if fact == "revision":
+        pointer = pointer.replace(pin["revision"], "").replace(pin["revision"][:12], "")
+    else:
+        pointer = pointer.replace(fact, "")
+    (tmp_path / ".github" / "GNN.md").write_text(pointer, encoding="utf-8")
+    with pytest.raises(ValueError, match="does not name"):
+        load_pin(tmp_path)
 
 
 def test_structural_drift_is_reported() -> None:

@@ -64,7 +64,7 @@ Commands live in `scripts/gate.py`; this table only says what each arm covers.
 | `docs` | `docs/documentation-index.md` is current and every relative Markdown link resolves | `gate` |
 | `test-fast` | quick pass over the logic core (see below) | local only |
 | `test` | full suite with coverage and a JUnit report | `gate` |
-| `gnn` | provisions `.gate/gnn`, calls its `gnn.importers` reader for pin/pointer/syntax validation, then runs CEREBRUM's model drift tests | `gnn-conformance` |
+| `gnn` | checks pin/pointer drift with the local reader, provisions `.gate/gnn`, and runs model agreement and pinned-parser/runtime tests | `gnn-conformance` |
 | `debt` | measures the non-blocking static-analysis debt | local only |
 | `docs-index` | regenerates `docs/documentation-index.md` | — |
 | `metrics` | regenerates `docs/_generated/gate-metrics.md` | — |
@@ -72,10 +72,11 @@ Commands live in `scripts/gate.py`; this table only says what each arm covers.
 `./run.sh all` runs `lint`, `types`, `docs`, `test`, `gnn` in that order — the
 same five steps the two CI jobs run between them.
 
-The GNN–FEP reader migration is not yet landable: the current upstream pin
-predates `gnn.importers`, so the `gnn` arm fails at that import. The
-[GNN pointer](../.github/GNN.md#migration-blocker) records the exact dependency
-and the bootstrap pin read that remains to be removed. Other arms are unchanged.
+The current GNN–FEP prerequisite retains the local reader with pin/pointer
+drift checks until an upstream release ships `gnn.importers`. This is the
+interim path used by the `gnn` arm; it never calls the unavailable module.
+The [GNN pointer](../.github/GNN.md#migration-blocker) records the full-cutover
+prerequisite. Other arms are unchanged.
 
 ## Measured cost
 

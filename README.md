@@ -199,9 +199,9 @@ storage orders, and the eight-case precision-focus contract), the loader in
 `8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1`, also in
 [`.github/gnn-pin.json`](.github/gnn-pin.json)). `tests/core/test_gnn_spec.py`
 checks the specification against the parameters and case configurations the
-framework uses. `./run.sh gnn` delegates upstream pin, pointer and syntax checks
-to `gnn.importers`; the [migration blocker](.github/GNN.md#migration-blocker)
-records why that reader cannot yet run from the pinned revision.
+framework uses. `./run.sh gnn` checks pin/pointer drift with the local reader
+and runs the pinned parser. The [migration prerequisite](.github/GNN.md#migration-blocker)
+explains why shared-reader cutover waits for an upstream release containing it.
 
 For new model work, start from the upstream [framework integration
 guide](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1/docs/gnn/integration/framework_integration_guide.md)

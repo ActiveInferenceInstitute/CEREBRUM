@@ -43,11 +43,11 @@ case-precision contracts that every instantiation keeps.
   recorded version.
 
 Editing the specification, the model parameters, or the case configurations
-without the other side fails the test suite. Pin and pointer validation are
-delegated to `gnn.importers` by `./run.sh gnn`. The parser-acceptance and
+without the other side fails the test suite. Until a release ships the shared
+reader, `scripts/gnn_checkout.py` owns the local pin/pointer drift check and
+the runtime-test fixture uses the same reader. Parser-acceptance and
 runtime-identity tests keep their independent clean-export coverage. See
-[the GNN pointer](../.github/GNN.md#migration-blocker) for the reader's absence
-from the current pinned revision and the remaining local pin reads.
+[the GNN prerequisite](../.github/GNN.md#migration-blocker) for the full cutover.
 
 ## Upstream pin
 
@@ -65,9 +65,9 @@ Re-validation uses the shared reader through the repository's gate:
 ./run.sh gnn
 ```
 
-The arm provisions the pinned runtime, invokes `gnn.importers check` with the
-required pointer, workflow and job, then runs CEREBRUM's model drift tests.
-It currently fails at the reader import; no newer parser is silently used.
+The arm checks pin/pointer drift, provisions the pinned runtime, then runs
+CEREBRUM's model drift, strict parser-acceptance and exported-runtime tests.
+It follows the interim local-reader path, without importing `gnn.importers`.
 The syntax authority is `docs/gnn/reference/gnn_syntax.md` in that checkout.
 For new integrations, start from the upstream [framework integration
 guide](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1/docs/gnn/integration/framework_integration_guide.md)
