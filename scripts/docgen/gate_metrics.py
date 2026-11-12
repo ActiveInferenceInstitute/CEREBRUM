@@ -190,8 +190,13 @@ def main(argv: list[str] | None = None) -> int:
     rendered = render(gate_dir)
 
     if args.check:
-        if not any(gate_dir.glob("*")):
-            print(f"no {gate_dir.name}/ artifacts; nothing to compare {OUTPUT} against")
+        # `.gate/env.json` exists as soon as any arm runs, including this one, so
+        # the meaningful test is whether an arm measurement was ever recorded.
+        if not read_timings(gate_dir / "timings.jsonl"):
+            print(
+                f"no recorded arm runs in {gate_dir.name}/; "
+                f"nothing to compare {OUTPUT} against"
+            )
             return 0
         current = target.read_text(encoding="utf-8") if target.exists() else ""
         if current != rendered:
