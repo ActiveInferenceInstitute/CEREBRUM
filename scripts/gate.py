@@ -176,7 +176,10 @@ ARMS: dict[str, Arm] = {
                 ),
                 env={"PYTHONPATH": str(GNN_CHECKOUT / "src")},
             ),
-            Step(py("-m", "pytest", "tests/core/test_gnn_spec.py", "-q", "--no-header")),
+            Step(
+                py("-m", "pytest", "tests/core/test_gnn_spec.py", "-q", "--no-header"),
+                env={"GNN_CHECKOUT": str(GNN_CHECKOUT)},
+            ),
         ),
     ),
     "debt": Arm(

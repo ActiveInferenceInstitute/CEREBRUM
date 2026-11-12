@@ -19,7 +19,8 @@ gate: `./run.sh gnn` (see [../docs/RUN_GUIDE.md](../docs/RUN_GUIDE.md)).
 
 `.github/gnn-pin.json` owns the upstream identity. The gate delegates pin,
 pointer and specification validation to `gnn.importers`; CEREBRUM's tests
-retain only the model/specification agreement checks.
+retain model/specification agreement, pinned-parser acceptance and exported
+runtime identity checks.
 
 ## What the job parses
 
@@ -41,6 +42,13 @@ retain only the model/specification agreement checks.
   It checks the declared factors, modality, controls, matrix values and axis
   orders against `InsectModel` / `ActiveInferenceModel`, and that each case
   transformation rescales exactly the matrices declared for its precision focus.
+* The parser-acceptance and runtime-identity tests use a clean
+  `git archive <revision> src/gnn pyproject.toml` export and that checkout's
+  interpreter. They assert strict parser acceptance, the imported module's
+  location inside the export, and its declared version. The tag-resolution test
+  independently checks that the declared tag dereferences to the pinned commit.
+  An explicitly selected `GNN_CHECKOUT` that cannot supply this runtime fails
+  rather than skipping.
 
 ## Migration blocker
 
@@ -51,8 +59,10 @@ requires the reader and parser from the same pinned runtime.
 
 This migration cannot land until a reviewed upstream revision containing the
 reader is adopted, and clean-checkout provisioning can call its `read_pin`.
-`scripts/gnn_checkout.py` still has the bootstrap JSON read; it is not a
-completed migration. No schema or pin identity is changed here.
+`scripts/gnn_checkout.py` still has the bootstrap JSON read, and the preserved
+runtime-test fixture still reads the pin to select its clean export. These
+reads remain part of the blocker, not a completed migration. No schema or pin
+identity is changed here.
 
 The check covers the one selected specification. It is not a scan of every
 `*.gnn.md` in the tree, and it says nothing about behavioural or biological

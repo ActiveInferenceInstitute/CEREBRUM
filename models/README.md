@@ -37,14 +37,17 @@ case-precision contracts that every instantiation keeps.
 - the stored observation and transition orientations behave as declared
   (checked with asymmetric matrices, so a wrong axis order fails);
 - each case transformation rescales exactly the matrices the specification
-  declares for that case's precision focus.
+  declares for that case's precision focus;
+- the pinned upstream parser accepts the specification under `--strict`; and
+- the imported runtime comes from the clean pinned export and reports the
+  recorded version.
 
 Editing the specification, the model parameters, or the case configurations
-without the other side fails the test suite. Pin, pointer and upstream syntax
-validation are delegated to `gnn.importers` by `./run.sh gnn`, using the
-materialized upstream checkout rather than a sibling working tree. See
+without the other side fails the test suite. Pin and pointer validation are
+delegated to `gnn.importers` by `./run.sh gnn`. The parser-acceptance and
+runtime-identity tests keep their independent clean-export coverage. See
 [the GNN pointer](../.github/GNN.md#migration-blocker) for the reader's absence
-from the current pinned revision and the remaining provisioning blocker.
+from the current pinned revision and the remaining local pin reads.
 
 ## Upstream pin
 
