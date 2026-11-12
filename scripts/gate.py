@@ -211,8 +211,10 @@ def run_arm(arm: Arm) -> int:
             exit_code = result.returncode
             break
     elapsed = time.perf_counter() - started
+    status = "ok" if exit_code == 0 else f"FAILED ({exit_code})"
     if not arm.record:
-        print(f"[{arm.name}] finished in {elapsed:.1f}s (not recorded)", flush=True)
+        # The renderer's own run would make the page it just wrote stale.
+        print(f"[{arm.name}] {status} in {elapsed:.1f}s (run not recorded)", flush=True)
         return exit_code
     record = {
         "arm": arm.name,
@@ -229,7 +231,6 @@ def run_arm(arm: Arm) -> int:
     }
     with (GATE_DIR / "timings.jsonl").open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(record) + "\n")
-    status = "ok" if exit_code == 0 else f"FAILED ({exit_code})"
     print(f"[{arm.name}] {status} in {elapsed:.1f}s", flush=True)
     return exit_code
 
@@ -286,6 +287,7 @@ def main(argv: list[str] | None = None) -> int:
             arm.help,
             (Step((*arm.steps[0].argv, *args.rest), arm.steps[0].env),),
             arm.needs_venv,
+            arm.record,
         )
     if arm.needs_venv and Path(sys.executable).resolve() != VENV_PYTHON.resolve():
         print(

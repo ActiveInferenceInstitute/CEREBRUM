@@ -49,7 +49,8 @@ Each subdirectory has its own index; start there for the full listings.
   `./run.sh docs` fails when it is stale. Never edit it by hand.
 - **[_generated/gate-metrics.md](_generated/gate-metrics.md)**: generated
   measured numbers (per-arm wall time, test counts, coverage, static-analysis
-  debt). Regenerate with `./run.sh metrics` from the `.gate/` run artifacts.
+  debt, and the comparison against the commands the gate replaced). Regenerate
+  with `./run.sh metrics` from the `.gate/` run artifacts.
 - **[../.github/GNN.md](../.github/GNN.md)**: the GNN conformance job
   (`gnn conformance (pinned)`) and the pin it reads,
   [`../.github/gnn-pin.json`](../.github/gnn-pin.json) (`gnn-importer-pin/v1`,

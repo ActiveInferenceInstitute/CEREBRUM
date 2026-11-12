@@ -1,0 +1,59 @@
+{
+  "schema": "gate-baseline/v1",
+  "recorded": "2026-11-12",
+  "host": "darwin-arm64",
+  "python": "3.13.17",
+  "uv": "0.13.7",
+  "how_measured": "one run per entry on the host above, warm uv cache, no other gate running",
+  "note": "Pre-gate receipts. These are historical observations of the commands ./run.sh replaced; a script cannot re-measure them, so they are data rather than prose. scripts/docgen/gate_metrics.py renders them beside the current arm timings.",
+  "entries": [
+    {
+      "work": "full test suite (CI's command)",
+      "before": "501.2 s; 1289 passed, 1 skipped; 53.7% coverage",
+      "arm": "test",
+      "note": "same pytest command as the arm; the earlier run overlapped another test run on this host, so the difference is host load, not the gate"
+    },
+    {
+      "work": "quick pre-flight",
+      "before": "did not exist",
+      "arm": "test-fast",
+      "note": "new arm; path selection because the suite carries no slow/visualization/end_to_end markers"
+    },
+    {
+      "work": "GNN conformance",
+      "before": "inline workflow bash; not runnable locally as one command",
+      "arm": "gnn",
+      "note": "arm provisions the pinned revision, then runs the conformance tests against it"
+    },
+    {
+      "work": "lint",
+      "before": "no job; full flake8 ruleset over src: 9508 findings",
+      "arm": "lint",
+      "note": "arm blocks E9,F63,F7,F82 only; the wider findings are measured by the debt arm"
+    },
+    {
+      "work": "types",
+      "before": "no job; mypy src: 640 errors in 83 files",
+      "arm": "types",
+      "note": "arm covers src/core/gnn.py, the annotated loader surface"
+    },
+    {
+      "work": "docs index and relative links",
+      "before": "nothing existed; no mkdocs, no link-check config",
+      "arm": "docs",
+      "note": "index is generated from docs/; link check is offline and skips tool-generated trees"
+    },
+    {
+      "work": "static-analysis debt",
+      "before": "nothing recorded",
+      "arm": "debt",
+      "note": "publishes flake8, black, isort and mypy counts into this page"
+    },
+    {
+      "work": "CI environments per gate run",
+      "before": "5 (four suite legs plus the GNN job)",
+      "arm": null,
+      "note": "now 2 jobs; each creates one locked environment and calls ./run.sh only"
+    }
+  ]
+}

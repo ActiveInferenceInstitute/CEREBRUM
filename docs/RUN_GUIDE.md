@@ -72,31 +72,25 @@ Commands live in `scripts/gate.py`; this table only says what each arm covers.
 `./run.sh all` runs `lint`, `types`, `docs`, `test`, `gnn` in that order — the
 same five steps the two CI jobs run between them.
 
-## Measured arms
+## Measured cost
 
-Host `darwin-arm64`, CPython 3.13.17, uv 0.13.7, one run per arm on 2026-11-12.
-[`_generated/gate-metrics.md`](_generated/gate-metrics.md) is the authoritative,
-script-refreshed copy of these numbers; the table below is the one-off
-comparison against the commands the gate replaced, which no script can
-regenerate.
+Every number lives in one generated page:
+[`_generated/gate-metrics.md`](_generated/gate-metrics.md). It carries the last
+recorded run of each arm, the pytest counts and coverage from the JUnit and
+coverage reports, the static-analysis debt counts, and the comparison against
+the commands this gate replaced.
 
-| Arm | Wall time | What it produced | Before this gate |
-| --- | --- | --- | --- |
-| `setup` | 0.2 s warm (`uv` cache and an existing `.venv`) | locked environment | `uv venv` + `uv pip install -e ".[dev]"`, 1.8 s warm, once per CI job (5 jobs) |
-| `lint` | 1.9 s warm, 4.6 s cold | 0 findings in the blocking selection | no job; `flake8` full ruleset: 9508 findings |
-| `types` | 0.2 s with a warm mypy cache, 9.5 s cold | `src/core/gnn.py` clean | no job; `mypy src`: 640 errors |
-| `docs` | 0.5 s | index current, 0 broken relative links over 328 files (51 tool-generated files skipped) | nothing |
-| `test-fast` | 13.8 s | 714 passed, 16 deselected | nothing |
-| `test` | 272.9 s standalone, 319.2 s inside `./run.sh all` | 1289 passed, 1 skipped, 53.7% coverage | the same suite at 501.2 s, as a four-leg matrix |
-| `gnn` | 6.0 s (provisioning 5.47 s cold, 0.09 s on reuse; 23 passed) | pinned validator accepted the specification | inline workflow `bash`, not runnable locally as one command |
-| `debt` | 28.2 s | the four debt counts | nothing recorded |
-| `all` | 328.2 s | every arm above | — |
+That comparison is generated too. The pre-gate receipts are stored as data in
+[`../scripts/docgen/baseline.json`](../scripts/docgen/baseline.json) — a script
+cannot re-measure a command the gate has replaced — and the page joins them to
+the current arm timings, so the "now" column cannot drift from the artifacts.
+Run the arms, then `./run.sh metrics`, then commit the page.
 
-The two full-suite numbers run the same pytest command over the same 1289
-tests. The earlier run overlapped another test run on this host, so the
-difference is host load, not the gate; no suite-speedup is claimed. The speedup
-that is real is local: `test-fast` answers in 13.8 s instead of a full suite, and
-a CI gate run needs two environments instead of five.
+Two of those rows carry a caveat rather than a win. The full-suite receipt was
+taken while another test run shared this host, so the before/after difference
+there is host load, not the gate: no suite-speedup is claimed. The GNN receipt
+describes work that only existed as inline workflow `bash`, so its "before" is a
+shape, not a duration.
 
 ## Artifacts and generated documents
 
@@ -115,24 +109,22 @@ compares the page against the artifacts on disk, so it reports staleness after
 any arm run that happened later than the last `./run.sh metrics`; refresh and
 commit as the final step of a measurement.
 
-The [measured comparison](#measured-arms) above is the
-one table that cannot be regenerated: it records what the commands the gate
-replaced used to cost.
+The pre-gate receipts in `scripts/docgen/baseline.json` are the one input that
+is not produced by an arm; the metrics page renders them next to the arm
+timings, so the document still owns every number it shows.
 
 ## test-fast is a path selection, not a marker selection
 
 `pytest.ini` declares `unit`, `integration`, `slow`, `visualization`,
-`end_to_end` and `regression` markers, but the suite does not use them:
-`pytest -m slow` selects **0** of the 1289 collected tests (likewise
-`-m visualization` and `-m end_to_end`), and 60 of the 72 `test_*.py` files in
-the collected trees carry no marker at all. A marker-based "fast" arm would
-therefore run essentially the whole suite. `test-fast` selects the logic core by
-path instead (`tests/core`, `tests/cases`, `tests/transformations`,
+`end_to_end` and `regression` markers, but the suite does not use them: no test
+carries `slow`, `visualization` or `end_to_end`, so `pytest -m <marker>` selects
+nothing, and most test files carry no marker at all. A marker-based "fast" arm
+would therefore run essentially the whole suite. `test-fast` selects the logic
+core by path instead (`tests/core`, `tests/cases`, `tests/transformations`,
 `tests/utils`, and `beyond_cerebrum/src/tests`) and deselects the two slowest
 core files, `tests/core/test_neural_network.py` and
-`tests/core/test_active_inference_pomdp.py`, which account for about a third of
-the full run. It is honest about what it covers: a quick pre-flight, not a
-substitute for `./run.sh test`.
+`tests/core/test_active_inference_pomdp.py`. It is honest about what it covers: a
+quick pre-flight, not a substitute for `./run.sh test`.
 
 Populating the markers would let the arm become a marker selection; that is a
 real change to the suite and is not part of this gate.

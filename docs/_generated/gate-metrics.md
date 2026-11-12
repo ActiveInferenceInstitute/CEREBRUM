@@ -14,22 +14,36 @@ artifact under `.gate/` that the arm itself wrote, so re-running the arms and
 | Host | `darwin-arm64` |
 | Python | `3.13.17` |
 | uv | `0.13.7` |
-| Timing method | one run per arm, wall clock, cold cache not enforced |
+| Timing method | last recorded run per arm; wall clock, warm cache, host load not controlled |
 
 ## Arms
 
 | Arm | Command | Wall time | Exit |
 | --- | --- | --- | --- |
 | `debt` | `python scripts/docgen/debt.py` | 28.2 s | 0 |
-| `docs` | `python scripts/docgen/doc_index.py --check ...` | 0.6 s | 0 |
+| `docs` | `python scripts/docgen/doc_index.py --check ...` | 1.1 s | 0 |
 | `docs-index` | `python scripts/docgen/doc_index.py` | 0.1 s | 0 |
 | `gnn` | `python scripts/gnn_checkout.py --dest .gate/gnn ...` | 6.0 s | 0 |
-| `lint` | `python -m flake8 --select=E9,F63,F7,F82 --max-line-length=100 src tests beyond_cerebrum/src scripts` | 1.4 s | 0 |
-| `metrics` | `python scripts/docgen/gate_metrics.py --check` | 0.0 s | 0 |
+| `lint` | `python -m flake8 --select=E9,F63,F7,F82 --max-line-length=100 src tests beyond_cerebrum/src scripts` | 3.4 s | 0 |
 | `setup` | `uv sync --locked --extra dev --extra llm` | 0.2 s | 0 |
 | `test` | `python -m pytest -q --cov=src --cov-report=term-missing --cov-report=json:.gate/coverage.json --junitxml=.gate/junit.xml` | 319.2 s | 0 |
-| `test-fast` | `python -m pytest -q --no-header tests/core tests/cases tests/transformations tests/utils beyond_cerebrum/src/tests --deselect tests/core/test_neural_network.py --deselect tests/core/test_active_inference_pomdp.py` | 18.6 s | 0 |
+| `test-fast` | `python -m pytest -q --no-header tests/core tests/cases tests/transformations tests/utils beyond_cerebrum/src/tests --deselect tests/core/test_neural_network.py --deselect tests/core/test_active_inference_pomdp.py` | 26.1 s | 0 |
 | `types` | `python -m mypy src/core/gnn.py` | 0.2 s | 0 |
+
+## Comparison with the pre-gate commands
+
+Receipts recorded on `darwin-arm64`, CPython `3.13.17`, uv `0.13.7` on 2026-11-12 (one run per entry on the host above, warm uv cache, no other gate running). The *now* column is the last recorded run of that arm, so it moves with the artifacts instead of being copied.
+
+| Work | Before the gate | Now (arm, last run) | Note |
+| --- | --- | --- | --- |
+| full test suite (CI's command) | 501.2 s; 1289 passed, 1 skipped; 53.7% coverage | `test`: 319.2 s | same pytest command as the arm; the earlier run overlapped another test run on this host, so the difference is host load, not the gate |
+| quick pre-flight | did not exist | `test-fast`: 26.1 s | new arm; path selection because the suite carries no slow/visualization/end_to_end markers |
+| GNN conformance | inline workflow bash; not runnable locally as one command | `gnn`: 6.0 s | arm provisions the pinned revision, then runs the conformance tests against it |
+| lint | no job; full flake8 ruleset over src: 9508 findings | `lint`: 3.4 s | arm blocks E9,F63,F7,F82 only; the wider findings are measured by the debt arm |
+| types | no job; mypy src: 640 errors in 83 files | `types`: 0.2 s | arm covers src/core/gnn.py, the annotated loader surface |
+| docs index and relative links | nothing existed; no mkdocs, no link-check config | `docs`: 1.1 s | index is generated from docs/; link check is offline and skips tool-generated trees |
+| static-analysis debt | nothing recorded | `debt`: 28.2 s | publishes flake8, black, isort and mypy counts into this page |
+| CI environments per gate run | 5 (four suite legs plus the GNN job) | — | now 2 jobs; each creates one locked environment and calls ./run.sh only |
 
 ## Test suite
 
