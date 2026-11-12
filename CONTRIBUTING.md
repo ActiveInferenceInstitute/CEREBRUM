@@ -129,8 +129,24 @@ Thank you for your interest in contributing to CEREBRUM! We welcome contribution
 2. **Set up** your development environment (see [getting_started.md](docs/getting_started.md))
 3. **Create a branch** for your contribution
 4. **Make changes** following our coding standards
-5. **Run tests** to ensure your changes don't break existing functionality
+5. **Run the gate** before opening a pull request
 6. **Submit a pull request** with a clear description of your changes
+
+### Before you open a pull request
+
+Every check runs through one entry point, and CI calls the same arms:
+
+```bash
+./run.sh setup     # create .venv from uv.lock (dev extras)
+./run.sh all       # lint, types, docs, test, gnn conformance
+```
+
+`./run.sh test-fast` is a quicker pre-flight while you iterate. If you changed
+documentation, `./run.sh docs` also checks that `docs/documentation-index.md` is
+current and that relative links resolve; `./run.sh docs-index` regenerates the
+index. See [docs/RUN_GUIDE.md](docs/RUN_GUIDE.md) for the arm definitions, the
+CI job mapping, and the measured numbers in
+[docs/_generated/gate-metrics.md](docs/_generated/gate-metrics.md).
 
 ### For Research Contributors
 1. **Reach out** to discuss how your research connects with CEREBRUM

@@ -116,7 +116,7 @@ But there is a crucial difference: unlike mathematical fractals, cognitive case 
 
 To demonstrate, I will now implement a simultaneous multi-case analysis:
 
-[NOM+META+REFL]: I analyze my analysis of case transformation while transforming between cases to enable the analysis itself.
+\[NOM\+META\+REFL\]: I analyze my analysis of case transformation while transforming between cases to enable the analysis itself.
 
 This compound statement operates in three cases simultaneously, with each case context modulating the others. The [NOM] component establishes agency, the [META] component observes the analysis reflexively, and the [REFL] component acknowledges the self-reference.
 

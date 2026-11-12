@@ -119,19 +119,37 @@ uv pip install -e ".[all]"
 
 ### Testing
 
-```bash
-# Full test suite (the default run deselects the opt-in `live` network tests)
-uv run python -m pytest
+All checks run through one entry point. `./run.sh` lists the arms; each arm is
+also what CI runs, so a local run and a CI run execute the same commands.
 
+```bash
+./run.sh setup        # create .venv from uv.lock (dev extras)
+./run.sh lint         # blocking static checks
+./run.sh types        # mypy on the annotated GNN loader surface
+./run.sh docs         # docs index freshness + relative link check
+./run.sh test-fast    # quick pass over the logic core
+./run.sh test         # full suite with coverage (what CI runs)
+./run.sh gnn          # pinned-upstream GNN conformance
+./run.sh all          # lint, types, docs, test, gnn
+```
+
+Measured per-arm wall times, test counts and coverage live in
+[`docs/_generated/gate-metrics.md`](docs/_generated/gate-metrics.md), which
+`./run.sh metrics` regenerates from the run artifacts. See
+[`docs/RUN_GUIDE.md`](docs/RUN_GUIDE.md) for the arm definitions, the CI job
+mapping and the current static-analysis debt.
+
+Individual commands that the arms wrap are still fine for debugging:
+
+```bash
 # A single test file
 uv run python -m pytest tests/core/test_model.py -v
 
-# GNN specification drift guard
+# GNN specification drift guard, against a sibling GNN checkout
 uv run python -m pytest tests/core/test_gnn_spec.py -v
 
 # Run tests by marker
 uv run python -m pytest -m unit
-uv run python -m pytest -m integration
 ```
 
 ## PDF Documentation

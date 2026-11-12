@@ -42,11 +42,19 @@ uv pip install -e ".[all]"      # Install all optional dependencies
 
 - **Framework concepts (cold start):** `docs/README.md` — core spec, how-it-works,
   getting started, case system, and per-audience contributing guides.
+- **The gate:** `docs/RUN_GUIDE.md` and `./run.sh` — one entry point with
+  separately runnable arms (lint, types, docs, test, test-fast, gnn). CI runs
+  the same arms; there is no second copy of a command. Run `./run.sh all` before
+  landing a change. Generated pages never hold hand-typed numbers:
+  `docs/documentation-index.md` (`./run.sh docs-index`) and
+  `docs/_generated/gate-metrics.md` (`./run.sh metrics`).
 - **Core mechanics:** `docs/cerebrum_core_spec.md` (compliance spec) and
   `docs/how_it_works.md` (architecture overview); architecture diagram source at
   `docs/diagrams/project_architecture.mermaid`.
 - **Generative model specification:** `models/README.md` (GNN source of truth,
-  loader, drift guard, upstream pin).
+  loader, drift guard, upstream pin) and `.github/GNN.md` (the conformance job,
+  its display name `gnn conformance (pinned)`, and the `.github/gnn-pin.json`
+  revision it parses).
 - **Language case mappings:** `docs/language_implementations.md` and `docs/languages/`.
 - **Agent orientation:** this file (`AGENTS.md`) plus `CLAUDE.md` (commands and
   architecture notes). Read `docs/README.md` before extending the conceptual surface.
