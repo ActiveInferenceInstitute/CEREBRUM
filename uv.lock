@@ -579,7 +579,7 @@ requires-dist = [
     { name = "networkx", specifier = ">=3.4.2" },
     { name = "networkx", marker = "extra == 'lexicon'", specifier = ">=3.4.2" },
     { name = "numpy", specifier = ">=2.2.6" },
-    { name = "openai", marker = "extra == 'llm'", specifier = ">=3.45.0" },
+    { name = "openai", marker = "extra == 'llm'", specifier = ">=3.46.0" },
     { name = "pandas", marker = "extra == 'lexicon'", specifier = ">=2.3.3" },
     { name = "plotly", marker = "extra == 'lexicon'", specifier = ">=7.1.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.6.2" },
