@@ -11,34 +11,39 @@ gate: `./run.sh gnn` (see [../docs/RUN_GUIDE.md](../docs/RUN_GUIDE.md)).
 | Pin file | `.github/gnn-pin.json` |
 | Schema | `gnn-importer-pin/v1` |
 | Upstream | `ActiveInferenceInstitute/Generalized_Notation_Notation` |
-| Tag | `v5.0.3` |
-| Revision | `8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1` |
+| Tag | `v5.1.0` |
+| Revision | `75c834bd8519dc7b5adc4d24f16bf393cfd1ecdf` |
 | Recorded | `2026-11-12` |
 | Specification directory | `models` |
 | Specification files | `models/case_conditioned_active_inference.gnn.md` |
 
-`.github/gnn-pin.json` owns the upstream identity. While the pinned release
-predates `gnn.importers`, `scripts/gnn_checkout.py` is the local pin reader and
-checks pin/pointer drift. The runtime tests call that same reader and retain
-model agreement, pinned-parser acceptance and exported-runtime identity checks.
+`.github/gnn-pin.json` owns the upstream identity. The pin is read and judged by
+`gnn.importers`, the estate's one reader for a pin, its declared specifications
+and this pointer; this repository carries no copy of that logic.
 
 ## What the job parses
 
 * `scripts/gnn_checkout.py` materialises the pinned revision into `.gate/gnn`:
   `git init`, `git fetch --depth 1 origin <revision> refs/tags/<tag>`,
   `git checkout --detach <revision>`, then a private `uv venv --python 3.12`
-  with the parser's runtime dependencies (`numpy`, `defusedxml`, `psutil`).
-  A revision that no longer resolves upstream fails the arm instead of skipping.
-* Before provisioning or reusing a checkout, the script checks the pin's schema,
-  revision and declared specifications, and requires this pointer to name the
-  pin path, revision, workflow and job. The same drift check runs without network
-  or provisioning via:
+  with the parser's runtime dependencies (`numpy`, `defusedxml`, `psutil`,
+  `pyyaml`). A revision that no longer resolves upstream fails the arm instead
+  of skipping. The script takes only those two `git fetch` coordinates from the
+  pin; whether they are the right ones is the reader's verdict, not its own.
+* That same environment then runs the shipped reader against this repository:
 
   ```bash
-  .venv/bin/python scripts/gnn_checkout.py --check
+  PYTHONPATH=.gate/gnn/src .gate/gnn/.venv/bin/python -m gnn.importers check \
+      --repo . --require-pointer \
+      --workflow .github/workflows/ci.yml --job gnn-conformance
   ```
 
-* `tests/core/test_gnn_spec.py` loads
+  The pinned tree supplies `gnn`; the private venv supplies its dependencies, so
+  the reader, the parser and the checkout are one revision. The reader reports
+  the pin's schema, revision shape, tag and declared specifications, parses the
+  declared specification with the pinned parser, and requires this pointer to
+  name the pin path, the pinned revision, the workflow filename and the job key.
+* `tests/core/test_gnn_spec.py` reports that same reader verdict, then loads
   `models/case_conditioned_active_inference.gnn.md` through `src/core/gnn.py`.
   It checks the declared factors, modality, controls, matrix values and axis
   orders against `InsectModel` / `ActiveInferenceModel`, and that each case
@@ -51,20 +56,23 @@ model agreement, pinned-parser acceptance and exported-runtime identity checks.
   An explicitly selected `GNN_CHECKOUT` that cannot supply this runtime fails
   rather than skipping.
 
-## Migration blocker
+## Adopted: one reader, no local copy
 
-The pinned release does not contain `src/gnn/importers.py`. The updated
-[GNN–FEP prerequisite](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/d31c1768114098e91033ad2ad5a383e188c3cd67/docs/workflows/gnn-fep.md#prerequisite-the-reader-ships-in-a-revision-not-in-a-version-name)
-requires members in this state to retain their local reader and add pin/pointer
-drift checks, not call the unavailable shared module or vendor it. This gate
-implements that interim path; it does not claim the full shared-reader cutover.
+GNN `v5.1.0` at `75c834bd8519dc7b5adc4d24f16bf393cfd1ecdf` is the first pinned
+release that contains `src/gnn/importers.py`. The previous pin, `v5.0.3` at
+`8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1`, predates the module, so the
+intervening state kept a local reader — `load_pin` in
+`scripts/gnn_checkout.py`, with the pointer regressions that tested its own pin
+shape — and could not call `python -m gnn.importers`.
 
-Cutover waits for an upstream release containing the reader. The same reviewed
-change must advance this pin, remove the local reader, call `gnn.importers`
-from the new pinned runtime, and record the old and new revisions. The pin and
-schema are unchanged here; no unpinned bootstrap reader or parser overlay is used.
+This change advances the pin to `v5.1.0`, deletes that reader and the tests for
+its pin shape, and runs the shipped reader from the environment the arm already
+builds. `validate`, `pin-commit-shape`, `pin-tag-mismatch`, `spec-missing`,
+`spec-invalid` and the `pointer-*` codes are the reader's findings now; the
+copy carried no unique coverage. No copy of `importers.py` is vendored and no
+newer reader is overlaid on an older parser.
 
-The check covers the one selected specification. It is not a scan of every
+The check covers the one declared specification. It is not a scan of every
 `*.gnn.md` in the tree, and it says nothing about behavioural or biological
 validity of the declared model.
 

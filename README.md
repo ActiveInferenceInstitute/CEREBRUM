@@ -195,16 +195,16 @@ Notation (GNN) at
 hidden-state factor, one identity-likelihood modality, three controls, the
 runtime `A[state, observation]` and `B[previous_state, action, next_state]`
 storage orders, and the eight-case precision-focus contract), the loader in
-`src/core/gnn.py`, and the pinned upstream revision (GNN v5.0.3, commit
-`8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1`, also in
+`src/core/gnn.py`, and the pinned upstream revision (GNN v5.1.0, commit
+`75c834bd8519dc7b5adc4d24f16bf393cfd1ecdf`, also in
 [`.github/gnn-pin.json`](.github/gnn-pin.json)). `tests/core/test_gnn_spec.py`
 checks the specification against the parameters and case configurations the
-framework uses. `./run.sh gnn` checks pin/pointer drift with the local reader
-and runs the pinned parser. The [migration prerequisite](.github/GNN.md#migration-blocker)
-explains why shared-reader cutover waits for an upstream release containing it.
+framework uses. `./run.sh gnn` runs the shared `gnn.importers` reader against
+the pin and pointer, then the pinned parser; the [GNN pointer](.github/GNN.md)
+records that adopted reader.
 
 For new model work, start from the upstream [framework integration
-guide](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1/docs/gnn/integration/framework_integration_guide.md)
+guide](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/75c834bd8519dc7b5adc4d24f16bf393cfd1ecdf/docs/gnn/integration/framework_integration_guide.md)
 and the [downstream adoption
 guide](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/1f3abb56e25886dfa6ddc49c76af7b723941485a/docs/gnn/integration/downstream_adoption.md).
 
@@ -215,7 +215,7 @@ way:
   — case-level specifications such as `gnn/models/L4_case.gnn.md`, plus mutation
   variants that show how a declared model degrades.
 - [ActiveBlockference](https://github.com/ActiveInferenceInstitute/ActiveBlockference)
-  — a control model validated against the same GNN v5.0.3 tag.
+  — a control model validated against its own pinned GNN release.
 - [active_fractal_rabbit](https://github.com/ActiveInferenceInstitute/active_fractal_rabbit)
   — the reference layout this repository follows: `models/`, a loader module,
   and `.github/gnn-pin.json`.

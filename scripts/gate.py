@@ -44,6 +44,11 @@ ROOT = Path(__file__).resolve().parents[1]
 GATE_DIR = ROOT / ".gate"
 VENV_PYTHON = ROOT / ".venv" / "bin" / "python"
 GNN_CHECKOUT = GATE_DIR / "gnn"
+GNN_PYTHON = GNN_CHECKOUT / ".venv" / "bin" / "python"
+# The conformance workflow and job the pointer must name; the shared reader
+# does not parse workflow YAML, so the caller states them.
+GNN_WORKFLOW = ".github/workflows/ci.yml"
+GNN_JOB = "gnn-conformance"
 
 LINT_TARGETS = ("src", "tests", "beyond_cerebrum/src", "scripts")
 BLOCKING_FLAKE8_SELECT = "E9,F63,F7,F82"
@@ -157,9 +162,28 @@ ARMS: dict[str, Arm] = {
     ),
     "gnn": Arm(
         "gnn",
-        "pinned-upstream GNN conformance (provisions .gate/gnn at the pinned revision)",
+        "pinned-upstream GNN conformance: shared reader, then model agreement at the pin",
         (
             Step(py("scripts/gnn_checkout.py", "--dest", str(GNN_CHECKOUT))),
+            # The estate's one pin/pointer reader, called from the environment
+            # this arm just built and against the parser this pin names. The
+            # pinned tree supplies ``gnn``; the venv supplies its dependencies.
+            Step(
+                (
+                    str(GNN_PYTHON),
+                    "-m",
+                    "gnn.importers",
+                    "check",
+                    "--repo",
+                    ".",
+                    "--require-pointer",
+                    "--workflow",
+                    GNN_WORKFLOW,
+                    "--job",
+                    GNN_JOB,
+                ),
+                env={"PYTHONPATH": str(GNN_CHECKOUT / "src")},
+            ),
             Step(
                 py("-m", "pytest", "tests/core/test_gnn_spec.py", "-q", "--no-header"),
                 env={"GNN_CHECKOUT": str(GNN_CHECKOUT)},

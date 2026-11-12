@@ -1,9 +1,9 @@
 {
   "schema": "gnn-importer-pin/v1",
-  "tag": "v5.0.3",
-  "revision": "8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1",
+  "tag": "v5.1.0",
+  "revision": "75c834bd8519dc7b5adc4d24f16bf393cfd1ecdf",
   "recorded": "2026-11-12",
-  "version": "5.0.3",
+  "version": "5.1.0",
   "spec_directory": "models",
   "spec_files": [
     "models/case_conditioned_active_inference.gnn.md"

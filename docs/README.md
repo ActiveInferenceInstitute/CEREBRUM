@@ -54,7 +54,7 @@ Each subdirectory has its own index; start there for the full listings.
 - **[../.github/GNN.md](../.github/GNN.md)**: the GNN conformance job
   (`gnn conformance (pinned)`) and the pin it reads,
   [`../.github/gnn-pin.json`](../.github/gnn-pin.json) (`gnn-importer-pin/v1`,
-  upstream `v5.0.3`, revision `8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1`).
+  upstream `v5.1.0`, revision `75c834bd8519dc7b5adc4d24f16bf393cfd1ecdf`).
 - **[../models/README.md](../models/README.md)**: the specification itself, its
   loader (`src/core/gnn.py`), and the drift guard.
 

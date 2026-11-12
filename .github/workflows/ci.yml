@@ -47,9 +47,10 @@ jobs:
 
   gnn-conformance:
     timeout-minutes: 60
-    # The gnn arm checks pin/pointer drift with the local reader, then checks
-    # model agreement and pinned-parser/runtime identity. Shared-reader cutover
-    # waits for its upstream release; keep this status-check context unchanged.
+    # The gnn arm provisions the pinned revision, runs the shared
+    # gnn.importers reader against the pin and pointer, then checks model
+    # agreement and pinned-parser/runtime identity. Keep this status-check
+    # context unchanged.
     name: gnn conformance (pinned)
     runs-on: ubuntu-latest
     steps:

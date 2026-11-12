@@ -43,21 +43,22 @@ case-precision contracts that every instantiation keeps.
   recorded version.
 
 Editing the specification, the model parameters, or the case configurations
-without the other side fails the test suite. Until a release ships the shared
-reader, `scripts/gnn_checkout.py` owns the local pin/pointer drift check and
-the runtime-test fixture uses the same reader. Parser-acceptance and
-runtime-identity tests keep their independent clean-export coverage. See
-[the GNN prerequisite](../.github/GNN.md#migration-blocker) for the full cutover.
+without the other side fails the test suite. The pin, its declared
+specification and the `.github/GNN.md` pointer are read and judged by
+`gnn.importers`, the estate's one reader; the runtime-test fixture reports that
+same verdict, and parser-acceptance and runtime-identity tests keep their
+independent clean-export coverage. See [the GNN pointer](../.github/GNN.md) for
+the adopted state.
 
 ## Upstream pin
 
 - Upstream repository:
   `https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation.git`
-- Pinned tag: `v5.0.3`
-- Pinned revision: `8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1` (the commit the
-  `v5.0.3` tag dereferences to)
-- Upstream version: `5.0.3`
-- Pinned on: `2026-11-01`
+- Pinned tag: `v5.1.0`
+- Pinned revision: `75c834bd8519dc7b5adc4d24f16bf393cfd1ecdf` (the commit the
+  `v5.1.0` tag dereferences to)
+- Upstream version: `5.1.0`
+- Pinned on: `2026-11-12`
 
 Re-validation uses the shared reader through the repository's gate:
 
@@ -65,12 +66,13 @@ Re-validation uses the shared reader through the repository's gate:
 ./run.sh gnn
 ```
 
-The arm checks pin/pointer drift, provisions the pinned runtime, then runs
-CEREBRUM's model drift, strict parser-acceptance and exported-runtime tests.
-It follows the interim local-reader path, without importing `gnn.importers`.
+The arm provisions the pinned runtime, runs `python -m gnn.importers check
+--repo . --require-pointer` from that runtime against the pin and this
+repository's pointer, then runs CEREBRUM's model drift, strict
+parser-acceptance and exported-runtime tests.
 The syntax authority is `docs/gnn/reference/gnn_syntax.md` in that checkout.
 For new integrations, start from the upstream [framework integration
-guide](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1/docs/gnn/integration/framework_integration_guide.md)
+guide](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/75c834bd8519dc7b5adc4d24f16bf393cfd1ecdf/docs/gnn/integration/framework_integration_guide.md)
 and the [downstream adoption
 guide](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/1f3abb56e25886dfa6ddc49c76af7b723941485a/docs/gnn/integration/downstream_adoption.md).
 

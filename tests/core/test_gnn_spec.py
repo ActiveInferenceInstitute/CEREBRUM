@@ -1,13 +1,16 @@
-"""GNN model agreement, pinned-parser acceptance and exported-runtime identity.
+"""GNN model agreement, shared reader adoption and pinned-runtime identity.
 
-Until the pinned release ships ``gnn.importers``, the local provisioner owns
-pin/pointer drift checks. Clean-export checks independently prove strict parser
-acceptance, actual tag resolution and pinned-runtime identity.
+The pin, its declared specifications and the ``.github/GNN.md`` pointer are
+judged by the estate's one reader, ``gnn.importers``, run from the pinned
+checkout's interpreter. This module only reports that verdict and then checks
+what the reader does not: strict parser acceptance, actual tag resolution and
+exported-runtime identity.
 """
 
 from __future__ import annotations
 
 import io
+import json
 import os
 import re
 import subprocess
@@ -18,7 +21,7 @@ from typing import Any, Dict, Iterator
 import numpy as np
 import pytest
 
-from scripts.gnn_checkout import load_pin
+from scripts.gate import GNN_JOB, GNN_WORKFLOW
 
 from src.core.active_inference import ActiveInferenceModel
 from src.core.gnn import (
@@ -63,8 +66,42 @@ def _replace_block(text: str, section: str, body: str) -> str:
     return replaced
 
 
-def _pin() -> Dict[str, Any]:
-    return load_pin(REPO_ROOT)
+def _reader_report(checkout: Path) -> Dict[str, Any]:
+    """Return the pinned reader's verdict on this repository's pin and pointer.
+
+    ``gnn.importers`` is the estate's one reader for a pin, its declared
+    specifications and the ``.github/GNN.md`` pointer. This module reports that
+    verdict instead of re-reading the JSON, and it asks the pinned checkout's
+    interpreter with that checkout's own ``src`` on the path, so the verdict is
+    the pinned parser's.
+    """
+    result = subprocess.run(
+        [
+            str(checkout / ".venv" / "bin" / "python"),
+            "-m",
+            "gnn.importers",
+            "check",
+            "--repo",
+            str(REPO_ROOT),
+            "--require-pointer",
+            "--workflow",
+            GNN_WORKFLOW,
+            "--job",
+            GNN_JOB,
+            "--json",
+        ],
+        capture_output=True,
+        text=True,
+        env={**os.environ, "PYTHONPATH": str(checkout / "src")},
+        timeout=UPSTREAM_TIMEOUT_SECONDS,
+        check=False,
+    )
+    if not result.stdout.strip():
+        _unavailable(
+            "the pinned reader produced no report: "
+            f"{result.stdout}{result.stderr}".strip()
+        )
+    return json.loads(result.stdout)
 
 
 def _focus_by_case(model: ActiveInferenceModel) -> Dict[str, str]:
@@ -89,15 +126,16 @@ def _unavailable(message: str) -> None:
 
 @pytest.fixture(scope="module")
 def pinned_upstream(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Any]:
-    """Yield ``(checkout, exported_tree, revision)`` for the pinned revision."""
+    """Yield ``(checkout, exported_tree, reader_report)`` for the pinned revision."""
 
     checkout = _checkout()
     if not (checkout / ".git").exists():
         _unavailable(f"no GNN checkout exists at {checkout}")
-    revision = str(_pin()["revision"])
     interpreter = checkout / ".venv" / "bin" / "python"
     if not interpreter.is_file():
         _unavailable(f"the GNN checkout at {checkout} has no .venv/bin/python interpreter")
+    report = _reader_report(checkout)
+    revision = str(report["pin"]["commit"])
     archive = subprocess.run(
         ["git", "-C", str(checkout), "archive", revision, "src/gnn", "pyproject.toml"],
         stdin=subprocess.DEVNULL,
@@ -112,7 +150,7 @@ def pinned_upstream(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Any]:
     tree = tmp_path_factory.mktemp("gnn-pinned")
     with tarfile.open(fileobj=io.BytesIO(archive.stdout)) as bundle:
         bundle.extractall(tree, filter="data")
-    yield checkout, tree, revision
+    yield checkout, tree, report
 
 
 def test_spec_is_structurally_conformant() -> None:
@@ -219,18 +257,34 @@ def test_case_transformations_scale_the_declared_matrices(case: Case) -> None:
             assert np.allclose(observed, before[attribute]), attribute
 
 
+def test_shared_reader_reports_the_pin_and_pointer_clean(pinned_upstream: Any) -> None:
+    _, _, report = pinned_upstream
+    errors = [finding for finding in report["findings"] if finding["level"] == "error"]
+    assert errors == []
+    assert report["ok"] is True
+    assert report["pin"]["path"] == ".github/gnn-pin.json"
+    assert report["pin"]["schema"] == "gnn-importer-pin/v1"
+    assert report["pin"]["tag"] == "v5.1.0"
+    assert report["pin"]["recorded"] == "2026-11-12"
+    assert report["pin"]["spec_files"] == ["models/case_conditioned_active_inference.gnn.md"]
+    assert report["specs"]["count"] == 1
+    assert report["specs"]["invalid"] == []
+    assert report["pointer"] == {"path": ".github/GNN.md", "ok": True}
+
+
 def test_pin_record_revision_is_the_declared_tag(pinned_upstream: Any) -> None:
-    checkout, _, revision = pinned_upstream
+    checkout, _, report = pinned_upstream
+    pin = report["pin"]
     resolved = subprocess.run(
-        ["git", "-C", str(checkout), "rev-parse", f"{_pin()['tag']}^{{commit}}"],
+        ["git", "-C", str(checkout), "rev-parse", f"{pin['tag']}^{{commit}}"],
         stdin=subprocess.DEVNULL,
         capture_output=True,
         text=True,
         check=False,
     )
     if resolved.returncode != 0:
-        pytest.skip(f"tag {_pin()['tag']} is not available in {checkout}")
-    assert resolved.stdout.strip() == revision
+        pytest.skip(f"tag {pin['tag']} is not available in {checkout}")
+    assert resolved.stdout.strip() == pin["commit"]
 
 
 def test_upstream_parser_accepts_the_specification(pinned_upstream: Any) -> None:
@@ -255,7 +309,8 @@ def test_upstream_parser_accepts_the_specification(pinned_upstream: Any) -> None
 
 
 def test_upstream_export_is_the_pinned_version(pinned_upstream: Any) -> None:
-    checkout, tree, revision = pinned_upstream
+    checkout, tree, report = pinned_upstream
+    expected = report["pin"]["tag"].removeprefix("v")
     result = subprocess.run(
         [
             str(checkout / ".venv" / "bin" / "python"),
@@ -271,28 +326,9 @@ def test_upstream_export_is_the_pinned_version(pinned_upstream: Any) -> None:
     assert result.returncode == 0, result.stdout + result.stderr
     module_path, version = result.stdout.strip().splitlines()
     assert str(tree) in module_path, "the export must shadow any installed gnn package"
-    assert version == _pin()["version"], f"expected {revision} to report version {_pin()['version']}"
-
-
-@pytest.mark.parametrize("fact", [".github/gnn-pin.json", "revision", "ci.yml", "gnn-conformance"])
-def test_gnn_pin_pointer_drift_is_reported(tmp_path: Path, fact: str) -> None:
-    pin = _pin()
-    (tmp_path / ".github").mkdir()
-    (tmp_path / ".github" / "gnn-pin.json").write_bytes(
-        (REPO_ROOT / ".github" / "gnn-pin.json").read_bytes()
+    assert version == expected, (
+        f"expected {report['pin']['commit']} to report version {expected}"
     )
-    for relative in pin["spec_files"]:
-        target = tmp_path / relative
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes((REPO_ROOT / relative).read_bytes())
-    pointer = (REPO_ROOT / ".github" / "GNN.md").read_text(encoding="utf-8")
-    if fact == "revision":
-        pointer = pointer.replace(pin["revision"], "").replace(pin["revision"][:12], "")
-    else:
-        pointer = pointer.replace(fact, "")
-    (tmp_path / ".github" / "GNN.md").write_text(pointer, encoding="utf-8")
-    with pytest.raises(ValueError, match="does not name"):
-        load_pin(tmp_path)
 
 
 def test_structural_drift_is_reported() -> None:
