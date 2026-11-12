@@ -123,7 +123,7 @@ All checks run through one entry point. `./run.sh` lists the arms; each arm is
 also what CI runs, so a local run and a CI run execute the same commands.
 
 ```bash
-./run.sh setup        # create .venv from uv.lock (dev extras)
+./run.sh setup        # create .venv from uv.lock (dev + llm extras)
 ./run.sh lint         # blocking static checks
 ./run.sh types        # mypy on the annotated GNN loader surface
 ./run.sh docs         # docs index freshness + relative link check

@@ -28,16 +28,22 @@ three more environments and CI is billing-locked for this organisation, so they
 cost the most and reported nothing locally. `requires-python = ">=3.10"` still
 describes the supported range; re-add a leg if version drift becomes a real
 risk. The job that runs the suite is now named `gate` (display name
-`gate (Python 3.13)`); the `gnn conformance (pinned)` job keeps its key
-(`gnn-conformance`) and display name because that name is the status-check
-context.
+`gate (Python 3.13)`) instead of `pytest (Python 3.x)`, so a branch-protection
+rule that requires the old contexts needs updating when Actions billing returns;
+the `gnn conformance (pinned)` job keeps its key (`gnn-conformance`) and display
+name because that name is the status-check context.
 
 ## Environment
 
 * `uv` **0.13.7** — `[tool.uv] required-version` in `pyproject.toml` enforces it.
-* `uv.lock` is committed; `./run.sh setup` is `uv sync --locked --extra dev`, so
-  a run refuses a lock that disagrees with `pyproject.toml` instead of resolving
-  something new.
+* `uv.lock` is committed; `./run.sh setup` is
+  `uv sync --locked --extra dev --extra llm`, so a run refuses a lock that
+  disagrees with `pyproject.toml` instead of resolving something new.
+* The `llm` extra is part of the gate environment, not an optional add-on: it is
+  light (`aiohttp`, `openai`, `python-dotenv`, `requests`) and it keeps
+  `tests/llm/test_openrouter_contract.py` and `tests/llm/test_llm_utils.py`
+  running instead of module-skipping. The old CI expressed the same intent by
+  installing `.[dev,llm]` on its 3.13 leg.
 * Python comes from `.python-version` (**3.13**) for the project environment;
   the GNN arm additionally provisions its own **3.12** interpreter for the
   pinned upstream parser.
@@ -52,7 +58,7 @@ Commands live in `scripts/gate.py`; this table only says what each arm covers.
 
 | Arm | What it checks | CI job |
 | --- | --- | --- |
-| `setup` | creates `.venv` from `uv.lock` with the dev extras | both jobs |
+| `setup` | creates `.venv` from `uv.lock` with the dev and llm extras | both jobs |
 | `lint` | `flake8` blocking selection: syntax errors, undefined names, broken f-strings over `src/`, `tests/`, `beyond_cerebrum/src/`, `scripts/` | `gate` |
 | `types` | `mypy` on `src/core/gnn.py`, the annotated GNN loader surface | `gate` |
 | `docs` | `docs/documentation-index.md` is current and every relative Markdown link resolves | `gate` |
@@ -66,6 +72,32 @@ Commands live in `scripts/gate.py`; this table only says what each arm covers.
 `./run.sh all` runs `lint`, `types`, `docs`, `test`, `gnn` in that order — the
 same five steps the two CI jobs run between them.
 
+## Measured arms
+
+Host `darwin-arm64`, CPython 3.13.17, uv 0.13.7, one run per arm on 2026-11-12.
+[`_generated/gate-metrics.md`](_generated/gate-metrics.md) is the authoritative,
+script-refreshed copy of these numbers; the table below is the one-off
+comparison against the commands the gate replaced, which no script can
+regenerate.
+
+| Arm | Wall time | What it produced | Before this gate |
+| --- | --- | --- | --- |
+| `setup` | 0.2 s warm (`uv` cache and an existing `.venv`) | locked environment | `uv venv` + `uv pip install -e ".[dev]"`, 1.8 s warm, once per CI job (5 jobs) |
+| `lint` | 1.9 s warm, 4.6 s cold | 0 findings in the blocking selection | no job; `flake8` full ruleset: 9508 findings |
+| `types` | 0.2 s with a warm mypy cache, 9.5 s cold | `src/core/gnn.py` clean | no job; `mypy src`: 640 errors |
+| `docs` | 0.5 s | index current, 0 broken relative links over 328 files (51 tool-generated files skipped) | nothing |
+| `test-fast` | 13.8 s | 714 passed, 16 deselected | nothing |
+| `test` | 272.9 s standalone, 319.2 s inside `./run.sh all` | 1289 passed, 1 skipped, 53.7% coverage | the same suite at 501.2 s, as a four-leg matrix |
+| `gnn` | 6.0 s (provisioning 5.47 s cold, 0.09 s on reuse; 23 passed) | pinned validator accepted the specification | inline workflow `bash`, not runnable locally as one command |
+| `debt` | 28.2 s | the four debt counts | nothing recorded |
+| `all` | 328.2 s | every arm above | — |
+
+The two full-suite numbers run the same pytest command over the same 1289
+tests. The earlier run overlapped another test run on this host, so the
+difference is host load, not the gate; no suite-speedup is claimed. The speedup
+that is real is local: `test-fast` answers in 13.8 s instead of a full suite, and
+a CI gate run needs two environments instead of five.
+
 ## Artifacts and generated documents
 
 `./run.sh` writes to `.gate/` (gitignored): `timings.jsonl` (per-arm wall time
@@ -78,19 +110,29 @@ GNN checkout. Two documents are generated from those artifacts and the tree:
 | [`docs/documentation-index.md`](documentation-index.md) | `./run.sh docs-index` | `./run.sh docs` |
 
 Never type a number into those pages. Run the arms, then refresh the page; the
-numbers in the metrics page are the ones the arms recorded.
+numbers in the metrics page are the ones the arms recorded. `metrics --check`
+compares the page against the artifacts on disk, so it reports staleness after
+any arm run that happened later than the last `./run.sh metrics`; refresh and
+commit as the final step of a measurement.
+
+The [measured comparison](#measured-arms) above is the
+one table that cannot be regenerated: it records what the commands the gate
+replaced used to cost.
 
 ## test-fast is a path selection, not a marker selection
 
 `pytest.ini` declares `unit`, `integration`, `slow`, `visualization`,
 `end_to_end` and `regression` markers, but the suite does not use them:
-`pytest -m slow` selects **0** of the 1181 collected tests (likewise
+`pytest -m slow` selects **0** of the 1289 collected tests (likewise
 `-m visualization` and `-m end_to_end`), and 60 of the 72 `test_*.py` files in
 the collected trees carry no marker at all. A marker-based "fast" arm would
 therefore run essentially the whole suite. `test-fast` selects the logic core by
 path instead (`tests/core`, `tests/cases`, `tests/transformations`,
-`tests/utils`, and `beyond_cerebrum/src/tests`), which is honest about what it
-covers: it is a quick pre-flight, not a substitute for `./run.sh test`.
+`tests/utils`, and `beyond_cerebrum/src/tests`) and deselects the two slowest
+core files, `tests/core/test_neural_network.py` and
+`tests/core/test_active_inference_pomdp.py`, which account for about a third of
+the full run. It is honest about what it covers: a quick pre-flight, not a
+substitute for `./run.sh test`.
 
 Populating the markers would let the arm become a marker selection; that is a
 real change to the suite and is not part of this gate.
@@ -141,3 +183,6 @@ file or an extra pytest flag still works without bypassing the gate:
 ./run.sh test tests/core/test_model.py -v
 ./run.sh test-fast -x
 ```
+
+Arms made of more than one step (`docs`, `gnn`) refuse extra arguments instead
+of guessing which step they belong to.

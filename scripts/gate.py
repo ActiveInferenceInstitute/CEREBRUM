@@ -61,6 +61,9 @@ class Arm:
     help: str
     steps: tuple[Step, ...]
     needs_venv: bool = True
+    # `metrics` renders the timing table, so recording its own run would make
+    # the freshly written document stale by one row.
+    record: bool = True
 
 
 def py(*args: str) -> tuple[str, ...]:
@@ -70,8 +73,11 @@ def py(*args: str) -> tuple[str, ...]:
 ARMS: dict[str, Arm] = {
     "setup": Arm(
         "setup",
-        "create .venv from uv.lock with the dev extras (uv must be on PATH)",
-        (Step(("uv", "sync", "--locked", "--extra", "dev")),),
+        "create .venv from uv.lock with the dev and llm extras (uv must be on PATH)",
+        # `llm` is light (aiohttp, openai, python-dotenv, requests) and keeps
+        # tests/llm/test_openrouter_contract.py and tests/llm/test_llm_utils.py
+        # running instead of module-skipping, which is what the old CI leg did.
+        (Step(("uv", "sync", "--locked", "--extra", "dev", "--extra", "llm")),),
         needs_venv=False,
     ),
     "lint": Arm(
@@ -109,7 +115,7 @@ ARMS: dict[str, Arm] = {
     ),
     "test-fast": Arm(
         "test-fast",
-        "quick logic-core pass (tests/core, cases, transformations, utils, beyond_cerebrum)",
+        "quick logic-core pass (core, cases, transformations, utils, beyond_cerebrum)",
         (
             Step(
                 py(
@@ -122,6 +128,12 @@ ARMS: dict[str, Arm] = {
                     "tests/transformations",
                     "tests/utils",
                     "beyond_cerebrum/src/tests",
+                    # The two slowest core files (measured: ~120 s and ~100 s of
+                    # the full run) belong to `test`, not to the quick pass.
+                    "--deselect",
+                    "tests/core/test_neural_network.py",
+                    "--deselect",
+                    "tests/core/test_active_inference_pomdp.py",
                 )
             ),
         ),
@@ -164,6 +176,7 @@ ARMS: dict[str, Arm] = {
         "render docs/_generated/gate-metrics.md from the recorded artifacts",
         (Step(py("scripts/docgen/gate_metrics.py")),),
         needs_venv=False,
+        record=False,
     ),
     "all": Arm("all", "lint, types, docs, test, gnn", ()),
 }
@@ -173,9 +186,11 @@ ALL_SEQUENCE = ("lint", "types", "docs", "test", "gnn")
 
 def record_environment() -> None:
     uv = subprocess.run(["uv", "--version"], capture_output=True, text=True, check=False)
+    tokens = uv.stdout.split()
     record = {
         "python": platform.python_version(),
-        "uv": uv.stdout.strip() if uv.returncode == 0 else "unavailable",
+        # `uv 0.13.7 (Homebrew ...)` -> record just the version token.
+        "uv": tokens[1] if uv.returncode == 0 and len(tokens) > 1 else "unavailable",
         "host": f"{platform.system().lower()}-{platform.machine()}",
     }
     GATE_DIR.mkdir(exist_ok=True)
@@ -196,9 +211,17 @@ def run_arm(arm: Arm) -> int:
             exit_code = result.returncode
             break
     elapsed = time.perf_counter() - started
+    if not arm.record:
+        print(f"[{arm.name}] finished in {elapsed:.1f}s (not recorded)", flush=True)
+        return exit_code
     record = {
         "arm": arm.name,
-        "argv": [str(part) for part in arm.steps[0].argv]
+        # Record `python ...` rather than the absolute interpreter path so the
+        # published command is reproducible on another machine.
+        "argv": [
+            "python" if str(part) == sys.executable else str(part).replace(f"{ROOT}/", "")
+            for part in arm.steps[0].argv
+        ]
         + (["..."] if len(arm.steps) > 1 else []),
         "seconds": round(elapsed, 2),
         "exit": exit_code,
@@ -251,10 +274,17 @@ def main(argv: list[str] | None = None) -> int:
 
     arm = ARMS[name]
     if args.rest:
+        if len(arm.steps) != 1:
+            print(
+                f"arm '{name}' has {len(arm.steps)} steps; run its scripts directly "
+                "rather than forwarding arguments",
+                file=sys.stderr,
+            )
+            return 2
         arm = Arm(
             arm.name,
             arm.help,
-            tuple(Step((*arm.steps[0].argv, *args.rest), arm.steps[0].env), *arm.steps[1:]),
+            (Step((*arm.steps[0].argv, *args.rest), arm.steps[0].env),),
             arm.needs_venv,
         )
     if arm.needs_venv and Path(sys.executable).resolve() != VENV_PYTHON.resolve():

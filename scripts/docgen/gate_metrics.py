@@ -77,11 +77,18 @@ def read_junit(path: Path) -> dict:
     return totals
 
 
+def repo_relative(arg: str, root: Path) -> str:
+    """Drop the repository prefix so a published command is portable."""
+    prefix = f"{root}/"
+    return arg.replace(prefix, "") if prefix in arg else arg
+
+
 def fmt_seconds(value: float) -> str:
     return f"{value:.1f} s"
 
 
 def render(gate_dir: Path) -> str:
+    root = gate_dir.parent
     timings = read_timings(gate_dir / "timings.jsonl")
     junit = read_junit(gate_dir / "junit.xml")
     coverage = read_json(gate_dir / "coverage.json").get("totals", {})
@@ -114,7 +121,7 @@ def render(gate_dir: Path) -> str:
     if timings:
         for arm in sorted(timings):
             record = timings[arm]
-            command = shlex.join(record.get("argv", []))
+            command = shlex.join(repo_relative(str(arg), root) for arg in record.get("argv", []))
             exit_code = record.get("exit", "?")
             status = "0" if exit_code == 0 else f"**{exit_code}**"
             lines.append(

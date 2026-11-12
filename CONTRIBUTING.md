@@ -137,7 +137,7 @@ Thank you for your interest in contributing to CEREBRUM! We welcome contribution
 Every check runs through one entry point, and CI calls the same arms:
 
 ```bash
-./run.sh setup     # create .venv from uv.lock (dev extras)
+./run.sh setup     # create .venv from uv.lock (dev + llm extras)
 ./run.sh all       # lint, types, docs, test, gnn conformance
 ```
 

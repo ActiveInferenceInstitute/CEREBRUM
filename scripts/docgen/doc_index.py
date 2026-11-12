@@ -40,8 +40,10 @@ def repo_root() -> Path:
 
 
 def tracked_docs(root: Path) -> list[Path]:
+    # Tracked plus new-but-not-ignored files, so a document can be indexed and
+    # link-checked before it is committed.
     result = subprocess.run(
-        ["git", "-C", str(root), "ls-files", "-z", "--", "docs/*.md"],
+        ["git", "-C", str(root), "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "docs/*.md"],
         capture_output=True,
         check=True,
     )

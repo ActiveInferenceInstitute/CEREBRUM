@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Everything goes through one gate entry point; `./run.sh` lists the arms.
-./run.sh setup         # create .venv from uv.lock (dev extras)
+./run.sh setup         # create .venv from uv.lock (dev + llm extras)
 ./run.sh lint          # blocking static checks (syntax / undefined names)
 ./run.sh types         # mypy on src/core/gnn.py
 ./run.sh docs          # docs index freshness + relative link check

@@ -61,7 +61,6 @@ Generated pages are views over checked-in sources or run artifacts. If a number
 or a file list is wrong, fix the producer and regenerate; do not patch the page.
 
 
-
 ## Core Concepts
 
 CEREBRUM is built around several key concepts:

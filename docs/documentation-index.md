@@ -8,11 +8,12 @@ files themselves. Titles come from each file's first heading and descriptions fr
 first paragraph, so this page is a view of the tree rather than a second place to
 maintain it. The curated entry points are in [`docs/README.md`](README.md).
 
-Totals: **239 documents** in **10 sections** (`python scripts/docgen/doc_index.py --check` verifies this page).
+Totals: **241 documents** in **11 sections** (`python scripts/docgen/doc_index.py --check` verifies this page).
 
 | Section | Documents |
 | --- | --- |
-| [`docs/`](./) | 13 |
+| [`docs/`](./) | 14 |
+| [`docs/_generated/`](_generated/) | 1 |
 | [`docs/diagrams/`](diagrams/) | 4 |
 | [`docs/diagrams/templates/`](diagrams/templates/) | 8 |
 | [`docs/dialogs/`](dialogs/) | 20 |
@@ -29,6 +30,7 @@ Totals: **239 documents** in **10 sections** (`python scripts/docgen/doc_index.p
 | --- | --- | --- |
 | [`AGENTS.md`](AGENTS.md) | Documentation Context | This directory contains all documentation for the CEREBRUM framework, split into conceptual guides, technical specifications, and language-specific... |
 | [`README.md`](README.md) | CEREBRUM Documentation | Welcome to the CEREBRUM documentation. This directory contains comprehensive documentation for the Case-Enabled Reasoning Engine with Bayesian Repr... |
+| [`RUN_GUIDE.md`](RUN_GUIDE.md) | Gate and CI run guide | ./run.sh is the single gate entry point for this repository. It runs the arms |
 | [`active_inference_integration.md`](active_inference_integration.md) | Active Inference Integration in CEREBRUM | This document details how the CEREBRUM framework integrates with Active Inference principles, providing a mathematically rigorous foundation for ca... |
 | [`cerebrum_core_spec.md`](cerebrum_core_spec.md) | CEREBRUM Core Specification | CEREBRUM (Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling) provides a framework for cognitive models that can assu... |
 | [`contributing_documentation.md`](contributing_documentation.md) | Documentation & Educational Contribution Guide for CEREBRUM | This guide provides detailed information for contributors interested in improving CEREBRUM's documentation, educational resources, and learning mat... |
@@ -40,6 +42,12 @@ Totals: **239 documents** in **10 sections** (`python scripts/docgen/doc_index.p
 | [`language_implementations.md`](language_implementations.md) | CEREBRUM Language Implementation Guidelines | This document provides guidelines for implementing CEREBRUM in different programming languages, ensuring consistency while allowing language-specif... |
 | [`language_nuance_handling.md`](language_nuance_handling.md) | Language Nuance Handling in CEREBRUM's Active Inference Model | This document explains how CEREBRUM's active inference model handles and exploits nuances in different languages, leveraging its case-based archite... |
 | [`model_examples.md`](model_examples.md) | CEREBRUM Model Examples | This document provides concrete examples of CEREBRUM models in various domains, demonstrating how the case system can be applied to real-world prob... |
+
+## docs/_generated/
+
+| Document | Title | Description |
+| --- | --- | --- |
+| [`_generated/gate-metrics.md`](_generated/gate-metrics.md) | Gate metrics | Measured numbers for ./run.sh (the local gate). Every value below is read from an |
 
 ## docs/diagrams/
 

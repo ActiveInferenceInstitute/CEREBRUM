@@ -41,7 +41,7 @@ These scripts follow the **thin orchestrator** pattern:
 The paper and setup scripts require the CEREBRUM package to be installed:
 
 ```bash
-./run.sh setup    # uv sync --locked --extra dev
+./run.sh setup    # uv sync --locked --extra dev --extra llm
 ```
 
 The gate and documentation scripts need only Python 3.13's standard library

@@ -97,8 +97,10 @@ def iter_links(text: str) -> list[str]:
 
 
 def tracked_markdown(root: Path) -> list[Path]:
+    # Tracked plus new-but-not-ignored files: a document should be link-checked
+    # before it is committed, not only after.
     result = subprocess.run(
-        ["git", "-C", str(root), "ls-files", "-z", "--", "*.md"],
+        ["git", "-C", str(root), "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "*.md"],
         capture_output=True,
         check=False,
     )
