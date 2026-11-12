@@ -39,6 +39,28 @@ Each subdirectory has its own index; start there for the full listings.
 - **[Languages](languages/README.md)**: Natural- and programming-language case analyses
 - **[Speculative Design](speculative_design/README.md)**: Experimental design essays
 
+## Gates, generated pages, and the GNN pin
+
+- **[RUN_GUIDE.md](RUN_GUIDE.md)**: the local gate. One entry point (`./run.sh`)
+  with separately runnable arms (lint, types, docs, tests, GNN conformance),
+  the CI job mapping, and the measured arm timings.
+- **[documentation-index.md](documentation-index.md)**: generated flat index of
+  every Markdown document under `docs/`. Regenerate with `./run.sh docs-index`;
+  `./run.sh docs` fails when it is stale. Never edit it by hand.
+- **[_generated/gate-metrics.md](_generated/gate-metrics.md)**: generated
+  measured numbers (per-arm wall time, test counts, coverage, static-analysis
+  debt). Regenerate with `./run.sh metrics` from the `.gate/` run artifacts.
+- **[../.github/GNN.md](../.github/GNN.md)**: the GNN conformance job
+  (`gnn conformance (pinned)`) and the pin it reads,
+  [`../.github/gnn-pin.json`](../.github/gnn-pin.json) (`gnn-importer-pin/v1`,
+  upstream `v5.0.3`, revision `8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1`).
+- **[../models/README.md](../models/README.md)**: the specification itself, its
+  loader (`src/core/gnn.py`), and the drift guard.
+
+Generated pages are views over checked-in sources or run artifacts. If a number
+or a file list is wrong, fix the producer and regenerate; do not patch the page.
+
+
 ## Core Concepts
 
 CEREBRUM is built around several key concepts:

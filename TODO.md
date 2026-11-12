@@ -20,6 +20,29 @@ run; the baseline was 1 failed / 1144 passed / 3 skipped). Targeted module
 suites (core, cases, transformations, utils/data_generator, lexicon, visualization)
 all green (442 passed in the combined post-isort check).
 
+### Gate, CI and documentation (2026-11-12)
+- [x] **One gate entry point** — `./run.sh` dispatches the arms defined in
+      `scripts/gate.py` (`setup`, `lint`, `types`, `docs`, `test-fast`, `test`,
+      `gnn`, `debt`, `metrics`, `docs-index`); every arm is timed into
+      `.gate/timings.jsonl`. See [docs/RUN_GUIDE.md](docs/RUN_GUIDE.md).
+- [x] **CI calls the arms** — two jobs (`gate`, `gnn-conformance`) instead of a
+      four-leg pytest matrix plus a hand-written GNN job; one `uv.lock`, one
+      `uv sync --locked --extra dev --extra llm` per job, Python and uv from the
+      pinned estate composite action.
+- [x] **GNN provisioning scripted** — `scripts/gnn_checkout.py` materialises the
+      revision in `.github/gnn-pin.json` (`gnn-importer-pin/v1`, `v5.0.3`,
+      `8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1`) into `.gate/gnn`, so the
+      workflow and a local run provision it the same way.
+- [x] **Generated documentation** — `docs/documentation-index.md` (flat index of
+      the `docs/` tree) and `docs/_generated/gate-metrics.md` (per-arm wall
+      time, test counts, coverage, static-analysis debt) are produced by
+      scripts and checked by the `docs`/`metrics` arms; no measured number is
+      typed by hand.
+- [x] **Link check** — `scripts/check_links.py` resolves every relative Markdown
+      link (no network). It found and we fixed an unresolvable
+      `/Supplement_C_3_...` target and a prose line that Markdown parsed as a
+      link definition.
+
 ### Mathematics / Core correctness
 - [x] **free_energy() KL-divergence corrected** (`src/core/active_inference.py`).
       The complexity term used an inverted trace and an inverted log-det ratio;

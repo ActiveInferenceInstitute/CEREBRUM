@@ -5,29 +5,30 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-# Setup (uses uv for dependency management)
-uv venv && source .venv/bin/activate
-uv pip install -e ".[dev]"       # development dependencies
-uv pip install -e ".[all]"       # all optional dependencies including lexicon and llm
+# Everything goes through one gate entry point; `./run.sh` lists the arms.
+./run.sh setup         # create .venv from uv.lock (dev + llm extras)
+./run.sh lint          # blocking static checks (syntax / undefined names)
+./run.sh types         # mypy on src/core/gnn.py
+./run.sh docs          # docs index freshness + relative link check
+./run.sh test-fast     # logic-core test selection
+./run.sh test          # full suite with coverage + JUnit report
+./run.sh gnn           # pinned-upstream GNN conformance (provisions .gate/gnn)
+./run.sh all           # lint, types, docs, test, gnn
 
-# Run all tests
-pytest
+# Regenerate the generated docs after a run
+./run.sh docs-index                       # docs/documentation-index.md
+./run.sh debt                             # static-analysis debt counts
+./run.sh metrics                          # docs/_generated/gate-metrics.md
 
-# Run a single test file
-pytest tests/cases/test_case_manager.py -v
+# Debugging: a single test file
+uv run python -m pytest tests/cases/test_case_manager.py -v
 
-# GNN specification drift guard (model structure vs. implementation)
-pytest tests/core/test_gnn_spec.py -v
+# GNN specification drift guard, against a sibling GNN checkout
+GNN_CHECKOUT=../Generalized_Notation_Notation uv run python -m pytest tests/core/test_gnn_spec.py -v
 
-# Run tests by marker
-pytest -m unit
-pytest -m integration
-
-# Linting and formatting
-black src/ tests/          # format code (line-length: 100)
-isort src/ tests/           # sort imports
-flake8 src/                 # lint
-mypy src/                   # type check
+# Fix formatting in files you touched (the tree is not black-clean; do not reformat
+# unrelated files — see `./run.sh debt` for the current count)
+black <file>; isort --profile black --line-length 100 <file>
 
 # Run the comprehensive test suite across all case types
 python src/scripts/test_all_cases.py
