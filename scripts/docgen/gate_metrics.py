@@ -12,6 +12,10 @@ Inputs (all under ``.gate/``, all written by ``./run.sh``):
 ``coverage.json``   ``./run.sh test`` coverage report
 ``debt.json``       ``./run.sh debt`` static-analysis counts
 
+The pre-gate receipts in ``scripts/docgen/baseline.json`` are historical data
+(no script can re-measure the commands the gate replaced); their "now" column is
+joined to the recorded arm timings so it cannot drift from the artifacts.
+
 Usage::
 
     ./run.sh metrics            # rewrite docs/_generated/gate-metrics.md
@@ -111,7 +115,9 @@ def render(gate_dir: Path) -> str:
     )
     lines.append(f"| Python | `{environment.get('python', platform.python_version())}` |")
     lines.append(f"| uv | `{environment.get('uv', 'not recorded; run ./run.sh setup')}` |")
-    lines.append("| Timing method | one run per arm, wall clock, cold cache not enforced |")
+    lines.append(
+        "| Timing method | last recorded run per arm; wall clock, warm cache, host load not controlled |"
+    )
     lines.append("")
 
     lines.append("## Arms")
@@ -129,6 +135,36 @@ def render(gate_dir: Path) -> str:
             )
     else:
         lines.append("| — | no arm has been recorded yet: run `./run.sh <arm>` | — | — |")
+    lines.append("")
+
+    baseline = read_json(root / "scripts" / "docgen" / "baseline.json")
+    lines.append("## Comparison with the pre-gate commands")
+    lines.append("")
+    entries = baseline.get("entries", [])
+    if entries:
+        lines.append(
+            f"Receipts recorded on `{baseline.get('host', '?')}`, CPython "
+            f"`{baseline.get('python', '?')}`, uv `{baseline.get('uv', '?')}` "
+            f"on {baseline.get('recorded', '?')} ({baseline.get('how_measured', '')}). "
+            "The *now* column is the last recorded run of that arm, so it moves with "
+            "the artifacts instead of being copied."
+        )
+        lines.append("")
+        lines.append("| Work | Before the gate | Now (arm, last run) | Note |")
+        lines.append("| --- | --- | --- | --- |")
+        for entry in entries:
+            arm = entry.get("arm")
+            record = timings.get(arm) if arm else None
+            now = (
+                f"`{arm}`: {fmt_seconds(float(record.get('seconds', 0.0)))}"
+                if record
+                else ("not run yet" if arm else "—")
+            )
+            note = str(entry.get("note", "")).replace("|", "\\|")
+            before = str(entry.get("before", "—")).replace("|", "\\|")
+            lines.append(f"| {entry.get('work', '?')} | {before} | {now} | {note} |")
+    else:
+        lines.append("No pre-gate receipts recorded in `scripts/docgen/baseline.json`.")
     lines.append("")
 
     lines.append("## Test suite")
