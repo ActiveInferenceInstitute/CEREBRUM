@@ -226,7 +226,8 @@ def test_case_transformations_scale_the_declared_matrices(case: Case) -> None:
 
 def test_pin_record_matches_the_specification() -> None:
     pin = _pin()
-    assert pin["schema"] == "cerebrum-gnn-pin-v1"
+    assert pin["schema"] == "gnn-importer-pin/v1"
+    assert pin["recorded"] == "2026-11-12"
     assert pin["tag"] == "v5.0.3"
     assert pin["version"] == "5.0.3"
     assert pin["revision"] == "8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1"
