@@ -186,3 +186,6 @@ tests/pytest_run.log
 # Personal tool artifacts (must never be committed to this public repo)
 ~/
 .desloppify/
+
+# Local gate artifacts (timings, JUnit, coverage, pinned GNN checkout)
+.gate/
