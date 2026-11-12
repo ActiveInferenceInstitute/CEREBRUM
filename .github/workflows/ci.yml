@@ -12,93 +12,63 @@ concurrency:
 permissions:
   contents: read
 
+# Every step below is one arm of ./run.sh. The arms are defined once, in
+# scripts/gate.py, and the same commands run locally; see docs/RUN_GUIDE.md.
+# There is one environment per job (uv.lock, Python from .python-version) and
+# no workspace step repeats a command another job already runs.
 jobs:
-  test:
+  gate:
     timeout-minutes: 60
-    name: pytest (Python ${{ matrix.python-version }})${{ matrix.extras && ' + llm extra' || '' }}
+    name: gate (Python 3.13)
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
-        include:
-          # One leg installs the light `llm` extra so the OpenRouter contract tests
-          # run instead of skipping. The heavier `lexicon` extra stays out of CI.
-          - python-version: "3.13"
-            extras: "dev,llm"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - name: Set up Python and uv
+        uses: ActiveInferenceInstitute/.github/.github/actions/setup-python-uv@7159e67315330aac8e414aebae0ad1e999a41448
         with:
-          version: "0.13.7"
-          python-version: ${{ matrix.python-version }}
-          # v5 created and activated the venv implicitly; from v6 on that is
-          # opt-in, and the next step's `uv pip install -e` needs it active.
-          activate-environment: true
+          python-version: "3.13"
+          uv-version: "0.13.7"
 
-      - name: Install dependencies
-        run: uv pip install -e ".[${{ matrix.extras || 'dev' }}]"
+      - name: Create the locked environment
+        run: ./run.sh setup
 
-      - name: Run test suite
-        run: uv run python -m pytest -q --cov=src --cov-report=term-missing
+      - name: Lint
+        run: ./run.sh lint
+
+      - name: Types
+        run: ./run.sh types
+
+      - name: Docs
+        run: ./run.sh docs
+
+      - name: Tests
+        run: ./run.sh test
 
   gnn-conformance:
     timeout-minutes: 60
     # Validates models/case_conditioned_active_inference.gnn.md with the upstream
-    # parser revision pinned in .github/gnn-pin.json. The pinned revision is
-    # fetched from the public repository at the recorded SHA into its own
-    # runtime; tests/core/test_gnn_spec.py fails (never skips) when the
-    # explicitly selected checkout is missing or unusable, so the pin is
-    # checked here rather than assumed.
+    # parser revision pinned in .github/gnn-pin.json. tests/core/test_gnn_spec.py
+    # fails (never skips) when GNN_CHECKOUT selects a missing or unusable
+    # checkout, so the pin is checked here rather than assumed. The job name is
+    # the status-check context; do not rename it without updating protection.
     name: gnn conformance (pinned)
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+      - name: Set up Python and uv
+        uses: ActiveInferenceInstitute/.github/.github/actions/setup-python-uv@7159e67315330aac8e414aebae0ad1e999a41448
         with:
-          version: "0.13.7"
-          python-version: "3.12"
-          # v5 created and activated the venv implicitly; from v6 on that is
-          # opt-in, and the next step's `uv pip install -e` needs it active.
-          activate-environment: true
+          python-version: "3.13"
+          uv-version: "0.13.7"
 
-      - name: Install dependencies
-        run: uv pip install -e ".[dev]"
+      - name: Create the locked environment
+        run: ./run.sh setup
 
-      - name: Provision the pinned GNN parser runtime
-        env:
-          GNN_CHECKOUT: ${{ runner.temp }}/gnn
-        run: |
-          REVISION=$(python -c "import json; print(json.load(open('.github/gnn-pin.json'))['revision'])")
-          TAG=$(python -c "import json; print(json.load(open('.github/gnn-pin.json'))['tag'])")
-          git init --quiet "$GNN_CHECKOUT"
-          git -C "$GNN_CHECKOUT" remote add origin \
-            https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation.git
-          # A pin that no longer resolves upstream fails here rather than skipping.
-          git -C "$GNN_CHECKOUT" fetch --depth 1 origin "$REVISION" "refs/tags/$TAG:refs/tags/$TAG"
-          git -C "$GNN_CHECKOUT" checkout --quiet --detach "$REVISION"
-          uv venv --python 3.12 --no-project "$GNN_CHECKOUT/.venv"
-          # The pinned parser CLI imports numpy, defusedxml and psutil; a missing
-          # dependency fails the run loudly instead of degrading to a skip.
-          uv pip install --python "$GNN_CHECKOUT/.venv/bin/python" numpy defusedxml psutil
-
-      - name: Run the pinned-upstream conformance tests
-        env:
-          GNN_CHECKOUT: ${{ runner.temp }}/gnn
-        # The activated environment from the install step, not `uv run`: the
-        # point of the job is to exercise the environment it just built.
-        run: python -m pytest tests/core/test_gnn_spec.py -q
+      - name: Pinned GNN conformance
+        run: ./run.sh gnn
 
       - name: Report the resolved GNN version
         run: |
-          PIN=.github/gnn-pin.json
-          VERSION=$(python3 -c "import json;print(json.load(open('$PIN'))['version'].removeprefix('v'))")
-          test -n "$VERSION"
-          TAG=$(python3 -c "import json;print(json.load(open('$PIN'))['tag'])")
-          test "$VERSION" = "${TAG#v}"
-          echo "gnn-version=${VERSION}" >> "$GITHUB_STEP_SUMMARY"
+          python3 -c "import json;pin=json.load(open('.github/gnn-pin.json'));print('gnn-version='+pin['version'])" >> "$GITHUB_STEP_SUMMARY"
