@@ -187,7 +187,8 @@ checkout is available.
 For new model work, start from the upstream [framework integration
 guide](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1/docs/gnn/integration/framework_integration_guide.md)
 and the [downstream adoption
-guide](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/1f3abb56e25886dfa6ddc49c76af7b723941485a/docs/gnn/integration/downstream_adoption.md).
+guide](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/main/docs/gnn/integration/downstream_adoption.md)
+(later than `v5.0.3`, so linked on the upstream default branch rather than the pin).
 
 Related Active Inference Institute repositories that already declare models this
 way:
