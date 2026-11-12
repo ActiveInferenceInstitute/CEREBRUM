@@ -59,6 +59,10 @@ The script performs the following steps:
 
 All output files are placed in the `paper/output/` directory.
 
+The command exits nonzero if figure rendering, Markdown assembly, HTML conversion,
+or PDF conversion fails. It still attempts the remaining independent steps so their
+diagnostics are available; a failed Markdown assembly skips both conversions.
+
 ### Prerequisites
 
 To build the paper, you need:
