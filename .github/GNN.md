@@ -52,4 +52,4 @@ Both CI jobs set up Python and uv with the estate composite action, pinned by
 commit: `ActiveInferenceInstitute/.github/.github/actions/setup-python-uv@7159e67315330aac8e414aebae0ad1e999a41448`.
 It installs a pinned `uv` (`0.13.7`, which `[tool.uv] required-version` in
 `pyproject.toml` also enforces) and a CPython interpreter; the project
-environment itself comes from `./run.sh setup` (`uv sync --locked --extra dev`).
+environment itself comes from `./run.sh setup` (`uv sync --locked --extra dev --extra llm`).

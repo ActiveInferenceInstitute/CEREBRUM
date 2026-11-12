@@ -508,8 +508,9 @@ def convert_to_pdf(md_path, pdf_path):
 
 # --- Execution ---
 
-if __name__ == "__main__":
+def main() -> int:
     logging.info("--- Starting Paper Assembly Process ---")
+    exit_code = 0
 
     # 1. Render Mermaid figures to PNG
     logging.info("--- Step 1: Rendering Mermaid Figures ---")
@@ -517,7 +518,8 @@ if __name__ == "__main__":
     if render_success:
         logging.info("All Mermaid figures rendered successfully.")
     else:
-        logging.warning("Some Mermaid figures failed to render, but continuing with assembly process.")
+        logging.error("Some Mermaid figures failed to render, but continuing with assembly process.")
+        exit_code = 1
     
     # 2. Assemble main Markdown components
     logging.info("--- Step 2: Assembling Markdown Components ---")
@@ -535,6 +537,7 @@ if __name__ == "__main__":
             logging.info("HTML conversion successful.")
         else:
             logging.error("HTML conversion failed.")
+            exit_code = 1
             # Continue to PDF regardless of HTML result
 
         # 4. Convert to PDF
@@ -543,8 +546,15 @@ if __name__ == "__main__":
              logging.info("PDF conversion successful.")
         else:
              logging.error("PDF conversion failed.")
+             exit_code = 1
 
     else:
         logging.error("Markdown assembly failed. Skipping HTML and PDF conversion.")
+        exit_code = 1
 
     logging.info("--- Paper Assembly Process Finished ---") 
+    return exit_code
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
