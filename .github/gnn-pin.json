@@ -1,7 +1,8 @@
 {
-  "schema": "cerebrum-gnn-pin-v1",
+  "schema": "gnn-importer-pin/v1",
   "tag": "v5.0.3",
   "revision": "8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1",
+  "recorded": "2026-11-12",
   "version": "5.0.3",
   "spec_directory": "models",
   "spec_files": [
