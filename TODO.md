@@ -2,13 +2,13 @@
 
 > **Status**: Active
 > **Owner**: Daniel Ari Friedman
-> **Last reviewed**: 2026-11-01
+> **Last reviewed**: 2026-11-12
 
 This is the authoritative project backlog. It records completed work and the
-remaining **Major**-class items from the hostile red-team review pass of
-2026-08-01. The vast majority of review findings (Minor, Medium, and the bulk
-of the Major) were implemented during the 2026-08-01 review + remediation passes;
-the items below under "Major — Scoped (deferred)" are the few that remain open.
+items that are still open. Every completed line names the commit, PR or file that
+proves it; every open item names what blocks it and who can unblock it.
+**Open — 2026-11-12** at the end of this file is the current open list; the dated
+pass sections above it are history and are kept for the evidence trail.
 
 ---
 
@@ -46,11 +46,20 @@ all green (442 passed in the combined post-isort check).
       the `docs/` tree) and `docs/_generated/gate-metrics.md` (per-arm wall
       time, test counts, coverage, static-analysis debt) are produced by
       scripts and checked by the `docs`/`metrics` arms; no measured number is
-      typed by hand.
+      typed by hand. The `metrics` arm tolerates a fresh clone with no `.gate/`
+      artifacts (`e8ffc52`, #18), and the page is the only place measured
+      numbers live (`bef71b4`, #19).
 - [x] **Link check** — `scripts/check_links.py` resolves every relative Markdown
       link (no network). It found and we fixed an unresolvable
       `/Supplement_C_3_...` target and a prose line that Markdown parsed as a
       link definition.
+- [x] **Manuscript assembly reports failure** — `paper/assemble_paper.py` now
+      runs as `main() -> int` and exits nonzero when Mermaid rendering,
+      Markdown assembly, HTML conversion or PDF conversion fails, while still
+      attempting the remaining independent steps; a failed assembly skips both
+      conversions. `paper/README.md` documents the contract and
+      `tests/test_paper_assembly.py` covers it. Also aligns the `.aii` sidecar
+      `tasks.test` command with `./run.sh test`. (`6837324`, #21.)
 
 ### Mathematics / Core correctness
 - [x] **free_energy() KL-divergence corrected** (`src/core/active_inference.py`).
@@ -166,27 +175,30 @@ all green (442 passed in the combined post-isort check).
 
 ---
 
-## Major — Scoped (deferred)
+## Major — Scoped (closed)
 
-These are the **remaining** Major-class items intentionally NOT implemented this
-pass. Each is concrete and actionable.
+The one Major-class item deferred from the 2026-08-01 pass is closed; the entry
+is kept with its closure evidence.
 
-### 1. Lexicon component-architecture full unification (partial — data integrity done)
+### 1. Lexicon component-architecture full unification — closed 2026-08-18
 - **Files**: `src/lexicon/core/engine.py` getters `_get_nlp_preprocessor` /
   `_get_case_tagger` / `_get_paraphrase_generator`; the
   `NLPPreprocessor`/`CaseTagger` classes
-- **Why it matters**: The **data-integrity portion is done and verified** —
-  `_get_entity_deduplicator` + `_get_graph_assembler` are wired into
-  `_build_knowledge_graph`, producing deduplicated, stable CID-based node/claim
-  IDs (verified: 3 input entities incl. a duplicate → 2 unique nodes, stable IDs).
-  What remains is the larger architectural unification: the shipped `process_text`
-  path still uses its own inline LLM logic while the spaCy-based `NLPPreprocessor` /
-  `CaseTagger` component classes exist as a separate (largely unused) pipeline.
-- **Suggested fix**: Continue wiring `NLPPreprocessor`/`CaseTagger` into
-  `process_text` and remove the parallel inline implementation, or delete the
-  unused classes; add an integration test on the real path. This is intentionally
-  deferred because it is a large refactor of a live-API-dependent path that cannot
-  be fully validated without a real OpenRouter key/network.
+- **Why it mattered**: The **data-integrity portion was already done and
+  verified** — `_get_entity_deduplicator` + `_get_graph_assembler` are wired
+  into `_build_knowledge_graph`, producing deduplicated, stable CID-based
+  node/claim IDs (verified: 3 input entities incl. a duplicate → 2 unique
+  nodes, stable IDs). The remaining gap was that the shipped `process_text`
+  path kept its own inline LLM logic while the spaCy-based `NLPPreprocessor` /
+  `CaseTagger` component classes sat in a separate (largely unused) pipeline.
+- **Closed**: `process_text` now runs the unified pipeline — `NLPPreprocessor`
+  segments the text and `CaseTagger` applies the 8-case declension, surfaced as
+  `result["segments"]` / `result["cased_segments"]` in
+  `src/lexicon/core/engine.py`, with both stages degrading gracefully (warning
+  log, never abort). Verified live end-to-end against a real OpenRouter key
+  (see "Second pass — 2026-08-18" below) and guarded by
+  `src/lexicon/tests/test_integration_live.py` (`live` marker, skipped without
+  `OPENROUTER_API_KEY`).
 
 ---
 
@@ -252,13 +264,13 @@ findings). Test baseline verified on this date: **1242 collected, 1239 passed,
 
 - [x] **Paper figure path convention** — 17 placement tags in 5 components + `assembled_paper.md` + HTML normalized to bare `Figure_N.png` (matching `assemble_paper.py`); README clarified. (`60de1e1`)
 - [x] **Private `~/.claude/` artifact removed** from the public repo; `~/` + `.desloppify/` gitignored. (`32e253e`)
-- [x] **CI added** — `.github/workflows/ci.yml` (uv + pytest, Python 3.11–3.13) + README badge. Lint not added (pre-existing `src/llm` ruff debt).
+- [x] **CI added** — `.github/workflows/ci.yml` (uv + pytest, Python 3.11–3.13) + README badge. Lint was not added then (pre-existing `src/llm` debt); since 2026-11-12 `./run.sh lint` is a step in the `gate` job.
 - [x] **CITATION.cff + SECURITY.md added**.
 - [x] **Doc indexes completed** — dialogs, discussions, speculative_design, languages, computer.
-- ○ **Full paper regeneration** — deferred (heavy pandoc/xelatex/mmdc pipeline; committed artifacts self-consistent).
-- ○ **`.desloppify/` tracked artifacts** — gitignored; recommend `git rm -r .desloppify` if it shouldn't be public.
-- ○ **Zenodo deposit metadata** still NC-ND vs repo CC BY 4.0 — update the Zenodo record externally.
-- ○ **`src/llm` ruff debt (168 pre-existing errors)** — out of scope for this docs pass.
+- ○ **Full paper regeneration** — still open; see **Open — 2026-11-12** item 1 (the Mermaid CLI is absent, so figures cannot be re-rendered).
+- ○ **`.desloppify/` tracked artifacts** — still tracked as of 2026-11-12; see **Open — 2026-11-12** item 2.
+- ○ **Zenodo deposit metadata** — the reason shifted: the latest record (`15231156`, behind concept DOI `10.5281/zenodo.15170907`) sits at version 1.4 and declares no license, while the README badge points at the v1.0 record `15170908`; see **Open — 2026-11-12** item 3.
+- ○ **Static-analysis debt** — no longer unmeasured: the `debt` arm publishes flake8/black/isort/mypy counts in `docs/_generated/gate-metrics.md`; see **Open — 2026-11-12** item 4.
 
 ---
 
@@ -348,13 +360,84 @@ opt-in via `-m live` adds 1 more). Live key validated `moonshotai/kimi-k2`.
       the case-tagging mechanism (any populated slot) rather than a specific
       slot, which is model-dependent.
 
-### Deferred (unchanged)
+### Deferred (now tracked under "Open — 2026-11-12")
 
 - ~~Lexicon component-architecture full unification~~ — **completed** in the
   second 2026-08-18 pass above.
-- Full paper regeneration (heavy pandoc/xelatex pipeline) — committed
-  artifacts remain self-consistent.
-- `src/llm` ruff debt — pre-existing, out of scope.
+- Full paper regeneration and the static-analysis debt are still open; their
+  current blockers and owners are named under **Open — 2026-11-12** below.
+
+---
+
+## Open — 2026-11-12
+
+The current open list, checked against the working tree, `git log` and the
+`.gate/` artifacts on 2026-11-12. Nothing is listed here without a path, commit
+or measured receipt behind it.
+
+### 1. Full manuscript regeneration — blocked on the Mermaid CLI
+- **Evidence**: `paper/output/` still holds the April 2025 builds
+  (`CEREBRUM_1-4_April-16-2025.pdf`, `Figure_1.png`, …) while the package is
+  `1.5.0` (`pyproject.toml`). The last commit touching `paper/` is `6837324`
+  (#21), which only made failures fatal; it rebuilt nothing.
+  `paper/assemble_paper.py` now exits nonzero when figure rendering, assembly,
+  HTML or PDF conversion fails, so a partial rebuild cannot pass silently.
+- **Blocker**: `mmdc` (Mermaid CLI) is missing on the review host
+  (`command -v mmdc` → not found); `pandoc` and `xelatex` are installed. The
+  figures under `paper/components/figures/` cannot be re-rendered without it.
+- **Owner / unblock**: Daniel Ari Friedman (paper toolchain) — install
+  `@mermaid-js/mermaid-cli`, then run `python paper/assemble_paper.py` and
+  commit the regenerated artifacts.
+
+### 2. `.desloppify/` review-session artifacts are still tracked
+- **Evidence**: `git ls-files .desloppify` lists the 2026-03 external review
+  sessions, e.g.
+  `.desloppify/external_review_sessions/ext_20260306_020130_fb621885/review_result.json`
+  and `.../claude_launch_prompt.md`. `.desloppify/` is already in `.gitignore`,
+  so the tracked copies are the unfinished half of the 2026-08-02 note's
+  `git rm -r .desloppify` recommendation.
+- **Blocker**: none technical; it needs a maintainer call on whether those
+  review transcripts belong in the public repository.
+- **Owner / unblock**: Daniel Ari Friedman — decide, then
+  `git rm -r --cached .desloppify`.
+
+### 3. Zenodo deposit lags the repository, and the README badge points at v1.0
+- **Evidence** (Zenodo API, 2026-11-12): record `15231156` — the latest version
+  behind concept DOI `10.5281/zenodo.15170907` — reports `version: 1.4`,
+  `publication_date: 2025-04-16` and no license field. Record `15170908`, the
+  DOI in the README badge at `README.md:3`, reports `version: 1.0`. The
+  repository is `1.5.0` under CC BY 4.0 (`pyproject.toml`, `LICENSE`,
+  `CITATION.cff`).
+- **Blocker**: publishing a new Zenodo version needs the depositor's account;
+  repointing the badge and reconciling the citations is in-repo work that can
+  happen now.
+- **Owner / unblock**: Daniel Ari Friedman (Zenodo record owner) — deposit
+  1.5.0 with the CC BY 4.0 license set, then make `README.md:3`,
+  `README.md:41`, the README BibTeX entry and `CITATION.cff` name the same DOI.
+
+### 4. Static-analysis debt is measured but not gated
+- **Evidence**: `.gate/debt.json`, published in
+  `docs/_generated/gate-metrics.md` (recorded 2026-11-12): flake8 over `src`
+  9508 findings, `black --check src tests beyond_cerebrum/src` 247 files,
+  `isort --check-only` on the same paths 187 files, `mypy src` 640 errors.
+  `./run.sh lint` blocks only E9,F63,F7,F82.
+- **Blocker**: the size of the backlog; no single change closes it.
+- **Owner / unblock**: maintainers — ratchet one subtree per pull request and
+  let the published counts show the movement.
+
+### 5. Pre-commit hooks pin versions below the dev floors, and CI never runs pre-commit
+- **Evidence**: `.pre-commit-config.yaml` pins `black` 23.7.0, `flake8` 6.0.0,
+  `isort` 5.12.0, `mypy` v1.5.1 and `pre-commit-hooks` v4.4.0, while the
+  `pyproject.toml` `dev` extra requires `black>=26.10.1`, `flake8>=7.4.1`,
+  `isort>=9.0.2` and `mypy>=2.4.1`. No arm in `scripts/gate.py` runs
+  pre-commit, and `.github/workflows/ci.yml` runs only `setup`, `lint`, `types`,
+  `docs`, `test` and `gnn`.
+- **Blocker**: none technical, but the black hook (`files: ^src/.*\.py$`) would
+  fail on the current tree — `black --check` finds unformatted files under
+  `src`, part of the 247 counted in item 4 — so the hook bump and the
+  formatting have to land together.
+- **Owner / unblock**: maintainers — bump the hook revisions, then either format
+  `src` in the same change or scope the black hook while the debt shrinks.
 
 ---
 
