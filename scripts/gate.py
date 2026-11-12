@@ -161,9 +161,22 @@ ARMS: dict[str, Arm] = {
         (
             Step(py("scripts/gnn_checkout.py", "--dest", str(GNN_CHECKOUT))),
             Step(
-                py("-m", "pytest", "tests/core/test_gnn_spec.py", "-q", "--no-header"),
-                env={"GNN_CHECKOUT": str(GNN_CHECKOUT)},
+                (
+                    str(GNN_CHECKOUT / ".venv" / "bin" / "python"),
+                    "-m",
+                    "gnn.importers",
+                    "check",
+                    "--repo",
+                    ".",
+                    "--require-pointer",
+                    "--workflow",
+                    ".github/workflows/ci.yml",
+                    "--job",
+                    "gnn-conformance",
+                ),
+                env={"PYTHONPATH": str(GNN_CHECKOUT / "src")},
             ),
+            Step(py("-m", "pytest", "tests/core/test_gnn_spec.py", "-q", "--no-header")),
         ),
     ),
     "debt": Arm(

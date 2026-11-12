@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Provision the pinned Generalized Notation Notation checkout.
 
-The GNN conformance test (``tests/core/test_gnn_spec.py``) validates this
-repository's specification with the *upstream* parser at the revision recorded
-in ``.github/gnn-pin.json``. This script materialises that exact revision into a
+The GNN gate validates this repository's specification with the *upstream*
+reader and parser at the revision recorded in ``.github/gnn-pin.json``.
+This script materialises that exact revision into a
 throwaway checkout with its own interpreter, so the check never silently uses a
 sibling working copy.
 
-The layout it produces is the contract the test fixture expects: a Git checkout
-whose ``HEAD`` is the pinned revision plus a ``.venv/bin/python`` carrying the
+The layout it produces is the contract the gate expects: a Git checkout whose
+``HEAD`` is the pinned revision plus a ``.venv/bin/python`` carrying the
 parser's runtime dependencies (``numpy``, ``defusedxml``, ``psutil``).
 
 Idempotent: an existing checkout already at the pinned revision is reused, so

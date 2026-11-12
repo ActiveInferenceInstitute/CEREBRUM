@@ -1,26 +1,15 @@
-"""GNN specification conformance and pinned-upstream validation tests.
+"""Keep the GNN specification aligned with CEREBRUM's implemented model.
 
-These tests keep three things in agreement: the GNN specification in
-``models/``, the parameters and case configurations the framework actually uses
-(``src/core/active_inference.py``, ``src/models/insect/base.py``), and the
-pinned upstream revision recorded in ``.github/gnn-pin.json``. The upstream
-parser checks run against a clean export of the pinned revision, so in-progress
-edits in a sibling GNN checkout cannot contaminate the result; they skip with an
-explicit reason when the checkout or its interpreter is unavailable, and fail
-instead of skipping when the checkout was selected explicitly (CI sets
-``GNN_CHECKOUT``, so a missing or unusable checkout is a red check there).
+Pin, pointer and upstream syntax validation belong to ``gnn.importers`` in the
+gate's ``gnn`` arm. These tests cover CEREBRUM's model parameters, case
+configurations and runtime axis orders, not the upstream reader's pin shape.
 """
 
 from __future__ import annotations
 
-import io
-import json
-import os
 import re
-import subprocess
-import tarfile
 from pathlib import Path
-from typing import Any, Dict, Iterator
+from typing import Any, Dict
 
 import numpy as np
 import pytest
@@ -44,17 +33,6 @@ from src.core.gnn import (
 from src.core.model import Case
 from src.models.insect.base import InsectModel
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-PIN_PATH = REPO_ROOT / ".github" / "gnn-pin.json"
-CHECKOUT_ENV = "GNN_CHECKOUT"
-DEFAULT_CHECKOUT = REPO_ROOT.parent / "Generalized_Notation_Notation"
-UPSTREAM_TIMEOUT_SECONDS = 300
-
-
-def _checkout() -> Path:
-    override = os.environ.get(CHECKOUT_ENV)
-    return Path(override) if override else DEFAULT_CHECKOUT
-
 
 def _spec_text() -> str:
     return SPEC_PATH.read_text(encoding="utf-8")
@@ -69,55 +47,11 @@ def _replace_block(text: str, section: str, body: str) -> str:
     return replaced
 
 
-def _pin() -> Dict[str, Any]:
-    return json.loads(PIN_PATH.read_text(encoding="utf-8"))
-
-
 def _focus_by_case(model: ActiveInferenceModel) -> Dict[str, str]:
     return {
         case.name.lower(): configuration["precision_focus"]
         for case, configuration in model._case_configurations.items()
     }
-
-
-def _unavailable(message: str) -> None:
-    """Skip when no checkout was selected; fail when one was selected explicitly.
-
-    ``GNN_CHECKOUT`` is the explicit selection, and CI sets it after
-    provisioning the pinned revision. An unusable selected checkout must be a
-    failure, never a skip: a skipped check cannot fail and so proves nothing.
-    """
-
-    if os.environ.get(CHECKOUT_ENV):
-        pytest.fail(f"{CHECKOUT_ENV} selects a checkout, but {message}")
-    pytest.skip(message)
-
-
-@pytest.fixture(scope="module")
-def pinned_upstream(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Any]:
-    """Yield ``(checkout, exported_tree, revision)`` for the pinned revision."""
-
-    checkout = _checkout()
-    if not (checkout / ".git").exists():
-        _unavailable(f"no GNN checkout exists at {checkout}")
-    revision = str(_pin()["revision"])
-    interpreter = checkout / ".venv" / "bin" / "python"
-    if not interpreter.is_file():
-        _unavailable(f"the GNN checkout at {checkout} has no .venv/bin/python interpreter")
-    archive = subprocess.run(
-        ["git", "-C", str(checkout), "archive", revision, "src/gnn", "pyproject.toml"],
-        capture_output=True,
-        check=False,
-    )
-    if archive.returncode != 0:
-        _unavailable(
-            f"pinned revision {revision} is not available in {checkout}: "
-            f"{archive.stderr.decode(errors='replace').strip()}"
-        )
-    tree = tmp_path_factory.mktemp("gnn-pinned")
-    with tarfile.open(fileobj=io.BytesIO(archive.stdout)) as bundle:
-        bundle.extractall(tree, filter="data")
-    yield checkout, tree, revision
 
 
 def test_spec_is_structurally_conformant() -> None:
@@ -222,74 +156,6 @@ def test_case_transformations_scale_the_declared_matrices(case: Case) -> None:
         else:
             # Non-target matrices keep the value from the previous transition.
             assert np.allclose(observed, before[attribute]), attribute
-
-
-def test_pin_record_matches_the_specification() -> None:
-    pin = _pin()
-    assert pin["schema"] == "gnn-importer-pin/v1"
-    assert pin["recorded"] == "2026-11-12"
-    assert pin["tag"] == "v5.0.3"
-    assert pin["version"] == "5.0.3"
-    assert pin["revision"] == "8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1"
-    assert len(str(pin["revision"])) == 40
-    assert pin["spec_directory"] == "models"
-    assert pin["spec_files"] == ["models/case_conditioned_active_inference.gnn.md"]
-    for spec_file in pin["spec_files"]:
-        assert (REPO_ROOT / str(spec_file)).is_file()
-
-
-def test_pin_record_revision_is_the_declared_tag(pinned_upstream: Any) -> None:
-    checkout, _, revision = pinned_upstream
-    resolved = subprocess.run(
-        ["git", "-C", str(checkout), "rev-parse", f"{_pin()['tag']}^{{commit}}"],
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    if resolved.returncode != 0:
-        pytest.skip(f"tag {_pin()['tag']} is not available in {checkout}")
-    assert resolved.stdout.strip() == revision
-
-
-def test_upstream_parser_accepts_the_specification(pinned_upstream: Any) -> None:
-    checkout, tree, _ = pinned_upstream
-    result = subprocess.run(
-        [
-            str(checkout / ".venv" / "bin" / "python"),
-            "-m",
-            "gnn.cli",
-            "validate",
-            str(SPEC_PATH),
-            "--strict",
-        ],
-        capture_output=True,
-        text=True,
-        env={**os.environ, "PYTHONPATH": str(tree / "src")},
-        timeout=UPSTREAM_TIMEOUT_SECONDS,
-        check=False,
-    )
-    assert result.returncode == 0, result.stdout + result.stderr
-    assert "valid" in result.stdout
-
-
-def test_upstream_export_is_the_pinned_version(pinned_upstream: Any) -> None:
-    checkout, tree, revision = pinned_upstream
-    result = subprocess.run(
-        [
-            str(checkout / ".venv" / "bin" / "python"),
-            "-c",
-            "import gnn; print(gnn.__file__); print(getattr(gnn, '__version__', ''))",
-        ],
-        capture_output=True,
-        text=True,
-        env={**os.environ, "PYTHONPATH": str(tree / "src")},
-        timeout=UPSTREAM_TIMEOUT_SECONDS,
-        check=False,
-    )
-    assert result.returncode == 0, result.stdout + result.stderr
-    module_path, version = result.stdout.strip().splitlines()
-    assert str(tree) in module_path, "the export must shadow any installed gnn package"
-    assert version == _pin()["version"], f"expected {revision} to report version {_pin()['version']}"
 
 
 def test_structural_drift_is_reported() -> None:

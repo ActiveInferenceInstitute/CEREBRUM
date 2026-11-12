@@ -17,9 +17,9 @@ gate: `./run.sh gnn` (see [../docs/RUN_GUIDE.md](../docs/RUN_GUIDE.md)).
 | Specification directory | `models` |
 | Specification files | `models/case_conditioned_active_inference.gnn.md` |
 
-`.github/gnn-pin.json` is the only place the revision is written down; the job,
-`scripts/gnn_checkout.py`, `models/README.md` and the test all read it from
-there.
+`.github/gnn-pin.json` owns the upstream identity. The gate delegates pin,
+pointer and specification validation to `gnn.importers`; CEREBRUM's tests
+retain only the model/specification agreement checks.
 
 ## What the job parses
 
@@ -28,19 +28,31 @@ there.
   `git checkout --detach <revision>`, then a private `uv venv --python 3.12`
   with the parser's runtime dependencies (`numpy`, `defusedxml`, `psutil`).
   A revision that no longer resolves upstream fails the arm instead of skipping.
-* `tests/core/test_gnn_spec.py` reads the specification named by
-  `gnn-pin.json` (`models/case_conditioned_active_inference.gnn.md`) through
-  `src/core/gnn.py`, which parses it without importing the upstream package. It
-  checks the declared factors, modality, controls, matrix values and axis
+* The gate invokes the reader from that checkout's interpreter and `src/`:
+
+  ```bash
+  PYTHONPATH=.gate/gnn/src .gate/gnn/.venv/bin/python -m gnn.importers check \
+      --repo . --require-pointer --workflow .github/workflows/ci.yml \
+      --job gnn-conformance
+  ```
+
+* `tests/core/test_gnn_spec.py` loads
+  `models/case_conditioned_active_inference.gnn.md` through `src/core/gnn.py`.
+  It checks the declared factors, modality, controls, matrix values and axis
   orders against `InsectModel` / `ActiveInferenceModel`, and that each case
-  transformation rescales exactly the matrices the specification declares for
-  that case's precision focus.
-* With `GNN_CHECKOUT` set — the arm always sets it, and so does CI — the test
-  also exports the pinned revision (`git archive <revision> src/gnn`) into a
-  temporary tree and runs the pinned upstream `gnn.cli validate --strict`
-  against this repository's specification with that checkout's interpreter. An
-  in-progress sibling checkout cannot contaminate the result because the export
-  is taken from the pinned commit only.
+  transformation rescales exactly the matrices declared for its precision focus.
+
+## Migration blocker
+
+The pinned revision does not contain `src/gnn/importers.py`. The reader call
+therefore fails instead of substituting an unpinned implementation. The
+[GNN–FEP contract](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/5efd8b2922c678e99e754c9f1ec2a5bd63b62cc2/docs/workflows/gnn-fep.md)
+requires the reader and parser from the same pinned runtime.
+
+This migration cannot land until a reviewed upstream revision containing the
+reader is adopted, and clean-checkout provisioning can call its `read_pin`.
+`scripts/gnn_checkout.py` still has the bootstrap JSON read; it is not a
+completed migration. No schema or pin identity is changed here.
 
 The check covers the one selected specification. It is not a scan of every
 `*.gnn.md` in the tree, and it says nothing about behavioural or biological

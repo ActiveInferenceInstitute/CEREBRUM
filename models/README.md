@@ -37,19 +37,14 @@ case-precision contracts that every instantiation keeps.
 - the stored observation and transition orientations behave as declared
   (checked with asymmetric matrices, so a wrong axis order fails);
 - each case transformation rescales exactly the matrices the specification
-  declares for that case's precision focus;
-- the recorded pin still dereferences to the recorded revision; and
-- the pinned upstream parser accepts the specification under `--strict`.
+  declares for that case's precision focus.
 
 Editing the specification, the model parameters, or the case configurations
-without the other side fails the test suite. The upstream checks run against a
-clean export of the pinned revision (`git archive <revision> src/gnn`) with the
-GNN checkout's interpreter, so in-progress edits in a sibling checkout cannot
-contaminate the result; they skip with an explicit reason when no checkout was
-selected, and fail when `GNN_CHECKOUT` selects a missing or unusable one. CI
-runs this file in the `gnn conformance (pinned)` job, which fetches the
-pinned revision from the public upstream repository and provisions its
-interpreter, so the pin is re-checked on every push and pull request.
+without the other side fails the test suite. Pin, pointer and upstream syntax
+validation are delegated to `gnn.importers` by `./run.sh gnn`, using the
+materialized upstream checkout rather than a sibling working tree. See
+[the GNN pointer](../.github/GNN.md#migration-blocker) for the reader's absence
+from the current pinned revision and the remaining provisioning blocker.
 
 ## Upstream pin
 
@@ -61,20 +56,17 @@ interpreter, so the pin is re-checked on every push and pull request.
 - Upstream version: `5.0.3`
 - Pinned on: `2026-11-01`
 
-Re-validation runs the pinned upstream validator against this specification:
+Re-validation uses the shared reader through the repository's gate:
 
 ```bash
-# from this repository; <gnn-checkout> is the sibling checkout or $GNN_CHECKOUT
-export_dir=$(mktemp -d)
-git -C <gnn-checkout> archive 8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1 src/gnn pyproject.toml \
-  | tar -x -C "$export_dir"
-PYTHONPATH="$export_dir/src" <gnn-checkout>/.venv/bin/python -m gnn.cli validate \
-  models/case_conditioned_active_inference.gnn.md --strict
+./run.sh gnn
 ```
 
-`tests/core/test_gnn_spec.py` performs exactly this validation, and the syntax
-authority is `docs/gnn/reference/gnn_syntax.md` in that checkout. For new
-integrations, start from the upstream [framework integration
+The arm provisions the pinned runtime, invokes `gnn.importers check` with the
+required pointer, workflow and job, then runs CEREBRUM's model drift tests.
+It currently fails at the reader import; no newer parser is silently used.
+The syntax authority is `docs/gnn/reference/gnn_syntax.md` in that checkout.
+For new integrations, start from the upstream [framework integration
 guide](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1/docs/gnn/integration/framework_integration_guide.md)
 and the [downstream adoption
 guide](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/1f3abb56e25886dfa6ddc49c76af7b723941485a/docs/gnn/integration/downstream_adoption.md).

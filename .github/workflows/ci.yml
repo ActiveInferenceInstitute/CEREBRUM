@@ -47,11 +47,9 @@ jobs:
 
   gnn-conformance:
     timeout-minutes: 60
-    # Validates models/case_conditioned_active_inference.gnn.md with the upstream
-    # parser revision pinned in .github/gnn-pin.json. tests/core/test_gnn_spec.py
-    # fails (never skips) when GNN_CHECKOUT selects a missing or unusable
-    # checkout, so the pin is checked here rather than assumed. The job name is
-    # the status-check context; do not rename it without updating protection.
+    # The gnn arm calls the pinned upstream gnn.importers reader, then checks
+    # CEREBRUM's model/specification agreement. The job name is the status-check
+    # context; do not rename it without updating protection.
     name: gnn conformance (pinned)
     runs-on: ubuntu-latest
     steps:
@@ -68,7 +66,3 @@ jobs:
 
       - name: Pinned GNN conformance
         run: ./run.sh gnn
-
-      - name: Report the resolved GNN version
-        run: |
-          python3 -c "import json;pin=json.load(open('.github/gnn-pin.json'));print('gnn-version='+pin['version'])" >> "$GITHUB_STEP_SUMMARY"
