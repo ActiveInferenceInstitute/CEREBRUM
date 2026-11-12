@@ -10,7 +10,7 @@ than calling these directly.
 | Script | Purpose | Used by |
 |--------|---------|---------|
 | `gate.py` | defines every gate arm and times them into `.gate/timings.jsonl` | `../run.sh` |
-| `gnn_checkout.py` | provisions the pinned GNN revision (`.gate/gnn`) with its own interpreter | `./run.sh gnn` |
+| `gnn_checkout.py` | provisions the pinned GNN revision (`.gate/gnn`) with its own interpreter; the arm then runs `python -m gnn.importers` from it | `./run.sh gnn` |
 | `check_links.py` | resolves every relative Markdown link; no network access | `./run.sh docs` |
 | `docgen/doc_index.py` | generates `docs/documentation-index.md` from the docs tree | `./run.sh docs`, `./run.sh docs-index` |
 | `docgen/gate_metrics.py` | renders `docs/_generated/gate-metrics.md` from `.gate/` artifacts | `./run.sh metrics` |

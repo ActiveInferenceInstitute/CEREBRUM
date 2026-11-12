@@ -30,9 +30,18 @@ all green (442 passed in the combined post-isort check).
       `uv sync --locked --extra dev --extra llm` per job, Python and uv from the
       pinned estate composite action.
 - [x] **GNN provisioning scripted** — `scripts/gnn_checkout.py` materialises the
-      revision in `.github/gnn-pin.json` (`gnn-importer-pin/v1`, `v5.0.3`,
-      `8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1`) into `.gate/gnn`, so the
+      revision in `.github/gnn-pin.json` (`gnn-importer-pin/v1`, `v5.1.0`,
+      `75c834bd8519dc7b5adc4d24f16bf393cfd1ecdf`) into `.gate/gnn`, so the
       workflow and a local run provision it the same way.
+- [x] **Shared GNN reader adopted** — the pin advanced from `v5.0.3`
+      (`8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1`, which predates the reader) to
+      `v5.1.0`, which ships `src/gnn/importers.py`. The `gnn` arm now runs
+      `python -m gnn.importers check --repo . --require-pointer --workflow
+      .github/workflows/ci.yml --job gnn-conformance` from the interpreter it
+      provisions, and the interim local reader (`load_pin`) and its pin-shape
+      tests are deleted. No copy of the reader is vendored; see
+      [.github/GNN.md](.github/GNN.md) and the
+      [GNN–FEP contract](https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation/blob/main/docs/workflows/gnn-fep.md).
 - [x] **Generated documentation** — `docs/documentation-index.md` (flat index of
       the `docs/` tree) and `docs/_generated/gate-metrics.md` (per-arm wall
       time, test counts, coverage, static-analysis debt) are produced by
@@ -134,8 +143,8 @@ all green (442 passed in the combined post-isort check).
       configurations, checks the stored orientations with asymmetric matrices,
       verifies each case transformation rescales exactly the declared matrices,
       and re-validates the file with the pinned upstream parser (`--strict`) from
-      a clean export of the pinned revision. Pin: GNN v5.0.3,
-      `8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1`, recorded in
+      a clean export of the pinned revision. Pin: GNN v5.1.0,
+      `75c834bd8519dc7b5adc4d24f16bf393cfd1ecdf`, recorded in
       `.github/gnn-pin.json`.
 - [x] **Documented test gate collects cleanly on a `.[dev]` install** — seven test
       modules (`tests/lexicon/*`, `tests/llm/test_llm_utils.py`,

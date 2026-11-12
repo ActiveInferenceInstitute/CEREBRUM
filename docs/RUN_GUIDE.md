@@ -64,13 +64,23 @@ Commands live in `scripts/gate.py`; this table only says what each arm covers.
 | `docs` | `docs/documentation-index.md` is current and every relative Markdown link resolves | `gate` |
 | `test-fast` | quick pass over the logic core (see below) | local only |
 | `test` | full suite with coverage and a JUnit report | `gate` |
-| `gnn` | pinned-upstream GNN conformance (provisions `.gate/gnn` at the pinned revision) | `gnn-conformance` |
+| `gnn` | provisions `.gate/gnn`, runs the shared `gnn.importers` reader against the pin and pointer, and runs model agreement and pinned-parser/runtime tests | `gnn-conformance` |
 | `debt` | measures the non-blocking static-analysis debt | local only |
 | `docs-index` | regenerates `docs/documentation-index.md` | — |
 | `metrics` | regenerates `docs/_generated/gate-metrics.md` | — |
 
 `./run.sh all` runs `lint`, `types`, `docs`, `test`, `gnn` in that order — the
 same five steps the two CI jobs run between them.
+
+The `gnn` arm calls the shipped reader: the pin is `v5.1.0`
+(`75c834bd8519dc7b5adc4d24f16bf393cfd1ecdf`), which contains
+`src/gnn/importers.py`, so `python -m gnn.importers check --repo .
+--require-pointer` runs from the interpreter the arm provisions and against the
+parser that pin names. The local reader the interim state carried — and the
+tests for its pin shape — are gone; the
+[GNN pointer](../.github/GNN.md#adopted-one-reader-no-local-copy) records the
+change from `v5.0.3` (`8f293d9ba810e6eda5c09842d9c7ed9ffa5f92c1`). Other arms
+are unchanged.
 
 ## Measured cost
 

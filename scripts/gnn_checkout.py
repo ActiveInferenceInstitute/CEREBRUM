@@ -1,15 +1,22 @@
 #!/usr/bin/env python3
 """Provision the pinned Generalized Notation Notation checkout.
 
-The GNN conformance test (``tests/core/test_gnn_spec.py``) validates this
-repository's specification with the *upstream* parser at the revision recorded
-in ``.github/gnn-pin.json``. This script materialises that exact revision into a
-throwaway checkout with its own interpreter, so the check never silently uses a
-sibling working copy.
+The GNN gate validates this repository's specification with the *pinned*
+parser. This script materialises the revision recorded in
+``.github/gnn-pin.json`` into a throwaway checkout with its own interpreter, so
+the check never silently uses a sibling working copy.
 
-The layout it produces is the contract the test fixture expects: a Git checkout
-whose ``HEAD`` is the pinned revision plus a ``.venv/bin/python`` carrying the
-parser's runtime dependencies (``numpy``, ``defusedxml``, ``psutil``).
+The layout it produces is the contract the gate expects: a Git checkout whose
+``HEAD`` is the pinned revision plus a ``.venv/bin/python`` carrying the
+parser's runtime dependencies (``numpy``, ``defusedxml``, ``psutil``,
+``pyyaml``).
+
+The pin is only *located* here, never judged: this reads the two coordinates a
+``git fetch`` consumes and materialises them. Every judgement about the pin —
+its schema, the revision's shape, the tag, the declared specifications and the
+``.github/GNN.md`` pointer — belongs to the estate's one reader,
+``gnn.importers``, which the gate's next step runs from the interpreter this
+script builds (``python -m gnn.importers check --repo . --require-pointer``).
 
 Idempotent: an existing checkout already at the pinned revision is reused, so
 ``./run.sh gnn`` is cheap on a second run.
@@ -25,12 +32,31 @@ import sys
 from pathlib import Path
 
 UPSTREAM = "https://github.com/ActiveInferenceInstitute/Generalized_Notation_Notation.git"
-PARSER_DEPENDENCIES = ("numpy", "defusedxml", "psutil")
+PARSER_DEPENDENCIES = ("numpy", "defusedxml", "psutil", "pyyaml")
+ROOT = Path(__file__).resolve().parents[1]
 PIN_PATH = Path(".github/gnn-pin.json")
 
 
+def coordinates(repo_root: Path = ROOT) -> tuple[str, str]:
+    """Return the ``(revision, tag)`` the checkout must materialise.
+
+    Only the two fetch coordinates are taken; whether they are the *right*
+    ones is ``gnn.importers``' verdict, not this script's.
+    """
+    try:
+        pin = json.loads((repo_root / PIN_PATH).read_text(encoding="utf-8"))
+        return str(pin["revision"]), str(pin["tag"])
+    except (OSError, json.JSONDecodeError, KeyError, TypeError) as exc:
+        raise SystemExit(
+            f"cannot read {PIN_PATH} fetch coordinates ({exc}); "
+            "run python -m gnn.importers check --repo . from the pinned runtime for the finding"
+        ) from exc
+
+
 def run(argv: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
-    result = subprocess.run(argv, capture_output=True, text=True, check=False, **kwargs)
+    result = subprocess.run(
+        argv, stdin=subprocess.DEVNULL, capture_output=True, text=True, check=False, **kwargs
+    )
     if result.returncode != 0:
         sys.stderr.write(f"command failed ({result.returncode}): {' '.join(argv)}\n")
         sys.stderr.write(result.stdout)
@@ -41,7 +67,8 @@ def run(argv: list[str], **kwargs: object) -> subprocess.CompletedProcess[str]:
 
 def head_of(checkout: Path) -> str:
     result = subprocess.run(
-        ["git", "-C", str(checkout), "rev-parse", "HEAD"], capture_output=True, text=True
+        ["git", "-C", str(checkout), "rev-parse", "HEAD"],
+        stdin=subprocess.DEVNULL, capture_output=True, text=True
     )
     return result.stdout.strip()
 
@@ -52,9 +79,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--force", action="store_true", help="re-provision even when the pin matches")
     args = parser.parse_args(argv)
 
-    pin = json.loads(PIN_PATH.read_text(encoding="utf-8"))
-    revision = str(pin["revision"])
-    tag = str(pin["tag"])
+    revision, tag = coordinates()
     checkout = Path(args.dest).resolve()
 
     interpreter = checkout / ".venv" / "bin" / "python"
