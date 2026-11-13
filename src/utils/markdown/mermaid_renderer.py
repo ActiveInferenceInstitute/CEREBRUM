@@ -76,7 +76,10 @@ def render_mermaid_with_mmdc(mermaid_code, output_path):
     try:
         # Use mmdc from mermaid-cli to render the diagram
         print(f"Rendering diagram using mmdc...")
-        # Increased resolution with width and height parameters
+        # mermaid-cli 12 removed -w/--width and -H/--height; --size bounds the
+        # diagram to N CSS px on its longest side. Combined with the 2.5 scale
+        # factor this keeps the high-resolution output intent (2400 px long
+        # side before scaling, 6000 px after).
         # Added -c for custom config with higher quality settings
         config_json = json.dumps({
             "theme": "default",
@@ -104,10 +107,9 @@ def render_mermaid_with_mmdc(mermaid_code, output_path):
                        '-i', temp_file_path, 
                        '-o', str(output_path), 
                        '-b', 'transparent',
-                       '-w', '2400',  # Increased width for better resolution
-                       '-H', '1800',  # Increased height for better resolution
+                       '--size', '2400',  # Longest rendered side in CSS px
                        '-c', config_path,
-                       '-s', '2.5'    # Increased scale factor for better resolution
+                       '-s', '2.5'    # Puppeteer scale factor for better resolution
                       ], 
                        check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         

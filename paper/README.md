@@ -68,7 +68,7 @@ diagnostics are available; a failed Markdown assembly skips both conversions.
 To build the paper, you need:
 
 - Python 3 (with standard libraries like `os`, `glob`, `re`, `logging`)
-- Node.js with Mermaid CLI (`@mermaid-js/mermaid-cli` package installed globally or accessible via `mmdc` command)
+- Node.js with Mermaid CLI (`@mermaid-js/mermaid-cli` `12.x`, pinned in the repository-root `package.json`; run `npm install` there and put `node_modules/.bin` on `PATH` so `mmdc` resolves, or install the package globally)
 - Pandoc
 - XeLaTeX (a LaTeX distribution like TeX Live or MiKTeX is required for PDF generation)
 
