@@ -214,7 +214,9 @@ def render_mermaid_figures():
                     "-i", os.path.abspath(tmp_mmd_path),
                     "-o", os.path.abspath(output_png_path),
                     "-b", "transparent",  # Use transparent background
-                    "-w", "1200",  # Set width (adjust as needed)
+                    # mermaid-cli 12 removed -w/--width; --size bounds the
+                    # longest rendered side to 1200 CSS px.
+                    "--size", "1200",
                 ]
 
                 logging.info(f"Running command: {' '.join(mmdc_command)}")

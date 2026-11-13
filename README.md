@@ -161,7 +161,7 @@ The full documentation for CEREBRUM is available as a PDF file in the `paper/out
 To regenerate the PDF documentation, you need:
 
 - Python 3
-- Node.js with Mermaid CLI (`@mermaid-js/mermaid-cli` package)
+- Node.js with Mermaid CLI (`@mermaid-js/mermaid-cli` `12.x`, pinned in `package.json`; run `npm install` at the repository root)
 - Pandoc
 - XeLaTeX (for PDF generation)
 
