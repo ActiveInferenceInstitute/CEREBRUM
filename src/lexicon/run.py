@@ -190,7 +190,7 @@ def process_sample_text(args: argparse.Namespace) -> Dict[str, Any]:
     return process_text_input(sample_text, args)
 
 
-def main():
+def main(argv=None) -> int:
     """Main entry point for LEXICON processing."""
     # Set up environment
     setup_environment_logging()
@@ -201,7 +201,7 @@ def main():
     # Validate environment
     if not validate_environment():
         print("Environment validation failed. Please check your configuration.")
-        sys.exit(1)
+        return 1
     
     # Parse arguments
     parser = argparse.ArgumentParser(description="Run LEXICON pipeline")
@@ -216,32 +216,45 @@ def main():
                         help="Process all files in input directory")
     parser.add_argument("--process-samples", "-s", action="store_true",
                         help="Process the sample input files (chemistry_methods.md and therapy_session.md)")
+    parser.add_argument("--input-dir", action="append", type=Path,
+                        help="Batch input root; repeat for multiple roots instead of defaults")
+    parser.add_argument("--output-dir", type=Path,
+                        help="Batch output root instead of the generated output directory")
+    parser.add_argument("--api-base-url",
+                        help="Batch OpenRouter-compatible endpoint override")
     
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+    if not (args.batch or args.process_samples) and any(
+        value is not None for value in (args.input_dir, args.output_dir, args.api_base_url)
+    ):
+        parser.error("--input-dir, --output-dir and --api-base-url require a batch mode")
     
     try:
-        if args.process_samples:
-            # Process the sample input files directly
-            print("Processing sample input files from src/lexicon/input/...")
-            base_dir = create_output_dir(is_batch=True)
-            batch_results = process_all_inputs(base_dir, args.model, args.log_level)
-            print(f"Sample processing complete. Processed {len(batch_results)} files.")
-            print(f"Results available in: {base_dir}")
-            
-            # Print summary of results
-            for filename, result in batch_results.items():
-                if result["status"] == "success":
-                    output_dir = result.get("output_dir", "unknown")
-                    print(f"  ✓ {filename}: {output_dir}")
-                else:
-                    print(f"  ✗ {filename}: {result.get('error', 'Unknown error')}")
-            
-        elif args.batch:
-            # Batch processing
-            print("Starting batch processing...")
-            base_dir = create_output_dir(is_batch=True)
-            batch_results = process_all_inputs(base_dir, args.model, args.log_level)
+        if args.process_samples or args.batch:
+            print("Starting sample processing..." if args.process_samples else "Starting batch processing...")
+            base_dir = (
+                args.output_dir.resolve()
+                if args.output_dir is not None else create_output_dir(is_batch=True)
+            )
+            config = None
+            if args.api_base_url is not None:
+                config = LexiconConfig(
+                    output_dir=base_dir,
+                    cache_dir=base_dir / "cache",
+                    base_api_url=args.api_base_url,
+                )
+            batch_results = process_all_inputs(
+                base_dir, args.model, args.log_level,
+                input_dirs=args.input_dir, config=config,
+            )
             print(f"Batch processing complete. Processed {len(batch_results)} files.")
+            print(f"Results available in: {base_dir}")
+            for source_id, result in batch_results.items():
+                if result["status"] == "success":
+                    print(f"  success {source_id}: {result['output_dir']}")
+                else:
+                    print(f"  error {source_id}: {result.get('error', 'Unknown error')}")
+            return int(any(result["status"] != "success" for result in batch_results.values()))
             
         elif args.input:
             input_path = Path(args.input)
@@ -260,11 +273,12 @@ def main():
             
     except KeyboardInterrupt:
         print("\nProcessing interrupted by user.")
-        sys.exit(0)
+        return 0
     except Exception as e:
         print(f"Processing failed: {str(e)}")
-        sys.exit(1)
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
-    main() 
+    sys.exit(main())

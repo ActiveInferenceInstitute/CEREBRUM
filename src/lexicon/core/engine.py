@@ -20,7 +20,6 @@ from typing import Any, Dict, List, Optional, Union
 import numpy as np
 from dotenv import load_dotenv
 
-from src.llm.config import get_model_name
 
 # Import OpenRouter integration
 from src.llm.OpenRouter.openrouter import OpenRouterClient, OpenRouterConfig
@@ -162,7 +161,9 @@ class LexiconEngine:
             # Use OpenRouter client with configuration
             router_config = OpenRouterConfig(
                 api_key=api_key,
-                default_model=get_model_name() or "qwen/qwen3.8-27b",
+                base_url=self.config.base_api_url,
+                default_model=self.config.default_model,
+                request_timeout=self.config.timeout_seconds,
                 fallback_models=list(getattr(self.config, "client_fallback_models", []) or []),
                 temperature=0.7,
                 max_tokens=1000

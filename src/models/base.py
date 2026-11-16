@@ -13,6 +13,9 @@ hook — rather than a broken, disconnected parallel class.
 """
 
 import logging
+from typing import Optional
+
+import numpy as np
 
 # Re-export Case from src.core.model for unified identity
 # This ensures all imports of Case refer to the same enum class
@@ -31,14 +34,14 @@ class Model(_CoreModel):
     ``src.core.model.Model``.
     """
 
-    def __init__(self, name: str = None, case: Case = Case.NOMINATIVE, **kwargs):
+    def __init__(self, name: Optional[str] = None, case: Case = Case.NOMINATIVE, **kwargs):
         # The core model accepts (name, parameters=None, ...); delegate any
         # extra keyword arguments so future core options remain usable.
         parameters = kwargs.pop("parameters", None)
         super().__init__(name=name, parameters=parameters)
         if isinstance(case, Case):
             self._case = case
-        self.data_buffer = {"X": None, "y": None}
+        self.data_buffer: dict[str, Optional[np.ndarray]] = {"X": None, "y": None}
         if kwargs:
             for k, v in kwargs.items():
                 setattr(self, k, v)

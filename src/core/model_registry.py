@@ -170,7 +170,7 @@ class ModelRegistry:
                     self._save_registry()
                     
                     logger.info(f"Model {model_id} loaded from disk")
-                    return model
+                    return self._models[model_id]
                     
                 except Exception as e:
                     logger.error(f"Failed to load model {model_id}: {e}")
@@ -271,11 +271,12 @@ class ModelRegistry:
         """
         models = list(self._metadata.values())
         
+        models_by_case: Dict[str, int] = {}
         stats = {
             'total_models': len(models),
             'fitted_models': sum(1 for m in models if m.is_fitted),
             'unfitted_models': sum(1 for m in models if not m.is_fitted),
-            'models_by_case': {},
+            'models_by_case': models_by_case,
             'models_by_type': {},
             'oldest_model': None,
             'newest_model': None,
@@ -287,10 +288,10 @@ class ModelRegistry:
             for case in Case:
                 count = sum(1 for m in models if m.case == case)
                 if count > 0:
-                    stats['models_by_case'][case.value] = count
+                    models_by_case[case.value] = count
             
             # Group by type
-            types = {}
+            types: Dict[str, int] = {}
             for m in models:
                 types[m.model_type] = types.get(m.model_type, 0) + 1
             stats['models_by_type'] = types

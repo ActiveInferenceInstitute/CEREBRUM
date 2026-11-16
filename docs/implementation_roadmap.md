@@ -1,5 +1,11 @@
 # CEREBRUM Implementation Roadmap
 
+> Retained planning document, not the current implementation-status ledger.
+> See [TODO.md](../TODO.md) for the maintained backlog. Existing core models,
+> case management, transformations, free-energy/precision foundations and tests
+> do not imply completion of every broader proposal below. Preserve the
+> original proposal checkboxes and qualify expansions separately.
+
 This document outlines the phased development plan for implementing the CEREBRUM framework across multiple languages and environments. It provides a structured approach to building the core components and expanding the framework's capabilities.
 
 ## Table of Contents

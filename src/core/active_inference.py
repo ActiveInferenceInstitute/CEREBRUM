@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 
@@ -18,11 +18,11 @@ class ActiveInferenceModel(Model):
     
     def __init__(
         self, 
-        name: str = None, 
-        parameters: Dict[str, Any] = None,
-        prior_means: np.ndarray = None,
-        prior_precision: np.ndarray = None,
-        likelihood_precision: np.ndarray = None
+        name: Optional[str] = None,
+        parameters: Optional[Dict[str, Any]] = None,
+        prior_means: Optional[np.ndarray] = None,
+        prior_precision: Optional[np.ndarray] = None,
+        likelihood_precision: Optional[np.ndarray] = None
     ):
         """
         Initialize an ActiveInferenceModel with the necessary components.
@@ -53,7 +53,7 @@ class ActiveInferenceModel(Model):
             self.n_observations = self.n_states
         
         # Set up prior distributions
-        self.prior_means = prior_means if prior_means is not None else np.zeros(self.n_states)
+        self.prior_means: np.ndarray = prior_means if prior_means is not None else np.zeros(self.n_states)
         
         if prior_precision is not None:
             if prior_precision.ndim == 1:
@@ -73,7 +73,7 @@ class ActiveInferenceModel(Model):
             self.likelihood_precision = np.eye(self.n_observations)
         
         # Posterior beliefs (these will be updated during inference)
-        self.posterior_means = self.prior_means.copy()
+        self.posterior_means: np.ndarray = self.prior_means.copy()
         self.posterior_precision = self.prior_precision.copy()
 
         # Baseline precision values — _apply_case_transformation scales from these
@@ -86,11 +86,11 @@ class ActiveInferenceModel(Model):
         self._setup_case_configurations()
         
         # History for tracking belief updates
-        self.belief_history = []
+        self.belief_history: List[Dict[str, object]] = []
         
         # Prediction errors and free energy history
-        self.prediction_errors = []
-        self.free_energy_history = []
+        self.prediction_errors: List[np.ndarray] = []
+        self.free_energy_history: List[float] = []
         
         # Ensure required parameters are available (if parameters dict was provided)
         # This is optional - models can be initialized with prior_means/prior_precision directly
@@ -250,7 +250,8 @@ class ActiveInferenceModel(Model):
             The prediction error (observations - expected observations)
         """
         expected_obs = self.likelihood(self.posterior_means)
-        return observations - expected_obs
+        error: np.ndarray = observations - expected_obs
+        return error
     
     def _kl_divergence(self) -> float:
         """KL(N(posterior)||N(prior)) with numerical guards.
@@ -258,26 +259,34 @@ class ActiveInferenceModel(Model):
         Guards against singular / non-positive-definite precision matrices so a
         degenerate posterior yields a finite, large value instead of NaN/-inf.
         """
+        vector_shape = (self.n_states,)
+        matrix_shape = (self.n_states, self.n_states)
+        if (np.shape(self.prior_means) != vector_shape
+                or np.shape(self.posterior_means) != vector_shape
+                or np.shape(self.prior_precision) != matrix_shape
+                or np.shape(self.posterior_precision) != matrix_shape):
+            raise ValueError("Prior and posterior dimensions must match n_states")
+
         try:
-            prior_inv_post = self.prior_precision @ np.linalg.inv(self.posterior_precision)
-            det_ratio = (
-                np.linalg.det(self.posterior_precision)
-                / np.linalg.det(self.prior_precision)
-            )
+            # trace(Pprior @ inv(Ppost)) == trace(solve(Ppost, Pprior)).
+            inverse_post_prior = np.linalg.solve(self.posterior_precision, self.prior_precision)
+            prior_sign, prior_logdet = np.linalg.slogdet(self.prior_precision)
+            post_sign, post_logdet = np.linalg.slogdet(self.posterior_precision)
         except np.linalg.LinAlgError:
-            # Singular precision matrix: posterior is maximally uninformative
+            # Preserve the existing singular-posterior policy.
             return float(self.n_states)
 
-        quadratic = (self.prior_means - self.posterior_means).T @ self.prior_precision @ (self.prior_means - self.posterior_means)
-        if not (det_ratio > 0) or not np.isfinite(det_ratio):
-            # Non-positive ratio -> degenerate precision -> very high complexity
+        logdet_ratio = post_logdet - prior_logdet
+        if prior_sign * post_sign <= 0 or not np.isfinite(logdet_ratio):
             return float(1e6)
 
+        difference = self.prior_means - self.posterior_means
+        quadratic = difference.T @ self.prior_precision @ difference
         kl = 0.5 * (
-            np.trace(prior_inv_post)
+            np.trace(inverse_post_prior)
             + quadratic
             - self.n_states
-            + np.log(det_ratio)
+            + logdet_ratio
         )
         # Guard against any residual negative value from numerical noise
         return float(max(kl, 0.0))
@@ -382,7 +391,7 @@ class ActiveInferenceModel(Model):
         logger.debug(f"Updated posterior: {np.round(self.posterior_means, 3)}")
         return {"status": "success", "method": "bayesian"}
     
-    def get_optimal_action(self) -> int:
+    def get_optimal_action(self) -> np.integer:
         """
         Get the optimal action based on current beliefs.
         
@@ -390,8 +399,8 @@ class ActiveInferenceModel(Model):
             Index of the optimal action
         """
         # Greedy policy: action corresponding to most likely state (modulo n_actions)
-        max_state = np.argmax(self.posterior_means)
-        n_actions = self.parameters.get('n_actions', max(1, len(self.posterior_means))) if self.parameters else max(1, len(self.posterior_means))
+        max_state: np.integer = np.argmax(self.posterior_means)
+        n_actions: int = self.parameters.get('n_actions', max(1, len(self.posterior_means))) if self.parameters else max(1, len(self.posterior_means))
         optimal_action = max_state % n_actions
         
         logger.debug(f"Selected optimal action {optimal_action} for max state {max_state}")
@@ -411,7 +420,8 @@ class ActiveInferenceModel(Model):
         # Get transition matrix (with a safe default so default-constructed models
         # do not crash with a KeyError)
         if self.parameters is None or 'transition_matrix' not in self.parameters:
-            return self.posterior_means.copy()
+            next_state: np.ndarray = self.posterior_means.copy()
+            return next_state
         transition_matrix = self.parameters['transition_matrix']
         n_states = self.parameters.get('n_states', len(self.posterior_means))
         
@@ -562,33 +572,46 @@ class ActiveInferenceModel(Model):
                 return {"status": "error", "message": "Observations required for inversion", "case": "INSTRUMENTAL"}
             
             observations = np.array(method_params["observations"])
-            learning_rate = method_params.get("learning_rate", 0.1)
             iterations = method_params.get("iterations", 10)
-            
-            # Copy current posterior to avoid changing it
-            saved_posterior = self.posterior_means.copy()
-            
-            # Start from prior or specified initial state
-            self.posterior_means = method_params.get("initial_state", self.prior_means.copy())
-            
-            # Run gradient descent for specified iterations
+            initial_state = np.array(
+                method_params.get("initial_state", self.prior_means), copy=True
+            )
+            if initial_state.shape != (self.n_states,):
+                return {
+                    "status": "error",
+                    "message": "Initial state dimension does not match n_states",
+                    "method": "invert",
+                    "case": "INSTRUMENTAL",
+                }
+
+            # Borrow a private posterior, preserving the caller's object as well as its values.
+            saved_posterior = self.posterior_means
             results = []
-            for i in range(iterations):
-                update_result = self.update_posterior(observations)
-                results.append(update_result)
-            
-            # Restore original posterior
-            inferred_state = self.posterior_means.copy()
-            self.posterior_means = saved_posterior
-            
-            return {
-                "status": "success",
-                "method": "invert",
-                "inferred_state": inferred_state,
-                "iterations": iterations,
-                "results": results,
-                "case": "INSTRUMENTAL"
-            }
+            try:
+                self.posterior_means = initial_state
+                for _ in range(iterations):
+                    update_result = self.update_posterior(observations)
+                    results.append(update_result)
+                    if update_result.get("status") != "success":
+                        return {
+                            "status": "error",
+                            "message": update_result.get("message", "Posterior update failed"),
+                            "method": "invert",
+                            "iterations": len(results),
+                            "results": results,
+                            "case": "INSTRUMENTAL",
+                        }
+
+                return {
+                    "status": "success",
+                    "method": "invert",
+                    "inferred_state": self.posterior_means.copy(),
+                    "iterations": iterations,
+                    "results": results,
+                    "case": "INSTRUMENTAL",
+                }
+            finally:
+                self.posterior_means = saved_posterior
         else:
             return {"status": "error", "message": f"Unknown method {method}", "case": "INSTRUMENTAL"}
     

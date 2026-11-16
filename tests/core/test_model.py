@@ -217,4 +217,11 @@ class TestModel:
         """Test that predict raises NotImplementedError in base class."""
         model = Model()
         with pytest.raises(NotImplementedError):
-            model.predict(data="test") 
+            model.predict("test")
+
+    def test_model_predict_requires_positional_input(self):
+        model = Model()
+        with pytest.raises(TypeError):
+            model.predict()
+        with pytest.raises(TypeError):
+            model.predict(data="test")

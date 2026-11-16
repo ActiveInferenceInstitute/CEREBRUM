@@ -18,6 +18,8 @@ import json
 import time
 import asyncio
 import random
+import math
+from email.utils import mktime_tz, parsedate_tz
 from typing import Dict, List, Optional, Iterator, AsyncIterator, Any
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -101,9 +103,9 @@ class CircuitBreaker:
     
     def record_success(self):
         """Record successful operation."""
-        if self.state == "HALF_OPEN":
-            self.failure_count = 0
-            self.state = "CLOSED"
+        self.failure_count = 0
+        self.last_failure_time = None
+        self.state = "CLOSED"
         self.half_open_calls = 0
         
     def record_failure(self):
@@ -133,6 +135,9 @@ class OpenRouterClient:
         self.client = OpenAI(
             api_key=self.config.api_key,
             base_url=self.config.base_url,
+            # This wrapper owns retries and the total configured timeout per attempt.
+            max_retries=0,
+            timeout=self.config.request_timeout,
             default_headers={
                 "HTTP-Referer": self.config.http_referer,
                 "X-Title": self.config.x_title,
@@ -142,6 +147,9 @@ class OpenRouterClient:
         self.async_client = AsyncOpenAI(
             api_key=self.config.api_key,
             base_url=self.config.base_url,
+            # This wrapper owns retries and the total configured timeout per attempt.
+            max_retries=0,
+            timeout=self.config.request_timeout,
             default_headers={
                 "HTTP-Referer": self.config.http_referer,
                 "X-Title": self.config.x_title,
@@ -180,8 +188,36 @@ class OpenRouterClient:
             self.logger = logging.getLogger("null")
             self.logger.addHandler(logging.NullHandler())
     
-    def _calculate_delay(self, attempt: int) -> float:
-        """Calculate retry delay with exponential backoff and jitter."""
+    @staticmethod
+    def _retry_after(error: Optional[Exception]) -> Optional[float]:
+        """Read public response headers using the SDK's bounded delay semantics."""
+        if not isinstance(error, openai.APIStatusError):
+            return None
+        headers = error.response.headers
+        for header, divisor in (("retry-after-ms", 1000), ("retry-after", 1)):
+            value = headers.get(header)
+            if value is None:
+                continue
+            try:
+                delay = float(value)
+            except ValueError:
+                continue
+            if delay == math.inf and value.strip().lower() not in (
+                "inf", "+inf", "infinity", "+infinity"
+            ):
+                return 121.0
+            return delay / divisor
+        try:
+            date = parsedate_tz(headers.get("retry-after"))
+            return None if date is None else float(mktime_tz(date) - time.time())
+        except (TypeError, ValueError, OverflowError, OSError):
+            return None
+
+    def _calculate_delay(self, attempt: int, error: Optional[Exception] = None) -> float:
+        """Honor bounded server cooldowns before exponential backoff and jitter."""
+        retry_after = self._retry_after(error)
+        if retry_after is not None and math.isfinite(retry_after) and 0 < retry_after <= 120:
+            return retry_after
         delay = min(
             self.retry_config.base_delay * (self.retry_config.exponential_base ** attempt),
             self.retry_config.max_delay
@@ -196,95 +232,82 @@ class OpenRouterClient:
         """Determine if error is retryable."""
         if isinstance(error, openai.RateLimitError):
             self.stats["rate_limit_hits"] += 1
-            return True
-        elif isinstance(error, (openai.APITimeoutError, openai.APIConnectionError)):
-            return True
-        elif isinstance(error, openai.InternalServerError):
-            return True
-        elif isinstance(error, openai.BadRequestError):
-            return False  # Don't retry client errors
-        return False
+        if isinstance(error, openai.APIStatusError):
+            retry_after = self._retry_after(error)
+            if retry_after is not None and math.isfinite(retry_after) and retry_after > 120:
+                return False
+            directive = error.response.headers.get("x-should-retry")
+            if directive in ("true", "false"):
+                return directive == "true"
+            return error.status_code in (408, 409, 429) or error.status_code >= 500
+        return isinstance(error, (openai.APITimeoutError, openai.APIConnectionError))
     
+    def _begin_request(self):
+        """Count one logical call; a stream starts when consumption starts."""
+        self.stats["total_requests"] += 1
+        if not self.circuit_breaker.can_execute():
+            self.stats["circuit_breaker_trips"] += 1
+            self.stats["failed_requests"] += 1
+            raise RuntimeError("Circuit breaker is OPEN - service temporarily unavailable")
+
+    def _record_request_success(self):
+        self.circuit_breaker.record_success()
+        self.stats["successful_requests"] += 1
+
+    def _record_request_failure(self, error: Exception):
+        self.stats["failed_requests"] += 1
+        # An unavailable model is not evidence that the service is unhealthy.
+        if not isinstance(error, openai.NotFoundError):
+            self.circuit_breaker.record_failure()
+
     def _with_retry_and_circuit_breaker(self, func):
-        """Decorator for retry logic and circuit breaker."""
+        """Retry a logical non-streaming call and record its final outcome."""
         @wraps(func)
         def wrapper(*args, **kwargs):
-            self.stats["total_requests"] += 1
-            
-            if not self.circuit_breaker.can_execute():
-                self.stats["circuit_breaker_trips"] += 1
-                raise Exception("Circuit breaker is OPEN - service temporarily unavailable")
-            
-            last_exception = None
-            
+            self._begin_request()
+            retry_delay = 0.0
             for attempt in range(self.retry_config.max_retries + 1):
+                if attempt:
+                    time.sleep(retry_delay)
+                    self.stats["retried_requests"] += 1
                 try:
-                    if attempt > 0:
-                        delay = self._calculate_delay(attempt - 1)
-                        self.logger.warning(f"Retrying request (attempt {attempt + 1}) after {delay:.2f}s delay")
-                        time.sleep(delay)
-                        self.stats["retried_requests"] += 1
-                    
                     result = func(*args, **kwargs)
-                    self.circuit_breaker.record_success()
-                    self.stats["successful_requests"] += 1
+                except Exception as error:
+                    if (not self._is_retryable_error(error)
+                            or attempt == self.retry_config.max_retries):
+                        self._record_request_failure(error)
+                        raise
+                    retry_delay = self._calculate_delay(attempt, error)
+                    self.logger.warning("Retrying failed request: %s", error)
+                else:
+                    self._record_request_success()
                     return result
-                    
-                except Exception as e:
-                    last_exception = e
-                    self.circuit_breaker.record_failure()
-                    
-                    if not self._is_retryable_error(e) or attempt == self.retry_config.max_retries:
-                        break
-                        
-                    self.logger.warning(f"Request failed (attempt {attempt + 1}): {str(e)}")
-            
-            self.stats["failed_requests"] += 1
-            self.logger.error(f"Request failed after {self.retry_config.max_retries + 1} attempts: {str(last_exception)}")
-            raise last_exception
-            
         return wrapper
-    
+
     def _with_async_retry_and_circuit_breaker(self, func):
-        """Async decorator for retry logic and circuit breaker."""
+        """Async counterpart of the logical-call retry contract."""
         @wraps(func)
         async def wrapper(*args, **kwargs):
-            self.stats["total_requests"] += 1
-            
-            if not self.circuit_breaker.can_execute():
-                self.stats["circuit_breaker_trips"] += 1
-                raise Exception("Circuit breaker is OPEN - service temporarily unavailable")
-            
-            last_exception = None
-            
+            self._begin_request()
+            retry_delay = 0.0
             for attempt in range(self.retry_config.max_retries + 1):
+                if attempt:
+                    await asyncio.sleep(retry_delay)
+                    self.stats["retried_requests"] += 1
                 try:
-                    if attempt > 0:
-                        delay = self._calculate_delay(attempt - 1)
-                        self.logger.warning(f"Retrying async request (attempt {attempt + 1}) after {delay:.2f}s delay")
-                        await asyncio.sleep(delay)
-                        self.stats["retried_requests"] += 1
-                    
                     result = await func(*args, **kwargs)
-                    self.circuit_breaker.record_success()
-                    self.stats["successful_requests"] += 1
+                except Exception as error:
+                    if (not self._is_retryable_error(error)
+                            or attempt == self.retry_config.max_retries):
+                        self._record_request_failure(error)
+                        raise
+                    retry_delay = self._calculate_delay(attempt, error)
+                    self.logger.warning("Retrying failed async request: %s", error)
+                else:
+                    self._record_request_success()
                     return result
-                    
-                except Exception as e:
-                    last_exception = e
-                    self.circuit_breaker.record_failure()
-                    
-                    if not self._is_retryable_error(e) or attempt == self.retry_config.max_retries:
-                        break
-                        
-                    self.logger.warning(f"Async request failed (attempt {attempt + 1}): {str(e)}")
-            
-            self.stats["failed_requests"] += 1
-            self.logger.error(f"Async request failed after {self.retry_config.max_retries + 1} attempts: {str(last_exception)}")
-            raise last_exception
-            
         return wrapper
-    
+
     def chat_completion(
         self,
         messages: List[Dict[str, str]],
@@ -301,7 +324,12 @@ class OpenRouterClient:
         restriction) is a permanent condition for that model, so retrying it
         cannot help and the next model in the chain is tried instead.
         """
-        enhanced_func = self._with_retry_and_circuit_breaker(self._base_chat_completion)
+        enhanced_func = self._with_retry_and_circuit_breaker(self._chat_completion_with_fallback)
+        return enhanced_func(messages, model, temperature, max_tokens, **kwargs)
+
+    def _chat_completion_with_fallback(
+        self, messages, model, temperature, max_tokens, **kwargs
+    ) -> ChatCompletion:
         model_chain = [model or self.config.default_model] + [
             m for m in self.config.fallback_models
             if m and m != (model or self.config.default_model)
@@ -309,7 +337,7 @@ class OpenRouterClient:
         last_error: Exception = RuntimeError("no models configured")
         for candidate in model_chain:
             try:
-                return enhanced_func(messages, candidate, temperature, max_tokens, **kwargs)
+                return self._base_chat_completion(messages, candidate, temperature, max_tokens, **kwargs)
             except openai.NotFoundError as e:
                 last_error = e
                 self.logger.warning(
@@ -329,7 +357,7 @@ class OpenRouterClient:
         return self.client.chat.completions.create(
             model=model or self.config.default_model,
             messages=messages,
-            temperature=temperature or self.config.temperature,
+            temperature=self.config.temperature if temperature is None else temperature,
             max_tokens=max_tokens or self.config.max_tokens,
             **kwargs
         )
@@ -342,10 +370,32 @@ class OpenRouterClient:
         max_tokens: Optional[int] = None,
         **kwargs
     ) -> Iterator[ChatCompletionChunk]:
-        """Streaming chat completion with retry and circuit breaker."""
-        enhanced_func = self._with_retry_and_circuit_breaker(self._base_chat_completion_stream)
-        return enhanced_func(messages, model, temperature, max_tokens, **kwargs)
-    
+        """Consume a managed stream; only failures before delivery may retry."""
+        self._begin_request()
+        delivered = False
+        retry_delay = 0.0
+        for attempt in range(self.retry_config.max_retries + 1):
+            if attempt:
+                time.sleep(retry_delay)
+                self.stats["retried_requests"] += 1
+            try:
+                with self._base_chat_completion_stream(
+                    messages, model, temperature, max_tokens, **kwargs
+                ) as stream:
+                    for chunk in stream:
+                        delivered = True
+                        yield chunk
+            except Exception as error:
+                retryable = self._is_retryable_error(error)
+                if delivered or not retryable or attempt == self.retry_config.max_retries:
+                    self._record_request_failure(error)
+                    raise
+                retry_delay = self._calculate_delay(attempt, error)
+                self.logger.warning("Retrying stream before first chunk: %s", error)
+            else:
+                self._record_request_success()
+                return
+
     def _base_chat_completion_stream(
         self,
         messages: List[Dict[str, str]],
@@ -353,19 +403,17 @@ class OpenRouterClient:
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
         **kwargs
-    ) -> Iterator[ChatCompletionChunk]:
-        """Base streaming chat completion implementation."""
-        stream = self.client.chat.completions.create(
+    ) -> openai.Stream[ChatCompletionChunk]:
+        """Open the SDK stream; the caller owns consumption and closure."""
+        return self.client.chat.completions.create(
             model=model or self.config.default_model,
             messages=messages,
-            temperature=temperature or self.config.temperature,
+            temperature=self.config.temperature if temperature is None else temperature,
             max_tokens=max_tokens or self.config.max_tokens,
             stream=True,
             **kwargs
         )
-        for chunk in stream:
-            yield chunk
-    
+
     async def async_chat_completion(
         self,
         messages: List[Dict[str, str]],
@@ -390,7 +438,7 @@ class OpenRouterClient:
         return await self.async_client.chat.completions.create(
             model=model or self.config.default_model,
             messages=messages,
-            temperature=temperature or self.config.temperature,
+            temperature=self.config.temperature if temperature is None else temperature,
             max_tokens=max_tokens or self.config.max_tokens,
             **kwargs
         )
@@ -403,10 +451,32 @@ class OpenRouterClient:
         max_tokens: Optional[int] = None,
         **kwargs
     ) -> AsyncIterator[ChatCompletionChunk]:
-        """Async streaming chat completion with retry and circuit breaker."""
-        async for chunk in self._base_async_chat_completion_stream(messages, model, temperature, max_tokens, **kwargs):
-            yield chunk
-    
+        """Async stream with the same pre-delivery retry and circuit contract."""
+        self._begin_request()
+        delivered = False
+        retry_delay = 0.0
+        for attempt in range(self.retry_config.max_retries + 1):
+            if attempt:
+                await asyncio.sleep(retry_delay)
+                self.stats["retried_requests"] += 1
+            try:
+                async with await self._base_async_chat_completion_stream(
+                    messages, model, temperature, max_tokens, **kwargs
+                ) as stream:
+                    async for chunk in stream:
+                        delivered = True
+                        yield chunk
+            except Exception as error:
+                retryable = self._is_retryable_error(error)
+                if delivered or not retryable or attempt == self.retry_config.max_retries:
+                    self._record_request_failure(error)
+                    raise
+                retry_delay = self._calculate_delay(attempt, error)
+                self.logger.warning("Retrying async stream before first chunk: %s", error)
+            else:
+                self._record_request_success()
+                return
+
     async def _base_async_chat_completion_stream(
         self,
         messages: List[Dict[str, str]],
@@ -414,19 +484,17 @@ class OpenRouterClient:
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
         **kwargs
-    ) -> AsyncIterator[ChatCompletionChunk]:
-        """Base async streaming chat completion implementation."""
-        stream = await self.async_client.chat.completions.create(
+    ) -> openai.AsyncStream[ChatCompletionChunk]:
+        """Open the SDK stream; the caller owns consumption and closure."""
+        return await self.async_client.chat.completions.create(
             model=model or self.config.default_model,
             messages=messages,
-            temperature=temperature or self.config.temperature,
+            temperature=self.config.temperature if temperature is None else temperature,
             max_tokens=max_tokens or self.config.max_tokens,
             stream=True,
             **kwargs
         )
-        async for chunk in stream:
-            yield chunk
-    
+
     def simple_chat(self, message: str, model: Optional[str] = None) -> str:
         """Simple chat interface with production features."""
         messages = [{"role": "user", "content": message}]

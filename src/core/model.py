@@ -25,7 +25,7 @@ class Model:
     while preserving their core identity.
     """
     
-    def __init__(self, name: str = None, parameters: Dict[str, Any] = None):
+    def __init__(self, name: Optional[str] = None, parameters: Optional[Dict[str, Any]] = None):
         """
         Initialize a Model with a name and parameters.
         
@@ -37,15 +37,15 @@ class Model:
         self.name = name or f"Model_{self.id[:8]}"
         self.parameters = parameters or {}
         self._case = Case.NOMINATIVE  # Default case is NOMINATIVE
-        self._prior_case = None
-        self._case_history = []
+        self._prior_case: Optional[Case] = None
+        self._case_history: List[Tuple[Case, Case]] = []
         # Reversal stack: every case transition pushes the outgoing case so
         # revert_case can restore a genuine multi-step history (not just a
         # 2-state toggle).
-        self._case_stack = []
+        self._case_stack: List[Case] = []
         
         # Each case has its own parameter access patterns and interface configurations
-        self._case_configurations = {case: {} for case in Case}
+        self._case_configurations: Dict[Case, Dict[str, object]] = {case: {} for case in Case}
         
         # Initialize precision weights matching XxxCase.PRECISION constants in src/cases/.
         # These weights are consumed by ActiveInferenceModel._apply_case_transformation via
@@ -62,7 +62,7 @@ class Model:
         }
         
         # Track connections to other models
-        self.connections = []
+        self.connections: List[Tuple[Model, Optional[str]]] = []
     
     @property
     def case(self) -> Case:
@@ -139,7 +139,7 @@ class Model:
             case = self._case
         return self._precision_weights[case]
     
-    def connect(self, other_model: 'Model', relation_type: str = None):
+    def connect(self, other_model: 'Model', relation_type: Optional[str] = None):
         """
         Connect this model to another model with a specified relation type.
         
@@ -159,12 +159,12 @@ class Model:
         # To be implemented by subclasses based on their specific generative models
         raise NotImplementedError("Subclasses must implement free_energy()")
     
-    def predict(self, data: Any = None) -> Any:
+    def predict(self, data: Any, /) -> Any:
         """
         Make a prediction with the model.
         
         Args:
-            data: Input data for prediction
+            data: Required positional input; concrete models may name it X or inputs
             
         Returns:
             Model prediction (type depends on subclass implementation)
