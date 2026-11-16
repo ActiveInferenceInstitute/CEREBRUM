@@ -160,7 +160,8 @@ class NeuralNetworkModel(Model):
     def _activation_function(self, x: np.ndarray) -> np.ndarray:
         """Apply the specified activation function."""
         if self.activation == 'relu':
-            return np.maximum(0, x)
+            rectified: np.ndarray = np.maximum(0, x)
+            return rectified
         elif self.activation == 'sigmoid':
             activated: np.ndarray = 1 / (1 + np.exp(-x))
             return activated

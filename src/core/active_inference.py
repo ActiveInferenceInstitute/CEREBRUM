@@ -399,7 +399,7 @@ class ActiveInferenceModel(Model):
             Index of the optimal action
         """
         # Greedy policy: action corresponding to most likely state (modulo n_actions)
-        max_state = np.argmax(self.posterior_means)
+        max_state: np.integer = np.argmax(self.posterior_means)
         n_actions: int = self.parameters.get('n_actions', max(1, len(self.posterior_means))) if self.parameters else max(1, len(self.posterior_means))
         optimal_action = max_state % n_actions
         
@@ -420,7 +420,8 @@ class ActiveInferenceModel(Model):
         # Get transition matrix (with a safe default so default-constructed models
         # do not crash with a KeyError)
         if self.parameters is None or 'transition_matrix' not in self.parameters:
-            return self.posterior_means.copy()
+            next_state: np.ndarray = self.posterior_means.copy()
+            return next_state
         transition_matrix = self.parameters['transition_matrix']
         n_states = self.parameters.get('n_states', len(self.posterior_means))
         
