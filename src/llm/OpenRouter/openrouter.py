@@ -18,6 +18,8 @@ import json
 import time
 import asyncio
 import random
+import math
+from email.utils import mktime_tz, parsedate_tz
 from typing import Dict, List, Optional, Iterator, AsyncIterator, Any
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -186,8 +188,36 @@ class OpenRouterClient:
             self.logger = logging.getLogger("null")
             self.logger.addHandler(logging.NullHandler())
     
-    def _calculate_delay(self, attempt: int) -> float:
-        """Calculate retry delay with exponential backoff and jitter."""
+    @staticmethod
+    def _retry_after(error: Optional[Exception]) -> Optional[float]:
+        """Read public response headers using the SDK's bounded delay semantics."""
+        if not isinstance(error, openai.APIStatusError):
+            return None
+        headers = error.response.headers
+        for header, divisor in (("retry-after-ms", 1000), ("retry-after", 1)):
+            value = headers.get(header)
+            if value is None:
+                continue
+            try:
+                delay = float(value)
+            except ValueError:
+                continue
+            if delay == math.inf and value.strip().lower() not in (
+                "inf", "+inf", "infinity", "+infinity"
+            ):
+                return 121.0
+            return delay / divisor
+        try:
+            date = parsedate_tz(headers.get("retry-after"))
+            return None if date is None else float(mktime_tz(date) - time.time())
+        except (TypeError, ValueError, OverflowError, OSError):
+            return None
+
+    def _calculate_delay(self, attempt: int, error: Optional[Exception] = None) -> float:
+        """Honor bounded server cooldowns before exponential backoff and jitter."""
+        retry_after = self._retry_after(error)
+        if retry_after is not None and math.isfinite(retry_after) and 0 < retry_after <= 120:
+            return retry_after
         delay = min(
             self.retry_config.base_delay * (self.retry_config.exponential_base ** attempt),
             self.retry_config.max_delay
@@ -202,14 +232,15 @@ class OpenRouterClient:
         """Determine if error is retryable."""
         if isinstance(error, openai.RateLimitError):
             self.stats["rate_limit_hits"] += 1
-            return True
-        elif isinstance(error, (openai.APITimeoutError, openai.APIConnectionError)):
-            return True
-        elif isinstance(error, openai.InternalServerError):
-            return True
-        elif isinstance(error, openai.BadRequestError):
-            return False  # Don't retry client errors
-        return False
+        if isinstance(error, openai.APIStatusError):
+            retry_after = self._retry_after(error)
+            if retry_after is not None and math.isfinite(retry_after) and retry_after > 120:
+                return False
+            directive = error.response.headers.get("x-should-retry")
+            if directive in ("true", "false"):
+                return directive == "true"
+            return error.status_code in (408, 409, 429) or error.status_code >= 500
+        return isinstance(error, (openai.APITimeoutError, openai.APIConnectionError))
     
     def _begin_request(self):
         """Count one logical call; a stream starts when consumption starts."""
@@ -234,9 +265,10 @@ class OpenRouterClient:
         @wraps(func)
         def wrapper(*args, **kwargs):
             self._begin_request()
+            retry_delay = 0.0
             for attempt in range(self.retry_config.max_retries + 1):
                 if attempt:
-                    time.sleep(self._calculate_delay(attempt - 1))
+                    time.sleep(retry_delay)
                     self.stats["retried_requests"] += 1
                 try:
                     result = func(*args, **kwargs)
@@ -245,6 +277,7 @@ class OpenRouterClient:
                             or attempt == self.retry_config.max_retries):
                         self._record_request_failure(error)
                         raise
+                    retry_delay = self._calculate_delay(attempt, error)
                     self.logger.warning("Retrying failed request: %s", error)
                 else:
                     self._record_request_success()
@@ -256,9 +289,10 @@ class OpenRouterClient:
         @wraps(func)
         async def wrapper(*args, **kwargs):
             self._begin_request()
+            retry_delay = 0.0
             for attempt in range(self.retry_config.max_retries + 1):
                 if attempt:
-                    await asyncio.sleep(self._calculate_delay(attempt - 1))
+                    await asyncio.sleep(retry_delay)
                     self.stats["retried_requests"] += 1
                 try:
                     result = await func(*args, **kwargs)
@@ -267,6 +301,7 @@ class OpenRouterClient:
                             or attempt == self.retry_config.max_retries):
                         self._record_request_failure(error)
                         raise
+                    retry_delay = self._calculate_delay(attempt, error)
                     self.logger.warning("Retrying failed async request: %s", error)
                 else:
                     self._record_request_success()
@@ -338,9 +373,10 @@ class OpenRouterClient:
         """Consume a managed stream; only failures before delivery may retry."""
         self._begin_request()
         delivered = False
+        retry_delay = 0.0
         for attempt in range(self.retry_config.max_retries + 1):
             if attempt:
-                time.sleep(self._calculate_delay(attempt - 1))
+                time.sleep(retry_delay)
                 self.stats["retried_requests"] += 1
             try:
                 with self._base_chat_completion_stream(
@@ -354,6 +390,7 @@ class OpenRouterClient:
                 if delivered or not retryable or attempt == self.retry_config.max_retries:
                     self._record_request_failure(error)
                     raise
+                retry_delay = self._calculate_delay(attempt, error)
                 self.logger.warning("Retrying stream before first chunk: %s", error)
             else:
                 self._record_request_success()
@@ -417,9 +454,10 @@ class OpenRouterClient:
         """Async stream with the same pre-delivery retry and circuit contract."""
         self._begin_request()
         delivered = False
+        retry_delay = 0.0
         for attempt in range(self.retry_config.max_retries + 1):
             if attempt:
-                await asyncio.sleep(self._calculate_delay(attempt - 1))
+                await asyncio.sleep(retry_delay)
                 self.stats["retried_requests"] += 1
             try:
                 async with await self._base_async_chat_completion_stream(
@@ -433,6 +471,7 @@ class OpenRouterClient:
                 if delivered or not retryable or attempt == self.retry_config.max_retries:
                     self._record_request_failure(error)
                     raise
+                retry_delay = self._calculate_delay(attempt, error)
                 self.logger.warning("Retrying async stream before first chunk: %s", error)
             else:
                 self._record_request_success()

@@ -50,6 +50,10 @@ a later failure is raised without replay. Closing or cancelling a stream
 releases its SDK response and does not count as success. Unavailable-model
 404 fallback attempts belong to one synchronous chat request and do not
 poison transport-circuit health. Explicit `temperature=0` is preserved.
+Wrapper-owned retries preserve transient HTTP 408/409 handling and server
+`Retry-After` (seconds or HTTP date) / `retry-after-ms` cooldowns up to 120
+seconds, including stream opening. Server retry directives and longer cooldowns
+are respected without replaying delivered stream content.
 
 ### Multi-Model Analysis
 

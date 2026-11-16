@@ -4,10 +4,11 @@ import asyncio
 import json
 import os
 import socket
+import time
 import threading
 from collections import deque
 from contextlib import asynccontextmanager, contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 
@@ -18,6 +19,7 @@ class Reply:
     content_type: str = "application/json"
     truncate: bool = False
     hold_open: bool = False
+    headers: dict = field(default_factory=dict)
 
 
 def completion_reply(content="ok"):
@@ -65,6 +67,7 @@ class OpenRouterHTTP:
         self._lock = threading.Lock()
         self.requests = []
         self.paths = []
+        self.request_times = []
         self.errors = []
         self.disconnected = threading.Event()
         self._server = None
@@ -84,6 +87,7 @@ class OpenRouterHTTP:
                     payload = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
                     with owner._lock:
                         owner.requests.append(payload)
+                        owner.request_times.append(time.monotonic())
                         owner.paths.append(self.path)
                         if owner._responder is None:
                             reply = owner._replies.popleft()
@@ -97,6 +101,8 @@ class OpenRouterHTTP:
                 self.send_response(reply.status)
                 self.send_header("Content-Type", reply.content_type)
                 self.send_header("Connection", "close")
+                for name, value in reply.headers.items():
+                    self.send_header(name, value)
                 if not reply.hold_open:
                     self.send_header("Content-Length", str(len(reply.body) + int(reply.truncate)))
                 self.end_headers()

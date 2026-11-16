@@ -1,6 +1,9 @@
 """Real-SDK contract tests against bounded loopback HTTP/SSE responses only."""
 
 import asyncio
+import time
+from dataclasses import replace
+from email.utils import formatdate
 
 import pytest
 
@@ -83,6 +86,93 @@ def test_wrapper_owns_retry_budget(asynchronous):
                 with pytest.raises(openai.APIStatusError):
                     client.chat_completion(MESSAGES)
                 check(client)
+
+
+@pytest.mark.parametrize("asynchronous", [False, True])
+@pytest.mark.parametrize("streaming", [False, True])
+@pytest.mark.parametrize("status,headers,retry,minimum_delay", [
+    (408, {}, True, 0),
+    (409, {}, True, 0),
+    (429, {"Retry-After": "0.03"}, True, 0.025),
+    (503, {"retry-after-ms": "30", "Retry-After": "10"}, True, 0.025),
+    (400, {"x-should-retry": "true"}, True, 0),
+    (503, {"x-should-retry": "false"}, False, 0),
+    (429, {"Retry-After": "121"}, False, 0),
+    (429, {"retry-after-ms": "1e999"}, False, 0),
+])
+def test_wrapper_preserves_sdk_status_and_cooldown_contract(
+    asynchronous, streaming, status, headers, retry, minimum_delay,
+):
+    failure = replace(error_reply(status), headers=headers)
+    success = stream_reply("ok") if streaming else completion_reply()
+    with OpenRouterHTTP([failure, success]) as server:
+        def check(client):
+            assert len(server.requests) == (2 if retry else 1)
+            stats = client.get_stats()
+            assert stats["total_requests"] == 1
+            assert stats["retried_requests"] == int(retry)
+            assert stats["successful_requests"] == int(retry)
+            assert stats["failed_requests"] == int(not retry)
+            if retry:
+                assert server.request_times[1] - server.request_times[0] >= minimum_delay
+
+        async def run_async():
+            async with async_openrouter_client(server, max_retries=1) as client:
+                async def consume():
+                    if streaming:
+                        chunks = [chunk async for chunk in client.async_chat_completion_stream(MESSAGES)]
+                        assert chunks[0].choices[0].delta.content == "ok"
+                    else:
+                        assert (await client.async_chat_completion(MESSAGES)).choices[0].message.content == "ok"
+                if retry:
+                    await consume()
+                else:
+                    with pytest.raises(openai.APIStatusError):
+                        await consume()
+                check(client)
+
+        if asynchronous:
+            asyncio.run(run_async())
+        else:
+            with openrouter_client(server, max_retries=1) as client:
+                def consume():
+                    if streaming:
+                        assert list(client.chat_completion_stream(MESSAGES))[0].choices[0].delta.content == "ok"
+                    else:
+                        assert client.chat_completion(MESSAGES).choices[0].message.content == "ok"
+                if retry:
+                    consume()
+                else:
+                    with pytest.raises(openai.APIStatusError):
+                        consume()
+                check(client)
+
+
+@pytest.mark.parametrize("header,expected", [
+    ("30", 30),
+    ("90", 90),
+    ("bad", 0),
+    ("-1", 0),
+    ("inf", 0),
+])
+def test_retry_delay_uses_public_sdk_response_headers(header, expected):
+    failure = replace(error_reply(429), headers={"Retry-After": header})
+    with OpenRouterHTTP([failure]) as server, openrouter_client(server) as client:
+        with pytest.raises(openai.RateLimitError) as captured:
+            client.chat_completion(MESSAGES)
+        assert client._calculate_delay(0, captured.value) == expected
+
+
+def test_retry_delay_accepts_http_date_from_real_sdk_response():
+    deadline = int(time.time()) + 30
+    failure = replace(error_reply(429), headers={"Retry-After": formatdate(deadline, usegmt=True)})
+    with OpenRouterHTTP([failure]) as server, openrouter_client(server) as client:
+        with pytest.raises(openai.RateLimitError) as captured:
+            client.chat_completion(MESSAGES)
+        before = time.time()
+        delay = client._calculate_delay(0, captured.value)
+        after = time.time()
+        assert deadline - after <= delay <= deadline - before
 
 
 @pytest.mark.parametrize("asynchronous", [False, True])
