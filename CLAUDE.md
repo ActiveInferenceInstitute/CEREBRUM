@@ -53,6 +53,13 @@ src/models/base.py: Model (thin compatibility subclass of src.core.model.Model; 
 
 **Note:** `src/models/base.py` provides a thin compatibility subclass of `src.core.model.Model` and re-exports the shared `Case` enum. Model behavior is implemented in `src.core.model`; prefer that module for new model implementations.
 
+The abstract `Model.predict(data, /)` contract requires positional input, matching
+the existing linear-regression and neural-network implementations (`X` and
+`inputs`). It still raises `NotImplementedError` on the base model; concrete
+example subclasses may explicitly support no-argument predictions themselves.
+Model state annotations distinguish optional initialization from populated arrays,
+case history and fitted regression parameters without changing scientific formulas.
+
 ### Key Modules
 
 - **`src/core/model.py`** — `Case` enum (8 cases: NOM/ACC/GEN/DAT/INS/LOC/ABL/VOC) and base `Model` class with case-switching logic. Changing `model.case` triggers `_apply_case_transformation()`.

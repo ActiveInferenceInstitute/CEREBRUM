@@ -6,7 +6,7 @@ Implements a linear regression model with different linguistic cases
 
 import logging
 import numpy as np
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, TypedDict
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
 from sklearn.linear_model import LinearRegression
 from scipy import stats
@@ -15,6 +15,11 @@ from .base import Model, Case
 
 # Setup logging
 logger = logging.getLogger(__name__)
+
+class _RegressionParameters(TypedDict):
+    intercept: float
+    coefficients: np.ndarray
+
 
 class LinearRegressionModel(Model):
     """Linear regression model with linguistic case functionality."""
@@ -38,7 +43,7 @@ class LinearRegressionModel(Model):
         
         # Model state
         self._is_fitted = False
-        self._params = None
+        self._params: Optional[_RegressionParameters] = None
         
     def fit(self, X: np.ndarray, y: np.ndarray) -> 'LinearRegressionModel':
         """Fit the model (primary action for NOMINATIVE case)."""
@@ -72,7 +77,8 @@ class LinearRegressionModel(Model):
         if self.case == Case.GENITIVE:
             logger.info("GENITIVE case: Model generating predictions as its possessive function")
         
-        return self._model.predict(X)
+        prediction: np.ndarray = self._model.predict(X)
+        return prediction
     
     def evaluate(self, X: np.ndarray, y: np.ndarray, fitted_params: Optional[Dict[str, Any]] = None) -> Dict[str, float]:
         """Evaluate the model (primary action for ACCUSATIVE case)."""
@@ -180,14 +186,14 @@ class LinearRegressionModel(Model):
     
     def respond_to_query(self, query_type: str, **kwargs) -> Dict[str, Any]:
         """Method for VOCATIVE case to respond to direct queries."""
-        if not self._is_fitted:
+        if not self._is_fitted or self._params is None:
             return {"error": "Model is not fitted yet."}
             
         # Check if we're in VOCATIVE case
         if self.case != Case.VOCATIVE:
             logger.warning(f"respond_to_query called outside VOCATIVE case: {self.case}")
             
-        response = {}
+        response: Dict[str, object] = {}
         
         # Process different query types
         if query_type == "predict":

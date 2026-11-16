@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 
@@ -18,11 +18,11 @@ class ActiveInferenceModel(Model):
     
     def __init__(
         self, 
-        name: str = None, 
-        parameters: Dict[str, Any] = None,
-        prior_means: np.ndarray = None,
-        prior_precision: np.ndarray = None,
-        likelihood_precision: np.ndarray = None
+        name: Optional[str] = None,
+        parameters: Optional[Dict[str, Any]] = None,
+        prior_means: Optional[np.ndarray] = None,
+        prior_precision: Optional[np.ndarray] = None,
+        likelihood_precision: Optional[np.ndarray] = None
     ):
         """
         Initialize an ActiveInferenceModel with the necessary components.
@@ -53,7 +53,7 @@ class ActiveInferenceModel(Model):
             self.n_observations = self.n_states
         
         # Set up prior distributions
-        self.prior_means = prior_means if prior_means is not None else np.zeros(self.n_states)
+        self.prior_means: np.ndarray = prior_means if prior_means is not None else np.zeros(self.n_states)
         
         if prior_precision is not None:
             if prior_precision.ndim == 1:
@@ -73,7 +73,7 @@ class ActiveInferenceModel(Model):
             self.likelihood_precision = np.eye(self.n_observations)
         
         # Posterior beliefs (these will be updated during inference)
-        self.posterior_means = self.prior_means.copy()
+        self.posterior_means: np.ndarray = self.prior_means.copy()
         self.posterior_precision = self.prior_precision.copy()
 
         # Baseline precision values — _apply_case_transformation scales from these
@@ -86,11 +86,11 @@ class ActiveInferenceModel(Model):
         self._setup_case_configurations()
         
         # History for tracking belief updates
-        self.belief_history = []
+        self.belief_history: List[Dict[str, object]] = []
         
         # Prediction errors and free energy history
-        self.prediction_errors = []
-        self.free_energy_history = []
+        self.prediction_errors: List[np.ndarray] = []
+        self.free_energy_history: List[float] = []
         
         # Ensure required parameters are available (if parameters dict was provided)
         # This is optional - models can be initialized with prior_means/prior_precision directly
@@ -250,7 +250,8 @@ class ActiveInferenceModel(Model):
             The prediction error (observations - expected observations)
         """
         expected_obs = self.likelihood(self.posterior_means)
-        return observations - expected_obs
+        error: np.ndarray = observations - expected_obs
+        return error
     
     def _kl_divergence(self) -> float:
         """KL(N(posterior)||N(prior)) with numerical guards.
@@ -390,7 +391,7 @@ class ActiveInferenceModel(Model):
         logger.debug(f"Updated posterior: {np.round(self.posterior_means, 3)}")
         return {"status": "success", "method": "bayesian"}
     
-    def get_optimal_action(self) -> int:
+    def get_optimal_action(self) -> np.integer:
         """
         Get the optimal action based on current beliefs.
         
@@ -399,7 +400,7 @@ class ActiveInferenceModel(Model):
         """
         # Greedy policy: action corresponding to most likely state (modulo n_actions)
         max_state = np.argmax(self.posterior_means)
-        n_actions = self.parameters.get('n_actions', max(1, len(self.posterior_means))) if self.parameters else max(1, len(self.posterior_means))
+        n_actions: int = self.parameters.get('n_actions', max(1, len(self.posterior_means))) if self.parameters else max(1, len(self.posterior_means))
         optimal_action = max_state % n_actions
         
         logger.debug(f"Selected optimal action {optimal_action} for max state {max_state}")

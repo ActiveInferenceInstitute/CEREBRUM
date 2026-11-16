@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 
@@ -17,11 +17,11 @@ class NeuralNetworkModel(Model):
     
     def __init__(
         self, 
-        name: str = None, 
-        parameters: Dict[str, Any] = None,
+        name: Optional[str] = None,
+        parameters: Optional[Dict[str, Any]] = None,
         input_dim: int = 1,
         output_dim: int = 1,
-        hidden_dims: List[int] = None,
+        hidden_dims: Optional[List[int]] = None,
         activation: str = 'relu'
     ):
         """
@@ -65,7 +65,7 @@ class NeuralNetworkModel(Model):
         self.biases.append(np.zeros(output_dim))
         
         # Training state
-        self.loss_history = []
+        self.loss_history: List[float] = []
         self.trained = False
         
         # Case-specific parameter access patterns
@@ -73,7 +73,7 @@ class NeuralNetworkModel(Model):
         self._setup_case_configurations()
         
         # Additional tracking
-        self.prediction_history = []
+        self.prediction_history: List[Dict[str, np.ndarray]] = []
         self.training_examples_seen = 0
         
     def _setup_case_configurations(self):
@@ -162,7 +162,8 @@ class NeuralNetworkModel(Model):
         if self.activation == 'relu':
             return np.maximum(0, x)
         elif self.activation == 'sigmoid':
-            return 1 / (1 + np.exp(-x))
+            activated: np.ndarray = 1 / (1 + np.exp(-x))
+            return activated
         elif self.activation == 'tanh':
             return np.tanh(x)
         else:
@@ -244,8 +245,8 @@ class NeuralNetworkModel(Model):
         _, activations = self._forward_with_activations(X)
         
         # Initialize empty arrays for gradients and weight updates
-        gradients = []
-        weight_updates = []
+        gradients: List[np.ndarray] = []
+        weight_updates: List[np.ndarray] = []
         
         # Output layer error
         if self.output_activation == 'softmax':
@@ -518,7 +519,7 @@ class NeuralNetworkModel(Model):
         accuracy = self.loss_history[-1]
         
         # Regularization term (L2 norm of weights) as complexity term
-        complexity = 0
+        complexity: float = 0
         for w in self.weights:
             complexity += np.sum(w ** 2)
         
