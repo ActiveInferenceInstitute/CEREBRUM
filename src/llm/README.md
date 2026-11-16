@@ -43,6 +43,14 @@ response = client.simple_chat("Explain case-based reasoning")
 print(response)
 ```
 
+The wrapper owns retry attempts through the OpenAI SDK's public errors.
+Streaming requests begin on consumption and count as successful only after
+normal completion. Retry is permitted only before the first delivered chunk;
+a later failure is raised without replay. Closing or cancelling a stream
+releases its SDK response and does not count as success. Unavailable-model
+404 fallback attempts belong to one synchronous chat request and do not
+poison transport-circuit health. Explicit `temperature=0` is preserved.
+
 ### Multi-Model Analysis
 
 ```python

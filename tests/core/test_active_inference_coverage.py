@@ -196,12 +196,75 @@ class TestCaseUpdates:
         assert result['method'] == 'predict'
 
     def test_instrumental_invert(self, ai_model):
+        original = ai_model.posterior_means
+        before = original.copy()
+        observation = np.array([0.5, 0.3, 0.2])
         result = ai_model._update_instrumental({
             "method": "invert",
-            "params": {"observations": [0.5, 0.3, 0.2], "iterations": 3}
+            "params": {"observations": observation, "initial_state": original, "iterations": 3}
         })
         assert result['status'] == 'success'
         assert result['method'] == 'invert'
+        np.testing.assert_allclose(
+            result['inferred_state'], 0.9 ** 3 * before + (1 - 0.9 ** 3) * observation
+        )
+        assert ai_model.posterior_means is original
+        np.testing.assert_array_equal(original, before)
+
+    def test_instrumental_invert_propagates_dimension_failure(self, ai_model):
+        original = ai_model.posterior_means
+        before = original.copy()
+        result = ai_model._update_instrumental({
+            "method": "invert",
+            "params": {"observations": [1.0, 0.0], "iterations": 3},
+        })
+        assert result['status'] == 'error'
+        assert result['iterations'] == 1
+        assert result['results'][0]['status'] == 'error'
+        assert 'inferred_state' not in result
+        assert ai_model.posterior_means is original
+        np.testing.assert_array_equal(original, before)
+
+    def test_instrumental_invert_propagates_contradictory_observation(self):
+        model = ActiveInferenceModel(
+            prior_means=np.array([0.4, 0.6]),
+            parameters={'n_states': 2, 'observation_matrix': np.zeros((2, 2))},
+        )
+        original = model.posterior_means
+        result = model._update_instrumental({
+            'method': 'invert',
+            'params': {'observations': [1.0, 0.0], 'iterations': 3},
+        })
+        assert result['status'] == 'error'
+        assert 'zero' in result['message']
+        assert result['iterations'] == 1
+        assert model.posterior_means is original
+        np.testing.assert_array_equal(original, [0.4, 0.6])
+
+    def test_instrumental_invert_restores_posterior_on_exception(self):
+        model = ActiveInferenceModel(
+            prior_means=np.array([0.4, 0.6]),
+            parameters={'n_states': 2, 'observation_matrix': np.eye(2)},
+        )
+        original = model.posterior_means
+        initial = np.array([1.0, 0.0])
+        with pytest.raises(ValueError):
+            model._update_instrumental({
+                'method': 'invert',
+                'params': {'observations': [1.0, 0.0, 0.0], 'initial_state': initial},
+            })
+        assert model.posterior_means is original
+        np.testing.assert_array_equal(original, [0.4, 0.6])
+        np.testing.assert_array_equal(initial, [1.0, 0.0])
+
+    def test_instrumental_invert_rejects_wrong_initial_dimension(self, ai_model):
+        original = ai_model.posterior_means
+        result = ai_model._update_instrumental({
+            'method': 'invert',
+            'params': {'observations': [1.0, 0.0, 0.0], 'initial_state': [1.0]},
+        })
+        assert result['status'] == 'error'
+        assert ai_model.posterior_means is original
 
     def test_instrumental_unknown_method(self, ai_model):
         result = ai_model._update_instrumental({"method": "dance"})
@@ -323,6 +386,37 @@ class TestKLCorrectness:
         # Regression: still exactly zero when posterior == prior
         m = ActiveInferenceModel(name="Z", prior_means=np.zeros(3))
         assert m.free_energy() == pytest.approx(0.0, abs=1e-10)
+
+
+    @pytest.mark.parametrize("scale", [1e200, 1e-200])
+    def test_kl_identical_extreme_precisions(self, scale):
+        model = ActiveInferenceModel(
+            prior_means=np.zeros(2), prior_precision=scale * np.eye(2)
+        )
+        assert model.free_energy() == pytest.approx(0.0, abs=1e-10)
+
+    @pytest.mark.parametrize("scale", [1e200, 1e-200])
+    def test_kl_extreme_correlated_precisions_match_reference(self, scale):
+        prior = np.array([[2.0, 0.3], [0.3, 1.0]])
+        posterior = np.array([[1.0, 0.1], [0.1, 0.8]])
+        model = ActiveInferenceModel(prior_means=np.zeros(2), prior_precision=scale * prior)
+        model.posterior_precision = scale * posterior
+        expected = self._analytic_kl(
+            np.zeros(2), np.zeros(2), np.linalg.inv(prior), np.linalg.inv(posterior)
+        )
+        assert model.free_energy() == pytest.approx(expected, abs=1e-10)
+
+    @pytest.mark.parametrize("field,value", [
+        ("prior_means", np.zeros(1)),
+        ("posterior_means", np.zeros((2, 1))),
+        ("prior_precision", np.eye(3)),
+        ("posterior_precision", np.eye(3)),
+    ])
+    def test_kl_rejects_inconsistent_dimensions(self, field, value):
+        model = ActiveInferenceModel(prior_means=np.zeros(2))
+        setattr(model, field, value)
+        with pytest.raises(ValueError, match="dimensions"):
+            model.free_energy()
 
 
 class TestDefaultModelRobustness:

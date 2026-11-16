@@ -258,26 +258,34 @@ class ActiveInferenceModel(Model):
         Guards against singular / non-positive-definite precision matrices so a
         degenerate posterior yields a finite, large value instead of NaN/-inf.
         """
+        vector_shape = (self.n_states,)
+        matrix_shape = (self.n_states, self.n_states)
+        if (np.shape(self.prior_means) != vector_shape
+                or np.shape(self.posterior_means) != vector_shape
+                or np.shape(self.prior_precision) != matrix_shape
+                or np.shape(self.posterior_precision) != matrix_shape):
+            raise ValueError("Prior and posterior dimensions must match n_states")
+
         try:
-            prior_inv_post = self.prior_precision @ np.linalg.inv(self.posterior_precision)
-            det_ratio = (
-                np.linalg.det(self.posterior_precision)
-                / np.linalg.det(self.prior_precision)
-            )
+            # trace(Pprior @ inv(Ppost)) == trace(solve(Ppost, Pprior)).
+            inverse_post_prior = np.linalg.solve(self.posterior_precision, self.prior_precision)
+            prior_sign, prior_logdet = np.linalg.slogdet(self.prior_precision)
+            post_sign, post_logdet = np.linalg.slogdet(self.posterior_precision)
         except np.linalg.LinAlgError:
-            # Singular precision matrix: posterior is maximally uninformative
+            # Preserve the existing singular-posterior policy.
             return float(self.n_states)
 
-        quadratic = (self.prior_means - self.posterior_means).T @ self.prior_precision @ (self.prior_means - self.posterior_means)
-        if not (det_ratio > 0) or not np.isfinite(det_ratio):
-            # Non-positive ratio -> degenerate precision -> very high complexity
+        logdet_ratio = post_logdet - prior_logdet
+        if prior_sign * post_sign <= 0 or not np.isfinite(logdet_ratio):
             return float(1e6)
 
+        difference = self.prior_means - self.posterior_means
+        quadratic = difference.T @ self.prior_precision @ difference
         kl = 0.5 * (
-            np.trace(prior_inv_post)
+            np.trace(inverse_post_prior)
             + quadratic
             - self.n_states
-            + np.log(det_ratio)
+            + logdet_ratio
         )
         # Guard against any residual negative value from numerical noise
         return float(max(kl, 0.0))
@@ -562,33 +570,46 @@ class ActiveInferenceModel(Model):
                 return {"status": "error", "message": "Observations required for inversion", "case": "INSTRUMENTAL"}
             
             observations = np.array(method_params["observations"])
-            learning_rate = method_params.get("learning_rate", 0.1)
             iterations = method_params.get("iterations", 10)
-            
-            # Copy current posterior to avoid changing it
-            saved_posterior = self.posterior_means.copy()
-            
-            # Start from prior or specified initial state
-            self.posterior_means = method_params.get("initial_state", self.prior_means.copy())
-            
-            # Run gradient descent for specified iterations
+            initial_state = np.array(
+                method_params.get("initial_state", self.prior_means), copy=True
+            )
+            if initial_state.shape != (self.n_states,):
+                return {
+                    "status": "error",
+                    "message": "Initial state dimension does not match n_states",
+                    "method": "invert",
+                    "case": "INSTRUMENTAL",
+                }
+
+            # Borrow a private posterior, preserving the caller's object as well as its values.
+            saved_posterior = self.posterior_means
             results = []
-            for i in range(iterations):
-                update_result = self.update_posterior(observations)
-                results.append(update_result)
-            
-            # Restore original posterior
-            inferred_state = self.posterior_means.copy()
-            self.posterior_means = saved_posterior
-            
-            return {
-                "status": "success",
-                "method": "invert",
-                "inferred_state": inferred_state,
-                "iterations": iterations,
-                "results": results,
-                "case": "INSTRUMENTAL"
-            }
+            try:
+                self.posterior_means = initial_state
+                for _ in range(iterations):
+                    update_result = self.update_posterior(observations)
+                    results.append(update_result)
+                    if update_result.get("status") != "success":
+                        return {
+                            "status": "error",
+                            "message": update_result.get("message", "Posterior update failed"),
+                            "method": "invert",
+                            "iterations": len(results),
+                            "results": results,
+                            "case": "INSTRUMENTAL",
+                        }
+
+                return {
+                    "status": "success",
+                    "method": "invert",
+                    "inferred_state": self.posterior_means.copy(),
+                    "iterations": iterations,
+                    "results": results,
+                    "case": "INSTRUMENTAL",
+                }
+            finally:
+                self.posterior_means = saved_posterior
         else:
             return {"status": "error", "message": f"Unknown method {method}", "case": "INSTRUMENTAL"}
     

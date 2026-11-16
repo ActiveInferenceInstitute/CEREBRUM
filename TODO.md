@@ -7,8 +7,39 @@
 This is the authoritative project backlog. It records completed work and the
 items that are still open. Every completed line names the commit, PR or file that
 proves it; every open item names what blocks it and who can unblock it.
-**Open — 2026-11-12** at the end of this file is the current open list; the dated
-pass sections above it are history and are kept for the evidence trail.
+The dated **Open — 2026-11-12** list retains its original evidence below.
+The bounded qualification section supplements it without rewriting histories
+or closing owner/science decisions.
+
+## Bounded software qualification — 2026-11-13
+
+- [x] C1 — focused KL stability/dimension and instrumental-state restoration
+  controls passed against the actual lane implementation.
+- [x] C2 — actual-SDK loopback controls passed for retries, fallback/circuit
+  accounting, sync/async streaming, zero temperature, and response cleanup.
+  Transport handling uses the SDK's public connection/timeout errors.
+- [x] C3 — real batch CLI controls passed for both modes, full-path identities,
+  duplicate discovery, all success/failure orderings, and engine-error
+  continuation.
+- [x] C4 — real SDK/file controls passed for request-bound paraphrase caching,
+  complete quality-ID validation, explicit provider/protocol failure, legitimate
+  empty results, and preservation of legacy cache files.
+- [x] C5 / D1 — the corrected `CaseManager` example passed; contributor and
+  retained-roadmap guidance now distinguishes existing foundations from
+  uncommissioned proposals.
+- B1: assembly, conversion, and figure failure-exit controls passed with
+  isolated files and unavailable render tools. Successful full manuscript
+  regeneration remains blocked by approved toolchain/output custody.
+- B4: the complete declared flake8/black/isort/mypy diagnostic workset was
+  captured with untruncated source-bound private logs. All four debt checks
+  returned failures; no formatting, type-policy change, generated-count
+  rewrite, or umbrella closure followed. Exact file/rule repair admission
+  remains separate.
+- B2, B3 and B5: retention, DOI/deposit presentation, and hook/enforcement
+  decisions remain owner-held. No corresponding policy or publication change.
+
+These are focused governed contracts, not aggregate gate, full optional NLP,
+installed-wheel, native GNN, live-provider, biological, or release acceptance.
 
 ---
 

@@ -88,7 +88,7 @@ Return a JSON assessment with this structure:
 }}
 ```
 
-Only include high-quality paraphrases that achieve at least 0.6 quality score.
+Include exactly one assessment for every paraphrase, using its numbered ID, including scores below 0.6. The caller will filter low-quality paraphrases.
 """
     return prompt
 

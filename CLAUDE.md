@@ -48,10 +48,10 @@ src/core/model.py: Model (base) + Case (enum)
     └── src/core/active_inference.py: ActiveInferenceModel
             └── src/models/insect/base.py: InsectModel
             └── src/examples/animal_agent.py: AnimalAgent
-src/models/base.py: Model (simplified re-export, re-exports Case from core)
+src/models/base.py: Model (thin compatibility subclass of src.core.model.Model; re-exports the shared Case)
 ```
 
-**Note:** There are two `Model` classes — `src/core/model.py` (full, with precision weights and case history) and `src/models/base.py` (simplified). Both share the same `Case` enum via re-export. Prefer `src.core.model` for new model implementations.
+**Note:** `src/models/base.py` provides a thin compatibility subclass of `src.core.model.Model` and re-exports the shared `Case` enum. Model behavior is implemented in `src.core.model`; prefer that module for new model implementations.
 
 ### Key Modules
 
@@ -82,8 +82,9 @@ revert_case(model)                       # returns to prior case
 
 # Or via CaseManager
 from src.cases import CaseManager
-manager = CaseManager(model)
-manager.transition(Case.DATIVE)
+manager = CaseManager()
+manager.register_model(model)
+manager.transform_case(model, Case.DATIVE)
 ```
 
 ### Environment Variables

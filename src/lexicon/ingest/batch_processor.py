@@ -5,8 +5,9 @@ Handles batch processing of multiple files through the LEXICON pipeline.
 """
 
 import logging
+from dataclasses import replace
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from ..core.config import LexiconConfig
 from ..core.engine import LexiconEngine
@@ -117,47 +118,38 @@ def generate_health_summary(batch_results: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def process_all_inputs(base_dir: Path, model: str = "qwen/qwen3.8-27b", 
-                      log_level: str = "INFO") -> Dict[str, Any]:
+def process_all_inputs(
+    base_dir: Path,
+    model: str = "qwen/qwen3.8-27b",
+    log_level: str = "INFO",
+    *,
+    input_dirs: Optional[List[Path]] = None,
+    config: Optional[LexiconConfig] = None,
+) -> Dict[str, Any]:
+    """Process markdown inputs, retaining one outcome per resolved source path.
+
+    Explicit input directories replace the two default discovery roots. A supplied
+    config carries provider settings; output/cache paths, model and log level are
+    owned by this batch and its per-file directories.
     """
-    Process all input files in the input directory.
-    
-    Args:
-        base_dir: Base directory for batch processing
-        model: Model to use
-        log_level: Logging level
-        
-    Returns:
-        Dictionary of batch results
-    """
-    # First check if there are files in the src/lexicon/input directory
-    src_input_dir = Path(__file__).resolve().parent.parent / "input"
+    base_dir = Path(base_dir).resolve()
     batch_input_dir = base_dir / "input"
-    
-    # Look for input files in both locations
-    input_files = []
-    
-    # Check src/lexicon/input directory first
-    if src_input_dir.exists():
-        md_files = list(src_input_dir.glob("*.md"))
-        if md_files:
-            print(f"Found {len(md_files)} markdown files in src/lexicon/input/")
-            input_files.extend(md_files)
-    
-    # Also check batch input directory
-    if batch_input_dir.exists():
-        additional_files = list(batch_input_dir.glob("*.md"))
-        if additional_files:
-            print(f"Found {len(additional_files)} additional markdown files in batch input directory")
-            input_files.extend(additional_files)
-    
-    # If no files found, create input directory and inform user
+    roots = input_dirs if input_dirs is not None else [
+        Path(__file__).resolve().parent.parent / "input",
+        batch_input_dir,
+    ]
+    input_files = sorted({
+        path.resolve()
+        for root in roots
+        for path in Path(root).glob("*.md")
+        if path.is_file()
+    })
     if not input_files:
-        batch_input_dir.mkdir(parents=True, exist_ok=True)
-        print(f"No markdown files found in either:")
-        print(f"  - {src_input_dir}")
-        print(f"  - {batch_input_dir}")
-        print(f"Please place input files in one of these directories and run again.")
+        if input_dirs is None:
+            batch_input_dir.mkdir(parents=True, exist_ok=True)
+        print("No markdown files found in:")
+        for root in roots:
+            print(f"  - {root}")
         return {}
     
     print(f"Processing {len(input_files)} input files...")
@@ -170,36 +162,49 @@ def process_all_inputs(base_dir: Path, model: str = "qwen/qwen3.8-27b",
     
     # Process each input file
     for input_file in input_files:
-        print(f"Processing {input_file.name}...")
+        source_id = str(input_file)
+        print(f"Processing {source_id}...")
         
         # Look up by full path; batch dirs are keyed this way so files that share
         # a stem never collide with each other's output directory.
-        file_output_dir = batch_dirs[str(input_file)]
-        
-        # Initialize configuration for this file
-        config = LexiconConfig(
-            output_dir=file_output_dir,
-            cache_dir=file_output_dir / "cache",
-            log_level=log_level,
-            default_model=model
-        )
-        
+        file_output_dir = batch_dirs[source_id]
+
         try:
-            # Process the file
-            result = process_single_file_in_batch(input_file, file_output_dir, config)
-            
-            # Add visualization step
+            config_values = {
+                "output_dir": file_output_dir,
+                "cache_dir": file_output_dir / "cache",
+                "log_level": log_level,
+                "default_model": model,
+            }
+            file_config = (
+                replace(config, **config_values)
+                if config is not None else LexiconConfig(**config_values)
+            )
+            result = process_single_file_in_batch(input_file, file_output_dir, file_config)
+            if result.get("status") != "success":
+                batch_results[source_id] = {
+                    "status": "error",
+                    "error": result.get("error") or "Pipeline did not report success",
+                    "result": result,
+                    "output_dir": str(file_output_dir),
+                }
+                print(f"Error processing {source_id}: {batch_results[source_id]['error']}")
+                continue
+
             logger = logging.getLogger(f"lexicon_batch_{input_file.stem}")
             analyze_results(result, file_output_dir, logger)
-            
-            batch_results[input_file.name] = {
-                "status": "success", 
+            batch_results[source_id] = {
+                "status": "success",
                 "result": result,
-                "output_dir": str(file_output_dir)
+                "output_dir": str(file_output_dir),
             }
         except Exception as e:
-            print(f"Error processing {input_file.name}: {e}")
-            batch_results[input_file.name] = {"status": "error", "error": str(e)}
+            print(f"Error processing {source_id}: {e}")
+            batch_results[source_id] = {
+                "status": "error",
+                "error": str(e),
+                "output_dir": str(file_output_dir),
+            }
     
     # Save batch summary
     summary_path = save_batch_summary(batch_results, base_dir)

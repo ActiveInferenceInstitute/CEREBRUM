@@ -1,5 +1,11 @@
 # CEREBRUM Insect Documentation Improvement Plan
 
+> Retained improvement plan. Baseline insect implementations and tests exist;
+> see [the implementation completion summary](implementation-completion-summary.md)
+> and [the maintained backlog](../../TODO.md). Research, biological-validation,
+> performance and expansion goals remain unqualified proposals unless
+> separately commissioned and evidenced.
+
 ## Executive Summary
 
 This document outlines a comprehensive plan for improving and extending the insect-related documentation within the CEREBRUM framework. The current documentation provides an excellent foundation with detailed mappings between insect cognitive architectures and CEREBRUM cases, but significant opportunities exist for enhancement, implementation, and integration with cutting-edge research.
@@ -17,7 +23,7 @@ This document outlines a comprehensive plan for improving and extending the inse
 ### Identified Gaps and Opportunities
 
 #### 1. Implementation Gap
-- **Current State**: Documentation is primarily theoretical/conceptual
+- **Current State**: Baseline computational implementations exist; this retained plan describes further improvements rather than an absence of implementation.
 - **Opportunity**: Develop concrete computational implementations
 - **Priority**: High
 
@@ -27,7 +33,7 @@ This document outlines a comprehensive plan for improving and extending the inse
 - **Priority**: High
 
 #### 3. Testing and Validation
-- **Current State**: No test implementations or validation frameworks
+- **Current State**: Baseline tests exist. Their presence does not establish biological validity, coverage targets, latency targets or population-scale claims.
 - **Opportunity**: Create comprehensive test suites for insect-inspired models
 - **Priority**: High
 

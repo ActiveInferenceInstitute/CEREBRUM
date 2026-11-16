@@ -6,8 +6,9 @@ Generates micro-paraphrases for text segments.
 
 import hashlib
 import json
+import math
 import os
-import re  # Added missing import
+import re
 import time
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
@@ -83,32 +84,23 @@ class ParaphraseGenerator:
             "total_duration": 0.0
         }
     
-    def _get_cache_key(self, text: str) -> str:
-        """
-        Generate a cache key for a text segment.
-        
-        Args:
-            text: Text segment
-            
-        Returns:
-            MD5 hash for cache key
-        """
-        hash_obj = hashlib.md5(text.encode())
-        return hash_obj.hexdigest()
-    
-    def _generate_paraphrases_with_llm(self, segment: CasedSegment) -> List[Dict[str, Any]]:
-        """
-        Generate paraphrases using OpenRouter LLM.
-        
-        Args:
-            segment: Cased segment to paraphrase
-            
-        Returns:
-            List of paraphrase dictionaries
-        """
-        # Track metrics
-        self.metrics["llm_calls"] += 1
-        
+    def _get_cache_key(self, segment: CasedSegment, prompt: str, model: str) -> str:
+        """Bind cached successes to both prompts and the effective request settings."""
+        router = self.openrouter.config
+        identity = {
+            "version": 2,
+            "generation_prompt": prompt,
+            "quality_prompt": get_quality_prompt(segment.text, []),
+            "model": model,
+            "base_url": router.base_url,
+            "fallback_models": router.fallback_models,
+            "temperature": router.temperature,
+            "max_tokens": router.max_tokens,
+        }
+        encoded = json.dumps(identity, sort_keys=True, ensure_ascii=False).encode("utf-8")
+        return "v2-" + hashlib.sha256(encoded).hexdigest()
+
+    def _build_paraphrase_prompt(self, segment: CasedSegment) -> str:
         # Extract key entities for paraphrase focus
         key_entities = []
         
@@ -137,133 +129,92 @@ class ParaphraseGenerator:
                         "confidence": entity.get("confidence", 0.0)
                     })
         
-        # Generate the prompt
-        prompt = get_paraphrase_prompt(
-            segment.text, 
-            key_entities[:3]  # Limit to top 3 entities for focus
-        )
-        
-        try:
-            # Call OpenRouter with the prompt
-            model = self.config.fallback_models.get("paraphrase", self.config.default_model)
-            response = self.openrouter.simple_chat(prompt, model=model)
-            
-            # Parse response to extract paraphrases
-            paraphrases = self._parse_paraphrase_response(response)
-            
-            # Check quality and filter if needed
-            if paraphrases:
-                quality_prompt = get_quality_prompt(segment.text, paraphrases)
-                quality_response = self.openrouter.simple_chat(quality_prompt, model=model)
-                filtered_paraphrases = self._filter_by_quality(paraphrases, quality_response)
-                
-                return filtered_paraphrases
-            else:
-                return []
-                
-        except Exception as e:
-            self.logger.error(f"Paraphrase generation failed: {str(e)}")
+        return get_paraphrase_prompt(segment.text, key_entities[:3])
+
+    def _generate_paraphrases_with_llm(
+        self, segment: CasedSegment, prompt: str, model: str
+    ) -> List[Dict[str, Any]]:
+        """Generate and assess paraphrases; request or protocol failures propagate."""
+        self.metrics["llm_calls"] += 1
+        response = self.openrouter.simple_chat(prompt, model=model)
+        paraphrases = self._parse_paraphrase_response(response)
+        if not paraphrases:
             return []
+
+        quality_prompt = get_quality_prompt(segment.text, paraphrases)
+        self.metrics["llm_calls"] += 1
+        quality_response = self.openrouter.simple_chat(quality_prompt, model=model)
+        return self._filter_by_quality(paraphrases, quality_response)
     
+    @staticmethod
+    def _parse_json_response(response: str) -> Any:
+        """Accept raw JSON or a single JSON fence, never prose as a success."""
+        if not isinstance(response, str) or not response.strip():
+            raise ValueError("Empty paraphrase response")
+        payload = response.strip()
+        fenced = re.fullmatch(r"```(?:json)?\s*(.*?)\s*```", payload, re.DOTALL)
+        if fenced:
+            payload = fenced.group(1)
+        try:
+            return json.loads(payload)
+        except json.JSONDecodeError as error:
+            raise ValueError("Invalid paraphrase JSON response") from error
+
+    @staticmethod
+    def _validate_quality(value: Any) -> None:
+        if (
+            isinstance(value, bool)
+            or not isinstance(value, (int, float))
+            or not math.isfinite(value)
+            or not 0.0 <= value <= 1.0
+        ):
+            raise ValueError("Paraphrase quality must be a finite number from 0 to 1")
+
     def _parse_paraphrase_response(self, response: str) -> List[Dict[str, Any]]:
-        """
-        Parse LLM response to extract paraphrases.
-        
-        Args:
-            response: Raw response from OpenRouter
-            
-        Returns:
-            List of paraphrase dictionaries
-        """
-        paraphrases = []
-        
-        try:
-            # Look for JSON in response
-            json_match = None
-            
-            # Try different JSON extraction patterns
-            patterns = [
-                r'```json\s*(.*?)\s*```',  # Code block JSON
-                r'```\s*(.*?)\s*```',       # Any code block
-                r'(\[\s*\{.*\}\s*\])'       # JSON array
-            ]
-            
-            for pattern in patterns:
-                json_match = re.search(pattern, response, re.DOTALL)
-                if json_match:
-                    break
-            
-            if json_match:
-                json_str = json_match.group(1)
-                parsed = json.loads(json_str)
-                
-                # Handle both array and object formats
-                if isinstance(parsed, list):
-                    for item in parsed:
-                        if isinstance(item, dict) and "text" in item:
-                            paraphrases.append(item)
-                elif isinstance(parsed, dict) and "paraphrases" in parsed:
-                    for item in parsed["paraphrases"]:
-                        if isinstance(item, dict) and "text" in item:
-                            paraphrases.append(item)
-            else:
-                # Fall back to line-by-line extraction
-                for line in response.split('\n'):
-                    line = line.strip()
-                    # Skip empty lines and headings
-                    if not line or line.startswith('#'):
-                        continue
-                        
-                    # Remove list markers and parse as paraphrase
-                    clean_line = re.sub(r'^\d+[\.\)]\s*', '', line)
-                    if clean_line:
-                        paraphrases.append({"text": clean_line, "quality": 0.7})
-            
-            # Ensure consistent format for all paraphrases
-            for p in paraphrases:
-                if "quality" not in p:
-                    p["quality"] = 0.7
-            
-            return paraphrases
-            
-        except Exception as e:
-            self.logger.error(f"Failed to parse paraphrases: {str(e)}")
-            return []
-    
-    def _filter_by_quality(self, paraphrases: List[Dict[str, Any]], 
-                         quality_response: str) -> List[Dict[str, Any]]:
-        """
-        Filter paraphrases by quality assessment.
-        
-        Args:
-            paraphrases: List of paraphrases
-            quality_response: Quality assessment response
-            
-        Returns:
-            Filtered list of paraphrases
-        """
-        try:
-            # Try to parse quality assessment as JSON
-            json_match = re.search(r'```json\s*(.*?)\s*```', quality_response, re.DOTALL)
-            
-            if json_match:
-                quality_data = json.loads(json_match.group(1))
-                
-                # Check for assessments array
-                if "assessments" in quality_data and isinstance(quality_data["assessments"], list):
-                    assessments = quality_data["assessments"]
-                    
-                    # Update quality scores in paraphrases
-                    for i, assessment in enumerate(assessments):
-                        if i < len(paraphrases) and "quality" in assessment:
-                            paraphrases[i]["quality"] = assessment["quality"]
-            
-            # Filter out low-quality paraphrases
-            return [p for p in paraphrases if p.get("quality", 0.0) >= 0.6]
-            
-        except Exception as e:
-            self.logger.warning(f"Quality filter failed: {str(e)}")
-            return paraphrases  # Return original paraphrases if filtering fails
+        parsed = self._parse_json_response(response)
+        paraphrases = parsed.get("paraphrases") if isinstance(parsed, dict) else parsed
+        if not isinstance(paraphrases, list):
+            raise ValueError("Paraphrase response must contain an array")
+        for item in paraphrases:
+            if (
+                not isinstance(item, dict)
+                or not isinstance(item.get("text"), str)
+                or not item["text"].strip()
+            ):
+                raise ValueError("Each paraphrase must contain nonempty text")
+            if "quality" in item:
+                self._validate_quality(item["quality"])
+        return paraphrases
+
+    def _filter_by_quality(
+        self, paraphrases: List[Dict[str, Any]], quality_response: str
+    ) -> List[Dict[str, Any]]:
+        quality_data = self._parse_json_response(quality_response)
+        assessments = quality_data.get("assessments") if isinstance(quality_data, dict) else None
+        if not isinstance(assessments, list):
+            raise ValueError("Quality response must contain assessments")
+
+        scores = {}
+        for assessment in assessments:
+            if not isinstance(assessment, dict):
+                raise ValueError("Each quality assessment must be an object")
+            identifier = assessment.get("id")
+            if (
+                type(identifier) is not int
+                or not 1 <= identifier <= len(paraphrases)
+                or identifier in scores
+            ):
+                raise ValueError("Quality assessment IDs must uniquely identify paraphrases")
+            quality = assessment.get("quality")
+            self._validate_quality(quality)
+            scores[identifier] = quality
+        if len(scores) != len(paraphrases):
+            raise ValueError("Quality response must assess every paraphrase")
+        return [
+            {**paraphrase, "quality": scores[index]}
+            for index, paraphrase in enumerate(paraphrases, start=1)
+            if scores[index] >= 0.6
+        ]
     
     def generate_for_segment(self, segment: CasedSegment) -> ParaphrasedSegment:
         """
@@ -277,8 +228,12 @@ class ParaphraseGenerator:
         """
         start_time = time.time()
         
-        # Generate cache key
-        cache_key = self._get_cache_key(segment.text)
+        prompt = self._build_paraphrase_prompt(segment)
+        model = (
+            self.config.fallback_models.get("paraphrase", self.config.default_model)
+            or self.openrouter.config.default_model
+        )
+        cache_key = self._get_cache_key(segment, prompt, model)
         cache_file = self.cache_dir / f"{cache_key}.json"
         
         # Try to get from cache.
@@ -294,7 +249,7 @@ class ParaphraseGenerator:
             self.metrics["cache_misses"] += 1
             # Generate new paraphrases
             with LoggingTimer(self.logger, "LLM paraphrase generation"):
-                paraphrases = self._generate_paraphrases_with_llm(segment)
+                paraphrases = self._generate_paraphrases_with_llm(segment, prompt, model)
                 
             # Save to cache
             save_to_cache(cache_file, paraphrases)
