@@ -7,15 +7,13 @@ license = {text = "CC BY 4.0"}
 authors = [
     {name = "Daniel Ari Friedman", email = "daniel@activeinference.institute"}
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 keywords = ["active-inference", "cognitive-modeling", "bayesian", "case-based-reasoning"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
 ]
@@ -83,7 +81,7 @@ packages = ["src"]
 
 [tool.black]
 line-length = 100
-target-version = ['py310', 'py311', 'py312', 'py313']
+target-version = ['py312', 'py313']
 include = '\.pyi?$'
 
 [tool.isort]
@@ -91,7 +89,7 @@ profile = "black"
 line_length = 100
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true

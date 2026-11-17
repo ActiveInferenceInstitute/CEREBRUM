@@ -20,7 +20,7 @@ jobs:
   gate:
     timeout-minutes: 60
     name: gate (Python 3.13)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
@@ -52,7 +52,7 @@ jobs:
     # agreement and pinned-parser/runtime identity. Keep this status-check
     # context unchanged.
     name: gnn conformance (pinned)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
