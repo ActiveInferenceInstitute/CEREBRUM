@@ -126,7 +126,7 @@ Thank you for your interest in contributing to CEREBRUM! We welcome contribution
 
 ### For Technical Contributors
 1. **Fork** the repository
-2. **Set up** your development environment (see [getting_started.md](docs/getting_started.md))
+2. **Set up** your development environment (see [getting_started.md](docs/guides/getting_started.md))
 3. **Create a branch** for your contribution
 4. **Make changes** following our coding standards
 5. **Run the gate** before opening a pull request

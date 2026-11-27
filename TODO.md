@@ -415,7 +415,7 @@ or measured receipt behind it.
   HTML or PDF conversion fails, so a partial rebuild cannot pass silently.
 - **Blocker**: `mmdc` (Mermaid CLI) is missing on the review host
   (`command -v mmdc` → not found); `pandoc` and `xelatex` are installed. The
-  figures under `paper/components/figures/` cannot be re-rendered without it.
+  figures under `docs/manuscript/components/figures/` cannot be re-rendered without it.
 - **Owner / unblock**: Daniel Ari Friedman (paper toolchain) — install
   `@mermaid-js/mermaid-cli`, then run `python paper/assemble_paper.py` and
   commit the regenerated artifacts.

@@ -27,7 +27,7 @@ Before you begin, ensure you have the following installed:
 
 The reference implementation is Python-only. Case-system mappings and
 implementation guidelines for other languages (JavaScript, Rust, Julia, and
-35+ more) are provided as documentation in [`docs/languages/computer/`](languages/computer/README.md).
+35+ more) are provided as documentation in [`docs/languages/computer/`](../languages/computer/README.md).
 
 ## Installation
 
@@ -66,8 +66,8 @@ We use [uv](https://docs.astral.sh/uv/) for fast, reliable Python dependency man
 
 There are no runnable non-Python implementations in this repository. If you
 want to implement CEREBRUM in another language, see the
-[Language Implementation Guidelines](language_implementations.md) and the
-per-language mappings in [`docs/languages/computer/`](languages/computer/README.md).
+[Language Implementation Guidelines](../architecture/language_implementations.md) and the
+per-language mappings in [`docs/languages/computer/`](../languages/computer/README.md).
 
 ## Your First CEREBRUM Model
 
@@ -274,9 +274,9 @@ If you're interested in contributing to CEREBRUM, we welcome contributions acros
 1. Choose an area that matches your interests and skills
 2. Check the GitHub issues for "good first issue" tags
 3. Read our contribution guides:
-   - [Technical Contributions](contributing_technical.md)
-   - [Research Contributions](contributing_research.md)
-   - [Documentation Contributions](contributing_documentation.md)
+   - [Technical Contributions](../contributing/contributing_technical.md)
+   - [Research Contributions](../contributing/contributing_research.md)
+   - [Documentation Contributions](../contributing/contributing_documentation.md)
 4. Join our community channels to connect with other contributors
 5. Start with small contributions to familiarize yourself with the codebase
 
@@ -284,10 +284,10 @@ If you're interested in contributing to CEREBRUM, we welcome contributions acros
 
 After building your first model, explore these advanced topics:
 
-1. [Active Inference Integration](active_inference_integration.md): Learn how to apply free energy principles
+1. [Active Inference Integration](../architecture/active_inference_integration.md): Learn how to apply free energy principles
 2. [Model Examples](model_examples.md): Study more complex example implementations
-3. [Core Specification](cerebrum_core_spec.md): Understand the complete framework architecture
-4. [Language Nuance Handling](language_nuance_handling.md): Explore linguistic features and capabilities
+3. [Core Specification](../architecture/cerebrum_core_spec.md): Understand the complete framework architecture
+4. [Language Nuance Handling](../architecture/language_nuance_handling.md): Explore linguistic features and capabilities
 5. [Implementation Roadmap](implementation_roadmap.md): Learn about upcoming features and improvements
 
 ## Troubleshooting

@@ -14,12 +14,12 @@ SCRIPT = Path(__file__).resolve().parents[1] / "paper" / "assemble_paper.py"
 @pytest.mark.parametrize("failure", ["assembly", "conversion", "figure"])
 def test_manuscript_failure_exits_nonzero(tmp_path, failure):
     if failure != "assembly":
-        components = tmp_path / "paper" / "components" / "main_text"
+        components = tmp_path / "docs" / "manuscript" / "components" / "main_text"
         components.mkdir(parents=True)
         (components / "1_title.md").write_text("# Test manuscript\n", encoding="utf-8")
     if failure == "figure":
-        figures = tmp_path / "paper" / "components" / "figures"
-        figures.mkdir()
+        figures = tmp_path / "docs" / "manuscript" / "components" / "figures"
+        figures.mkdir(parents=True)
         (figures / "Figure_987654321.md").write_text(
             "```mermaid\ngraph TD\nA --> B\n```\n", encoding="utf-8"
         )

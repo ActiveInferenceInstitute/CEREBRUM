@@ -240,7 +240,7 @@ This guide provides detailed information for contributors interested in improvin
 
 ### Reference Resources
 
-- [Diagram Style Guide](diagrams/style-guide.md)
+- [Diagram Style Guide](../diagrams/style-guide.md)
 - [Markdown Cheat Sheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
 - [Mermaid Diagram Syntax](https://mermaid-js.github.io/mermaid/#/)
 
@@ -248,7 +248,7 @@ This guide provides detailed information for contributors interested in improvin
 
 1. Browse the [open documentation issues](https://github.com/ActiveInferenceInstitute/CEREBRUM/labels/documentation)
 2. Join the [documentation discussions](https://github.com/ActiveInferenceInstitute/CEREBRUM/discussions) to connect with other contributors
-3. Review the [implementation roadmap](implementation_roadmap.md) to understand current priorities
+3. Review the [implementation roadmap](../guides/implementation_roadmap.md) to understand current priorities
 4. Start with a small documentation improvement to get familiar with the process
 
 For general contribution guidelines, please refer to the main [CONTRIBUTING.md](https://github.com/ActiveInferenceInstitute/CEREBRUM/blob/main/CONTRIBUTING.md) document.
@@ -257,7 +257,7 @@ For general contribution guidelines, please refer to the main [CONTRIBUTING.md](
 
 - **Documentation Issues**: Submit questions and suggestions via GitHub issues
 - **Documentation Discussions**: Discuss documentation in GitHub Discussions
-- **Style Guide**: Reference the [diagram style guide](diagrams/style-guide.md) for consistency
+- **Style Guide**: Reference the [diagram style guide](../diagrams/style-guide.md) for consistency
 
 For specific documentation questions, please open an issue or discussion on
 [GitHub](https://github.com/ActiveInferenceInstitute/CEREBRUM). 

@@ -167,7 +167,7 @@ The first term is the expected information gain about hidden states, and the sec
 
 Precision plays a central role in CEREBRUM's case representations.
 
-**Definition 9.3.1** (Precision Matrix). For a Gaussian likelihood model $p(\mathbf{o}|\mathbf{h}) = \mathcal{N}(g(\mathbf{h}), \mathbf{\Sigma})$, the precision matrix is $\mathbf{\Pi} = \mathbf{\Sigma}^{-1}$, where $g(\mathbf{h})$ is the generative mapping from hidden states to observations.
+**Definition 9.3.1** (Precision Matrix). For a Gaussian likelihood model $p(\mathbf{o}|\mathbf{h}) = \mathcal{N}(g(\mathbf{h}), \boldsymbol{\Sigma})$, the precision matrix is $\boldsymbol{\Pi} = \boldsymbol{\Sigma}^{-1}$, where $g(\mathbf{h})$ is the generative mapping from hidden states to observations.
 
 **Theorem 9.3.1** (Precision and Free Energy). Increased precision on a specific observation dimension reduces free energy when predictions are accurate, but increases it when predictions are inaccurate.
 
@@ -282,7 +282,7 @@ where $\gamma: [0, 1] \rightarrow \mathcal{M}$ is a path with $\gamma(0) = C_1$ 
 
 *Proof*: The proof follows from calculus of variations, showing that the Euler-Lagrange equations for this functional yield the geodesic equation in the Fisher information metric. $\square$
 
-## 9.6 Topological Data Analysis of Case Structures
+## Topological Data Analysis of Case Structures {#supplement-9-6}
 
 ### 9.6.1 Persistent Homology
 

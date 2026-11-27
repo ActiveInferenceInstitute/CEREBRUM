@@ -1,0 +1,72 @@
+{
+  "paper": {
+    "title": "Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling (CEREBRUM)"
+  },
+  "authors": [
+    {
+      "name": "Daniel Ari Friedman",
+      "orcid": "0000-0001-6232-9096"
+    }
+  ],
+  "publication": {
+    "repository_url": "https://github.com/ActiveInferenceInstitute/CEREBRUM",
+    "release_status": "unreleased",
+    "doi": "10.5281/zenodo.15170907"
+  },
+  "metadata": {
+    "language": "en",
+    "license": "CC-BY-NC-ND-4.0"
+  },
+  "keywords": [
+    "active inference",
+    "case grammar",
+    "Bayesian modeling"
+  ],
+  "manuscript_dir": "docs/manuscript",
+  "render": {
+    "formats": {
+      "pdf": true,
+      "html": false,
+      "slides": false,
+      "docx": false,
+      "epub": false
+    }
+  },
+  "units": [
+    {
+      "directory": "components/main_text",
+      "chapters": [
+        "2_abstract.md",
+        "3_introduction.md",
+        "4_methods.md",
+        "5_case_functions_in_cognitive_models.md",
+        "6_model_workflows_as_case_transformations.md",
+        "7_active_inference_models.md",
+        "8_conclusion.md"
+      ]
+    },
+    {
+      "directory": "components/supplemental_sections",
+      "chapters": [
+        "Supplement_1_Mathematical_Formalization.md",
+        "Supplement_2_Novel_Linguistic_Cases.md",
+        "Supplement_3_Practical_Applications.md",
+        "Supplement_4_Related_Work.md",
+        "Supplement_5_Category_Theory.md",
+        "Supplement_6_Future_Directions.md",
+        "Supplement_7_Computational_Complexity.md",
+        "Supplement_8_Active_Inference_Formulation_Details.md",
+        "Supplement_9_Mathematical_Foundations.md",
+        "Supplement_10_Algorithmic_Details_Pseudocode.md",
+        "Supplement_11_Formal_Definitions_Core_Linguistic_Cases.md",
+        "Supplement_12_Writing_Research_Paper.md"
+      ]
+    }
+  ],
+  "appendices": {
+    "include_reference": true,
+    "reference": [
+      "references.md"
+    ]
+  }
+}

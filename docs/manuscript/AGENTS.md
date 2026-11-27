@@ -8,7 +8,7 @@ This directory contains the tools and source files for generating the academic p
 
 1. **Source**: Content is located in `components/`.
 2. **Generation**: The `assemble_paper.py` script aggregates components and figures.
-3. **Output**: Final artifacts (PDF, HTML) are placed in `output/`.
+3. **Output**: The [template render](README.md) writes the validated PDF into repository-root `output/`. The legacy assembler writes to `paper/output/`.
 
 ## Key Scripts
 

@@ -43,15 +43,9 @@ HEADING_RE = re.compile(r"^ {0,3}#{1,6}\s+(.*?)\s*#*\s*$", re.MULTILINE)
 ANCHOR_RE = re.compile(r"<a\s+(?:id|name)\s*=\s*[\"']([^\"']+)[\"']", re.IGNORECASE)
 SCHEME_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.\-]*:")
 
-# Trees whose Markdown is input to, or output of, another tool: their links are
-# resolved in a different tree than the one on disk.
-#   paper/components/  pandoc fragments that paper/assemble_paper.py copies into
-#                      paper/output/ and rewrites; `Figure_N.png` is rendered
-#                      there from Figure_N.md, so it does not exist next to the
-#                      fragment.
-#   paper/output/      build output.
-#   tests/output/      artifacts written by the test suite.
-SKIPPED_PREFIXES = ("paper/components/", "paper/output/", "tests/output/")
+# Legacy authoring templates contain sample paths. Historical render output
+# and test artifacts are checked by their own producers.
+SKIPPED_PREFIXES = ("paper/templates/", "paper/output/", "tests/output/")
 
 
 def slugify(text: str) -> str:

@@ -9,10 +9,10 @@ import tempfile
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # --- Configuration ---
-COMPONENTS_DIR = "paper/components/main_text"
-# Figure and Supplemental paths are relative to the base 'paper/components'
-BASE_COMPONENTS_DIR = "paper/components"
+BASE_COMPONENTS_DIR = "docs/manuscript/components"
+COMPONENTS_DIR = os.path.join(BASE_COMPONENTS_DIR, "main_text")
 FIGURES_DIR = os.path.join(BASE_COMPONENTS_DIR, "figures")
+SOURCE_FIGURE_PREFIX = r"(?:\.\./\.\./\.\./\.\./paper/output/)?"
 SUPPLEMENTAL_DIR = os.path.join(BASE_COMPONENTS_DIR, "supplemental_sections")
 OUTPUT_DIR = "paper/output"
 os.makedirs(OUTPUT_DIR, exist_ok=True) # Ensure output directory exists early
@@ -78,17 +78,14 @@ def extract_figure_caption(figure_file_path):
         logging.error(f"Error reading figure caption from {figure_file_path}: {e}")
         return None
 
-def fix_figure_references(content):
-    """
-    Replaces figure references in format @fig:figX with "Figure X".
-    """
-    # Replace @fig:figX with Figure X
-    content = re.sub(r'@fig:fig(\d+)', r'Figure \1', content)
-    
-    # Also handle other reference formats if needed
-    content = re.sub(r'\(#fig:fig(\d+)\)', r'(Figure \1)', content)
-    
-    return content
+def fix_figure_references(content, figure_id_map):
+    """Resolve legacy and Pandoc figure references to display-order numbers."""
+    def replace_reference(match):
+        ref_num = next(group for group in match.groups() if group is not None)
+        seq_num = figure_id_map.get(f"#fig:fig{ref_num}", ref_num)
+        return f"Figure {seq_num}"
+
+    return re.sub(r"\[@fig:fig(\d+)\]|@fig:fig(\d+)|\(#fig:fig(\d+)\)", replace_reference, content)
 
 def map_figure_captions():
     """
@@ -127,7 +124,7 @@ def map_figure_id_to_number(all_components_files):
             
             # Find all figure references with ID tags: ![...](Figure_X.png){#fig:figY}
             # This pattern will match the ID and the referenced PNG
-            figure_matches = re.finditer(r'!\[.*?\]\((Figure_(\d+)\.png)\)\{(#fig:fig(\d+))\}', content)
+            figure_matches = re.finditer(rf'!\[.*?\]\({SOURCE_FIGURE_PREFIX}(Figure_(\d+)\.png)\)\{{(#fig:fig(\d+))\}}', content)
             
             for match in figure_matches:
                 image_path = match.group(1)  # Figure_X.png
@@ -339,7 +336,7 @@ def assemble_markdown():
                 content = infile.read()
                 
                 # Fix @fig:figX references to "Figure X"
-                content = fix_figure_references(content)
+                content = fix_figure_references(content, figure_id_map)
                 
                 # Update image paths to use the correct relative path for Pandoc
                 # Ensure figures are referenced correctly regardless of the document location
@@ -350,7 +347,7 @@ def assemble_markdown():
                         ref_num = ref_match.group(1)
                         
                         # Find all image tags that use this figure ID
-                        img_pattern = rf'!\[(.*?)\]\((Figure_\d+\.png)\)\{{{fig_id}\}}'
+                        img_pattern = rf'!\[(.*?)\]\({SOURCE_FIGURE_PREFIX}(Figure_\d+\.png)\)\{{{fig_id}\}}'
                         img_matches = re.finditer(img_pattern, content)
                         
                         for img_match in img_matches:

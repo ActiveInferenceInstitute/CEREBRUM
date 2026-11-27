@@ -157,8 +157,8 @@ This guide provides detailed information for researchers interested in contribut
 ## Getting Started with Research Contributions
 
 1. Browse the [open research questions](https://github.com/ActiveInferenceInstitute/CEREBRUM/labels/research)
-2. Review the [current implementation roadmap](implementation_roadmap.md)
-3. Check the [research contribution examples](examples/Examples_README.md)
+2. Review the [current implementation roadmap](../guides/implementation_roadmap.md)
+3. Check the [research contribution examples](../examples/Examples_README.md)
 
 For general contribution guidelines, please refer to the main [CONTRIBUTING.md](https://github.com/ActiveInferenceInstitute/CEREBRUM/blob/main/CONTRIBUTING.md) document.
 

@@ -1,7 +1,7 @@
 # CEREBRUM Implementation Roadmap
 
 > Retained planning document, not the current implementation-status ledger.
-> See [TODO.md](../TODO.md) for the maintained backlog. Existing core models,
+> See [TODO.md](../../TODO.md) for the maintained backlog. Existing core models,
 > case management, transformations, free-energy/precision foundations and tests
 > do not imply completion of every broader proposal below. Preserve the
 > original proposal checkboxes and qualify expansions separately.
@@ -351,6 +351,6 @@ This section outlines specific contribution opportunities aligned with each phas
 - Writing blog posts, articles, and papers about CEREBRUM
 
 For detailed information on how to contribute in these areas, please see our contribution guides:
-- [Technical Contributions](contributing_technical.md)
-- [Research Contributions](contributing_research.md)
-- [Documentation Contributions](contributing_documentation.md) 
+- [Technical Contributions](../contributing/contributing_technical.md)
+- [Research Contributions](../contributing/contributing_research.md)
+- [Documentation Contributions](../contributing/contributing_documentation.md)

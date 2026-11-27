@@ -8,20 +8,28 @@ files themselves. Titles come from each file's first heading and descriptions fr
 first paragraph, so this page is a view of the tree rather than a second place to
 maintain it. The curated entry points are in [`docs/README.md`](README.md).
 
-Totals: **241 documents** in **11 sections** (`python scripts/docgen/doc_index.py --check` verifies this page).
+Totals: **287 documents** in **19 sections** (`python scripts/docgen/doc_index.py --check` verifies this page).
 
 | Section | Documents |
 | --- | --- |
-| [`docs/`](./) | 14 |
+| [`docs/`](./) | 3 |
 | [`docs/_generated/`](_generated/) | 1 |
+| [`docs/architecture/`](architecture/) | 7 |
+| [`docs/contributing/`](contributing/) | 5 |
 | [`docs/diagrams/`](diagrams/) | 4 |
 | [`docs/diagrams/templates/`](diagrams/templates/) | 8 |
 | [`docs/dialogs/`](dialogs/) | 20 |
 | [`docs/discussions/`](discussions/) | 5 |
 | [`docs/examples/`](examples/) | 11 |
+| [`docs/guides/`](guides/) | 5 |
 | [`docs/insects/`](insects/) | 15 |
 | [`docs/languages/`](languages/) | 65 |
 | [`docs/languages/computer/`](languages/computer/) | 38 |
+| [`docs/manuscript/`](manuscript/) | 4 |
+| [`docs/manuscript/assets/`](manuscript/assets/) | 1 |
+| [`docs/manuscript/components/figures/`](manuscript/components/figures/) | 15 |
+| [`docs/manuscript/components/main_text/`](manuscript/components/main_text/) | 8 |
+| [`docs/manuscript/components/supplemental_sections/`](manuscript/components/supplemental_sections/) | 12 |
 | [`docs/speculative_design/`](speculative_design/) | 60 |
 
 ## docs/
@@ -31,23 +39,34 @@ Totals: **241 documents** in **11 sections** (`python scripts/docgen/doc_index.p
 | [`AGENTS.md`](AGENTS.md) | Documentation Context | This directory contains all documentation for the CEREBRUM framework, split into conceptual guides, technical specifications, and language-specific... |
 | [`README.md`](README.md) | CEREBRUM Documentation | Welcome to the CEREBRUM documentation. This directory contains comprehensive documentation for the Case-Enabled Reasoning Engine with Bayesian Repr... |
 | [`RUN_GUIDE.md`](RUN_GUIDE.md) | Gate and CI run guide | ./run.sh is the single gate entry point for this repository. It runs the arms |
-| [`active_inference_integration.md`](active_inference_integration.md) | Active Inference Integration in CEREBRUM | This document details how the CEREBRUM framework integrates with Active Inference principles, providing a mathematically rigorous foundation for ca... |
-| [`cerebrum_core_spec.md`](cerebrum_core_spec.md) | CEREBRUM Core Specification | CEREBRUM (Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling) provides a framework for cognitive models that can assu... |
-| [`contributing_documentation.md`](contributing_documentation.md) | Documentation & Educational Contribution Guide for CEREBRUM | This guide provides detailed information for contributors interested in improving CEREBRUM's documentation, educational resources, and learning mat... |
-| [`contributing_research.md`](contributing_research.md) | Research Contribution Guide for CEREBRUM | This guide provides detailed information for researchers interested in contributing to the CEREBRUM framework. |
-| [`contributing_technical.md`](contributing_technical.md) | Technical Contribution Guide for CEREBRUM | This guide provides detailed information for developers and technical contributors interested in improving the CEREBRUM framework's implementation... |
-| [`getting_started.md`](getting_started.md) | Getting Started with CEREBRUM | This guide helps new developers get started with the CEREBRUM framework. It covers setting up the development environment, installing dependencies,... |
-| [`how_it_works.md`](how_it_works.md) | How CEREBRUM Works | CEREBRUM (Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling) is a synthetic intelligence framework that integrates l... |
-| [`implementation_roadmap.md`](implementation_roadmap.md) | CEREBRUM Implementation Roadmap | This document outlines the phased development plan for implementing the CEREBRUM framework across multiple languages and environments. It provides... |
-| [`language_implementations.md`](language_implementations.md) | CEREBRUM Language Implementation Guidelines | This document provides guidelines for implementing CEREBRUM in different programming languages, ensuring consistency while allowing language-specif... |
-| [`language_nuance_handling.md`](language_nuance_handling.md) | Language Nuance Handling in CEREBRUM's Active Inference Model | This document explains how CEREBRUM's active inference model handles and exploits nuances in different languages, leveraging its case-based archite... |
-| [`model_examples.md`](model_examples.md) | CEREBRUM Model Examples | This document provides concrete examples of CEREBRUM models in various domains, demonstrating how the case system can be applied to real-world prob... |
 
 ## docs/_generated/
 
 | Document | Title | Description |
 | --- | --- | --- |
 | [`_generated/gate-metrics.md`](_generated/gate-metrics.md) | Gate metrics | Measured numbers for ./run.sh (the local gate). Every value below is read from an |
+
+## docs/architecture/
+
+| Document | Title | Description |
+| --- | --- | --- |
+| [`architecture/AGENTS.md`](architecture/AGENTS.md) | Framework and model architecture guidance | Keep this area grounded in the current source and update the [local guide](README.md) after moving or adding documents. See the [repository documen... |
+| [`architecture/README.md`](architecture/README.md) | Framework and model architecture | Follow the design from its case-bearing model specification through example language systems and the active inference integration. Verify the curre... |
+| [`architecture/active_inference_integration.md`](architecture/active_inference_integration.md) | Active Inference Integration in CEREBRUM | This document details how the CEREBRUM framework integrates with Active Inference principles, providing a mathematically rigorous foundation for ca... |
+| [`architecture/cerebrum_core_spec.md`](architecture/cerebrum_core_spec.md) | CEREBRUM Core Specification | CEREBRUM (Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling) provides a framework for cognitive models that can assu... |
+| [`architecture/how_it_works.md`](architecture/how_it_works.md) | How CEREBRUM Works | CEREBRUM (Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling) is a synthetic intelligence framework that integrates l... |
+| [`architecture/language_implementations.md`](architecture/language_implementations.md) | CEREBRUM Language Implementation Guidelines | This document provides guidelines for implementing CEREBRUM in different programming languages, ensuring consistency while allowing language-specif... |
+| [`architecture/language_nuance_handling.md`](architecture/language_nuance_handling.md) | Language Nuance Handling in CEREBRUM's Active Inference Model | This document explains how CEREBRUM's active inference model handles and exploits nuances in different languages, leveraging its case-based archite... |
+
+## docs/contributing/
+
+| Document | Title | Description |
+| --- | --- | --- |
+| [`contributing/AGENTS.md`](contributing/AGENTS.md) | Contributor guides guidance | Keep this area grounded in the current source and update the [local guide](README.md) after moving or adding documents. See the [repository documen... |
+| [`contributing/README.md`](contributing/README.md) | Contributor guides | Choose the guide that matches the proposed change. Record new assumptions alongside their model implementation, and keep the [development checks](.... |
+| [`contributing/contributing_documentation.md`](contributing/contributing_documentation.md) | Documentation & Educational Contribution Guide for CEREBRUM | This guide provides detailed information for contributors interested in improving CEREBRUM's documentation, educational resources, and learning mat... |
+| [`contributing/contributing_research.md`](contributing/contributing_research.md) | Research Contribution Guide for CEREBRUM | This guide provides detailed information for researchers interested in contributing to the CEREBRUM framework. |
+| [`contributing/contributing_technical.md`](contributing/contributing_technical.md) | Technical Contribution Guide for CEREBRUM | This guide provides detailed information for developers and technical contributors interested in improving the CEREBRUM framework's implementation... |
 
 ## docs/diagrams/
 
@@ -121,6 +140,16 @@ Totals: **241 documents** in **11 sections** (`python scripts/docgen/doc_index.p
 | [`examples/AGENTS.md`](examples/AGENTS.md) | Examples Context | Detailed walkthroughs and playbooks for implementing CEREBRUM patterns. |
 | [`examples/Examples_README.md`](examples/Examples_README.md) | CEREBRUM Framework Examples | This directory contains practical examples, guides, and templates for applying the CEREBRUM (Case-Enabled Reasoning Engine with Bayesian Representa... |
 | [`examples/README.md`](examples/README.md) | Examples Documentation | This directory contains detailed documentation for CEREBRUM example implementations. |
+
+## docs/guides/
+
+| Document | Title | Description |
+| --- | --- | --- |
+| [`guides/AGENTS.md`](guides/AGENTS.md) | Using and extending the framework guidance | Keep this area grounded in the current source and update the [local guide](README.md) after moving or adding documents. See the [repository documen... |
+| [`guides/README.md`](guides/README.md) | Using and extending the framework | Start with the runnable quickstart, then use the examples to map cases to model roles. The roadmap describes planned work and should be read alongs... |
+| [`guides/getting_started.md`](guides/getting_started.md) | Getting Started with CEREBRUM | This guide helps new developers get started with the CEREBRUM framework. It covers setting up the development environment, installing dependencies,... |
+| [`guides/implementation_roadmap.md`](guides/implementation_roadmap.md) | CEREBRUM Implementation Roadmap | This document outlines the phased development plan for implementing the CEREBRUM framework across multiple languages and environments. It provides... |
+| [`guides/model_examples.md`](guides/model_examples.md) | CEREBRUM Model Examples | This document provides concrete examples of CEREBRUM models in various domains, demonstrating how the case system can be applied to real-world prob... |
 
 ## docs/insects/
 
@@ -254,6 +283,71 @@ Totals: **241 documents** in **11 sections** (`python scripts/docgen/doc_index.p
 | [`languages/computer/visual_basic.md`](languages/computer/visual_basic.md) | Visual Basic (.NET) Language Paradigms and CEREBRUM Mapping | Visual Basic (.NET), commonly referred to as VB.NET, is a multi-paradigm, object-oriented programming language implemented on the .NET platform. De... |
 | [`languages/computer/webassembly.md`](languages/computer/webassembly.md) | WebAssembly Case System and CEREBRUM Mapping | WebAssembly (WASM) is a modern low-level virtual instruction set architecture designed for web browsers and other execution environments. As a cutt... |
 | [`languages/computer/zig.md`](languages/computer/zig.md) | Zig Case System and CEREBRUM Mapping | Zig is a modern systems programming language designed as a replacement for C, with a focus on simplicity, safety, and performance. As a cutting-edg... |
+
+## docs/manuscript/
+
+| Document | Title | Description |
+| --- | --- | --- |
+| [`manuscript/AGENTS.md`](manuscript/AGENTS.md) | Paper Generation Context | This directory contains the tools and source files for generating the academic paper for CEREBRUM. |
+| [`manuscript/README.md`](manuscript/README.md) | Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling (CEREBRUM) | This directory contains the existing CEREBRUM paper and all twelve |
+| [`manuscript/preamble.md`](manuscript/preamble.md) | LaTeX preamble |  |
+| [`manuscript/references.md`](manuscript/references.md) | References | The archived edition is the source of this migrated manuscript [@cerebrum2025]. |
+
+## docs/manuscript/assets/
+
+| Document | Title | Description |
+| --- | --- | --- |
+| [`manuscript/assets/README.md`](manuscript/assets/README.md) | Figure assets | The figure registry records the provenance of the manuscript illustrations. |
+
+## docs/manuscript/components/figures/
+
+| Document | Title | Description |
+| --- | --- | --- |
+| [`manuscript/components/figures/Figure_1.md`](manuscript/components/figures/Figure_1.md) | Figure 1: Foundation Domains of CEREBRUM | Figure 1. Foundation Domains of CEREBRUM. This diagram illustrates the conceptual architecture of the CEREBRUM framework, showing how four distinct... |
+| [`manuscript/components/figures/Figure_10.md`](manuscript/components/figures/Figure_10.md) | Figure 10: Computational Implementation of Model Relationships | Figure 10. Computational Implementation of Model Relationships. This diagram illustrates the practical computational architecture required to imple... |
+| [`manuscript/components/figures/Figure_11.md`](manuscript/components/figures/Figure_11.md) | Figure 11: Intelligence Production Workflow State Diagram | Figure 11. Intelligence Production Workflow State Diagram. This state diagram visualizes the transformation of data into intelligence products thro... |
+| [`manuscript/components/figures/Figure_12.md`](manuscript/components/figures/Figure_12.md) | Figure 12: Intelligence Workflow with Primary and Feedback Cycles | Figure 12. Alternative Visualization of Intelligence Production Workflow. This diagram presents a complementary perspective to Figure 11, organizin... |
+| [`manuscript/components/figures/Figure_13.md`](manuscript/components/figures/Figure_13.md) | Figure 13: Active Inference Integration Framework | Figure 13. Active Inference Integration Framework. This diagram illustrates how CEREBRUM integrates with active inference principles, showing the m... |
+| [`manuscript/components/figures/Figure_14.md`](manuscript/components/figures/Figure_14.md) | Figure 14: Case-Specific Message Passing in Active Inference | Figure 14. Case-Specific Message Passing in Active Inference. This diagram details the specific message passing mechanisms that implement case tran... |
+| [`manuscript/components/figures/Figure_15.md`](manuscript/components/figures/Figure_15.md) | Figure 15: Model Case Calculus Framework | Figure 15. Model Case Calculus Framework. This diagram presents the formal mathematical calculus underlying CEREBRUM's case transformations, provid... |
+| [`manuscript/components/figures/Figure_2.md`](manuscript/components/figures/Figure_2.md) | Figure 2: Case Relationships - Model and Linguistic Parallels | Figure 2. Case Relationships - Model and Linguistic Parallels. This figure illustrates the direct mapping between linguistic case systems and cogni... |
+| [`manuscript/components/figures/Figure_3.md`](manuscript/components/figures/Figure_3.md) | Figure 3: Cognitive Model Case Framework | Figure 3. Cognitive Model Case Framework. This diagram illustrates how a single core generative model can assume different functional roles through... |
+| [`manuscript/components/figures/Figure_4.md`](manuscript/components/figures/Figure_4.md) | Figure 4: Generative Model Integration in Intelligence Case Management | Figure 4. Generative Model Integration in Intelligence Case Management. This diagram illustrates how CEREBRUM's generative model core orchestrates... |
+| [`manuscript/components/figures/Figure_5.md`](manuscript/components/figures/Figure_5.md) | Figure 5: Model Workflows as Case Transformations - Sequence Diagram 1 | Figure 5. Model Workflows as Case Transformations - Sequence Diagram. This diagram illustrates the cyclical nature of case transformations in an in... |
+| [`manuscript/components/figures/Figure_6.md`](manuscript/components/figures/Figure_6.md) | Figure 6: Intelligence Production Workflow with Case-Bearing Models | Figure 6. Intelligence Production Workflow with Case-Bearing Models. This flowchart depicts the intelligence production cycle from data collection... |
+| [`manuscript/components/figures/Figure_7.md`](manuscript/components/figures/Figure_7.md) | Figure 7: CEREBRUM Category Theory Framework | Figure 7. CEREBRUM Category Theory Framework. This diagram formalizes the CEREBRUM framework using category theory, providing a rigorous mathematic... |
+| [`manuscript/components/figures/Figure_8.md`](manuscript/components/figures/Figure_8.md) | Figure 8: Category Theory Framework - Alternative Visualization | Figure 8. Category Theory Framework - Alternative Visualization. This diagram provides a complementary perspective to Figure 7, offering a more exp... |
+| [`manuscript/components/figures/Figure_9.md`](manuscript/components/figures/Figure_9.md) | Figure 9: Morphosyntactic Alignments in Model Relationships | Figure 9. Morphosyntactic Alignments in Model Relationships. This diagram illustrates two fundamental alignment patterns that can be applied to mod... |
+
+## docs/manuscript/components/main_text/
+
+| Document | Title | Description |
+| --- | --- | --- |
+| [`manuscript/components/main_text/1_title_page.md`](manuscript/components/main_text/1_title_page.md) | Main Text | title: "Case-Enabled Reasoning Engine with Bayesian Representations for Unified Modeling (CEREBRUM)" |
+| [`manuscript/components/main_text/2_abstract.md`](manuscript/components/main_text/2_abstract.md) | 2_abstract |  |
+| [`manuscript/components/main_text/3_introduction.md`](manuscript/components/main_text/3_introduction.md) | 3_introduction |  |
+| [`manuscript/components/main_text/4_methods.md`](manuscript/components/main_text/4_methods.md) | 4_methods |  |
+| [`manuscript/components/main_text/5_case_functions_in_cognitive_models.md`](manuscript/components/main_text/5_case_functions_in_cognitive_models.md) | 5_case_functions_in_cognitive_models |  |
+| [`manuscript/components/main_text/6_model_workflows_as_case_transformations.md`](manuscript/components/main_text/6_model_workflows_as_case_transformations.md) | 6_model_workflows_as_case_transformations |  |
+| [`manuscript/components/main_text/7_active_inference_models.md`](manuscript/components/main_text/7_active_inference_models.md) | 7_active_inference_models |  |
+| [`manuscript/components/main_text/8_conclusion.md`](manuscript/components/main_text/8_conclusion.md) | 8_conclusion |  |
+
+## docs/manuscript/components/supplemental_sections/
+
+| Document | Title | Description |
+| --- | --- | --- |
+| [`manuscript/components/supplemental_sections/Supplement_10_Algorithmic_Details_Pseudocode.md`](manuscript/components/supplemental_sections/Supplement_10_Algorithmic_Details_Pseudocode.md) | Supplement 10: Algorithmic Details & Pseudocode | This supplement provides detailed, language-agnostic pseudocode for key algorithms within the CEREBRUM framework to aid understanding, implementati... |
+| [`manuscript/components/supplemental_sections/Supplement_11_Formal_Definitions_Core_Linguistic_Cases.md`](manuscript/components/supplemental_sections/Supplement_11_Formal_Definitions_Core_Linguistic_Cases.md) | Supplement 11: Formal Definitions of Core Linguistic Cases | This supplement provides rigorous mathematical and operational definitions for the traditional linguistic cases as implemented within the CEREBRUM... |
+| [`manuscript/components/supplemental_sections/Supplement_12_Writing_Research_Paper.md`](manuscript/components/supplemental_sections/Supplement_12_Writing_Research_Paper.md) | Supplement 12: Writing a Research Paper | This supplement serves as a detailed example application, demonstrating how the CEREBRUM framework can be applied to analyze and structure the comp... |
+| [`manuscript/components/supplemental_sections/Supplement_1_Mathematical_Formalization.md`](manuscript/components/supplemental_sections/Supplement_1_Mathematical_Formalization.md) | Supplement 1: Mathematical Formalization | This supplement contains all mathematical formalizations referenced throughout the paper, organized by equation number. |
+| [`manuscript/components/supplemental_sections/Supplement_2_Novel_Linguistic_Cases.md`](manuscript/components/supplemental_sections/Supplement_2_Novel_Linguistic_Cases.md) | Supplement 2: Novel Linguistic Cases | This supplement explores new linguistic cases that emerge from the CEREBRUM framework, examining how the cognitive declension paradigm generates no... |
+| [`manuscript/components/supplemental_sections/Supplement_3_Practical_Applications.md`](manuscript/components/supplemental_sections/Supplement_3_Practical_Applications.md) | Supplement 3: Practical Applications | The CEREBRUM framework offers significant practical advantages across multiple domains where complex model ecosystems must be coordinated effective... |
+| [`manuscript/components/supplemental_sections/Supplement_4_Related_Work.md`](manuscript/components/supplemental_sections/Supplement_4_Related_Work.md) | Supplement 4: Related Work | This supplement provides a comprehensive analysis of the research traditions upon which CEREBRUM builds, situating the framework within the broader... |
+| [`manuscript/components/supplemental_sections/Supplement_5_Category_Theory.md`](manuscript/components/supplemental_sections/Supplement_5_Category_Theory.md) | Supplement 5: Category-Theoretic Formalization | This supplement provides a rigorous category-theoretic foundation for the CEREBRUM framework, formalizing the model case relationships using the ma... |
+| [`manuscript/components/supplemental_sections/Supplement_6_Future_Directions.md`](manuscript/components/supplemental_sections/Supplement_6_Future_Directions.md) | Supplement 6: Future Directions - Operational Roadmap | This supplement provides a structured operational roadmap for the future development of the CEREBRUM framework, outlining actionable steps across t... |
+| [`manuscript/components/supplemental_sections/Supplement_7_Computational_Complexity.md`](manuscript/components/supplemental_sections/Supplement_7_Computational_Complexity.md) | Supplement 7: Computational Complexity of Case Transformations | The computational requirements of generative models in CEREBRUM vary significantly based on their case declensions. Each case imposes distinct reso... |
+| [`manuscript/components/supplemental_sections/Supplement_8_Active_Inference_Formulation_Details.md`](manuscript/components/supplemental_sections/Supplement_8_Active_Inference_Formulation_Details.md) | Supplement 8: Active Inference Formulation Details | This supplement provides detailed mathematical derivations and formulations connecting the Active Inference framework to the CEREBRUM case system. |
+| [`manuscript/components/supplemental_sections/Supplement_9_Mathematical_Foundations.md`](manuscript/components/supplemental_sections/Supplement_9_Mathematical_Foundations.md) | Supplement 9: Mathematical Foundations | This supplement provides the mathematical foundations underlying the CEREBRUM framework, detailing the formal definitions, theorems, and proofs tha... |
 
 ## docs/speculative_design/
 
