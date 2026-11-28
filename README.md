@@ -90,8 +90,8 @@ Workflow diagram (Mermaid source): [implementation_workflow.mermaid](docs/diagra
 CEREBRUM can be used in multiple ways depending on your needs:
 
 1. **Explore existing models**: Check out the `/src/examples` directory
-2. **Create your own models**: Follow the guides in `/docs/getting_started.md`
-3. **Extend the framework**: See `/docs/contributing_technical.md` for development setup
+2. **Create your own models**: Follow the guides in `/docs/guides/getting_started.md`
+3. **Extend the framework**: See `/docs/contributing/contributing_technical.md` for development setup
 
 ### Installation
 
@@ -175,7 +175,7 @@ python3 paper/assemble_paper.py
 
 This script will:
 
-1. Render all Mermaid diagrams from `paper/components/figures/` to PNG images
+1. Render all Mermaid diagrams from `docs/manuscript/components/figures/` to PNG images
 2. Assemble all markdown components in the correct order
 3. Generate an HTML version of the paper
 4. Create the final PDF file at `paper/output/assembled_paper.pdf`
@@ -271,3 +271,7 @@ InstituteOS metadata (`aii-sidecar/v1`): category, maturity, ecosystem relations
 key artifacts, provenance, and portable tasks. It is read by
 [InstituteOS](https://github.com/ActiveInferenceInstitute/InstituteOS) tooling and
 does not affect the project's build or runtime.
+
+## Research manuscript
+
+- [CEREBRUM paper and template build](docs/manuscript/README.md)

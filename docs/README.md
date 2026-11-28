@@ -10,22 +10,22 @@ CEREBRUM is a synthetic intelligence framework that integrates linguistic case s
 
 This documentation is organized as follows:
 
-- **[Core Specification](cerebrum_core_spec.md)**: Defines the core components, interfaces, and behaviors required for a compliant implementation
-- **[How It Works](how_it_works.md)**: Overview of CEREBRUM's core mechanics and architecture
-- **[Getting Started](getting_started.md)**: A beginner's guide to help new developers start using CEREBRUM
+- **[Core Specification](architecture/cerebrum_core_spec.md)**: Defines the core components, interfaces, and behaviors required for a compliant implementation
+- **[How It Works](architecture/how_it_works.md)**: Overview of CEREBRUM's core mechanics and architecture
+- **[Getting Started](guides/getting_started.md)**: A beginner's guide to help new developers start using CEREBRUM
 - **[LEXICON Usage Guide](../src/lexicon/docs/lexicon_usage_guide.md)**: Comprehensive guide for CEREBRUM's linguistic analysis engine
-- **[Language Implementations](language_implementations.md)**: Guidelines for implementing CEREBRUM in different programming languages
-- **[Model Examples](model_examples.md)**: Examples of CEREBRUM models in various domains
-- **[Active Inference Integration](active_inference_integration.md)**: Details on how CEREBRUM integrates with Active Inference principles
+- **[Language Implementations](architecture/language_implementations.md)**: Guidelines for implementing CEREBRUM in different programming languages
+- **[Model Examples](guides/model_examples.md)**: Examples of CEREBRUM models in various domains
+- **[Active Inference Integration](architecture/active_inference_integration.md)**: Details on how CEREBRUM integrates with Active Inference principles
 - **[GNN model specification](../models/README.md)**: The Generalized Notation Notation source of truth for the framework's discrete generative model, its runtime axis orders, the case precision contract, and the pinned upstream revision
-- **[Implementation Roadmap](implementation_roadmap.md)**: Phased development plan for implementing the framework
-- **[Language Nuance Handling](language_nuance_handling.md)**: Explanation of how CEREBRUM handles linguistic nuances
+- **[Implementation Roadmap](guides/implementation_roadmap.md)**: Phased development plan for implementing the framework
+- **[Language Nuance Handling](architecture/language_nuance_handling.md)**: Explanation of how CEREBRUM handles linguistic nuances
 
 ### Contributing Guides
 
-- **[Technical Contributions](contributing_technical.md)**: Guide for developers and technical contributors
-- **[Research Contributions](contributing_research.md)**: Guide for researchers and academic contributors
-- **[Documentation Contributions](contributing_documentation.md)**: Guide for documentation and educational content contributors
+- **[Technical Contributions](contributing/contributing_technical.md)**: Guide for developers and technical contributors
+- **[Research Contributions](contributing/contributing_research.md)**: Guide for researchers and academic contributors
+- **[Documentation Contributions](contributing/contributing_documentation.md)**: Guide for documentation and educational content contributors
 
 ### Subdirectories
 
@@ -90,11 +90,11 @@ CEREBRUM implements eight standard cases that define different functional roles 
 
 To get started with CEREBRUM:
 
-1. Review the [Getting Started Guide](getting_started.md) for a hands-on introduction
-2. Explore the [Core Specification](cerebrum_core_spec.md) to understand the framework components
-3. Study the [Model Examples](model_examples.md) to see concrete implementations
-4. Check the [Language Implementations](language_implementations.md) guide for your preferred language
-5. Follow the [Implementation Roadmap](implementation_roadmap.md) for a structured development approach
+1. Review the [Getting Started Guide](guides/getting_started.md) for a hands-on introduction
+2. Explore the [Core Specification](architecture/cerebrum_core_spec.md) to understand the framework components
+3. Study the [Model Examples](guides/model_examples.md) to see concrete implementations
+4. Check the [Language Implementations](architecture/language_implementations.md) guide for your preferred language
+5. Follow the [Implementation Roadmap](guides/implementation_roadmap.md) for a structured development approach
 
 ## Contributing
 
@@ -111,13 +111,13 @@ CEREBRUM is an open-source project and welcomes contributions from researchers, 
 ### Where to Start
 
 - Browse our [GitHub Issues](https://github.com/ActiveInferenceInstitute/CEREBRUM/issues) for tagged opportunities
-- Explore the [Implementation Roadmap](implementation_roadmap.md) for phase-specific contributions
+- Explore the [Implementation Roadmap](guides/implementation_roadmap.md) for phase-specific contributions
 - Check our comprehensive contribution guides:
-  - [Technical Contributions](contributing_technical.md)
-  - [Research Contributions](contributing_research.md)
-  - [Documentation Contributions](contributing_documentation.md)
+  - [Technical Contributions](contributing/contributing_technical.md)
+  - [Research Contributions](contributing/contributing_research.md)
+  - [Documentation Contributions](contributing/contributing_documentation.md)
 
-For specific contribution ideas aligned with the current development phase, see the [Contribution Opportunities by Roadmap Phase](implementation_roadmap.md#contribution-opportunities-by-roadmap-phase) section.
+For specific contribution ideas aligned with the current development phase, see the [Contribution Opportunities by Roadmap Phase](guides/implementation_roadmap.md#contribution-opportunities-by-roadmap-phase) section.
 
 ## License
 
@@ -133,3 +133,13 @@ For questions or feedback, please contact:
 ## Acknowledgments
 
 CEREBRUM is a project of the Active Inference Institute. We acknowledge the contributions of the active inference community and the theoretical foundations from cognitive science and linguistics that have made this work possible.
+
+## Documentation areas
+
+- [Framework and model architecture](architecture/README.md)
+- [Using and extending the framework](guides/README.md)
+- [Contributor guides](contributing/README.md)
+
+## Research manuscript
+
+- [CEREBRUM paper and template build](manuscript/README.md)

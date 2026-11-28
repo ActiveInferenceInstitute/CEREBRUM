@@ -225,25 +225,25 @@ We use [uv](https://docs.astral.sh/uv/) for fast, reliable Python dependency man
 Example code and guides live in the following locations:
 
 - `src/examples/` - Runnable Python example implementations (environment, model demos)
-- `docs/examples/` - Playbooks, guides, and templates for applying CEREBRUM across domains (see the [examples index](examples/Examples_README.md))
-- `docs/getting_started.md` - A runnable first-model walkthrough
+- `docs/examples/` - Playbooks, guides, and templates for applying CEREBRUM across domains (see the [examples index](../examples/Examples_README.md))
+- `docs/guides/getting_started.md` - A runnable first-model walkthrough
 
 The language mappings under `docs/languages/computer/` include per-language
 code sketches; the only runnable implementation in this repository is Python.
 
 ### Technical Documentation
 
-- [How CEREBRUM Works](how_it_works.md) - Architecture overview
-- [Core Specification](cerebrum_core_spec.md) - Component/interface standards
-- [Testing Guide](../tests/README.md) - Running and writing tests
-- [Implementation Roadmap](implementation_roadmap.md) - Current priorities
+- [How CEREBRUM Works](../architecture/how_it_works.md) - Architecture overview
+- [Core Specification](../architecture/cerebrum_core_spec.md) - Component/interface standards
+- [Testing Guide](../../tests/README.md) - Running and writing tests
+- [Implementation Roadmap](../guides/implementation_roadmap.md) - Current priorities
 
 ## Getting Started with Technical Contributions
 
-1. Review the [implementation roadmap](implementation_roadmap.md) to understand current priorities
+1. Review the [implementation roadmap](../guides/implementation_roadmap.md) to understand current priorities
 2. Browse [GitHub Discussions](https://github.com/ActiveInferenceInstitute/CEREBRUM/discussions) to connect with other contributors
 3. Check the [good first issues](https://github.com/ActiveInferenceInstitute/CEREBRUM/labels/good%20first%20issue) on GitHub
-4. Set up your development environment following the [Getting Started guide](getting_started.md)
+4. Set up your development environment following the [Getting Started guide](../guides/getting_started.md)
 
 For general contribution guidelines, please refer to the main [CONTRIBUTING.md](https://github.com/ActiveInferenceInstitute/CEREBRUM/blob/main/CONTRIBUTING.md) document.
 

@@ -651,7 +651,7 @@ Computational parallels include:
 
 #### 11.16.2.2 Agglutinative Case Systems
 
-CEREBRUM's compositional case approach draws from agglutinative languages with extensive case systems:
+CEREBRUM's compositional case approach draws from agglutinative languages with extensive case systems. The counts below use the classification conventions in the repository's language guides:
 
 | Language | Case Count | CEREBRUM Parallel |
 |----------|------------|-------------------|

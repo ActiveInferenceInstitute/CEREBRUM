@@ -1,4 +1,6 @@
-# CEREBRUM Paper Structure & Formatting Guidelines
+# CEREBRUM legacy paper build
+
+The canonical authoring sources and template PDF build live in [docs/manuscript](../docs/manuscript/README.md). This guide describes the historical assembler, which reads the same manuscript components and preserves the existing output paths.
 
 This document provides guidelines for maintaining consistency in the CEREBRUM paper's structure, formatting, and component integration.
 
@@ -8,7 +10,7 @@ This document provides guidelines for maintaining consistency in the CEREBRUM pa
 paper/
 ├── assemble_paper.py          # Main assembly script
 ├── README.md                  # This file (guidelines)
-├── components/                # All paper components
+├── ../docs/manuscript/components/  # Source shared with the template renderer
 │   ├── main_text/             # Primary paper sections (numbered)
 │   │   ├── 1_title_page.md
 │   │   ├── 2_abstract.md
@@ -21,7 +23,7 @@ paper/
 │   │   ├── Supplement_1_*.md
 │   │   ├── Supplement_2_*.md
 │   │   └── ...
-│   └── templates/             # Templates for new components
+├── templates/                 # Templates for new components
 │       ├── Figure_template.md
 │       ├── Section_template.md
 │       ├── Supplement_template.md
@@ -44,15 +46,15 @@ python3 paper/assemble_paper.py
 
 The script performs the following steps:
 
-1.  **Render Mermaid Figures**: Finds `Figure_*.md` files in `paper/components/figures/`, extracts the Mermaid code within ` ```mermaid ... ``` ` blocks, and renders them to `Figure_*.png` images in the `paper/output/` directory using the Mermaid CLI (`mmdc`).
+1.  **Render Mermaid Figures**: Finds `Figure_*.md` files in `docs/manuscript/components/figures/`, extracts the Mermaid code within ` ```mermaid ... ``` ` blocks, and renders them to `Figure_*.png` images in the `paper/output/` directory using the Mermaid CLI (`mmdc`).
 2.  **Assemble Markdown**:
-    *   Finds and sorts main text components (`[number]_*.md`) from `paper/components/main_text/`.
-    *   Finds and sorts supplemental components (`Supplement_[number]_*.md`) from `paper/components/supplemental_sections/`.
+    *   Finds and sorts main text components (`[number]_*.md`) from `docs/manuscript/components/main_text/`.
+    *   Finds and sorts supplemental components (`Supplement_[number]_*.md`) from `docs/manuscript/components/supplemental_sections/`.
     *   Extracts figure captions from the `Figure_*.md` definition files.
     *   Maps figure references (like `{#fig:figX}`) to their sequential appearance order in the combined document.
     *   Processes the content of each component file:
         *   Replaces simple references like `@fig:figX` with `Figure Y` (where Y is the sequential number).
-        *   Replaces Pandoc-style figure tags like `![Alt text](Figure_X.png){#fig:figY}` with `![Figure Y. Caption text.](Figure_X.png)`, using the sequential number (Y) and the caption extracted from `Figure_X.md`.
+        *   Replaces Pandoc-style figure tags like `![Alt text](../../../../paper/output/Figure_X.png){#fig:figY}` with `![Figure Y. Caption text.](../../../../paper/output/Figure_X.png)`, using the sequential number (Y) and the caption extracted from `Figure_X.md`.
     *   Combines the processed main text and supplemental sections (adding page breaks between supplements) into `paper/output/assembled_paper.md`.
 3.  **Convert to HTML**: Uses Pandoc to convert `assembled_paper.md` to `paper/output/assembled_paper.html`, adding a table of contents (`--toc`).
 4.  **Convert to PDF**: Uses Pandoc with the XeLaTeX engine (`--pdf-engine=xelatex`) to convert `assembled_paper.md` to `paper/output/assembled_paper.pdf`, also adding a table of contents (`--toc`).
@@ -109,7 +111,7 @@ Name supplemental sections with clear numeric prefixes:
 
 ### Figure Definition (in `components/figures/`)
 
-Each figure should be defined in its own Markdown file within `paper/components/figures/`. The file should contain:
+Each figure should be defined in its own Markdown file within `docs/manuscript/components/figures/`. The file should contain:
 1.  A Mermaid diagram definition enclosed in ```mermaid ... ```.
 2.  Optionally, a paragraph following the Mermaid block which will be used as the figure caption. The script will attempt to extract this paragraph.
 
@@ -134,7 +136,7 @@ This diagram illustrates the core components of the CEREBRUM framework, showing 
 When writing your text components (`main_text/` or `supplemental_sections/`), reference figures using **pandoc-crossref syntax initially**:
 
 1.  **In-text reference**: Use `@fig:figX` (e.g., `As shown in @fig:fig1...`).
-2.  **Figure placement tag**: Use `![Optional alt text.](Figure_X.png){#fig:figX}`.
+2.  **Figure placement tag**: Use `![Optional alt text.](../../../../paper/output/Figure_X.png){#fig:figX}`.
     *   Replace `X` with the *number from the figure filename* (e.g., `Figure_1.png`).
     *   Replace `Y` with a *unique identifier number* for the reference (e.g., `#fig:fig1`). This number establishes the *intended* order but will be replaced by the script.
     *   The alt text (`Optional alt text.`) is **not** used for the final caption. The caption is taken from the `Figure_X.md` file.
@@ -144,20 +146,20 @@ When writing your text components (`main_text/` or `supplemental_sections/`), re
 During the build process (`assemble_paper.py`):
 1.  The script renders `Figure_X.md` to `output/Figure_X.png`.
 2.  It determines the *sequential order* of all figure placement tags (`{#fig:...}`) throughout the document. Let's call the sequence number `S`.
-3.  It extracts the caption text from the corresponding `paper/components/figures/Figure_X.md` file.
+3.  It extracts the caption text from the corresponding `docs/manuscript/components/figures/Figure_X.md` file.
 4.  It replaces the in-text reference `@fig:figY` with `Figure S`.
-5.  It replaces the figure placement tag `![...](Figure_X.png){#fig:figY}` with the final Pandoc image syntax: `![Figure S. Caption text.](Figure_X.png)`.
+5.  It replaces the figure placement tag `![...](../../../../paper/output/Figure_X.png){#fig:figY}` with the final Pandoc image syntax: `![Figure S. Caption text.](../../../../paper/output/Figure_X.png)`.
 
 **Key points:**
 - Use the correct `Figure_X.png` filename in the placement tag.
-- The placement-tag path is relative to `paper/output/`, where the rendered PNGs live (use the bare `Figure_X.png`, not `../figures/...`).
+- Use a relative link from the source component to the committed PNGs in `paper/output/`. The assembler rewrites the link to a bare filename in the assembled output.
 - Use unique `#fig:figY` labels.
 - The script handles the final numbering (`Figure S`) and caption insertion based on the `Figure_X.md` file and appearance order.
 - Do **not** include "Figure X:" prefixes in the caption paragraph within `Figure_X.md`.
 
 ### Figure Placement
 
-Place the figure placement tag `![...](Figure_X.png){#fig:figY}` in your markdown file where you want the figure to appear, typically after its first mention in the text via `@fig:figY`.
+Place the figure placement tag `![...](../../../../paper/output/Figure_X.png){#fig:figY}` in your markdown file where you want the figure to appear, typically after its first mention in the text via `@fig:figY`.
 
 ## Sections and Headers
 
@@ -259,22 +261,22 @@ When referring to cases in the text, use the standard abbreviations:
 
 Templates are provided for creating new components with consistent formatting:
 
-1. **Figure Template** (`components/templates/Figure_template.md`):
+1. **Figure Template** (`paper/templates/Figure_template.md`):
    - Copy this template when creating a new figure
    - Update the figure number and title
    - Replace the placeholder Mermaid code with your diagram
 
-2. **Section Template** (`components/templates/Section_template.md`):
+2. **Section Template** (`paper/templates/Section_template.md`):
    - Use this template when adding a new main text section
    - Provides structure for sections, subsections, figures, tables, and equations
    - Save with appropriate numeric prefix in `components/main_text/`
 
-3. **Supplement Template** (`components/templates/Supplement_template.md`):
+3. **Supplement Template** (`paper/templates/Supplement_template.md`):
    - Template for creating new supplemental sections
    - Includes standard sections and formatting for supplements
    - Save with appropriate naming (e.g., `Supplement_X_Descriptive_Title.md`) in `components/supplemental_sections/`
 
-4. **LaTeX Header** (`components/templates/metadata_header.tex`):
+4. **LaTeX Header** (`paper/templates/metadata_header.tex`):
    - Contains LaTeX preamble commands, potentially for metadata, custom packages, or styling used during PDF generation via Pandoc. (Note: The current script passes basic metadata via command line).
 
 ## Schema Extension
@@ -282,16 +284,16 @@ Templates are provided for creating new components with consistent formatting:
 When adding new components:
 
 1. For new main text sections:
-   - Copy the Section template from `paper/components/templates/`
-   - Add to `paper/components/main_text/` with appropriate numeric prefix
+   - Copy the Section template from `paper/templates/`
+   - Add to `docs/manuscript/components/main_text/` with appropriate numeric prefix
    - Ensure headers use correct levels (starting with `##`)
 
 2. For new figures:
-   - Copy the Figure template from `paper/components/templates/`
-   - Add figure definition to `paper/components/figures/`
+   - Copy the Figure template from `paper/templates/`
+   - Add figure definition to `docs/manuscript/components/figures/`
    - Reference properly in main text
 
 3. For new supplements:
-   - Copy the Supplement template from `paper/components/templates/`
-   - Add to `paper/components/supplemental_sections/`
+   - Copy the Supplement template from `paper/templates/`
+   - Add to `docs/manuscript/components/supplemental_sections/`
    - Use consistent naming convention 

@@ -8,19 +8,19 @@ This supplement provides a comprehensive analysis of the research traditions upo
 
 Traditional cognitive architectures have served as comprehensive frameworks for modeling cognitive processes, providing structured approaches to implementing computational models of cognition:
 
-**ACT-R (Adaptive Control of Thought - Rational)** [(Anderson et al., 2004)](#references):
+**ACT-R (Adaptive Control of Thought - Rational)** [(Anderson et al., 2004)](#supplement-4-references):
 - Employs a modular architecture with specialized components for procedural, declarative, and perceptual-motor processes
 - Uses production rules and spreading activation for knowledge representation
 - Implements Bayesian learning mechanisms for skill acquisition
 - Limitations: Relies on fixed architectural components without explicit mechanisms for functional role transitions
 
-**Soar** [(Laird, 2012)](#references):
+**Soar** [(Laird, 2012)](#supplement-4-references):
 - Organizes knowledge as problem spaces with operators for state transformation
 - Employs a unified cognitive architecture with working memory and production memory
 - Uses chunking for learning and impasse resolution for meta-reasoning
 - Limitations: Emphasizes symbolic processing with less support for continuous transformations between system components
 
-**CLARION (Connectionist Learning with Adaptive Rule Induction ON-line)** [(Sun, 2016)](#references):
+**CLARION (Connectionist Learning with Adaptive Rule Induction ON-line)** [(Sun, 2016)](#supplement-4-references):
 - Integrates connectionist and symbolic processing in a dual-system architecture
 - Implements bottom-up learning through neural networks and top-down learning through rule extraction
 - Models implicit and explicit processes in cognition
@@ -32,19 +32,19 @@ CEREBRUM differs from these traditional architectures by explicitly modeling the
 
 Recent developments in active inference have led to specialized cognitive architectures that emphasize predictive processing and free energy minimization:
 
-**Active Inference Framework** [(Friston et al., 2017)](#references):
+**Active Inference Framework** [(Friston et al., 2017)](#supplement-4-references):
 - Provides a theoretical framework for perception, learning, and decision-making based on free energy minimization
 - Implements hierarchical predictive processing with bidirectional message passing
 - Unifies action and perception through a single principle
 - Limitations: Primarily focuses on individual agents rather than model ecosystems
 
-**Deep Active Inference** [(Sajid et al., 2021)](#references):
+**Deep Active Inference** [(Sajid et al., 2021)](#supplement-4-references):
 - Extends active inference with deep neural network implementations
 - Scales active inference to high-dimensional state spaces
 - Enables application to complex sensorimotor tasks
 - Limitations: Emphasizes architectural depth without explicit functional role differentiation
 
-**Active Inference for Robotics** [(Lanillos et al., 2021)](#references):
+**Active Inference for Robotics** [(Lanillos et al., 2021)](#supplement-4-references):
 - Adapts active inference principles for robotic control and perception
 - Implements proprioceptive and exteroceptive integration
 - Models body schema through predictive processing
@@ -58,19 +58,19 @@ Category theory has emerged as a powerful mathematical framework for formalizing
 
 ### 4.2.1 Categorical Compositional Cognition
 
-**Categorical Compositional Distributed Semantics (DisCoCat)** [(Coecke et al., 2010; Sadrzadeh et al., 2013)](#references):
-- Uses monoidal categories (specifically, compact closed categories or related structures like pregroup grammars [(Lambek, 2008)](#references)) to formalize compositional meaning in natural language, mapping grammar to tensor network operations.
+**Categorical Compositional Distributed Semantics (DisCoCat)** [(Coecke et al., 2010; Sadrzadeh et al., 2013)](#supplement-4-references):
+- Uses monoidal categories (specifically, compact closed categories or related structures like pregroup grammars [(Lambek, 2008)](#supplement-4-references)) to formalize compositional meaning in natural language, mapping grammar to tensor network operations.
 - Implements tensor product representations of linguistic structures, enabling semantic compositionality.
-- Foundational for modern computational linguistics approaches, with implementations like DisCoPy [(De Felice et al., 2020)](#references) extending its practical application.
+- Foundational for modern computational linguistics approaches, with implementations like DisCoPy [(De Felice et al., 2020)](#supplement-4-references) extending its practical application.
 - Limitations: Primarily focuses on sentence-level semantics; extensions to discourse and broader cognition are ongoing research areas.
 
-**Applied Category Theory in Cognitive Science** [(Fong & Spivak, 2019)](#references):
+**Applied Category Theory in Cognitive Science** [(Fong & Spivak, 2019)](#supplement-4-references):
 - Develops categorical foundations for knowledge representation
 - Uses functorial semantics to model cognitive processes
 - Applies compositional reasoning to cognitive systems
 - Limitations: Provides general mathematical foundations without specific applications to model ecosystems
 
-**Categorical Foundations of Cognition** [(Phillips & Wilson, 2016)](#references):
+**Categorical Foundations of Cognition** [(Phillips & Wilson, 2016)](#supplement-4-references):
 - Proposes category theory as a unifying language for cognitive science
 - Models hierarchical predictive processing in categorical terms
 - Connects free energy minimization to categorical optimization
@@ -84,19 +84,19 @@ The application of linguistic frameworks to computational systems has a rich his
 
 ### 4.3.1 Case Grammar and Computational Linguistics
 
-**Case Grammar in Linguistics** [(Fillmore, 1968)](#references):
+**Case Grammar in Linguistics** [(Fillmore, 1968)](#supplement-4-references):
 - Developed the theory of deep case roles in linguistic structures
 - Identified semantic roles independent of surface syntax
 - Proposed universal case relationships across languages
 - Limitations: Primarily applied to linguistic analysis rather than computational modeling
 
-**Case-Based Reasoning Systems** [(Kolodner, 1992)](#references):
+**Case-Based Reasoning Systems** [(Kolodner, 1992)](#supplement-4-references):
 - Implements problem-solving based on previous cases
 - Uses adaptation of prior solutions to new situations
 - Employs case libraries and similarity metrics
 - Limitations: Case refers to historical examples rather than functional roles
 
-**Semantic Role Labeling** [(Palmer et al., 2010)](#references):
+**Semantic Role Labeling** [(Palmer et al., 2010)](#supplement-4-references):
 - Automatically identifies semantic roles in text
 - Uses machine learning for role classification
 - Implements PropBank and FrameNet annotations
@@ -106,19 +106,19 @@ CEREBRUM repurposes linguistic case theory beyond natural language processing, u
 
 ### 4.3.2 Morphological Computing and Categorical Linguistics
 
-**Computing with Words** [(Zadeh, 1996)](#references):
+**Computing with Words** [(Zadeh, 1996)](#supplement-4-references):
 - Develops computational systems that operate on linguistic terms
 - Implements fuzzy logic for linguistic variable processing
 - Models human reasoning with linguistic uncertainty
 - Limitations: Focuses on linguistic terms rather than model relationships
 
-**Natural Language Programming** [(Liu & Lieberman, 2005)](#references):
+**Natural Language Programming** [(Liu & Lieberman, 2005)](#supplement-4-references):
 - Uses natural language as a programming paradigm
 - Implements program synthesis from natural language descriptions
 - Bridges human communication and computational execution
 - Limitations: Applies linguistic structures to programming rather than model management
 
-CEREBRUM extends these approaches by applying declensional semantics (a form of morphological transformation) to model management, treating models as entities that can assume different morphological forms based on their functional roles. This aligns with broader trends in **Categorical Linguistics** which use category theory to formally model diverse linguistic phenomena, from syntax and semantics [(Lambek, 2008)](#references) to morphology and discourse structure, providing a powerful toolkit for analyzing structure-preserving transformations in language and, by extension, in model ecosystems. This perspective enables more flexible and expressive representations of model relationships within computational ecosystems.
+CEREBRUM extends these approaches by applying declensional semantics (a form of morphological transformation) to model management, treating models as entities that can assume different morphological forms based on their functional roles. This aligns with broader trends in **Categorical Linguistics** which use category theory to formally model diverse linguistic phenomena, from syntax and semantics [(Lambek, 2008)](#supplement-4-references) to morphology and discourse structure, providing a powerful toolkit for analyzing structure-preserving transformations in language and, by extension, in model ecosystems. This perspective enables more flexible and expressive representations of model relationships within computational ecosystems.
 
 ## 4.4 Intelligence Production and Case Management
 
@@ -126,19 +126,19 @@ Traditional approaches to intelligence production and case management provide im
 
 ### 4.4.1 Intelligence Analysis Frameworks
 
-**Intelligence Cycle** [(Clark, 2019)](#references):
+**Intelligence Cycle** [(Clark, 2019)](#supplement-4-references):
 - Describes the process of intelligence production from collection to dissemination
 - Implements structured workflows for intelligence analysis
 - Models feedback loops in intelligence production
 - Limitations: Lacks formal mathematical foundations for process representation
 
-**Structured Analytic Techniques** [(Heuer & Pherson, 2014)](#references):
+**Structured Analytic Techniques** [(Heuer & Pherson, 2014)](#supplement-4-references):
 - Provides methodological approaches to intelligence analysis
 - Implements cognitive debiasing techniques
 - Models alternative hypothesis generation and evaluation
 - Limitations: Focuses on cognitive methods without formal model relationships
 
-**Activity-Based Intelligence** [(Atwood, 2015)](#references):
+**Activity-Based Intelligence** [(Atwood, 2015)](#supplement-4-references):
 - Shifts focus from entity-based to activity-based analysis
 - Implements spatio-temporal pattern recognition
 - Models network behaviors and relationships
@@ -148,19 +148,19 @@ CEREBRUM enhances these intelligence production frameworks by providing formal m
 
 ### 4.4.2 Case Management Systems
 
-**Legal Case Management** [(Reiling, 2010)](#references):
+**Legal Case Management** [(Reiling, 2010)](#supplement-4-references):
 - Implements structured workflows for legal case processing
 - Uses document management and version control
 - Models procedural requirements and deadlines
 - Limitations: Domain-specific without generalizable model interaction principles
 
-**Healthcare Case Management** [(Huber, 2018)](#references):
+**Healthcare Case Management** [(Huber, 2018)](#supplement-4-references):
 - Coordinates patient care across multiple providers
 - Implements care planning and outcome tracking
 - Models interdisciplinary collaboration
 - Limitations: Focuses on process coordination without formal mathematical foundations
 
-**Investigative Case Management** [(Peterson, 2018)](#references):
+**Investigative Case Management** [(Peterson, 2018)](#supplement-4-references):
 - Manages evidence collection and analysis in investigations
 - Implements link analysis and relationship mapping
 - Models case progression and resolution
@@ -174,13 +174,13 @@ Recent developments in cognitive modeling have explored innovative approaches th
 
 ### 4.5.1 Agentic Intelligence Architectures
 
-**Multi-Agent Cognitive Architectures** [(Shafti et al., 2020)](#references):
+**Multi-Agent Cognitive Architectures** [(Shafti et al., 2020)](#supplement-4-references):
 - Distributes cognitive processes across specialized agents
 - Implements coordination mechanisms for collaborative problem-solving
 - Models division of cognitive labor
 - Limitations: Focuses on agent specialization without formal functional role transitions
 
-**Joint Cognitive Systems** [(Woods & Hollnagel, 2006)](#references):
+**Joint Cognitive Systems** [(Woods & Hollnagel, 2006)](#supplement-4-references):
 - Views human-machine systems as integrated cognitive units
 - Implements distributed cognition principles
 - Models adaptive capacity and resilience
@@ -190,13 +190,13 @@ CEREBRUM enhances these approaches by providing formal mechanisms for role trans
 
 ### 4.5.2 Compositional Cognitive Systems
 
-**Neural-Symbolic Integration** [(Garcez et al., 2019)](#references):
+**Neural-Symbolic Integration** [(Garcez et al., 2019)](#supplement-4-references):
 - Combines neural networks and symbolic reasoning
 - Implements end-to-end differentiable reasoning systems
 - Models hybrid knowledge representation
 - Limitations: Focuses on representational integration without formal functional role differentiation
 
-**Compositional Generalization in AI** [(Lake & Baroni, 2018)](#references):
+**Compositional Generalization in AI** [(Lake & Baroni, 2018)](#supplement-4-references):
 - Studies systematic generalization in learning systems
 - Implements compositional representation learning
 - Models primitive operations and their combinations
@@ -236,7 +236,7 @@ The analysis of related work suggests several opportunities for future integrati
 
 These integration opportunities highlight the potential for CEREBRUM to continue evolving through cross-disciplinary collaboration and theoretical extension.
 
-## 4.8 References
+## Supplement 4 References
 
 Anderson, J. R., Bothell, D., Byrne, M. D., Douglass, S., Lebiere, C., & Qin, Y. (2004). An integrated theory of the mind. *Psychological Review*, 111(4), 1036-1060.
 

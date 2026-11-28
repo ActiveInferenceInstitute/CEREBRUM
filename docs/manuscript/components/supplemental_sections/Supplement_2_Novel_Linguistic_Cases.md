@@ -43,15 +43,15 @@ The conjunctive case is distinguished by its ability to maintain coherence acros
 
 | Aspect | Description | Mathematical Formulation | Examples & Applications |
 |--------|-------------|--------------------------|-------------------------|
-| **Core Function** | Synthesizes multiple model outputs into coherent joint predictions that preserve correlational structure | F[CNJ] = E[∑ wi log p(y\|xi, θi)] - D[q(x\|θ) \|\| ∏ p(xi)] | Multi-sensor fusion; multi-expert systems; cross-modal alignment |
+| **Core Function** | Synthesizes multiple model outputs into coherent joint predictions that preserve correlational structure | F[CNJ] = E[∑ wi log p(y∣xi, θi)] - D[q(x∣θ) ∣∣ ∏ p(xi)] | Multi-sensor fusion; multi-expert systems; cross-modal alignment |
 | **Information Flow** | Many-to-one convergent flow with bidirectional feedback | {xi → M[CNJ] → y} with {M[CNJ] ↔ Mi} feedback loops | Sensory integration; committee machines; ensemble methods |
-| **Error Handling** | Resolves inconsistencies across predictive streams while minimizing global prediction error | ε[CNJ] = y - f(∑ wi·xi) with consistency penalty λ·∑ D[xi \|\| xj] | Anomaly detection; conflict resolution; coherence optimization |
+| **Error Handling** | Resolves inconsistencies across predictive streams while minimizing global prediction error | ε[CNJ] = y - f(∑ wi·xi) with consistency penalty λ·∑ D[xi ∣∣ xj] | Anomaly detection; conflict resolution; coherence optimization |
 | **Learning Dynamics** | Updates based on joint prediction accuracy and inter-model consistency | Δθ[CNJ] ∝ -∇θ(prediction_error + λ·consistency_error) | Meta-ensemble training; cooperative multi-agent learning |
 | **Precision Allocation** | Higher precision to consistent model outputs; dynamically weighted integration | π[CNJ] = ∑ αi·πi where αi ∝ exp(-βi·εi²) | Robust sensor fusion; adaptive information integration |
 | **Computational Complexity** | O(n²) scaling with number of models due to pairwise consistency checks | Optimization requires evaluating n·(n-1)/2 pairwise constraints | Hierarchical clustering to reduce computation; sparse interaction approximations |
 | **Representation Requirements** | Shared latent space or translation mechanisms between models | Requires alignment functions f_ij: Xi → Xj for each model pair | Cross-modal embeddings; shared semantic spaces |
 | **Biological Analogues** | Multi-sensory integration areas in brain (e.g., superior colliculus) | Bayesian integration with cross-modal priors | Visual-auditory integration; sensorimotor coordination |
-| **Implementation Approaches** | Product-of-experts; mixture density networks; attention-based fusion | p(y\|x1,...,xn) ∝ ∏ p(y\|xi)^wi / Z | Transformer attention mechanisms; graph neural networks; hypernetworks |
+| **Implementation Approaches** | Product-of-experts; mixture density networks; attention-based fusion | p(y∣x1,...,xn) ∝ ∏ p(y∣xi)^wi / Z | Transformer attention mechanisms; graph neural networks; hypernetworks |
 | **Failure Modes** | Susceptible to reinforcing consistent but incorrect predictions | Can amplify correlated errors across models | Echo chambers; confirmation bias; groupthink |
 
 ## 2.4 The Recursive Case [REC]
@@ -190,7 +190,7 @@ The diagnostic case establishes a formal framework for model interrogation and f
 | **Information Flow** | Systematic probing of model behavior under diverse conditions | M[DIA] → test conditions → M → responses → M[DIA] → diagnosis | Regression test suites; behavioral boundary mapping; performance profiling |
 | **Error Handling** | Distinguishes between expected variability and significant anomalies | ε[DIA] = d(actual_behavior, expected_behavior)/σ[expected] with context-sensitive thresholds | Anomaly detection; out-of-distribution identification; failure prediction |
 | **Learning Dynamics** | Updates based on diagnostic efficacy in identifying true model limitations | Δθ[DIA] ∝ -∇θ(false_positive_rate + λ·false_negative_rate) | Active testing; efficient search for model weaknesses; diagnostic policy optimization |
-| **Precision Allocation** | Higher precision to regions of model behavior space with higher anomaly likelihood | π[DIA] ∝ P(anomaly\|context) with Bayesian updating from previous findings | Uncertainty-aware diagnosis; confidence-calibrated testing; prioritized exploration |
+| **Precision Allocation** | Higher precision to regions of model behavior space with higher anomaly likelihood | π[DIA] ∝ P(anomaly∣context) with Bayesian updating from previous findings | Uncertainty-aware diagnosis; confidence-calibrated testing; prioritized exploration |
 | **Computational Complexity** | Often NP-hard for complete diagnosis; practically approximated through guided sampling | O(f(n,d)) where f depends on model complexity n and diagnosis depth d | Adaptive testing strategies; efficient search algorithms; hierarchical diagnosis |
 | **Representation Requirements** | Requires behavioral specification models and anomaly taxonomies | Formal specifications of expected behaviors and failure mode ontologies | Verification conditions; metamorphic relations; invariant specifications |
 | **Biological Analogues** | Immune system detection of pathogens; interoceptive awareness of bodily states | T-cell recognition of non-self entities; pain localization systems | Automated diagnostics; syndrome recognition; failure pattern matching |
@@ -240,7 +240,7 @@ The generative case establishes a formal framework for creative production and c
 
 | Aspect | Description | Mathematical Formulation | Examples & Applications |
 |--------|-------------|--------------------------|-------------------------|
-| **Core Function** | Creates novel yet coherent instances within a learned distribution with optional conditioning | M[GEN]: (Z, C) → X such that P(X\|C) is maximized while D(X, Xtrain) > τ | Creative content generation; synthetic data creation; design ideation |
+| **Core Function** | Creates novel yet coherent instances within a learned distribution with optional conditioning | M[GEN]: (Z, C) → X such that P(X∣C) is maximized while D(X, Xtrain) > τ | Creative content generation; synthetic data creation; design ideation |
 | **Information Flow** | Transformation from latent/conditioning factors to instance space | Z, C → M[GEN] → X with optional feedback loop for iterative refinement | Generative art; synthetic data augmentation; conditional image generation |
 | **Error Handling** | Balances novelty against coherence and constraint satisfaction | ε[GEN] = w1·coherence_error + w2·novelty_penalty + w3·constraint_violation | Mode collapse detection; diversity enforcement; constraint validation |
 | **Learning Dynamics** | Updates based on distributional matching and constraint satisfaction | Δθ[GEN] ∝ -∇θ(distribution_matching_error + λ·constraint_violation) | GAN training; diffusion model optimization; energy-based learning |

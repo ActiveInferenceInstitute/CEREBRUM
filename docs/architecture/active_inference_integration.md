@@ -5,8 +5,8 @@ This document details how the CEREBRUM framework integrates with Active Inferenc
 The implemented discrete generative model — factors, modalities, the stored
 `A`/`B` orientations, and the case-to-precision contract described below — is
 specified in Generalized Notation Notation at
-[`../models/case_conditioned_active_inference.gnn.md`](../models/case_conditioned_active_inference.gnn.md);
-[`../models/README.md`](../models/README.md) records the loader, the drift
+[`../models/case_conditioned_active_inference.gnn.md`](../../models/case_conditioned_active_inference.gnn.md);
+[`../models/README.md`](../../models/README.md) records the loader, the drift
 guard, and the pinned upstream revision. The equations below are the conceptual
 framework; the GNN file and its drift guard are the checked contract.
 

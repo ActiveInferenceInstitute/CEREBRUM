@@ -1,0 +1,22 @@
+{
+  "claims": [
+    {
+      "claim_id": "finnish-case-count",
+      "value": 15,
+      "source": "Finnish guide classification",
+      "source_path": "docs/languages/finnish.md"
+    },
+    {
+      "claim_id": "hungarian-case-count",
+      "value": 18,
+      "source": "Hungarian guide classification",
+      "source_path": "docs/languages/hungarian.md"
+    },
+    {
+      "claim_id": "turkish-core-case-count",
+      "value": 6,
+      "source": "Turkish guide primary cases",
+      "source_path": "docs/languages/turkish.md"
+    }
+  ]
+}

@@ -4,7 +4,7 @@
 
 The computational requirements of generative models in CEREBRUM vary significantly based on their case declensions. Each case imposes distinct resource constraints, optimization patterns, and scaling relationships with problem complexity. This supplement provides a comprehensive analysis of the computational complexity characteristics across different case assignments, with particular focus on Partially Observable Markov Decision Process (POMDP) formulations under the Free Energy Principle. We examine both theoretical bounds and practical implementations to demonstrate how intelligent resource allocation strategies can optimize overall system performance through appropriate case assignments.
 
-## 7.2 Active Inference Framework for Case-Based Computational Analysis
+## Active Inference Framework for Case-Based Computational Analysis {#supplement-7-2}
 
 To formalize our analysis, we adapt the traditional POMDP framework to an Active Inference perspective, defined by the tuple $(S, A, T, \Omega, O, F)$ where:
 - $S$ is a finite set of states $s$
@@ -180,7 +180,7 @@ The vocative case, serving as an addressable interface, demonstrates unique invo
 - Two-phase activation reduces false positive resource waste
 - Load prioritization during activation transition improves responsiveness
 
-## 7.4 Comparative Resource Scaling Analysis
+## Comparative Resource Scaling Analysis {#supplement-7-4}
 
 **Table 1: Computational Complexity Analysis by Case in Active Inference Framework**
 

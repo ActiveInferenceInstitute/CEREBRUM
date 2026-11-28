@@ -271,7 +271,7 @@ def run_setup(args: argparse.Namespace) -> bool:
         print("\nNext steps:")
         print("  - Run full tests: python -m pytest tests/")
         print("  - Try examples: cd src/examples && python linear_regression_example.py")
-        print("  - Read docs: docs/getting_started.md")
+        print("  - Read docs: docs/guides/getting_started.md")
     else:
         print("❌ Setup completed with issues. Please fix the problems above.")
     

@@ -45,7 +45,7 @@ All examples utilize CEREBRUM's eight core case roles that models can assume:
 
 To begin using these examples:
 
-1. Read the [Core Specification](../cerebrum_core_spec.md) document to understand the core framework concepts
+1. Read the [Core Specification](../architecture/cerebrum_core_spec.md) document to understand the core framework concepts
 2. Choose an example most relevant to your use case
 3. Adapt the patterns and workflows to your specific project needs
 4. Refer to the documentation template for comprehensive project documentation

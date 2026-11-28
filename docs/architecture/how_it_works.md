@@ -72,7 +72,7 @@ Here's how CEREBRUM works in practice:
 4. **Resource Allocation**: The Precision Allocator optimizes system resources based on case assignments
 5. **Hierarchical Processing**: Models organize into hierarchical structures through case relationships
 
-A detailed implementation workflow is available in the [Getting Started Guide](getting_started.md#development-workflow).
+A detailed implementation workflow is available in the [Getting Started Guide](../guides/getting_started.md#development-workflow).
 
 ## Case-Specific Behaviors
 
@@ -105,9 +105,9 @@ CEREBRUM provides a Python reference implementation in `src/`, plus implementati
 The JavaScript and Rust entries are guidelines for implementing CEREBRUM in
 those languages; the only runnable implementation in this repository is the
 Python one. Per-language case mappings for 35+ programming languages live in
-[`docs/languages/computer/`](languages/computer/README.md).
+[`docs/languages/computer/`](../languages/computer/README.md).
 
-To get started with a practical implementation, see the [Getting Started Guide](getting_started.md) which walks through creating a simple temperature model with case transformations.
+To get started with a practical implementation, see the [Getting Started Guide](../guides/getting_started.md) which walks through creating a simple temperature model with case transformations.
 
 ## Example: A Simple CEREBRUM Model
 
@@ -118,7 +118,7 @@ A simple CEREBRUM model might be a temperature controller that can function in d
 - In **genitive case [GEN]**, it generates performance reports
 - In **instrumental case [INS]**, it acts as a method for temperature regulation
 
-The model transforms between these cases depending on the current context and requirements. See [Model Examples](model_examples.md) for detailed code examples and the [Getting Started Guide](getting_started.md#your-first-cerebrum-model) for implementation details.
+The model transforms between these cases depending on the current context and requirements. See [Model Examples](../guides/model_examples.md) for detailed code examples and the [Getting Started Guide](../guides/getting_started.md#your-first-cerebrum-model) for implementation details.
 
 ## Key Innovations
 
@@ -130,7 +130,7 @@ CEREBRUM introduces several key innovations to cognitive modeling:
 4. **Linguistic Metaphor**: Using linguistic cases provides an intuitive and expressive framework for model relationships
 5. **Compositional Intelligence**: Case relationships enable complex compositional structures of interacting models
 
-For researchers interested in contributing to these innovations, see our [Research Contribution Guide](contributing_research.md).
+For researchers interested in contributing to these innovations, see our [Research Contribution Guide](../contributing/contributing_research.md).
 
 ## Integration with Active Inference
 
@@ -145,21 +145,21 @@ The full mathematical details are available in the [Active Inference Integration
 
 ## Implementation Roadmap
 
-CEREBRUM is being implemented in phases according to the [Implementation Roadmap](implementation_roadmap.md):
+CEREBRUM is being implemented in phases according to the [Implementation Roadmap](../guides/implementation_roadmap.md):
 
 1. **Phase 1**: Core framework implementation
 2. **Phase 2**: Reference model implementations
 3. **Phase 3**: Advanced case relationship handling
 4. **Phase 4**: Distributed processing capabilities
 
-For developers looking to contribute to the implementation, see our [Technical Contribution Guide](contributing_technical.md).
+For developers looking to contribute to the implementation, see our [Technical Contribution Guide](../contributing/contributing_technical.md).
 
 ## Learn More
 
 - [Core Specification](cerebrum_core_spec.md): Detailed technical specification
-- [Getting Started](getting_started.md): Hands-on beginner's guide
+- [Getting Started](../guides/getting_started.md): Hands-on beginner's guide
 - [Language Implementations](language_implementations.md): Language-specific details
-- [Model Examples](model_examples.md): Example implementations
+- [Model Examples](../guides/model_examples.md): Example implementations
 - [Active Inference Integration](active_inference_integration.md): Mathematical foundation
-- [Implementation Roadmap](implementation_roadmap.md): Development plan
+- [Implementation Roadmap](../guides/implementation_roadmap.md): Development plan
 - [Language Nuance Handling](language_nuance_handling.md): Linguistic features and capabilities 
